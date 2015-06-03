@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the COD Schedule Pages feature.
+ */
+
+include_once 'cod_schedule_pages.features.inc';

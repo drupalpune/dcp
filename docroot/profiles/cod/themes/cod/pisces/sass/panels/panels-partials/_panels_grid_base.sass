@@ -1,0 +1,97 @@
+
+// Grid Variables, used in the Image width matrix,
+// located in /sass/panels/_panels_grid.sass
+
+$grid-3: 4
+$grid-4: 3
+$grid-6: 2
+$grid-8: 1.5
+$grid-9: 1.33
+$grid-12: 1
+
+$width-25: 4
+$width-33: 3
+$width-50: 2
+$width-66: 1.5
+$width-75: 1.33
+$width-100: 1
+
+@mixin width-25
+  width: 25%
+  float: left
+
+@mixin width-33
+  width: 33.33%
+  float: left
+
+@mixin width-50
+  width: 50%
+  float: left
+
+@mixin width-66
+  width: 66%
+  float: left
+
+@mixin width-75
+  width: 75%
+  float: left 
+
+@mixin width-100
+  width: 100%
+  float: left
+
+@mixin append-widths
+  &.width-25
+    @include width-25
+  &.width-33
+    @include width-33
+  &.width-50
+    @include width-50
+  &.width-66
+    @include width-66
+  &.width-75
+    @include width-75
+  &.width-100
+    @include width-100
+
+@mixin big-web-layout-on-mobile
+  .width-25, .width-33, .width-50, .width-66, .width-75,
+  .grid-3, .grid-4, .grid-6, .grid-8, .grid-9
+    width: 100%
+
+
+@mixin big-web-panel
+  //min-width: $desktop
+  max-width: $max-limit
+  position: relative
+  margin: 0 auto
+  .panel-pane~.panel-pane,
+    padding: 0 0 0 $pane-padding
+  #page-manager-edit &
+    // so the panel is fluid in the page editor
+    min-width: 100%
+    width: 100%
+    max-width: $max-limit
+  #wx-mid-wrap
+    position: relative
+    +breakpoint($smartphone-landscape-max)
+      +big-web-layout-on-mobile
+
+@mixin little-web-panel
+  max-width: $little-web-limit
+  margin: 0 auto
+  position: relative
+  .panel-pane
+    position: relative
+    float: left
+    width: 100%
+    +append-widths
+  .panel-pane~.panel-pane,
+    padding: 0 0 0 $pane-padding
+    position: relative
+    +clearfix
+  #page-manager-edit &
+    // so the panel is fluid in the page editor
+    min-width: 100%
+    width: 100%
+    max-width: $max-limit

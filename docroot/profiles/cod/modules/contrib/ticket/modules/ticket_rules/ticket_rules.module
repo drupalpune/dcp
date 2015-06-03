@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Ticket rules module.
+ */
+
+/**
+ * Rules integration access callback.
+ */
+function ticket_rules_access($type, $name) {
+  if ($type == 'event' || $type == 'condition') {
+    return ticket_registration_access('view');
+  }
+}

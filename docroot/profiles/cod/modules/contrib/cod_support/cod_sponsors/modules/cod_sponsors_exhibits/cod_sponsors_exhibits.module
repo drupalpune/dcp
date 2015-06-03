@@ -1,0 +1,17 @@
+<?php
+/**
+ * @file
+ * Code for the COD Sponsors Exhibits feature.
+ */
+
+include_once 'cod_sponsors_exhibits.features.inc';
+
+/**
+ * Implements hook_views_api().
+ */
+function cod_sponsors_exhibits_views_api() {
+  return array(
+    'version' => '3.0',
+    'path' => drupal_get_path('module', 'cod_sponsors_exhibits') . '/views',
+  );
+}

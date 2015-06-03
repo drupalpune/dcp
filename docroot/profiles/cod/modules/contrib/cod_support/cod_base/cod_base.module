@@ -1,0 +1,104 @@
+<?php
+/**
+ * @file
+ * Code for the COD Base feature.
+ */
+
+include_once('cod_base.features.inc');
+
+/**
+ * Implements hook_permission().
+ */
+function cod_base_permission() {
+  $perms = array();
+
+  $perms['administer conferences'] = array(
+    'title' => t('Administer Conferences'),
+    'description' => t('Allows users change global conference settings.'),
+  );
+
+  return $perms;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function cod_base_menu() {
+  $items = array();
+
+  $items['admin/conference/config'] = array(
+    'title' => 'Configuration',
+    'description' => 'Configure settings and business rules for your conference.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cod_base_admin_settings'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20,
+    'file path' => drupal_get_path('module', 'system'),
+    'file' => 'system.admin.inc',
+  );
+
+  $items['admin/conference/list'] = array(
+    'title' => 'Conference',
+    'description' => 'Configure conferences.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/conference'] = array(
+    'title' => 'Conference',
+    'description' => 'Configure conferences.',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function cod_base_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link 'admin/commerce/orders/add' on 'admin/commerce/orders'.
+  if ($root_path == 'admin/conference') {
+    $item = menu_get_item('admin/conference/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
+ * Conference admin page callback.
+ */
+function cod_base_admin_settings() {
+  $form = array();
+
+  $form['cod_base_default'] = array(
+    '#markup' => 'Conference organizing settings page',
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_date_format_types().
+ */
+function cod_base_date_format_types() {
+  $format_types = array();
+  // Exported date format type: date_no_time
+  $format_types['date_no_time'] = 'Date (no time)';
+  return $format_types;
+}
+
+/**
+* Implements hook_entity_info_alter().
+*/
+function cod_base_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes']['listing'] = array(
+    'label' => t('Listing'),
+    'custom settings' => TRUE,
+  );
+}

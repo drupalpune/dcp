@@ -1,0 +1,22 @@
+name = COD Events Pages
+core = 7.x
+package = COD Pages
+dependencies[] = cod_events
+dependencies[] = ctools
+dependencies[] = page_manager
+dependencies[] = panelizer
+dependencies[] = panels
+dependencies[] = views
+features[ctools][] = page_manager:pages_default:1
+features[ctools][] = panelizer:panelizer:1
+features[features_api][] = api:2
+features[page_manager_pages][] = conference_admin
+features[page_manager_pages][] = program
+features[panelizer_defaults][] = node:event:default:default
+
+; Information added by Drupal.org packaging script on 2015-05-01
+version = "7.x-1.0-beta9"
+core = "7.x"
+project = "cod_support"
+datestamp = "1430468586"
+

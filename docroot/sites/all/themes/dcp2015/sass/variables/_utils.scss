@@ -1,0 +1,78 @@
+// Legacy support.
+$legacy-support-for-ie6: false;
+$legacy-support-for-ie7: true;
+$legacy-support-for-ie8: true;
+
+// @file
+// Place your mixins here. Feel free to roll your own mixins.
+
+@mixin button-gradient($from, $to) {
+  background: $from;
+  background: -moz-linear-gradient(top, $from 40%, $to 54%, $to 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(40%,$from), color-stop(54%,$to), color-stop(100%,$to)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, $from 40%,$to 54%,$to 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, $from 40%,$to 54%,$to 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, $from 40%,$to 54%,$to 100%); /* Opera 11.10+ */
+  background: linear-gradient(to bottom, $from 40%,$to 54%,$to 100%); /* W3C */
+  filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#{$from}', endColorstr='#{$to}');
+}
+
+@mixin rounded($radius:4px) {
+  -ms-border-radius:$radius; // IE10+
+  -o-border-radius:$radius; // Opera
+  -moz-border-radius:$radius; // Firefox
+  -webkit-border-radius:$radius; // Webkit (Safari, Chrome, other)
+  border-radius:$radius;
+}
+
+@mixin box-shadow($top, $left, $blur, $color, $inset: false) {
+  @if $inset {
+    -webkit-box-shadow:inset $top $left $blur $color;
+    -moz-box-shadow:inset $top $left $blur $color;
+    box-shadow:inset $top $left $blur $color;
+  } @else {
+    -webkit-box-shadow: $top $left $blur $color;
+    -moz-box-shadow: $top $left $blur $color;
+    box-shadow: $top $left $blur $color;
+  }
+}
+
+@mixin clearfix {
+  &:after {
+    content: "\0020";
+    display: block;
+    height: 0;
+    clear: both;
+    overflow: hidden;
+    visibility: hidden;
+  }
+  @include has-layout;
+}
+
+@mixin box-sizing($box-model) {
+  -webkit-box-sizing: $box-model; // Safari <= 5
+     -moz-box-sizing: $box-model; // Firefox <= 19
+          box-sizing: $box-model;
+}
+
+@mixin opacity($opacity) {
+  opacity: $opacity;
+  $opacity-ie: $opacity * 100;
+  filter: alpha(opacity=$opacity-ie); //IE8
+}
+
+@mixin transition($property, $t, $effect){
+  -webkit-transition: $property $t $effect;
+  -moz-transition: $property $t $effect;
+  -o-transition: $property $t $effect;
+  transition: $property $t $effect;
+}
+
+
+// placeholders
+%img{
+  width: 100%;
+  height:auto;
+}
+
+

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the COD Profile (Social fields) feature.
+ */
+
+include_once 'cod_profile_social.features.inc';

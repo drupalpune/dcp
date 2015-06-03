@@ -1,0 +1,14 @@
+{
+  "name": "respond",
+  "homepage": "https://github.com/fubhy/respond",
+  "version": "1.2.0",
+  "_release": "1.2.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.2.0",
+    "commit": "c8ffda96bbbbbd0a455a56b2067548f189235801"
+  },
+  "_source": "git://github.com/fubhy/respond.git",
+  "_target": "*",
+  "_originalSource": "fubhy/respond"
+}

@@ -1,0 +1,12 @@
+name = DCP User Entity
+description = DCP User Entity
+core = 7.x
+package = DCP
+version = 7.x-1.0-beta1
+project = dcp_user_entity
+dependencies[] = ctools
+dependencies[] = page_manager
+features[ctools][] = page_manager:pages_default:1
+features[features_api][] = api:2
+features[page_manager_handlers][] = user_view__user_profile
+project path = sites/all/modules/dcp/

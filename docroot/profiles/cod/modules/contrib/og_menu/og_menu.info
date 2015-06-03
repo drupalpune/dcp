@@ -1,0 +1,18 @@
+name = OG Menu
+description = "Allow group creators and site admins to edit their own group menu."
+files[] = og_menu.module
+dependencies[] = menu
+dependencies[] = og (2.x)
+dependencies[] = og_ui
+dependencies[] = og_context
+configure = admin/config/group/og_menu
+package = "Organic groups"
+core = 7.x
+
+
+; Information added by drush on 2015-05-01
+version = "7.x-3.0-rc5+10-dev"
+core = "7.x"
+project = "og_menu"
+datestamp = "1430469493"
+

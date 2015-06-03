@@ -1,0 +1,55 @@
+@import "compass";
+@import "breakpoint";
+@import "singularitygs";
+
+// Set breakpoint values.
+$small: 420px;
+$tab  : 768px;
+$desk : 1200px;
+$large: 1600px;
+$max-limit: 1800px;
+
+// Set consistent vertical and horizontal spacing units.
+$vert-spacing-unit: 25px;
+$horz-spacing-unit: 1em;
+
+$grids: 4;
+$grids: add-grid(12 at $tab);
+
+$gutters: 1/16;
+
+// COD Panels Variables
+$smartphone-portrait: 320px;
+$smartphone-landscape: 480px;
+$tablet-portrait: 580px;
+$tablet-landscape: 750px;
+$desktop: 960px;
+$max-limit: 1200px;
+
+$breakpoint-hi-res: min-resolution 1.5dppx;
+
+// BIG WEB
+// 960 limit is set on all little web queries
+// so they do not interfere with big web
+
+$big-web: min-width $desktop;
+$big-web-large: min-width 1200px;
+$big-web-2x: (min-width $desktop) ($breakpoint-hi-res);
+
+// LITTLE WEB
+// 960 limit is set on all little web queries
+// so they do not interfere with big web
+// These queries assume a mobile-first approach
+
+$little-web-limit: 800px;
+$little-web: max-width $little-web-limit;
+$smartphone-portrait-little: $smartphone-portrait $little-web-limit;
+$smartphone-landscape-little: $smartphone-landscape $little-web-limit;
+$tablet-portrait-little: $tablet-portrait $little-web-limit;
+$tablet-landscape-little: $tablet-landscape $little-web-limit;
+
+// Max-width queries, only use when necessary:
+$smartphone-portrait-max: max-width 320px;
+$smartphone-landscape-max: max-width 480px;
+$tablet-portrait-max: max-width 550px;
+$tablet-landscape-max: max-width 750px;

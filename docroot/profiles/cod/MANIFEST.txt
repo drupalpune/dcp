@@ -1,0 +1,12 @@
+INSTALL.txt
+cod-dev.make
+cod.install_callbacks.inc
+drupal-org.make
+README.txt
+cod.info
+cod.profile
+scripts
+build-cod.make
+cod.install
+drupal-org-core.make
+themes/cod

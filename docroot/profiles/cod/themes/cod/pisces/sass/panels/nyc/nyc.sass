@@ -1,0 +1,85 @@
+// Import external libraries.
+@import "glob"
+// import panels partials:
+@import "panels/panels-partials/panels_glob"
+
+// Panel Layout variables:
+$grids: 12
+$gutters: 10px
+$gutter-styles: 'fixed'
+$output: 'float'
+$ad-width: 0px
+$pane-padding: 10px
+$img-padding: 10px
+$text-wrap-min: 110px
+
+
+@import "panels/panels-partials/panels_grid" 
+// must import AFTER variables
+
+//////////////////////////////////////////
+// Layout Styles
+.panel-display 
+  +big-web-panel
+  .container,
+  .content-header,
+  .content-container-column-container 
+    margin-bottom: 1em
+  #wx-bottom-wrap
+    margin-bottom: 0
+  .footer.container
+    width: 100%
+  .header,
+  .banner,
+  .partners,
+  .footer
+    @include grid-span(12, 1)
+    +breakpoint($desktop)
+      @include grid-span(12, 1)
+    // Full width Image Grid Styles:
+    @include img-grid-12(0)
+  .banner
+    float: left
+
+
+  .left-rail
+    @include grid-span(12, 1)
+    clear: left
+    .mod, .wx-module, .panel-region
+      float: none !important
+    +breakpoint($tablet-portrait)
+      @include grid-span(2, 1)
+      float: none !important
+      clear: left !important
+    // Full width Image Grid Styles:
+    @include img-grid-3($tablet-portrait)
+
+  .top-stories
+    @include grid-span(12, 1)
+    float: left
+    +breakpoint($tablet-portrait)
+      float: none
+    +breakpoint($desktop)
+      @include grid-span(10, 3, $output-style: 'float')
+      @include float-span(8, 'last')
+    // Image Grid Styles:
+    @include img-grid-9($desktop)
+
+
+  .top-stories,
+  .promo,
+  .content-row-1,
+  .content-row-2,
+  .content-row-3,
+  .content-row-4,
+  .content-row-5,
+  .content-row-6,
+  .content-row-7,
+  .content-row-8
+    @include img-grid-12(0, $tablet-portrait)
+    +breakpoint($tablet-portrait)
+      @include grid-span(10, 3, $output-style: 'float')
+      //@include float-span(9, 'last')
+    // Image Grid Styles:
+    @include img-grid-9($tablet-portrait)
+

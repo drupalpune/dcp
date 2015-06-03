@@ -1,0 +1,90 @@
+<?php
+
+include_once('cod_community.features.inc');
+
+/**
+ * Implements hook_ticket_field_item_presave().
+ *
+ * Add a field boolean to the user registration form.
+ */
+function cod_community_ticket_field_item_presave($item, $entity) {
+  if (!isset($entity->field_ticket_attendee_listing) || (isset($entity->field_ticket_attendee_listing) && !$entity->field_ticket_attendee_listing[LANGUAGE_NONE][0]['value'])) {
+    return;
+  }
+
+  cod_community_attendeelist_field_copy($item['entity']->ttid, 'registration');
+}
+
+
+/**
+ * User profile field copier.
+ *
+ * @param string $bundle
+ *   The ticket registration bundle to copy field to.
+ * @param array/string $fields
+ *   If an array, a list of fields to copy. Special strings are allowed
+ *   for 'registration' to copy any field marked for display on the user
+ *   registration form.
+ */
+function cod_community_attendeelist_field_copy($bundle, $fields = 'all') {
+  $attendee_field = cod_community_attendee_registration_instance($bundle);
+  $bundle_fields = field_info_instances('ticket_registration', $bundle);
+
+  // Process any fields that don't already exist on the bundle.
+  foreach (array_diff_key($attendee_field, $bundle_fields) as $field_name => $field_instance) {
+    if (is_array($fields) && !in_array($field_name, $fields)) {
+      continue;
+    }
+
+    // Unset specific instance information.
+    unset($field_instance['id']);
+    // Update instance information.
+    $field_instance['entity_type'] = 'ticket_registration';
+    $field_instance['bundle'] = $bundle;
+    field_create_instance($field_instance);
+  }
+}
+
+function cod_community_attendee_registration_instance($bundle) {
+  $field_instance['field_ticket_attendee_listing'] = array(
+    'bundle' => $bundle,
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 1,
+      ),
+    ),
+    'entity_type' => 'ticket_registration',
+    'field_name' => 'field_ticket_attendee_listing',
+    'label' => 'Show on attendee listing page',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'display_label' => 1,
+      ),
+      'type' => 'options_onoff',
+      'weight' => 1,
+    ),
+  );
+
+  // Translatables
+  // Included for use with string extractors like potx.
+  t('Show on attendee listing page');
+
+  return $field_instance;
+}

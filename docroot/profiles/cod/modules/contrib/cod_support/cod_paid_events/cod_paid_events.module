@@ -1,0 +1,258 @@
+<?php
+/**
+ * @file
+ * COD Paid Events module.
+ */
+
+include_once 'cod_paid_events.features.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function cod_paid_events_menu() {
+  $items = array();
+
+  $items['admin/commerce/orders/%commerce_order/registrations/rebuild'] = array(
+    'title' => 'Rebuild registration(s)',
+    'page callback' => 'cod_paid_events_rebuild_ticket',
+    'page arguments' => array(3),
+    'access callback' => 'commerce_order_admin_order_view_access',
+    'access arguments' => array(3),
+    'type' => MENU_LOCAL_ACTION,
+  );
+
+  return $items;
+}
+
+/**
+ * Form alter for cod registration to add a step to send the registrations to the cart.
+ */
+function cod_paid_events_ticket_registered_redirect_alter(&$redirect, &$registrations) {
+  global $user;
+  // Reset the cart for a new order.
+  $order = commerce_cart_order_new($user->uid);
+
+  foreach ($registrations as $registration) {
+    $ticket_type = $registration->ticket_type();
+    if (!empty($ticket_type->field_ticket_related_product) && $product = commerce_product_load($ticket_type->field_ticket_related_product[LANGUAGE_NONE][0]['product_id'])) {
+      // Add line items to the cart.
+      $line_item = commerce_product_line_item_new($product);
+      $line_item = commerce_cart_product_add($user->uid, $line_item);
+
+      // If the line item was successful, add the order id to the ticket.
+      if ($line_item && !empty($line_item->order_id)) {
+        // Set the ticket registration's order id.
+        $registration->field_ticket_order[LANGUAGE_NONE][0]['target_id'] = $line_item->order_id;
+        ticket_registration_save($registration);
+
+        // Remove 'completed registration' messages before going to cart
+        unset($_SESSION['messages']['status']);
+
+        $redirect = 'checkout';
+      }
+    }
+    // For registrations that don't have a product or line item, but need to be attached
+    // to an order for rules executions..
+    else if (isset($registration->field_ticket_order)) {
+      $registration->field_ticket_order[LANGUAGE_NONE][0]['target_id'] = $order->order_id;
+      ticket_registration_save($registration);
+    }
+
+    rules_invoke_event('cod_paid_events_add_ticket_to_order', $order, $registration);
+  }
+
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function cod_paid_events_entity_insert($entity, $type) {
+  cod_paid_events_add_order_instance($entity, $type);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function cod_paid_events_entity_update($entity, $type) {
+  cod_paid_events_add_order_instance($entity, $type);
+  cod_paid_events_order_complete($entity, $type);
+}
+
+/**
+ * Update the ticket registrations to have an order field.
+ */
+function cod_paid_events_add_order_instance($entity, $type) {
+  if ($type == 'ticket_type' && !empty($entity->field_ticket_related_product[LANGUAGE_NONE][0]['product_id'])) {
+    $field_name = 'field_ticket_order';
+    $entity_type = 'ticket_registration';
+    $instances = field_info_instances($entity_type, $entity->ttid);
+
+    if (!isset($instances[$field_name])) {
+      // Create field instance on the ticket_registration bundle.
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => $entity_type,
+        'bundle' => $entity->ttid,
+        'label' => t('Order'),
+        'description' => t('The Commerce order related to the registration.'),
+        'required' => FALSE,
+        'settings' => array(),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'module' => 'entityreference',
+            'type' => 'entityreference_label',
+            'settings' => array(
+              'link' => 1,
+            ),
+            'weight' => 10,
+          ),
+        ),
+        'widget' => array(
+          'weight' => 10,
+          'type' => 'entityreference_autocomplete',
+          'module' => 'entityreference',
+          'active' => 1,
+          'settings' => array(
+            'match_operator' => 'CONTAINS',
+            'size' => 60,
+            'path' => '',
+          ),
+        ),
+      );
+
+      field_create_instance($instance);
+      cache_clear_all('cod_paid_events_order_registrations_instance', 'cache');
+    }
+  }
+}
+
+/**
+ * Update the ticket to the correct state on order completion.
+ */
+function cod_paid_events_order_complete($entity, $type) {
+  // Commerce order moved from checkout complete to completed.
+  if ($type == 'commerce_order' && $entity->status == 'completed' && $entity->original->status != 'completed') {
+    // Get tickets related to the order.
+    $query = new EntityFieldQuery();
+    $results = $query->entityCondition('entity_type', 'ticket_registration')
+      ->fieldCondition('field_ticket_order', 'target_id', $entity->order_id)
+      ->execute();
+    if (count($results['ticket_registration'])) {
+      foreach (array_keys($results['ticket_registration']) as $trid) {
+        $ticket_registration = ticket_registration_load($trid);
+        if (!empty($ticket_registration->ticket_type()->field_checkout_complete_state)) {
+          $ticket_registration->ticket_state = $ticket_registration->ticket_type()->field_checkout_complete_state;
+          ticket_registration_save($ticket_registration);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FROM_ID_alter().
+ */
+function cod_paid_events_form_event_node_form_alter(&$form, &$form_state) {
+  // Make each ticket type's completed state field dependent on the product being selected.
+  foreach (element_children($form['field_event_tickets'][LANGUAGE_NONE]) as $key) {
+    if (is_numeric($key)) {
+      $element = ':input[name="field_event_tickets[und][' . $key . '][field_ticket_related_product][und]"]';
+      $form['field_event_tickets'][LANGUAGE_NONE][$key]['field_checkout_complete_state']['#states'] = array(
+        'invisible' => array(
+          $element => array('value' => '_none'),
+        ),
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function cod_paid_events_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['field_ticket_order']) && !user_access('administer orders')) {
+    $form['field_ticket_order']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function cod_paid_events_form_ticket_register_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['#entity_form_keys'])) {
+    foreach ($form['#entity_form_keys'] AS $field) {
+      if (isset($form[$field]['field_ticket_order'])) {
+        $form[$field]['field_ticket_order']['#access'] = FALSE;
+      }
+    }
+  }
+}
+
+/**
+ * (Re)-Assign a registration to an order
+ * In some (rare) cases on high profile sites, the invoice process will be interrupted
+ * and the registration will not get created. This function adds a link to fix it.
+ */
+function cod_paid_events_rebuild_ticket($order) {
+  // Fetch the order_id ref from the orphaned ticket
+  $tr_orders = db_select('field_data_field_ticket_order', 't')
+    ->fields('t', array('entity_id', 'revision_id', 'bundle'))
+    ->condition('field_ticket_order_target_id', $order->order_id, '=')
+    ->condition('entity_type', 'ticket_registration', '=')
+    ->orderBy('revision_id', 'DESC')
+    ->execute()
+    ->fetchAllAssoc('entity_id');
+
+  // Loop through each registration
+  $rebuilt = FALSE;
+  foreach ($tr_orders AS $trid => $tr_order) {
+    $changed_stamp = db_select('ticket_registration_revision', 'trr')
+      ->fields('trr', array('changed'))
+      ->condition('trid', $trid, '=')
+      ->condition('revision_id', $tr_order->revision_id, '=')
+      ->execute()
+      ->fetchField();
+
+    if(empty($changed_stamp)) {
+      drupal_set_message('Unable to rebuild registration automatically. Manual Database rebuild required. Sadface. Either the trid or revision id is missing.', 'error');
+      return;
+    }
+
+    if ($changed_stamp) {
+      $reservation = ticket_reservation_fetch_by_trid($trid);
+      $registration = array(
+        'trid' => $trid,
+        'revision_id' => $tr_order->revision_id,
+        'bundle' => $tr_order->bundle,
+        'user_uid' => !empty($reservation) ? 0 : $order->uid,
+        'author_uid' => $order->uid,
+        'created' => $changed_stamp,
+        'changed' => $changed_stamp,
+        'state' => $order->data['commerce_payment_order_paid_in_full_invoked'] ? 'completed' : 'pending',
+      );
+
+      $existing_field = db_select('ticket_registration', 'tr')
+        ->fields('tr', array('trid'))
+        ->condition('trid', $trid, '=')
+        ->condition('revision_id', $tr_order->revision_id, '=')
+        ->execute()
+        ->fetchField();
+
+      if(empty($existing_field)) {
+        db_insert('ticket_registration')
+          ->fields($registration)
+          ->execute();
+        $rebuilt = TRUE;
+      }
+    }
+  }
+  if ($rebuilt) {
+    drupal_set_message("Successfully rebuilt ticket registrations");
+  }
+  else {
+    drupal_set_message("All registrations already exist for this order. No rebuild necessary.");
+  }
+
+  drupal_goto("admin/commerce/orders/$order->order_id/edit/checkout");
+}

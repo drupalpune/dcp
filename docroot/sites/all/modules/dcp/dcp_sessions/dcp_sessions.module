@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the DCP Sessions feature.
+ */
+
+include_once 'dcp_sessions.features.inc';

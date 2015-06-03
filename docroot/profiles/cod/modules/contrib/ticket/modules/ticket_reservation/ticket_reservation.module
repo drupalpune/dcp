@@ -1,0 +1,604 @@
+<?php
+/**
+ * @file
+ * Ticket rules module.
+ */
+define('TICKET_RESERVATION_TIMEOUT_FIELD', 'ticket_reservation_timeout');
+
+/**
+* Implements hook_views_api().
+*/
+function ticket_reservation_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'ticket_reservation') . '/views',
+  );
+}
+
+function ticket_reservation_permission() {
+  return array(
+    'redeem ticket' => array(
+      'title' => t('Redeem a ticket'),
+      'description' => t('Redeem a single ticket with a code.'),
+    ),
+  );
+}
+/**
+ * Implements hook_menu().
+ */
+function ticket_reservation_menu() {
+  $items = array();
+
+  // Add cancel menu callback for returning a ticket to the ungrabbed pool.
+  // a place to attach.
+  $items['ticket_registration/%ticket_registration/cancel'] = array(
+    'title' => 'Cancel Ticket Registration',
+    'description' => 'Cancel an assigned ticket.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ticket_reservation_cancel', 1),
+    'access callback' => 'ticket_registration_access',
+    'access arguments' => array('cancel', 1),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  // Callback to redeem a ticket
+  $items['ticket/%ctools_js/redeem'] = array(
+    'title' => 'Register',
+    'page callback' => 'ticket_reservation_redeem_form',
+    'page arguments' => array(1, 3, 4),
+    'access callback' => 'ticket_reservation_redeem_access',
+    'access arguments' => array(4),
+    'file path' => drupal_get_path('module', 'ticket_reservation'),
+    'file' => 'ticket_reservation.redeem.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  // Callback to redeem a ticket
+  $items['ticket/redeem'] = array(
+    'title' => 'Register',
+    'page callback' => 'ticket_reservation_redeem_redirect',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'file path' => drupal_get_path('module', 'ticket_reservation'),
+    'file' => 'ticket_reservation.redeem.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/*
+ * Access permission for the ticket redeem page
+ */
+function ticket_reservation_redeem_access($code = NULL) {
+  // If the user cannot redeem a ticket, stop right now.
+  if (!user_access('redeem ticket')) {
+    return FALSE;
+  }
+
+  // Code is set, check access to the code
+  if (!empty($code)) {
+    if ($reservation = ticket_reservation_fetch_code(check_plain($code))) {
+      global $user;
+      $ticket_registration = ticket_registration_load($reservation['trid']);
+      if ($ticket_registration->user_uid != 0 && ($ticket_registration->author_uid != $user->uid && $ticket_registration->user_uid != $user->uid)) {
+        return FALSE;
+      }
+    }
+  }
+  return TRUE;
+}
+
+/**
+ * Ticket Reservation should run after all other modules
+ */
+/**
+ * Implements hook_module_implements_alter().
+ */
+function ticket_reservation_module_implements_alter(&$implementations, $hook) {
+  if (isset($implementations['ticket_reservation'])) {
+    $group = $implementations['ticket_reservation'];
+    unset($implementations['ticket_reservation']);
+    $implementations['ticket_reservation'] = $group;
+  }
+}
+
+/*
+ * Alter the registration form to create tickets when someone presses submit
+ */
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function ticket_reservation_form_ticket_field_formatter_view_form_alter(&$form, &$form_state, $form_id) {
+  $form['#submit'][] = 'ticket_reservation_field_formatter_view_form_submit';
+  $form['#validate'][] = 'ticket_reservation_field_formatter_view_form_validate';
+  //dpm($form);
+}
+
+function ticket_reservation_ticket_registration_access($registration, $op, $account) {
+  // If you have access to edit all registrations, you can cancel a ticket.
+  if ($op == 'cancel' && user_access('edit all ticket registrations', $account)) {
+    return TICKET_REGISTRATION_ACCESS_ALLOW;
+  }
+
+  // If there is a reservation code, no other access should be allowed.
+  if (in_array($op, array('update', 'delete', 'cancel', 'view', 'edit')) && !empty($registration->trid) && ticket_reservation_fetch_by_trid($registration->trid)) {
+    return TICKET_REGISTRATION_ACCESS_DENY;
+  }
+
+  // Add access checks for the cancel operation.
+  if ($op == 'cancel') {
+    // If you're the user of a ticket, you can cancel a ticket.
+    if (!empty($registration->user_uid) && $registration->user_uid == $account->uid) {
+      return TICKET_REGISTRATION_ACCESS_ALLOW;
+    }
+
+    // If you're the author of a ticket, don't do anything. By default, this should return false.
+    // However, if other modules change cancel access or the author has access to the ticket type, cancel should return true.
+    return TICKET_REGISTRATION_ACCESS_IGNORE;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function ticket_reservation_form_ticket_registration_form_alter(&$form, &$form_state, $form_id) {
+  // Hard code the completed state. We only allow completed registrations
+  // Cancel, so we can return it back to the completed state.
+  // TODO: Make the return ticket state configurable
+
+  if (isset($form['#entity']) && $form['#entity']->state != 'completed') {
+    drupal_set_message(t("Warning: This ticket is in an incomplete state. Only tickets with the %completed state are considered registered for the event. ", array('%completed' => 'Completed')), 'warning');
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function ticket_reservation_form_ticket_register_form_alter(&$form, &$form_state, $form_id) {
+  $i = 0;
+  $ttid = NULL;
+  $ttid_count = 0;
+  if (isset($_SESSION['ticket']['registrations'])) {
+    foreach ($_SESSION['ticket']['registrations'] AS $seq => $registration) {
+      //$form['ticket_registration:new_'.$i]['#entity'] = unserialize($registration);
+      if (isset($form['ticket_registration:new_'.$i]['ticket_user_registration_email:'.$i])) {
+        if ($form['ticket_registration:new_'.$i]['#bundle'] != $ttid) {
+          $ttid = $form['ticket_registration:new_'.$i]['#bundle'];
+          $ttid_count = 1;
+        }
+
+        $form['ticket_registration:new_'.$i]['ticket_user_registration_email:'.$i]['#required'] = FALSE;
+        // Overwrite the existing email validate function from user_registration.
+        $form['ticket_registration:new_'.$i]['ticket_user_registration_email:'.$i]['#element_validate'][0] = 'ticket_reservation_email_validate';
+        $form['ticket_registration:new_'.$i]['tr_details'] = array(
+          '#type' => 'container',
+          '#prefix' => '<div class="registration-details">',
+          '#suffix' => '</div>',
+          '#weight' => 2,
+          '#tree' => FALSE,
+          '#states' => array(
+            'visible' => array(
+              ':input[name="ticket_registration:new_'.$i.'[ticket_user_registration_email:'.$i.']"]' => array('filled' => TRUE),
+              ':input[name="ticket_registration:new_'.$i.'[skip_details_'.$i.']"]' => array('unchecked' => TRUE),
+            ),
+          ),
+          '#parent_language' => LANGUAGE_NONE,
+        );
+        // Loop through fields on the registration
+        foreach ($form['ticket_registration:new_'.$i] AS $field_key => $field) {
+          if (strpos($field_key, '#') === 0 || $field_key == 'ticket_user_registration_email:'.$i || $field_key == 'tr_details') {
+            continue;
+          }
+          else {
+            $field['#parents'] = array('ticket_registration:new_'.$i, $field_key);
+            $form['ticket_registration:new_'.$i]['tr_details'][$field_key] = $field;
+            unset($form['ticket_registration:new_'.$i][$field_key]);
+          }
+        }
+
+        $form['ticket_registration:new_'.$i]['skip_details_'.$i] = array(
+          '#type' => 'checkbox',
+          '#title' => 'Email registration code to above address and this person will complete registration later.',
+          '#description' => "Note: Registration is not complete until user fills out registration form",
+          '#default_value' => $ttid_count > 1 ? 1 : 0,
+          '#states' => array(
+            'visible' => array(
+              ':input[name="ticket_registration:new_'.$i.'[ticket_user_registration_email:'.$i.']"]' => array('filled' => TRUE),
+            ),
+          ),
+          '#weight' => -1,
+        );
+        $ttid_count++;
+      }
+      $i++;
+    }
+  }
+  $form['#validate'][] = 'ticket_reservation_ticket_form_validate';
+  $form['#submit'][] = 'ticket_reservation_ticket_form_submit';
+
+  /* Execute the reservation submit right before the main form submit.
+  $final_submit = array_pop($form['#submit']);
+  $form['#submit'][] = 'ticket_reservation_ticket_form_submit';
+  $form['#submit'][] = $final_submit;
+  */
+}
+
+/**
+ * Email validation function. Remove needing an email to register.
+ */
+function ticket_reservation_email_validate($element, &$form_state) {
+  // Trim whitespace from mail, to prevent confusing 'e-mail not valid'
+  // warnings often caused by cutting and pasting.
+  $mail = trim($element['#value']);
+  form_set_value($element, $mail, $form_state);
+}
+
+function ticket_reservation_ticket_form_submit(&$form, &$form_state) {
+  foreach ($form_state['values'] AS $key => $value) {
+    // Generate a code for three use cases:
+    // 1) Email doesn't exist, generate a code for the author and continue
+    // 2) Email does exist, but skipped values is checked. Create a code and email it.
+    // 3) Email does exist but associated user doesn't exist in the system.
+    if (preg_match('/^ticket_registration:new_(\d+)/', $key, $matches)) {
+      $reg_key = $matches[1];
+      if ((empty($form_state['values'][$key]['ticket_user_registration_email:' . $reg_key]) ||
+        $form_state['values'][$key]['skip_details_' . $reg_key] == 1 ||
+        $form_state['complete form'][$key]['#entity']->user_uid === 0)
+      ) {
+        $ticket_registration = $form[$key]['#entity'];
+        $mail = !empty($form_state['values'][$key]['ticket_user_registration_email:' . $reg_key]) && $form[$key]['#entity']->user_uid == 0 ? $form_state['values'][$key]['ticket_user_registration_email:' . $reg_key] : NULL;
+        $code = ticket_reservation_generate_code($ticket_registration->trid, $mail);
+
+        if (!empty($mail)) {
+          rules_invoke_event('ticket_reservation_create_ticket', $mail, $ticket_registration, $code);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_validate().
+ */
+function ticket_reservation_ticket_form_validate(&$form, &$form_state) {
+  $errors = &drupal_static('form_set_error', array());
+
+  if ($errors) {
+    $i = 0; // for some reason the session doesn't store the error variables.
+    foreach ($errors as $error => $text) {
+      $field_name = substr($error, 0, strpos($error, ']'));
+      if (preg_match('/^ticket_registration:new_(\d+)/', $field_name, $matches) &&
+        (empty($form_state['values'][$field_name]['ticket_user_registration_email:' . $matches[1][0]]) || $form_state['values'][$field_name]['skip_details_'.$matches[1][0]] == 1)) {
+        unset($errors[$error]);
+        unset($_SESSION['messages']['error'][$i]);
+      }
+      $i++;
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+/**
+ * Implements hook_validate().
+ */
+function ticket_reservation_field_formatter_view_form_validate($form, &$form_state) {
+  // If there are existing items in checkout, throw them out.
+  $registrationQuery = new EntityFieldQuery();
+  if ($registrations = $registrationQuery->entityCondition('entity_type', 'ticket_registration')
+  ->propertyCondition('author_uid', $GLOBALS['user']->uid)
+  ->propertyCondition('state', 'checkout')
+  ->execute()) {
+    foreach ($registrations['ticket_registration'] as $registration) {
+      $deleted = entity_delete('ticket_registration', $registration->trid);
+    }
+  }
+}
+
+function ticket_reservation_field_formatter_view_form_submit($form, &$form_state) {
+  // Don't do anything if we're not in the right form.
+  if (!isset($form['#form_id']) || $form['#form_id'] !== 'ticket_field_formatter_view_form') {
+    return;
+  }
+  $registrations = array();
+
+  // Get the ticket types first
+  if (isset($form_state['storage']['vars']['entity']->field_event_tickets)) {
+    foreach($form_state['storage']['vars']['entity']->field_event_tickets[LANGUAGE_NONE] as $ticket_value) {
+      $ttid = $ticket_value['value'];
+      if (isset($form_state['values']['ticket_quantity_'.$ttid]) && $quantity = $form_state['values']['ticket_quantity_'.$ttid]) {
+
+        $default_values = array(
+          'author_uid' => $GLOBALS['user']->uid,
+          'state' => 'checkout', //We default to checkout for creation.
+          'bundle' => $ttid,
+          'created' => REQUEST_TIME,
+          'user_uid' => NULL,
+        );
+
+        // Create amount of entities for each quantity.
+        for ($i = 0; $i < $quantity; $i++) {
+          $entity = entity_create('ticket_registration', $default_values);
+          $registrations[] = serialize($entity); //
+        }
+      }
+    }
+  }
+
+  // Provide external module access, so they can react to the registrations.
+  //module_invoke_all('ticket_registered', $registrations);
+  $_SESSION['ticket']['registrations'] = $registrations;
+
+  // Return back to the event entity, but let others modify that.
+  // Note that hook_ticket_registered_redirect_alter() may return an array. see:
+  // https://api.drupal.org/api/drupal/includes!form.inc/function/drupal_redirect_form/7
+  //$redirect = $_SESSION['ticket']['return_url'] ? $_SESSION['ticket']['return_url'] : '';
+  //drupal_alter('ticket_registered_redirect', $redirect, $registrations);
+}
+/*
+ * Timeout the tickets that are sitting in checkout
+ */
+
+/**
+ * Validate if an input code is valid.
+ *
+ * @ Return string code | boolean exists
+ */
+function ticket_reservation_fetch_code($code = NULL) {
+  if (empty($code)) {
+    return FALSE;
+  }
+
+  return db_select('ticket_reservation', 'tr')
+       ->fields('tr', array('trid', 'ticket_code', 'created', 'mail'))
+       ->condition('ticket_code', $code)
+       ->execute()
+       ->fetchAssoc();
+}
+
+/**
+ * Fetch a code from a valid trid
+ *
+ * @ Return string code
+ */
+function ticket_reservation_fetch_by_trid($trid = NULL) {
+  if (empty($trid)) {
+    return array();
+  }
+
+  $result = db_select('ticket_reservation', 'tr')
+       ->fields('tr', array('trid', 'ticket_code', 'created', 'mail'))
+       ->condition('trid', $trid)
+       ->execute()
+       ->fetchAssoc();
+  // Should only return a result if the code isn't null.
+  if (!empty($result['ticket_code'])) {
+    return $result;
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * Release an existing ticket
+ */
+function ticket_reservation_cancel($form, &$form_state, $ticket_registration) {
+  global $user;
+
+  if (isset($form['#entity']) && empty($ticket_registration)) {
+    $ticket_registration = $form['#entity'];
+  }
+  if ($ticket_registration->author_uid == $ticket_registration->user_uid) {
+    $msg = t('Clicking Confirm will delete all registration data for this ticket. You will receive an email with the code to pass on to another user.');
+  }
+  else {
+    $msg = t('Clicking Confirm will delete all registration data for this ticket. The person who registered you will receive a code to pass on to another user.');
+  }
+
+  if ($ticket_registration->state != 'completed') {
+    drupal_set_message("Only completed registrations can be cancelled.", 'warning');
+    if (isset($_GET['destination'])) {
+      drupal_goto(drupal_parse_url(urldecode($_GET['destination'])));
+    }
+    drupal_goto();
+  }
+  else {
+    $form['#entity'] = $ticket_registration;
+    return confirm_form($form,
+      t('Are you sure you want to cancel this registration?'),
+      'user/' . $user->uid . '/tickets', $msg,
+      t('Confirm Cancellation'), t('Go Back'));
+  }
+}
+
+function ticket_reservation_cancel_submit($form, &$form_state) {
+  $ticket_registration = $form['#entity'];
+  $author_controlled = FALSE;
+  $wrapper = entity_metadata_wrapper('ticket_registration', $ticket_registration);
+  // Traverse through the properties of the registration and wipe out data we don't need
+  // Except for data we do need.
+  $author_uid = ($ticket_registration->author_uid != 0) ? $ticket_registration->author_uid : NULL;
+  $mail = NULL;
+  if ($author_uid) {
+    $author = user_load($author_uid);
+    $mail = $author->mail;
+  }
+  $user_uid = $ticket_registration->user_uid;
+  foreach ($wrapper->getPropertyInfo() as $key => $val) {
+    // Don't touch these fields
+    switch ($key) {
+      case 'bundle':
+      case 'revision_id':
+      case 'trid':
+      case 'ticket_type':
+      case 'entity_type':
+      case 'entity_id':
+      case 'entity':
+      case 'user':
+      case 'author':
+      case 'user_uid':
+      case 'created':
+      case 'changed':
+      case 'state':
+      case 'field_ticket_order':
+        break;
+      case 'author_uid':
+        // if authori_uid = user_uid, then give up the author uid as well.
+        if ($ticket_registration->author_uid != 0 && $ticket_registration->author_uid == $ticket_registration->user_uid) {
+          $author_controlled = FALSE;
+          $ticket_registration->author_uid = 0;
+          $ticket_registration->user_uid = 0;
+        }
+        else {
+          $author_controlled = TRUE;
+          $ticket_registration->user_uid = 0;
+        }
+        break;
+      default:
+        $ticket_registration->$key = array();
+        break;
+    }
+  }
+  $ticket_registration->save();
+  $code = ticket_reservation_generate_code($ticket_registration->trid, $mail, $ticket_registration->changed);
+
+  rules_invoke_event('ticket_reservation_cancel_ticket', $author_uid, $ticket_registration, $code);
+
+  if ($author_controlled) {
+    $msg = t("Ticket has been returned to the user who created this registration");
+  }
+  else {
+    $msg = t('Ticket successfully cancelled. To redeem this ticket, use code: !code . This code has also been sent to your email.' , array('!code' => $code));
+  }
+  drupal_set_message($msg);
+}
+
+/**
+ * Internal function to generate a code.
+ * TODO: Make length configurable
+ * TODO: Make reservations revisionable. Right now this is ephemeral storage.
+ */
+function ticket_reservation_generate_code($trid, $mail = NULL, $tr_timestamp = NULL, $length = 6) {
+  // We define the possible characters. No 'l','1', 'i' to prevent
+  // reconisation problems.
+  $characters = array(
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
+    'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n',
+    'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    '2', '3', '4', '5', '6', '7', '8', '9',
+  );
+  $numberOfCharacters = count($characters);
+
+  // With 32 million possibilities at 6 characters, its highly unlikely that a
+  // Repeat code would be generated, but we need to check.
+  do {
+    $code = '';
+
+    // Create the code per character
+    for ($c = 0; $c < $length; $c++) {
+      $randIndex = mt_rand(0, $numberOfCharacters - 1);
+      $code .= $characters[$randIndex];
+    }
+  } while ($result = db_query("SELECT ticket_code FROM ticket_reservation WHERE ticket_code = :ticket_code", array(':ticket_code' => $code))->fetchField());
+
+  $record = array(
+    'trid' => $trid,
+    'ticket_code' => $code,
+    'created' => $tr_timestamp ? $tr_timestamp : 0,
+    'mail' => $mail,
+  );
+
+  // Since db delete doesn't care if the record exists or not, we'll delete before
+  // inserting a new reservation. Just in case we're re-generating the code.
+  db_delete('ticket_reservation')
+    ->condition('trid', $trid)
+    ->execute();
+
+  // Write out the new reservation
+  drupal_write_record('ticket_reservation', $record);
+
+  return $code;
+}
+
+/**
+ * Token Support
+ */
+
+/**
+* Implements hook_token_info().
+*/
+/**
+ * Implements hook_token_field_info_alter().
+ */
+/**
+ * Implements hook_token_info_alter().
+ */
+function ticket_reservation_token_info_alter(&$info) {
+  $info['tokens']['ticket_registration']['reservation_code'] = array(
+    'name' => t('Reservation Code'),
+    'description' => t('Reservation code for a ticket registration.'),
+  );
+  $info['tokens']['ticket_registration']['reservation_mail'] = array(
+    'name' => t('Reservation E-mail'),
+    'description' => t('Reservation E-mail address for a ticket registration.'),
+  );
+  return $info;
+}
+
+/**
+* Implements hook_tokens().
+*/
+function ticket_reservation_tokens($type, $tokens, array $data = array(), array $options = array()) {
+
+  $replacements = array();
+
+  if ($type == 'ticket_registration' && !empty($data['ticket_registration'])) {
+    $ticket_registration = $data['ticket_registration'];
+
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'reservation_code':
+          $reservation = ticket_reservation_fetch_by_trid($ticket_registration->trid);
+          $replacements[$original] = isset($reservation['ticket_code']) ? $reservation['ticket_code'] : '';
+          break;
+        case 'reservation_mail':
+          if ($reservation = ticket_reservation_fetch_by_trid($ticket_registration->trid)) {
+            if ($ticket_registration->user_uid != 0) {
+              $user_mail = user_load($ticket_registration->user_uid);
+              $replacements[$original] = $user_mail->mail;
+            }
+            else {
+              $replacements[$original] = !empty($reservation['mail']) ? $reservation['mail'] : '';
+            }
+          }
+          break;
+      }
+    }
+  }
+
+  return $replacements;
+}
+
+/**
+ * Delete a code from a ticket reservation
+ * TODO: Probably should make this more complete.
+ */
+function ticket_reservation_delete($trid) {
+  // Delete the reservation once the ticket is claimed.
+  db_delete('ticket_reservation')
+    ->condition('trid', $trid)
+    ->execute();
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function ticket_reservation_entity_delete($entity, $type) {
+  if ($type == 'ticket_registration') {
+    ticket_reservation_delete($entity->trid);
+  }
+}

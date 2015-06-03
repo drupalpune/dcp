@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the COD Registration Pages feature.
+ */
+
+include_once 'cod_registration_pages.features.inc';

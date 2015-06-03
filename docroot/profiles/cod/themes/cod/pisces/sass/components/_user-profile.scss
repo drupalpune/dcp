@@ -1,0 +1,15 @@
+.user-profile {
+  h2 {
+    margin-bottom: 0;
+  }
+  h3 {
+    margin-top: 0;
+  }
+  .user-picture {
+    float: right;
+    img {
+      border: 1px solid darken($lt-gray, 15%);
+      margin: 0.83em 0 12px 12px;
+    }
+  }
+}

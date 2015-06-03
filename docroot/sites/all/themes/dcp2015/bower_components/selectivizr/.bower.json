@@ -1,0 +1,13 @@
+{
+  "name": "selectivizr",
+  "homepage": "https://github.com/fubhy/selectivizr",
+  "_release": "7db526a493",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "7db526a4934d22e7e8dcbd5906df0a7d603244a0"
+  },
+  "_source": "git://github.com/fubhy/selectivizr.git",
+  "_target": "*",
+  "_originalSource": "fubhy/selectivizr"
+}

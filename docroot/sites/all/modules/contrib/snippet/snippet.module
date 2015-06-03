@@ -1,0 +1,252 @@
+<?php
+/**
+ * @file
+ * The module file for the snippet module.
+ */
+
+/**
+ * Menu item prefix.
+ */
+define('SNIPPET_MENU_PREFIX', 'admin/structure/snippet/list');
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function snippet_ctools_plugin_directory($module, $type) {
+  // Load the plugins.
+  return "plugins/{$type}";
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ *
+ * Tell CTools that we support the default_snippet_presets API.
+ */
+function snippet_ctools_plugin_api($owner, $api) {
+  if ($owner == 'snippet' && $api == 'default_snippet') {
+    return array('version' => 1);
+  }
+
+  return NULL;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function snippet_views_api() {
+  return array(
+    'api' => 2,
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function snippet_permission() {
+  $permissions = array();
+  $permissions['administer snippet'] = array(
+    'title' => t('Administer snippet'),
+    'description' => t('Perform administration tasks for snippet.'),
+    'restrict access' => TRUE,
+  );
+  $permissions['manage snippet'] = array(
+    'title' => t('Manage snippet'),
+    'description' => t('Allow user to create, modify snippet as well see revisions, revert to perticuler revision of the snippet'),
+  );
+  return $permissions;
+}
+
+/**
+ * Loads the data for the snippet.
+ *
+ * @param string $snippet_name
+ *   Machine-understandable name of the snippet to be loaded.
+ * @param int $rid
+ *   The revision ID, if needed.
+ *
+ * @return object|bool
+ *   FALSE if the snippet name was not found. Otherwise, the snippet as a ctools
+ *   object.
+ */
+function snippet_load($snippet_name, $rid = NULL) {
+  if ($snippet_name) {
+    ctools_include('export');
+    $snippet = ctools_export_crud_load('snippet', $snippet_name);
+
+    $snippet_revision = db_select('snippet_revision', 'sr')
+      ->fields('sr', array())
+      ->condition('name', $snippet->name);
+
+    if ($rid) {
+      $snippet_revision = $snippet_revision->condition('rid', $rid);
+    }
+    else {
+      $snippet_revision = $snippet_revision->condition('is_current', 1);
+    }
+    $snippet_revision = $snippet_revision->execute()->fetch();
+    $snippet->content = !empty($snippet_revision->content) ? $snippet_revision->content : '';
+    $snippet->content_format = !empty($snippet_revision->content_format) ? $snippet_revision->content_format : NULL;
+    $snippet->timestamp = !empty($snippet_revision->timestamp) ? $snippet_revision->timestamp : NULL;
+    $snippet->is_current = !empty($snippet_revision->is_current) ? $snippet_revision->is_current : NULL;
+    $snippet->rid = !empty($snippet_revision->rid) ? $snippet_revision->rid : NULL;
+    $snippet->title_revision = !empty($snippet_revision->title) ? $snippet_revision->title : NULL;
+    return $snippet;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function snippet_theme() {
+  return array(
+    'snippet' => array(
+      'variables' => array(),
+      'template' => 'snippet',
+    ),
+  );
+}
+
+/**
+ * Preprocess function for theme_snippet.
+ */
+function template_preprocess_snippet(&$vars) {
+  // Build contextual links.
+  if (user_access('manage snippet')) {
+    // Get the destination.
+    $destination = drupal_get_destination();
+
+    $links['snippet-edit'] = array(
+      'title' => t('Edit Snippet'),
+      'href' => SNIPPET_MENU_PREFIX . "/" . $vars['name'] . "/edit",
+      'query' => $destination,
+      // @TODO: Finish Snippet ajax editor (for in-place editing of snippets)
+      // 'href' => 'snippet/ajax/nojs/' . $vars['name'],
+      'attributes' => array(
+        // 'class' => array('use-ajax'),
+        'data-snippet-name' => $vars['name'],
+      ),
+    );
+    $links['snippet-revert'] = array(
+      'title' => t('Revisions'),
+      'href' => SNIPPET_MENU_PREFIX . "/" . $vars['name'] . "/revision",
+      'query' => $destination,
+    );
+
+    $build = array(
+      '#prefix' => '<div class="contextual-links-wrapper">',
+      '#suffix' => '</div>',
+      '#theme' => 'links__contextual',
+      '#links' => $links,
+      '#attributes' => array('class' => array('contextual-links')),
+      '#attached' => array(
+        'css' => array(drupal_get_path('module', 'snippet') . '/css/snippet.css'),
+        'library' => array(
+          array('contextual', 'contextual-links'),
+          // array('system', 'drupal.ajax'),
+          // array('system', 'jquery.form'),
+        ),
+      ),
+    );
+
+    $vars['admin_links'] = drupal_render($build);
+    $vars['classes_array'][] = 'contextual-links-region';
+    $vars['attributes_array']['class'][] = 'contextual-links-region';
+
+  }
+
+  // Add to attributes arrays for wrapper, title & content HTML elements.
+  $vars['classes_array'][] = drupal_html_class($vars['name']);
+  $vars['attributes_array']['class'][] = drupal_html_class($vars['name']);
+  $vars['attributes_array']['id'] = drupal_html_id($vars['name']);
+  $vars['title_attributes_array']['class'][] = 'snippet-title';
+  $vars['content_attributes_array']['class'][] = 'snippet-content';
+
+  // Add text to snippet body when content is empty but user has
+  // edit permissions.
+  if (empty($vars['content'])) {
+    if (user_access('manage snippet') || user_access('administer snippet')) {
+      $vars['content'] = t('<em>Empty snippet. Hover to edit.</em>');
+      $vars['classes_array'][] = 'snippet-empty';
+      $vars['attributes_array']['class'][] = 'snippet-empty';
+    }
+  }
+
+}
+
+/**
+ * Implements hook_menu().
+ */
+function snippet_menu() {
+  $items = array();
+  $items['snippet/ajax/%/%'] = array(
+    'title' => 'Snippet Admin Callback',
+    'description' => 'AHAH callback for snippet edit form',
+    'page callback' => 'snippet_get_ajax_form',
+    'page arguments' => array(2, 3),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * AJAX callback for in-place editor.
+ *
+ * @param string $type
+ *   The type of request being made. Currently 'ajax' is the only option, and
+ *   the default.
+ * @param string $snippet_name
+ *   The name of the snippet for which to get an AJAX form.
+ */
+function snippet_get_ajax_form($type = 'ajax', $snippet_name = '') {
+  if ($type == 'ajax') {
+    $selector = drupal_html_class($snippet_name);
+    $form = drupal_render(drupal_get_form('snippet_edit_form', $snippet_name));
+    $commands[] = ajax_command_replace('.' . $selector, $form);
+    $page = array('#type' => 'ajax', '#commands' => $commands);
+    ajax_deliver($page);
+  }
+}
+
+/**
+ * Get the snippet edit form.
+ *
+ * @param string $snippet_name
+ *   The name of the snippet that is being edited.
+ *
+ * @return array|bool
+ *   FALSE if the snippet name was not found. Otherwise, a Drupal edit form for
+ *   the snippet.
+ */
+function snippet_edit_form($form, &$form_state, $snippet_name) {
+  if ($snippet_name) {
+    $form = array();
+    $snippet = snippet_load($snippet_name);
+
+    $form['title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Title'),
+      '#default_value' => ($snippet->title_revision) ? $snippet->title_revision : (($snippet->title) ? $snippet->title : ''),
+    );
+
+    $form['content'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Content'),
+      '#default_value' => $snippet->content,
+      '#format' => @$snippet->content_format,
+      '#rows' => 10,
+    );
+
+    $form['preview'] = array(
+      '#type' => 'button',
+      '#value' => t('Preview'),
+    );
+
+    return $form;
+  }
+
+  return FALSE;
+}

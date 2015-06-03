@@ -1,0 +1,60 @@
+.page {
+  &>footer,
+  .maincontent-wrapper {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  &>footer {
+
+  }
+}
+
+
+.not-front .maincontent-wrapper {
+  @media #{$mobile}{
+    padding: 20px 1%;
+  }
+  @media #{$tab}{
+    padding: 40px 5%;
+  }
+  @media #{$desktop}{
+    padding: 60px 10%;
+  }
+}
+
+
+.center-wrapper {
+  display: table;
+  width: 100%;
+}
+.not-front.panel-col-first {
+  background: $yellow;
+  @media #{$mobile}{
+    width: 100% !important;
+    padding: 10px 5px 10px 5px;
+  }
+  @media #{$tab}{
+    width: 50% !important;
+    padding: 15px 8px 15px 8px;
+  }
+  @media #{$desktop}{
+    width: 65% !important;
+    padding: 20px 10px 20px 10px;
+  }
+}
+
+#user-pass,
+#user-register-form,
+#user-login {
+  background: $yellow;
+  @media #{$mobile}{
+    padding: 20px 1%;
+  }
+  @media #{$tab}{
+    padding: 40px 8%;
+  }
+  @media #{$desktop}{
+    padding: 60px 20%;
+  }
+}

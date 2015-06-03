@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the COD Community Pages feature.
+ */
+
+include_once 'cod_community_pages.features.inc';

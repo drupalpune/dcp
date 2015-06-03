@@ -1,0 +1,23 @@
+name = DCP-2015 Theme
+description = Drupal Camp Pune Website theme
+screenshot = screenshot.png
+engine = phptemplate
+core = 7.x
+
+;-------------- C S S -------------
+stylesheets[all][] = css/style.css
+
+;-------------- JS -------------
+scripts[] = js/script.js
+
+regions[page_top] = Page top
+regions[header] = Header
+
+regions[help] = Help
+regions[highlighted] = Highlighted
+regions[featured] = Featured
+
+regions[content] = Content
+
+regions[page_bottom] = Page bottom
+regions[footer] = Footer

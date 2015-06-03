@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * @file
+ * Batch generation functionalities for commerce_coupon module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function commerce_coupon_batch_menu() {
+  $items['admin/commerce/coupons/batch'] = array(
+    'title' => 'Batch create coupons',
+    'page callback' => 'commerce_coupon_batch_overview_page',
+    'access arguments' => array('commerce coupon batch creation'),
+  );
+
+  $coupon_types = commerce_coupon_get_types();
+  foreach ($coupon_types as $type => $info) {
+    $type_arg = strtr($type, '_', '-');
+    $coupon = commerce_coupon_create($type);
+    $items['admin/commerce/coupons/batch/' . $type_arg] = array(
+      'tab_parent' => 'admin/commerce/coupons/batch',
+      'title' => 'Batch create @name',
+      'title arguments' => array('@name' => $type),
+      'page callback' => 'commerce_coupon_batch_form_wrapper',
+      'page arguments' => array($coupon),
+      'access callback' => 'commerce_coupon_access',
+      'access arguments' => array('create', $coupon),
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function commerce_coupon_batch_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link 'admin/commerce/coupons/batch' on 'admin/commerce/coupons'.
+  if ($root_path == 'admin/commerce/coupons') {
+    $item = menu_get_item('admin/commerce/coupons/batch');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function commerce_coupon_batch_permission() {
+  $permissions['commerce coupon batch creation'] = array(
+    'title' => t('Commerce Coupon Batch Creation'),
+    'description' => t('Allows users to create coupons by a batch.'),
+  );
+  return $permissions;
+}
+
+/**
+ * Display the coupon type overview page for batch creation if there's more than
+ * one coupon type.
+ */
+function commerce_coupon_batch_overview_page() {
+  $item = menu_get_item();
+  $content = system_admin_menu_block($item);
+
+  // Bypass the node/add listing if only one content type is available.
+  if (count($content) == 1) {
+    $item = array_shift($content);
+    drupal_goto($item['href']);
+  }
+
+  return theme('admin_block_content', array('content' => $content));
+}
+
+/*
+ * Page callback: coupon batch form wrapper
+ */
+function commerce_coupon_batch_form_wrapper($coupon) {
+  module_load_include('inc', 'commerce_coupon_batch', 'includes/commerce_coupon_batch.form');
+  
+  return drupal_get_form('commerce_coupon_batch_form', $coupon);
+}

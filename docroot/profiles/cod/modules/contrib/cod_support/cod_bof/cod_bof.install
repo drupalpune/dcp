@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * Enable panel pages when cod_bof is first installed.
+ */
+function cod_bof_install() {
+  // Enabled the associated bof pages
+  $module_list = array('cod_bof_pages');
+  module_enable($module_list);
+  return array();
+}
+
+/**
+ * Revert cod_bof feature to set the correct pathauto variable event OG label.
+ */
+function cod_bof_update_7002() {
+  $revert = array(
+    'cod_bof' => array('variable', 'field_instance'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Revert cod_bof feature to set the correct views filter for the bof schedule.
+ */
+function cod_bof_update_7003() {
+  $revert = array(
+    'cod_bof' => array('views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Revert cod_bof view feature to convert to the panel if the page is enabled.
+ */
+function cod_bof_update_7004() {
+  if (module_exists('cod_bof_pages')){
+    $revert = array(
+      'cod_bof' => array('views_view'),
+      'cod_bof_pages' => array('page_manager_pages'),
+    );
+    features_revert($revert);
+  }
+
+  return array();
+}

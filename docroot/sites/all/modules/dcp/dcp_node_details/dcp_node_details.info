@@ -1,0 +1,12 @@
+name = DCP Node details
+description = DCP Node details
+core = 7.x
+package = DCP
+version = 7.x-1.0-beta1
+project = dcp_node_details
+dependencies[] = ctools
+dependencies[] = page_manager
+features[ctools][] = page_manager:pages_default:1
+features[features_api][] = api:2
+features[page_manager_handlers][] = node_view__basic_page
+project path = sites/all/modules/dcp/

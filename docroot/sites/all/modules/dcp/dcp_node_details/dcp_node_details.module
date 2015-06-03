@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the DCP Node details feature.
+ */
+
+include_once 'dcp_node_details.features.inc';

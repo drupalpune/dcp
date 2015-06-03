@@ -1,0 +1,37 @@
+name = COD Basic Page
+description = Basic pages (program, hotel, etc) for COD Events
+core = 7.x
+package = COD
+dependencies[] = cod_events
+dependencies[] = views
+dependencies[] = views_content
+features[ctools][] = page_manager:pages_default:1
+features[ctools][] = strongarm:strongarm:1
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:2
+features[field_instance][] = node-page-og_group_ref
+features[node][] = page
+features[og_features_permission][] = node:event:create page content
+features[og_features_permission][] = node:event:delete any page content
+features[og_features_permission][] = node:event:delete own page content
+features[og_features_permission][] = node:event:update any page content
+features[og_features_permission][] = node:event:update own page content
+features[page_manager_pages][] = cod_basic_pages
+features[variable][] = field_bundle_settings_node__page
+features[variable][] = panelizer_defaults_node_page
+features[variable][] = pathauto_node_page_pattern
+features[views_view][] = cod_basic_pages_admin_listing
+features_exclude[dependencies][ctools] = ctools
+features_exclude[dependencies][entityreference] = entityreference
+features_exclude[dependencies][features] = features
+features_exclude[dependencies][og] = og
+features_exclude[dependencies][page_manager] = page_manager
+features_exclude[dependencies][strongarm] = strongarm
+install_option = cod
+
+; Information added by Drupal.org packaging script on 2015-05-01
+version = "7.x-1.0-beta9"
+core = "7.x"
+project = "cod_support"
+datestamp = "1430468586"
+

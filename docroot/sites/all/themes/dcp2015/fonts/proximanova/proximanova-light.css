@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'ProximaNovaLight';
+    src: url('proximanova-light.eot');
+    src: url('proximanova-light.eot') format('embedded-opentype'),
+         url('proximanova-light.woff2') format('woff2'),
+         url('proximanova-light.woff') format('woff'),
+         url('proximanova-light.ttf') format('truetype'),
+         url('proximanova-light.svg#ProximaNovaLight') format('svg');
+}

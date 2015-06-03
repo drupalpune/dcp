@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * Reset the session management page with renamed view.
+ */
+function cod_session_management_pages_update_7002() {
+  $revert = array(
+    'cod_session_management_pages' => array('page_manager_pages'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Update pages to use permissions instead of roles for access
+ */
+function cod_session_management_pages_update_7003() {
+
+  cod_session_management_pages_update_7002();
+
+  return array();
+}

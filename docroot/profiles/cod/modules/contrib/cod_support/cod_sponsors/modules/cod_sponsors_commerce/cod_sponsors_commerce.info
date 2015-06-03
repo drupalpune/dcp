@@ -1,0 +1,28 @@
+name = COD Sponsors Commerce
+description = Sell and manage sponsorship order information
+core = 7.x
+package = COD
+install_option = cod
+dependencies[] = cod_events
+dependencies[] = cod_sponsors
+dependencies[] = commerce_features
+dependencies[] = commerce_product_ui
+dependencies[] = entityreference
+dependencies[] = features
+dependencies[] = og
+dependencies[] = options
+dependencies[] = taxonomy
+features[features_api][] = api:2
+features[field_instance][] = commerce_product-sponsor-field_sponsor_sponsorship_level
+features[field_instance][] = commerce_product-sponsor-og_group_ref
+
+; Views includes.
+files[] = views/cod_sponsors_commerce.views.inc
+files[] = views/cod_sponsors_commerce_views_handler_field_order_link.inc
+
+; Information added by Drupal.org packaging script on 2015-05-01
+version = "7.x-1.0-beta9"
+core = "7.x"
+project = "cod_support"
+datestamp = "1430468586"
+

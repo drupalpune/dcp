@@ -1,0 +1,14 @@
+name = DCP Sessions
+core = 7.x
+package = DCP
+version = 7.x-1.0-beta1
+project = dcp_sessions
+dependencies[] = ctools
+dependencies[] = page_manager
+dependencies[] = snippet
+features[ctools][] = page_manager:pages_default:1
+features[ctools][] = snippet:default_snippet:1
+features[features_api][] = api:2
+features[page_manager_pages][] = propose_a_session
+features[snippet][] = call_for_papers_description
+project path = sites/all/modules/dcp/

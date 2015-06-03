@@ -1,0 +1,50 @@
+/* ----------Header--------- */
+
+header {
+  @include container;
+  background: $menu-bg-color url(../images/header-tpbg.png) repeat;
+}
+
+.block-nice-menus {
+  text-align: center;
+  width: 80%;
+  margin: 0 auto;
+  padding-bottom: 10px;
+  ul.nice-menu {
+    &.nice-menu-down{
+      float: none;
+    }
+    li {
+      display: inline;
+      border: none;
+      float: none;
+      background-color: transparent;
+      &:hover {
+        background: none;
+      }
+      a{
+        color: #f3cb02;
+        font-size: 18px;
+        line-height: 1;
+        text-transform: uppercase;
+        padding:20px 30px 0 30px;
+        display: inline-block;
+        &.active{
+          color:  white;
+          background: url(../images/pointer.png) top no-repeat;
+        }
+      }
+      ul {
+        background: $dark-blue;
+        width:250px;
+        padding-bottom: 10px;
+      }
+    }
+  }
+}
+
+.region-header {
+  img{
+    @extend %img;
+  }
+}

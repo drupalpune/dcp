@@ -1,0 +1,14 @@
+{
+  "name": "matchmedia",
+  "homepage": "https://github.com/fubhy/matchmedia",
+  "version": "0.1.0",
+  "_release": "0.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.1.0",
+    "commit": "d59a32e68a29a7061447e9528e2eb4b9deec8592"
+  },
+  "_source": "git://github.com/fubhy/matchmedia.git",
+  "_target": "*",
+  "_originalSource": "fubhy/matchmedia"
+}

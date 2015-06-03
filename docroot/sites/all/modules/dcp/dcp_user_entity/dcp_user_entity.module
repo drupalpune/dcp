@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the DCP User Entity feature.
+ */
+
+include_once 'dcp_user_entity.features.inc';

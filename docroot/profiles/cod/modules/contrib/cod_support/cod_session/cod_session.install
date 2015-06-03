@@ -1,0 +1,266 @@
+<?php
+
+/**
+ * Add the session track vocabulary when cod_session is enabled the first time.
+ */
+function cod_session_install() {
+  $eventQuery = new EntityFieldQuery();
+  $events = $eventQuery->entityCondition('entity_type', 'node')
+    ->propertyCondition('type', 'event')
+    ->execute();
+  if (isset($events['node'])) {
+    $nids = array_keys($events['node']);
+    foreach ($nids as $nid) {
+      $event = node_load($nid);
+      // Make a session track vocabulary.
+      if (og_is_group('node', $event)) {
+        cod_session_generate_session_tracks($event, 'node', TRUE);
+      }
+    }
+  }
+
+  // Enable the associated session and speaker pages
+  $module_list = array('cod_speaker_pages', 'cod_session_pages');
+  module_enable($module_list);
+}
+
+/**
+ * Remove legacy views from the database.
+ */
+function cod_session_update_7001() {
+  // Remove legacy views:
+  $views = array('cod_session_schedule', 'cod_session_schedule_entity', 'my_presentations');
+
+  foreach ($views as $view_name) {
+    if ($view = views_get_view($view_name)) {
+      $view->delete(TRUE);
+    }
+  }
+
+  $revert = array(
+    'cod_session' => array('field_base', 'field_instance', 'views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Enable the OG Vocabulary (for session tracks) module.
+ */
+function cod_session_update_7002() {
+  $module_list = array('og_vocab');
+  module_enable($module_list);
+  return array();
+}
+
+/**
+ * Revert session features that use new flag3 API
+ */
+function cod_session_update_7003() {
+  $revert = array(
+    'cod_events' => array('flag', 'views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Revert session features to include new featured and default session tab
+ */
+function cod_session_update_7004() {
+  $revert = array(
+    'cod_events' => array('field_base', 'field_instance', 'field_group'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Enable cod_session_pages
+ */
+function cod_session_update_7005() {
+  module_enable(array('cod_session_pages'));
+  return array();
+}
+
+function cod_session_update_7006() {
+  $eventQuery = new EntityFieldQuery();
+  $events = $eventQuery->entityCondition('entity_type', 'node')
+    ->propertyCondition('type', 'event')
+    ->execute();
+  if (isset($events['node'])) {
+    $nids = array_keys($events['node']);
+    foreach ($nids as $nid) {
+      $event = node_load($nid);
+      if (og_is_group('node', $event)) {
+        cod_session_generate_session_tracks($event, 'node', TRUE);
+      }
+    }
+  }
+}
+
+/**
+ * Enable set default session settings for events
+ */
+function cod_session_update_7007() {
+
+  module_enable(array('cod_session_pages'));
+  return array();
+}
+
+/**
+ * Enable set default session settings for events
+ */
+function cod_session_update_7008() {
+  $eventQuery = new EntityFieldQuery();
+  $events = $eventQuery->entityCondition('entity_type', 'node')
+    ->propertyCondition('type', 'event')
+    ->execute();
+  if (isset($events['node'])) {
+    $nids = array_keys($events['node']);
+    foreach ($nids as $nid) {
+      $event = node_load($nid);
+
+    }
+  }
+
+  return array();
+}
+
+/**
+ * Enable set default session settings for events
+ */
+function cod_session_update_7009() {
+  $revert = array(
+    'cod_session' => array('views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Rename administrative view menu locations and machine names.
+ */
+function cod_session_update_7010() {
+  views_invalidate_cache();
+
+  $revert = array(
+    'cod_session' => array('views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Revert cod_session feature to set the correct pathauto variable.
+ */
+function cod_session_update_7011() {
+  $revert = array(
+    'cod_session' => array('variable'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Convert from list_integer to a list_text for session status.
+ */
+function cod_session_update_7013() {
+  // Change fields to be varchars first
+  db_change_field('field_data_field_accepted', 'field_accepted_value', 'field_accepted_value',
+    array('type' => 'varchar', 'length' => 255, 'not null' => FALSE)
+  );
+  db_change_field('field_revision_field_accepted', 'field_accepted_value', 'field_accepted_value',
+    array('type' => 'varchar', 'length' => 255, 'not null' => FALSE)
+  );
+
+  // Change field definition in drupal
+  db_update('field_config')
+    ->fields(array('type' => 'list_text'))
+    ->condition('field_name', 'field_accepted', '=')
+    ->execute();
+
+  // Update the values for each field.
+  db_update('field_data_field_accepted')
+    ->fields(array('field_accepted_value' => 'unprocessed'))
+    ->condition('field_accepted_value', '0', '=')
+    ->execute();
+  db_update('field_data_field_accepted')
+    ->fields(array('field_accepted_value' => 'accepted'))
+    ->condition('field_accepted_value', '1', '=')
+    ->execute();
+  db_update('field_data_field_accepted')
+    ->fields(array('field_accepted_value' => 'declined'))
+    ->condition('field_accepted_value', '2', '=')
+    ->execute();
+  db_update('field_data_field_accepted')
+    ->fields(array('field_accepted_value' => 'featured'))
+    ->condition('field_accepted_value', '3', '=')
+    ->execute();
+
+  // Revert the feature to include cancelled & backup options
+  // Change the views to use the new machine names as keys.
+  $revert = array(
+    'cod_session' => array('field_base', 'field_instance', 'views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Reset the session menu weight to order correctly on the admin tabs
+ */
+function cod_session_update_7014() {
+  $revert = array(
+    'cod_session' => array('page_manager_pages'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Update session views to fix an issue with broken handlers for session confirmation.
+ */
+function cod_session_update_7015() {
+  $revert = array(
+    'cod_session' => array('views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Enable views send to create bulk email messages for speakers.
+ * Note: this is a stopgap measure until we get message API integrated into COD.
+ */
+function cod_session_update_7016() {
+  module_enable(array('views_send'));
+
+  $revert = array(
+    'cod_session' => array('views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Update Session admin view to show sessions other than accepted ones.
+ */
+function cod_session_update_7017() {
+  $revert = array(
+    'cod_session' => array('views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}

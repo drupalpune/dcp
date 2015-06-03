@@ -1,0 +1,15 @@
+name = Ticket Rules
+description = Provides integration with the Rules module.
+package = Ticket
+core = 7.x
+
+dependencies[] = rules
+dependencies[] = ticket_state
+
+
+; Information added by drush on 2015-05-01
+version = "7.x-1.0-beta4"
+core = "7.x"
+project = "ticket"
+datestamp = "1430469490"
+

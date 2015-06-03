@@ -1,0 +1,283 @@
+<?php
+/**
+ * @file
+ * Code for the cod_sponsors_commerce feature.
+ */
+
+include_once 'cod_sponsors_commerce.features.inc';
+
+/**
+ * Implements hook_views_api().
+ */
+function cod_sponsors_commerce_views_api() {
+  return array(
+    'version' => '3.0',
+    'path' => drupal_get_path('module', 'cod_sponsors_commerce') . '/views',
+  );
+}
+
+/**
+ *  Implements hook_menu().
+ */
+function cod_sponsors_commerce_menu() {
+  $items = array();
+  $items['sponsorship/%commerce_product/add/%node'] = array(
+    'page callback' => 'cod_sponsors_commerce_product_add',
+    'page arguments' => array(1, 3),
+    'access callback' => 'cod_sponsors_commerce_product_access',
+    'access arguments' => array(1, 3),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/conference/%node/sponsors/add/sponsor_product'] = array(
+    'title' => t('Add Sponsor Product'),
+    'page callback' => 'cod_sponsors_commerce_add_product',
+    'page arguments' => array(2, 5, 'admin/conference', 3),
+    'access callback' => 'node_access',
+    'access arguments' => array('create', 'sponsor'),
+    'weight' => -1,
+    'type' => MENU_LOCAL_ACTION,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_commerce_line_item_type_info().
+ *
+ * - example_line_item_1 is simply a clone of the 'product' line item type. It's
+ *   a simple way to get a differentiated line item type.
+ * - example_line_item_2 is completely implemented and is not a product line
+ *   item type but rather a "surcharge", and the hook_commerce_order_presave()
+ *   is provided to make sure that there is one for every order.
+ *
+ * @see hook_commerce_line_item_type_info().
+ * @see http://www.drupalcommerce.org/specification/info-hooks/checkout
+ *
+ */
+function cod_sponsors_commerce_commerce_line_item_type_info() {
+
+  $line_item_types['sponsorship'] = array(
+    'name' => t('Sponsorship'),
+    'description' => t('Sponsorship Line Item'),
+    'product' => TRUE,
+
+    // Here you can change the text in the submit button in the order admin form.
+    'add_form_submit_value' => t('Add sponsorship'),
+
+    // 'base' basically provides magic naming for a set of callbacks
+    // including the settings_form, checkout_form, etc. Here we'll use the
+    // forms and callbacks provided for Commerce Product Reference module for
+    // its product line item, so we'll use
+    // commerce_product_line_item_configuration()
+    // and commerce_product_line_item_title(), etc.
+    // See example_line_item_2 for explicit callbacks.
+    'base' => 'commerce_product_line_item',
+  );
+
+  return $line_item_types;
+}
+
+/**
+ * Append group as query param so new content can have group context.
+ */
+function cod_sponsors_commerce_add_product($event, $content_type, $prefix = '', $suffix = '') {
+  $options = array(
+    'query' => array(
+      'og_group_ref' => $event->nid,
+    ),
+  );
+
+  if ($prefix || $suffix) {
+    $options['query']['destination'] = $prefix .'/'. $event->nid .'/'. $suffix;
+  }
+  drupal_goto('admin/commerce/products/add/sponsor', $options);
+}
+
+/**
+ *  Implements hook_form_alter().
+ */
+function cod_sponsors_commerce_form_alter(&$form, &$form_state, $form_id) {
+  //dpm($form_id);
+}
+
+/**
+ *  Implements hook_form_FORM_ID_alter().
+ *  TODO Improve functionality of this.
+
+function cod_sponsors_commerce_form_taxonomy_form_term_alter(&$form, &$form_state, $form_id) {
+
+  /*
+   * Add an option to create a product -- would be good to eventually use IEF here.
+  $form['related_product'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Create an associated product with this sponsorship type',
+    '#default_value' => 0,
+    '#weight' => 1,
+  );
+
+
+  module_load_include('inc', 'commerce_product', 'includes/commerce_product.forms');
+  $controller = cod_sponsors_commerce_inline_entity_form_get_controller();
+
+  $ief_id = sha1('sponsor-term');
+  $form_state['inline_entity_form'][$ief_id]['form settings']['bundle'] = 'sponsor';
+
+  $form['commerce_sponsor_product'] = array(
+    '#type' => 'container',
+    '#op' => 'add',
+    '#ief_id' => $ief_id,
+    '#entity_type' => 'commerce_product',
+    '#prefix' => '<div class="product-form">',
+    '#suffix' => '</div>',
+    '#weight' => 2,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="related_product"]' => array('checked' => TRUE),
+      ),
+    ),
+    '#parent_language' => LANGUAGE_NONE,
+  );
+  $form['commerce_sponsor_product'] = inline_entity_form_entity_form($controller, $form['commerce_sponsor_product'], $form_state);
+  // Hide all actions, the widget form behaves like a part of the main form.
+  $form['commerce_sponsor_product']['actions']['#access'] = FALSE;
+  $form['commerce_sponsor_product']['#element_validate'] = array('cod_sponsors_commerce_inline_entity_form_entity_form_validate');
+  $form['commerce_sponsor_product']['#ief_element_submit'] = array('cod_sponsors_commerce_inline_entity_form_entity_form_submit');
+}
+ */
+
+function cod_sponsors_commerce_inline_entity_form_get_controller() {
+  $type_settings = array(
+    'allow_existing' => FALSE,
+    'match_operator' => "CONTAINS",
+    'delete_references' => 0,
+    'override_labels' => 0,
+    'label_singular' => 'product',
+    'label_plural' => 'products',
+    'autogenerate_title' => 0,
+  );
+  $ief_settings = array(
+    'entity_type' => 'commerce_product',
+    'bundles' => array('sponsor'),
+    'create_bundles' => array('sponsor'),
+    'column' => 'target_id',
+  );
+  $entity_info = entity_get_info($ief_settings['entity_type']);
+  // The current entity type is not supported, execution can't continue.
+  if (!isset($entity_info['inline entity form'])) {
+    return FALSE;
+  }
+
+  return new $entity_info['inline entity form']['controller']($ief_settings['entity_type'], $type_settings);
+}
+
+
+/**
+ * Validates an entity form.
+ *
+ * @param $entity_form
+ *  The form of the entity being managed inline.
+ * @param $form_state
+ *   The form state of the parent form.
+ */
+function cod_sponsors_commerce_inline_entity_form_entity_form_validate(&$entity_form, &$form_state) {
+  $ief_id = $entity_form['#ief_id'];
+  // Instantiate the controller and validate the form.
+  $controller = cod_sponsors_commerce_inline_entity_form_get_controller();
+  $controller->entityFormValidate($entity_form, $form_state);
+
+  // Unset untriggered conditional fields errors
+  $errors = form_get_errors();
+  if ($errors && !empty($form_state['conditional_fields_untriggered_dependents'])) {
+    foreach ($form_state['conditional_fields_untriggered_dependents'] as $untriggered_dependents ) {
+      if (!empty($untriggered_dependents['errors'])) {
+        foreach (array_keys($untriggered_dependents['errors']) as $key) {
+          unset($errors[$key]);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Submits an entity form.
+ *
+ * Note that at this point the entity is not yet saved, since the user might
+ * still decide to cancel the parent form.
+ *
+ * @param $entity_form
+ *  The form of the entity being managed inline.
+ * @param $form_state
+ *   The form state of the parent form.
+ */
+function cod_sponsors_commerce_inline_entity_form_entity_form_submit($entity_form, &$form_state) {
+  $ief_id = $entity_form['#ief_id'];
+  // Instantiate the controller and validate the form.
+  $controller = cod_sponsors_commerce_inline_entity_form_get_controller();
+  $controller->entityFormSubmit($entity_form, $form_state);
+  inline_entity_form_cleanup_entity_form_state($entity_form, $form_state);
+
+  if ($entity_form['#op'] == 'add') {
+    // Determine the correct weight of the new element.
+    $weight = 0;
+    if (!empty($form_state['inline_entity_form'][$ief_id]['entities'])) {
+      $weight = max(array_keys($form_state['inline_entity_form'][$ief_id]['entities'])) + 1;
+    }
+    // Add the entity to form state, mark it for saving, and close the form.
+    $form_state['inline_entity_form'][$ief_id]['entities'][] = array(
+      'entity' => $entity_form['#entity'],
+      'weight' => $weight,
+      'form' => NULL,
+      'needs_save' => TRUE,
+    );
+  }
+  else {
+    $delta = $entity_form['#ief_row_delta'];
+    $form_state['inline_entity_form'][$ief_id]['entities'][$delta]['entity'] = $entity_form['#entity'];
+    $form_state['inline_entity_form'][$ief_id]['entities'][$delta]['needs_save'] = TRUE;
+  }
+}
+
+/*
+ * Check to make sure whomever is adding a node to the cart is the owner of the node.
+ */
+function cod_sponsors_commerce_product_access($product, $node) {
+  global $user;
+  if (!entity_access('view', 'commerce_product', $product)) {
+    return FALSE;
+  }
+  if ($node->uid == $user->uid) {
+    return TRUE;
+  }
+  // TODO: This is pseudo code.
+  if (!empty($node->field_sponsor_related_attendees) && in_array($node->field_sponsor_related_attendees[LANGUAGE_NONE], $user->uid)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+/**
+ * Custom function to add product(s) to a cart by product id.
+ *
+ * The hook adds a path with two wildcards (which become variables later
+ * in the function). The first spot is the for the product id, and the
+ * second is the quantity. For example, the url
+ * “mysite.com/product/add/5555/2” will add the 2 of the product with id
+ * 5555 to the cart. When the user visits this path, the product id and
+ * quantity are sent to the MYMODULE_product_add function… which we need
+ * to add now.
+ */
+function cod_sponsors_commerce_product_add($product, $node) {
+  // Do both the products and nodes have a sponsorship level tid reference?
+  // Do both entities have the same sponsorship level tid reference?
+  if (isset($node->field_sponsor_sponsorship_level[LANGUAGE_NONE][0]['tid']) &&
+      isset($product->field_sponsor_sponsorship_level[LANGUAGE_NONE][0]['tid']) &&
+    $node->field_sponsor_sponsorship_level[LANGUAGE_NONE][0]['tid'] == $product->field_sponsor_sponsorship_level[LANGUAGE_NONE][0]['tid']) {
+    global $user;
+    $uid = $user->uid;
+    $data['context']['display_path'] = 'node/' . $node->nid;
+    $line_item = commerce_product_line_item_new($product, 1, 0, $data, 'sponsorship');
+    $line_item->field_sponsorship_node[LANGUAGE_NONE][0]['target_id'] = $node->nid;
+    $line_item = commerce_cart_product_add($uid, $line_item, FALSE);
+    drupal_goto('checkout');
+  }
+}

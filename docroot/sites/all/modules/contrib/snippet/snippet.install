@@ -1,0 +1,217 @@
+<?php
+
+/**
+ * @file
+ * Snippets Schema
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function snippet_schema() {
+  $schema['snippet'] = array(
+    'description' => 'Text-container exportable definitions.',
+    'export' => array(
+      'key' => 'name',
+      // Exports will be defined as $snippet.
+      'identifier' => 'snippet',
+      // Function hook name.
+      'default hook' => 'default_snippet',
+      'api' => array(
+        'owner' => 'snippet',
+        // Base name for api include files.
+        'api' => 'default_snippet',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+
+    'fields' => array(
+      'sid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
+        // Do not export database-only keys.
+        'no export' => TRUE,
+      ),
+      'admin_title' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'description' => 'Unique ID for text-container exportible. Used to identify them programmatically.',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'description' => 'Unique ID for text-container exportible. Used to identify them programmatically.',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'description' => 'Title for snippet.',
+      ),
+    ),
+    'primary key' => array('sid'),
+    'foreign keys' => array(
+      'snippet_revision' => array(
+        'table' => 'snippet_revision',
+        'columns' => array('rid' => 'rid'),
+      ),
+    ),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  $schema['snippet_revision'] = array(
+    'description' => 'Stores information about each snippet version.',
+
+    'fields' => array(
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'description' => 'Relationship key.',
+      ),
+      'rid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary ID for this snippet version.',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'description' => 'Title for snippet.',
+      ),
+      'content' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Exportable configuration data.',
+      ),
+      'content_format' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'timestamp' => array(
+        'description' => 'A Unix timestamp indicating when this version was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'is_current' => array(
+        'description' => 'Boolean indicating whether the node is published (visible to non-administrators).',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('rid'),
+    'foreign keys' => array(
+      'versioned_snippet' => array(
+        'table' => 'snippet',
+        'columns' => array('name' => 'name'),
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function snippet_uninstall() {
+  drupal_uninstall_schema('snippet');
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function snippet_update_7001(&$sandbox) {
+  $content_format = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'not null' => FALSE,
+  );
+  db_add_field('snippet_revision', 'content_format', $content_format);
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Adds the machine_name as name in revision table to hold the revisions.
+ */
+function snippet_update_7002(&$sandbox) {
+  $snippets_machine_name = array(
+    'type' => 'varchar',
+    'length' => '255',
+  );
+  // db_add_field('snippet_revision', 'name', $snippets_machine_name);
+  db_drop_field('snippet_revision', 'sid');
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Add name column to revision table.
+ */
+function snippet_update_7003(&$sandbox) {
+  $content_format = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'not null' => FALSE,
+  );
+  db_add_field('snippet_revision', 'name', $content_format);
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Add name column to revision table and Assign permissions to roles.
+ */
+function snippet_update_7004(&$sandbox) {
+  // Add field to revision table to have a revision on Title field.
+  $content_format = array(
+    'type' => 'varchar',
+    'length' => '255',
+    'not null' => FALSE,
+  );
+  db_add_field('snippet_revision', 'title', $content_format);
+
+  // Update if any snippet has a reviosion.
+  ctools_include('export');
+  $options = ctools_export_crud_load_all('snippet');
+
+  foreach ($options as $key => $value) {
+    $num_updated = db_update('snippet_revision')
+      ->fields(array(
+        'title' => $value->title,
+      ))
+      ->condition('name', $key)
+      ->condition('is_current', 1)
+      ->execute();
+  }
+
+  // Assign the user permissions.
+  $permissions = user_role_permissions(user_roles());
+  foreach ($permissions as $rid => $permission) {
+    $user = user_role_load($rid);
+    $permission = array_keys($permission);
+
+    $check_count = 0;
+    if (in_array('access snippet list', $permission)) {
+      $check_count++;
+      user_role_revoke_permissions($rid, array('access snippet list'));
+    }
+
+    if (in_array('edit snippet content', $permission)) {
+      $check_count++;
+      user_role_revoke_permissions($rid, array('edit snippet content'));
+    }
+
+    if ($check_count) {
+      user_role_grant_permissions($rid, array('manage snippet'));
+    }
+  }
+}

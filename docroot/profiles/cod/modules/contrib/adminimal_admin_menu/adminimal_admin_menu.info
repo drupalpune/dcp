@@ -1,0 +1,13 @@
+name = Administration menu Adminimal Theme
+description = Clean and minimal theme for the administration menu module.
+package = Administration
+core = 7.x
+dependencies[] = admin_menu
+
+
+; Information added by drush on 2015-05-01
+version = "7.x-1.5+6-dev"
+core = "7.x"
+project = "adminimal_admin_menu"
+datestamp = "1430469503"
+

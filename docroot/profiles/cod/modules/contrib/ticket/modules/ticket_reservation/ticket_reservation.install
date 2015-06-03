@@ -1,0 +1,196 @@
+<?php
+/**
+ * @file
+ * Ticket reservation install file.
+ */
+
+function ticket_reservation_enable() {
+  //Check if table exists, if not install the schema.
+  if(db_table_exists('ticket_reservation') == FALSE) {
+    drupal_install_schema('ticket_reservation');
+  }
+}
+
+/**
+ * Implements hook_schema().
+ */
+function ticket_reservation_schema() {
+  $schema = array();
+
+  $schema['ticket_reservation'] = array(
+    'description' => 'Stores ticket reservation codes.',
+    'fields' => array(
+      'trid' => array(
+        'description' => 'Ticket Registration ID.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'ticket_code' => array(
+        'description' => 'Redemeption code for unclaimed tickets.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the type was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+      'mail' => array(
+        'description' => 'E-mail address for unclaimed tickets.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('trid'),
+    'unique keys' => array(
+      'trid' => array('trid'),
+      'ticket_code' => array('ticket_code')
+    ),
+    'indexes' => array(
+      'code' => array('ticket_code'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ * TODO: Remove the special states and return tickets back to their default state
+ */
+function ticket_reservation_uninstall() {
+
+}
+
+/**
+ * Implements hook_install().
+ */
+function ticket_reservation_install() {
+  $t = get_t();
+
+  // Create default states.
+  $states = array(
+    'checkout' => array(
+      'label' => 'Checkout',
+      'description' => 'Used for commerce related tickets. When used, tickets are expired depending on settings for the ticket type.',
+      'weight' => -9,
+    ),
+    'unclaimed' => array(
+      'label' => 'Unclaimed',
+      'description' => 'Tickets that are free to be claimed by a code.',
+      'weight' => -11,
+    ),
+  );
+
+  foreach ($states as $state_name => $state) {
+    $ticket_state = entity_create('ticket_state',
+      array(
+        'name' => $state_name,
+        'label' => $state['label'],
+        'description' => $state['description'],
+        'weight' => $state['weight'],
+        'module' => 'ticket_reservation',
+        'active' => 1,
+      )
+    );
+    $ticket_state->save();
+  }
+
+  // Generate a field base we can use for ticket reservation defaults and
+  $field_base = field_info_field(TICKET_RESERVATION_TIMEOUT_FIELD);
+
+  if (!$field_base) {
+    $field_base = array(
+      'active' => 1,
+      'cardinality' => 1,
+      'deleted' => 0,
+      'entity_types' => array(),
+      'field_name' => TICKET_RESERVATION_TIMEOUT_FIELD,
+      'field_permissions' => array(
+        'type' => 0,
+      ),
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'locked' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => 12,
+      ),
+      'translatable' => 0,
+      'type' => 'text',
+      'label' => $t('Ticket Reservation Timeout'),
+    );
+
+    field_create_field($field_base);
+
+    // Add the field instance.
+    $field_instance = array(
+      'bundle' => 'ticket_type',
+      'default_value' => NULL,
+      'deleted' => 0,
+      'description' => 'Set this field to enable a timeout for tickets of this type. Use the format DD:HH:MM:SS. Smaller numbers are allowed, IE: 24 is 24 seconds, 24:00 is 24 minutes, 0 seconds, etc. However, time will be added from greatest number. IE: 1:48:90:90 would be One day + 48 hours (2 days) + 90 minutes + 90 seconds.',
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 10,
+        ),
+      ),
+      'entity_type' => 'ticket_type',
+      'field_name' => TICKET_RESERVATION_TIMEOUT_FIELD,
+      'label' => 'Reservation Timeout',
+      'required' => 0,
+      'settings' => array(
+        'text_processing' => 0,
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => 12,
+        ),
+        'type' => 'text_textfield',
+        'weight' => 10,
+      ),
+    );
+
+    $field_instance = array_merge($field_instance, $field_base);
+    // Discard fields we don't need for the field instance.
+    unset($field_instance['type']);
+    unset($field_instance['field_settings']);
+    field_create_instance($field_instance);
+  }
+}
+
+/**
+ * Add e-mail field to ticket reservations.
+ */
+function ticket_reservation_update_7001() {
+  // Add the new author_uid field with index and foreign key constraint.
+  db_add_field('ticket_reservation', 'mail',
+    array(
+      'description' => 'E-mail address for unclaimed tickets.',
+      'type' => 'varchar',
+      'length' => 64,
+      'not null' => FALSE,
+    )
+  );
+}

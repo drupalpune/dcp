@@ -1,0 +1,46 @@
+<<<<<<< HEAD
+#cod-schedul-wrapper .panel-col-first {
+    width:75%;
+}
+#cod-schedul-wrapper .panel-col-last {
+    /*background:red;*/
+    width:25%;
+=======
+#cod-schedule-wrapper .panel-col-first {
+    width: 75%;
+}
+#cod-schedule-wrapper .panel-col-last {
+    width: 25%;
+>>>>>>> refs/heads/2281453-cod-drag-n-drop
+}
+
+.sortable-sessions.ui-sortable {
+    list-style-type: none;
+    padding: 5px;
+    margin: 0px;
+<<<<<<< HEAD
+    border: 1px solid #ccccee;
+=======
+    border: 1px solid #ccc;
+>>>>>>> refs/heads/2281453-cod-drag-n-drop
+    line-height: 35px;
+    min-height: 35px;
+}
+
+.sortable-sessions.ui-sortable li {
+    list-style-type: none;
+}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> refs/heads/2281453-cod-drag-n-drop
+
+#quicktabs-container-cod_schedule_schedule_builder td {
+  border: solid;
+  border-width: thin;
+}
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> dc6fc3201e9df474fd4a7b70b12e1ab96f6a1d24
+>>>>>>> refs/heads/2281453-cod-drag-n-drop

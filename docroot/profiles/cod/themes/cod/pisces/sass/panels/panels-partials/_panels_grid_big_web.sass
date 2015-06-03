@@ -1,0 +1,269 @@
+
+/////////////////////////////  
+// IMG WIDTH MATRIX
+
+// QUARTER
+.big-grid-3 .width-100,
+.big-grid-6 .width-50,
+.big-grid-12 .width-25
+  .img-sm
+    +img-breakpoint($img-sm, $grid-3, $width-100) 
+      @include img-grid-float
+  .img-md
+    +img-breakpoint($img-md, $grid-3, $width-100) 
+      @include img-grid-float
+  .img-lg
+    +img-breakpoint($img-lg, $grid-3, $width-100) 
+      @include img-grid-float
+
+
+// THIRD
+.big-grid-4 .width-100,
+.big-grid-8 .width-50,
+.big-grid-12 .width-33
+  .img-md
+    +img-breakpoint($img-md, $grid-4, $width-100) 
+      @include img-grid-float
+  .img-lg
+    +img-breakpoint($img-lg, $grid-4, $width-100) 
+      @include img-grid-float
+
+.big-grid-6 .width-75
+  .img-md
+    +img-breakpoint($img-md, $grid-6, $width-75) 
+      @include img-grid-float
+  .img-lg
+    +img-breakpoint($img-lg, $grid-6, $width-75) 
+      @include img-grid-float
+
+// HALF
+.big-grid-6 .width-100,
+.big-grid-12 .width-50
+  .img-md
+    +img-breakpoint($img-md, $grid-6, $width-100) 
+      @include img-grid-float
+  .img-lg
+    +img-breakpoint($img-lg, $grid-6, $width-100) 
+      @include img-grid-float
+
+.big-grid-8 
+  .width-75
+    .img-md
+      +img-breakpoint($img-md, $grid-8, $width-75) 
+        @include img-grid-float
+    .img-lg
+      +img-breakpoint($img-lg, $grid-8, $width-75) 
+        @include img-grid-float
+// TWO THIRDS        
+.big-grid-8 .width-100,
+.big-grid-12 .width-66
+  .img-lg
+    +img-breakpoint($img-lg, $grid-8, $width-100) 
+      @include img-grid-float
+
+.big-grid-12 
+  .width-100
+    .img-xxl
+      +img-breakpoint($img-xxl, $grid-12, $width-100) 
+        @include img-grid-float
+
+
+/////////////////////////////  
+// Nothing happens at less than 800px on big web,
+// so we group these styles together for a smaller file size.
+
+.big-grid-4 .width-100 .img-xs, 
+.big-grid-4 .width-100 .img-sm,
+.big-grid-8 .width-50 .img-xs,
+.big-grid-8 .width-50 .img-sm,
+.big-grid-12 .width-33 .img-xs,
+.big-grid-12 .width-33 .img-sm,
+.big-grid-6 .width-75 .img-xs, 
+.big-grid-6 .width-75 .img-sm,
+.big-grid-6 .width-100 .img-xs, 
+.big-grid-6 .width-100 .img-sm,
+.big-grid-12 .width-50 .img-xs,
+.big-grid-12 .width-50 .img-sm,
+.big-grid-8 .width-75 .img-xs, 
+.big-grid-8 .width-75 .img-sm,
+.big-grid-8 .width-100 .img-xs, 
+.big-grid-8 .width-100 .img-sm,
+.big-grid-8 .width-100 .img-md,
+.big-grid-12 .width-66 .img-xs,
+.big-grid-12 .width-66 .img-sm,
+.big-grid-12 .width-66 .img-md,
+.big-grid-9 .width-100 .img-xs, 
+.big-grid-9 .width-100 .img-sm,
+.big-grid-9 .width-100 .img-md,
+.big-grid-9 .width-100 .img-lg,
+.big-grid-12 .width-75 .img-xs,
+.big-grid-12 .width-75 .img-sm,
+.big-grid-12 .width-75 .img-md,
+.big-grid-12 .width-75 .img-lg,
+.big-grid-12 .width-100 .img-xs,
+.big-grid-12 .width-100 .img-sm,
+.big-grid-12 .width-100 .img-md,
+.big-grid-12 .width-100 .img-lg,
+.big-grid-12 .width-100 .img-xl
+  @include img-grid-float
+
+
+/////////////////////////////  
+// ORIGINAL FULL IMG WIDTH MATRIX
+//.big-grid-9 .width-33
+//  .img-xs
+//    +img-breakpoint($img-xs, $grid-9, $width-33) 
+//      @include img-grid-float
+//  .img-sm
+//    +img-breakpoint($img-sm, $grid-9, $width-33) 
+//      @include img-grid-float
+//  .img-md
+//    +img-breakpoint($img-md, $grid-9, $width-33) 
+//      @include img-grid-float
+//  .img-lg
+//    +img-breakpoint($img-lg, $grid-9, $width-33) 
+//      @include img-grid-float
+//
+//// QUARTER
+//.big-grid-3 .width-100,
+//.big-grid-6 .width-50,
+//.big-grid-12 .width-25
+//  .img-xs
+//    +img-breakpoint($img-xs, $grid-3, $width-100) 
+//      @include img-grid-float
+//  .img-sm
+//    +img-breakpoint($img-sm, $grid-3, $width-100) 
+//      @include img-grid-float
+//  .img-md
+//    +img-breakpoint($img-md, $grid-3, $width-100) 
+//      @include img-grid-float
+//  .img-lg
+//    +img-breakpoint($img-lg, $grid-3, $width-100) 
+//      @include img-grid-float
+//
+//.big-grid-6 .width-75
+//  .img-xs
+//    +img-breakpoint($img-xs, $grid-6, $width-75) 
+//      @include img-grid-float
+//  .img-sm
+//    +img-breakpoint($img-sm, $grid-6, $width-75) 
+//      @include img-grid-float
+//  .img-md
+//    +img-breakpoint($img-md, $grid-6, $width-75) 
+//      @include img-grid-float
+//  .img-lg
+//    +img-breakpoint($img-lg, $grid-6, $width-75) 
+//      @include img-grid-float
+//
+//// THIRD
+//.big-grid-4 .width-100,
+//.big-grid-8 .width-50,
+//.big-grid-12 .width-33
+//  .img-xs
+//    +img-breakpoint($img-xs, $grid-4, $width-100) 
+//      @include img-grid-float
+//  .img-sm
+//    +img-breakpoint($img-sm, $grid-4, $width-100) 
+//      @include img-grid-float
+//  .img-md
+//    +img-breakpoint($img-md, $grid-4, $width-100) 
+//      @include img-grid-float
+//  .img-lg
+//    +img-breakpoint($img-lg, $grid-4, $width-100) 
+//      @include img-grid-float
+//
+//
+//// HALF
+//.big-grid-6 .width-100,
+//.big-grid-12 .width-50
+//  .img-xs
+//    +img-breakpoint($img-xs, $grid-6, $width-100) 
+//      @include img-grid-float
+//  .img-sm
+//    +img-breakpoint($img-sm, $grid-6, $width-100) 
+//      @include img-grid-float
+//  .img-md
+//    +img-breakpoint($img-md, $grid-6, $width-100) 
+//      @include img-grid-float
+//  .img-lg
+//    +img-breakpoint($img-lg, $grid-6, $width-100) 
+//      @include img-grid-float
+//
+//.big-grid-8 
+//  // .width-50 see THIRD
+//  // .width-66 OMITTED because two thirds of two thirds is 43%
+//  .width-75
+//    .img-xs
+//      +img-breakpoint($img-xs, $grid-8, $width-75) 
+//      @include img-grid-float  
+//    .img-sm
+//      +img-breakpoint($img-sm, $grid-8, $width-75) 
+//      @include img-grid-float
+//    .img-md
+//      +img-breakpoint($img-md, $grid-8, $width-75) 
+//      @include img-grid-float
+//    .img-lg
+//      +img-breakpoint($img-lg, $grid-8, $width-75) 
+//      @include img-grid-float
+//
+//
+//// TWO THIRDS        
+//.big-grid-8 .width-100,
+//.big-grid-12 .width-66
+//  .img-xs
+//    +img-breakpoint($img-xs, $grid-8, $width-100) 
+//      @include img-grid-float
+//  .img-sm
+//    +img-breakpoint($img-sm, $grid-8, $width-100) 
+//      @include img-grid-float
+//  .img-md
+//    +img-breakpoint($img-md, $grid-8, $width-100) 
+//      @include img-grid-float
+//  .img-lg
+//    +img-breakpoint($img-lg, $grid-8, $width-100) 
+//      @include img-grid-float
+//
+//.big-grid-9 
+//  // .width-50 OMITTED, because half of three-quarters is 37.5%
+//  // .width-75 OMITTED, because three-quarters of three-quarters is 56%
+//
+////THREE QUARTERS
+//.big-grid-9 .width-100,
+//.big-grid-12 .width-75
+//  .img-xs
+//    +img-breakpoint($img-xs, $grid-9, $width-100) 
+//      @include img-grid-float
+//  .img-sm
+//    +img-breakpoint($img-sm, $grid-9, $width-100) 
+//      @include img-grid-float
+//  .img-md
+//    +img-breakpoint($img-md, $grid-9, $width-100) 
+//      @include img-grid-float
+//  .img-lg
+//    +img-breakpoint($img-lg, $grid-9, $width-100) 
+//      @include img-grid-float
+//
+//
+//.big-grid-12 
+//  // .width-33 see THIRD
+//  // .width-50 see HALF
+//  // .width-75 see THREE QUARTERS
+//  .width-100
+//    .img-xs
+//      +img-breakpoint($img-xs, $grid-12, $width-100) 
+//        @include img-grid-float
+//    .img-sm
+//      +img-breakpoint($img-sm, $grid-12, $width-100)
+//        @include img-grid-float
+//    .img-md
+//      +img-breakpoint($img-md, $grid-12, $width-100)
+//        @include img-grid-float
+//    .img-lg
+//      +img-breakpoint($img-lg, $grid-12, $width-100)
+//        @include img-grid-float
+//    .img-xl
+//      +img-breakpoint($img-xl, $grid-12, $width-100)
+//        @include img-grid-float
+//    .img-xxl
+//      +img-breakpoint($img-xxl, $grid-12, $width-100)
+//        @include img-grid-float//

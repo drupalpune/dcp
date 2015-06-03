@@ -1,0 +1,24 @@
+name = Fisherman
+description = A simple one-column, tableless, minimalist administration theme.
+base theme = adminimal
+core = 7.x
+stylesheets[screen][] = css/fisherman.no-query.css
+stylesheets[screen][] = css/fisherman.normalize.css
+stylesheets[screen][] = css/fisherman.styles.css
+settings[shortcut_module_link] = 1
+settings[display_icons_config] = 1
+regions[content_before] = Before Content
+regions[content] = Content
+regions[content_after] = After Content
+regions[help] = Help
+regions[page_top] = Page top
+regions[page_bottom] = Page bottom
+regions[sidebar_first] = First sidebar
+regions_hidden[] = sidebar_first
+
+; Information added by Drupal.org packaging script on 2015-05-01
+version = "7.x-1.0-beta9"
+core = "7.x"
+project = "cod"
+datestamp = "1430469482"
+

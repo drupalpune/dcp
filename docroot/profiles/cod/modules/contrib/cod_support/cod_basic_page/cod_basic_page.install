@@ -1,0 +1,17 @@
+<?php
+/**
+ * @file
+ * Cod basic page install file.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function cod_basic_page_install() {
+  // Revert some features that may have existed in other modules before we
+  // enabled Cod basic pages.
+  $revert = array(
+    'cod_basic_page' => array('og_features_permission', 'variable', 'field_instance'),
+  );
+  features_revert($revert);
+}

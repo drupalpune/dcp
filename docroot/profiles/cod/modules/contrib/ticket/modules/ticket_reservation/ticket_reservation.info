@@ -1,0 +1,27 @@
+name = Ticket Reservation
+description = Provides a layer between registering for a ticket and confirming a ticket, including registration timeouts.
+package = Ticket
+core = 7.x
+
+dependencies[] = ticket
+dependencies[] = ticket_state
+dependencies[] = entityreference
+dependencies[] = ctools
+dependencies[] = rules
+
+; Views includes.
+files[] = views/ticket_reservation.views.inc
+files[] = views/ticket_reservation_handler_field_ticket_state.inc
+files[] = views/ticket_reservation_handler_field_user_email.inc
+files[] = views/ticket_reservation_views_handler_field_registration_link_cancel.inc
+files[] = views/ticket_reservation_views_handler_field_registration_link_redeem.inc
+files[] = views/ticket_reservation_views_handler_field_reservation_code.inc
+
+
+
+; Information added by drush on 2015-05-01
+version = "7.x-1.0-beta4"
+core = "7.x"
+project = "ticket"
+datestamp = "1430469490"
+

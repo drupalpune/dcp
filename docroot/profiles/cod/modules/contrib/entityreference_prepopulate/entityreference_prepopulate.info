@@ -1,0 +1,15 @@
+name = Entity reference prepopulate
+description = Prepopulate entity reference values from URL.
+core = 7.x
+package = Fields
+dependencies[] = entityreference
+
+files[] = entityreference_prepopulate.test
+
+
+; Information added by drush on 2015-05-01
+version = "7.x-1.5+5-dev"
+core = "7.x"
+project = "entityreference_prepopulate"
+datestamp = "1430469497"
+

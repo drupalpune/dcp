@@ -1,0 +1,50 @@
+<?php
+/**
+ * @file
+ * Install file.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function cod_paid_events_install() {
+  // Set the commerce checkout permissions. These aren't added as part of the
+  // feature because some sites may want to override them.
+  $roles = array(1, 2);
+  $permissions = array('access checkout');
+  foreach ($roles as $role) {
+    user_role_grant_permissions($role, $permissions);
+  }
+}
+
+/**
+ * Update and Migrate Paid Events checkout complete field
+ */
+function cod_paid_events_update_7001(&$sandbox) {
+
+  // Add the new ticket_type default state field and add state property to
+  // Registrations.
+  $revert = array(
+    'cod_paid_events' => array('field_base', 'field_instance', 'user_permission'),
+  );
+  features_revert($revert);
+
+  // Migrate registrations from tsid's to new state property
+  $ticket_types = db_select('ticket_type', 'ticket')->fields('ticket', array('ttid'))->execute();
+  foreach ($ticket_types AS $ticket_types_id) {
+    $checkout_complete_state = NULL;
+    $ticket_type = ticket_type_load($ticket_types_id->ttid);
+    $wrapper = entity_metadata_wrapper('ticket_type', $ticket_type);
+    if (isset($wrapper->field_complete_state)) {
+      if ($checkout_complete_state = $wrapper->field_complete_state->value()) {
+        $ticket_type->field_checkout_complete_state[LANGUAGE_NONE][0]['value'] = $checkout_complete_state->name;
+        $ticket_type->save();
+      }
+      $instance_info = field_info_instance('ticket_type', 'field_complete_state', $ticket_type->bundle);
+       // Write the changed definition back.
+      $instance_info['label'] = 'Checkout complete state (Deprecated)';
+      field_update_instance($instance_info);
+    }
+  }
+  drupal_set_message("Ticket Checkout complete default state successfully updated, after verifying the ticket state, you can safely delete the 'field_complete_state' field from ticket types");
+}

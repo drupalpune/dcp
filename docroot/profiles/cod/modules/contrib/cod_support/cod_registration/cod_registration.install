@@ -1,0 +1,11 @@
+<?php
+
+/**
+ * Enable panel pages when cod_registration is first installed.
+ */
+function cod_registration_install() {
+  // Enabled the associated registration pages
+  $module_list = array('cod_registration_pages');
+  module_enable($module_list);
+  return array();
+}

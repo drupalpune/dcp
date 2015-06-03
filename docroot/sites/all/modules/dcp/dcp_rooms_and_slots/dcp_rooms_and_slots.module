@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the DCP Rooms and Slots feature.
+ */
+
+include_once 'dcp_rooms_and_slots.features.inc';

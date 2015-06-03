@@ -1,0 +1,26 @@
+name = Ticket Registration State
+description = Provides functionality to track registration states.
+package = Ticket
+core = 7.x
+
+dependencies[] = entityreference
+dependencies[] = ticket
+dependencies[] = ctools
+
+; Entity includes.
+files[] = includes/ticket_state.entity.inc
+files[] = includes/ticket_state.ui_controller.inc
+files[] = includes/ticket_state.controller.inc
+files[] = includes/ticket_state.admin.inc
+
+; Views includes.
+files[] = views/ticket_state.views.inc
+files[] = views/ticket_state_handler_field_ticket_state.inc
+files[] = views/ticket_state_handler_filter_ticket_state.inc
+
+; Information added by drush on 2015-05-01
+version = "7.x-1.0-beta4"
+core = "7.x"
+project = "ticket"
+datestamp = "1430469490"
+

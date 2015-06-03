@@ -1,0 +1,30 @@
+/* --- twitter + fb block --- */
+
+.social-block {
+  background: url(../images/hornok.png) no-repeat;
+  background-size: 100% 100%;
+  padding: 80px 0;
+  float: right !important;
+  @media #{$mobile}{
+    width: 100% !important;
+  }
+  @media #{$tab}{
+    width: 50% !important;
+  }
+  @media #{$desktop}{
+    width: 35% !important;
+  }
+  .inside {
+    margin: 0 !important;
+  }
+  iframe {
+    width: 100% !important;
+    padding: 5px;
+    background: white;
+  }
+  h2 {
+    padding: 10px;
+    text-transform: uppercase;
+    color: white;
+  }
+}

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the COD Speaker Pages feature.
+ */
+
+include_once 'cod_speaker_pages.features.inc';

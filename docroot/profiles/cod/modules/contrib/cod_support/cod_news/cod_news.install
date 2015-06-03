@@ -1,0 +1,24 @@
+<?php
+/**
+ * Revert news features to include OG in the content type and views
+ */
+function cod_news_update_7001() {
+  $revert = array(
+    'cod_news' => array('field_instance', 'variable', 'views_view'),
+  );
+  features_revert($revert);
+
+  return array();
+}
+
+/**
+ * Revert news features to set the correct pathauto variable and event label.
+ */
+function cod_news_update_7003() {
+  $revert = array(
+    'cod_news' => array('variable', 'field_instance'),
+  );
+  features_revert($revert);
+
+  return array();
+}

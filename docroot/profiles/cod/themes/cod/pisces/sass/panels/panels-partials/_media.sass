@@ -1,0 +1,60 @@
+
+$text-wrap-min: 120px
+$img-margin: 15px
+$scrollbar: 0px
+
+$img-sm: 125px
+$img-md: 320px
+$img-lg: 485px
+$img-xl: 650px
+
+
+
+//==========================================      
+
+
+@mixin img-breakpoint ($grid-width-inverse: $grid-100, $pane-width-inverse: $width-100, $img-width: $img-sm, $min: $min-breakpoint, $max: $max-breakpoint)
+  
+  $min-width-calc: (($img-width + $text-wrap-min) * $grid-width-inverse * $pane-width-inverse + $img-margin + $scrollbar + ($pane-padding * 2))
+
+  @if $min-width-calc >= $min and $min-width-calc <= $max 
+    @media screen and (min-width: $min-width-calc) and (max-width: $max)
+      @include img-grid-float
+  @else
+    @media screen and (min-width: $min) and (max-width: $max)
+      @include img-grid-float
+
+@mixin img-grid-float
+  img
+    float: left
+    margin-right: $img-margin
+    margin-bottom: 10px
+
+
+@mixin img-float($img-margin: 15px)
+  float: left
+  margin-right: $img-margin
+
+
+// Panel Style to override breakpoints, float image always 
+.l-page .img-float img
+  +img-float
+
+// SET WIDTH ON IMAGES in Panel Panes
+.pane-content.img-sm img,
+.img-sm img
+  max-width: 100%
+  width: $img-sm
+.pane-content.img-md img,
+.img-md img
+  max-width: 100%
+  width: $img-md
+.pane-content.img-lg img,
+.img-lg img
+  max-width: 100%
+  width: $img-lg
+.pane-content.img-xl img,
+.img-xl img
+  max-width: 100%
+  width: $img-xl
+

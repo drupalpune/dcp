@@ -1,0 +1,145 @@
+/* -------------- buttons -------------- */
+
+
+
+/* -------------- links -------------- */
+
+/* -------------- images -------------- */
+
+/* -------------- paragraphs -------------- */
+
+/* -------------- tabs -------------- */
+
+.tabs {
+  margin-top: 20px;
+}
+
+ul.primary {
+  padding: 0 0 1em 0;
+  white-space: nowrap;
+  list-style: none;
+  margin: 5px 0;
+  height: auto;
+  line-height: normal;
+  border-bottom: 1px solid transparent;
+
+  li a {
+    background-color: transparent; //#0a3a84;
+    border-color: #0a3a84;
+    border: none;
+    color: #0a3a84;
+    padding: 1em 1em 1em 1em;
+    border-bottom: 5px solid #bbb;
+    text-transform: uppercase;
+  }
+
+  li a:hover,
+  li.active a {
+    background-color: #0a3a84;
+    color: #fff;
+    border: none;
+    border-bottom: 5px solid #0a3a84;
+  }
+}
+
+.tabs ~ .content-area {
+  overflow: hidden;
+  padding: 10px;
+  border: 1px solid #bbb;
+}
+
+
+
+/* -------------- pager -------------- */
+
+
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-border: 1px solid $light-grey-text;
+  -moz-border: 1px solid $light-grey-text;
+  border: 1px solid $light-grey-text;
+}
+
+.form-item,
+.form-type-textfield,
+.form-type-email {
+  font-family: 'proximanova';
+  label {
+    font-family: 'proximanova-bold';
+    color:  $dark-grey;
+    font-size: 16px;
+    font-weight: 400;
+    text-align: left;
+    padding-bottom: 10px;
+  }
+  input {
+    width: 100%;
+    padding: 8px 10px;
+    @include rounded(3px);
+  }
+  .description {
+    display: none;
+  }
+}
+
+input[type="submit"],
+.button {
+  background-color:  $green;
+  display: block;
+  width: 300px;
+  padding: 10px 5px;
+  margin: 20px auto;
+  font-family: 'proximanova-bold';
+  font-size: 18px;
+  color:  $light-grey-text;
+  @include rounded(30px);
+}
+
+// .path-user {
+  .user-pass,
+  .user-register-form,
+  .user-login-form {
+    padding: 40px 80px;
+    @media #{$mobile}{
+      width: 98%;
+      margin: 0 auto;
+    }
+    @media #{$tab}{
+      width: 85%;
+    }
+    @media #{$desktop}{
+      width: 75%;
+    }
+  }
+// }
+
+.form-item input.form-checkbox,
+.form-item input.form-radio {
+  -webkit-appearance: radio;
+  -moz-appearance: radio;
+  appearance: radio;
+  -webkit-border: none;
+  -moz-border: none;
+  border: none;
+  width: auto;
+}
+
+.front h1#page-title {
+  display: none;
+}
+
+.front .tabs {
+  display: none;
+}
+
+h1#page-title {
+  text-transform: uppercase;
+  font-size: 40px;
+  text-align: center;
+  font-family: 'proximanova-bold';
+}
+
+
+

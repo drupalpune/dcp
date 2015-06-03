@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * Update pages to use permissions instead of roles for access
+ */
+function cod_schedule_pages_update_7001() {
+  $revert = array(
+    'cod_schedule_pages' => array('page_manager_pages'),
+  );
+  features_revert($revert);
+
+  return array();
+}

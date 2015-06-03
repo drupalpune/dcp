@@ -1,0 +1,13 @@
+{
+  "name": "pie",
+  "homepage": "https://github.com/fubhy/pie",
+  "_release": "e68a7bd09f",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "e68a7bd09ff1302754433e1493cbf9cee8c9aae1"
+  },
+  "_source": "git://github.com/fubhy/pie.git",
+  "_target": "*",
+  "_originalSource": "fubhy/pie"
+}

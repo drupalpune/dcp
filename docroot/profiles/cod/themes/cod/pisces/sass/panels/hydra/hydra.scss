@@ -1,0 +1,114 @@
+// Import external libraries.
+@import "glob";
+
+// import panels partials:
+@import "panels/panels-partials/panels_glob";
+
+// Panel layout variables:
+$grids: 12;
+$gutters: 10px;
+$gutter-styles: "split" "fixed";
+$output: "isolation";
+$ad-width: 0px;
+$pane-padding: 10px;
+$text-wrap-min: 130px;
+$img-margin: 15px;
+$scrollbar: 20px;
+
+@import "panels/panels-partials/panels_grid";
+
+// must import AFTER variables
+
+.panel-layout {
+  margin: 0;
+  max-width: $max-limit;
+  .container {
+    float: left;
+    clear: left;
+    width: 100%;
+  }
+  .panel-pane {
+    position: relative;
+    @include append-widths;
+    .pane-content {
+      padding: 0 $pane-padding;
+      position: relative;
+      @include clearfix;
+    }
+  }
+  // Mobile panel region width overrides
+  .container {
+    position: relative;
+    @include breakpoint($tablet-landscape-max) {
+      .panel-pane.width-25 {
+        width: 50%;
+      }
+    }
+
+    @include breakpoint($tablet-portrait-max) {
+      .panel-pane.width-33 {
+        width: 100%;
+      }
+    }
+
+    @include breakpoint($smartphone-landscape-max) {
+      .panel-pane.width-25 {
+        width: 100%;
+      }
+    }
+  }
+  .preface, .footer {
+    @include img-grid-12;
+  }
+  .left-content {
+    @include grid-span(12, 1);
+    @include breakpoint($tablet-portrait) {
+      @include grid-span(8, 1);
+    }
+
+    @include breakpoint($desktop) {
+      @include grid-span(8, 1);
+    }
+
+    // Image Grid Styles:
+    @include img-grid-3($tablet-portrait, $desktop);
+    @include img-grid-9($desktop);
+  }
+  .top-right-content {
+    @include grid-span(12, 1);
+    @include breakpoint($tablet-portrait) {
+      @include grid-span(4, 9);
+    }
+
+    @include breakpoint($desktop) {
+      @include grid-span(4, 9);
+    }
+
+    // Image Grid Styles:
+    @include img-grid-9($tablet-portrait, $desktop);
+    @include img-grid-3;
+  }
+  .bottom-right-content {
+    @include grid-span(12, 1);
+    clear: right;
+    @include breakpoint($tablet-portrait) {
+      @include grid-span(4, 9);
+      clear: right;
+    }
+
+    @include breakpoint($desktop) {
+      @include grid-span(4, 9);
+      clear: right;
+    }
+
+    // Image Grid Styles:
+    @include img-grid-9($tablet-portrait, $desktop);
+    @include img-grid-3;
+  }
+  .left-content,
+  .top-right-content,
+  .bottom-right-content {
+    // Shared Image Grid Styles:
+    @include img-grid-6(0, $tablet-portrait);
+  }
+}

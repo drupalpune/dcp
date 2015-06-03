@@ -1,0 +1,19 @@
+#cod-schedule-wrapper .panel-col-first {
+    width: 75%;
+}
+#cod-schedule-wrapper .panel-col-last {
+    width: 25%;
+}
+
+.sortable-sessions.ui-sortable {
+    list-style-type: none;
+    padding: 5px;
+    margin: 0px;
+    border: 1px solid #ccc;
+    line-height: 35px;
+    min-height: 35px;
+}
+
+.sortable-sessions.ui-sortable li {
+    list-style-type: none;
+}

@@ -1,0 +1,30 @@
+name = COD Sponsors Exhibits
+description = Provide Exhibitor information for Sponsors
+core = 7.x
+package = COD
+project = cod_sponsors_exhibits
+install_option = cod
+dependencies[] = cod_sponsors
+dependencies[] = features
+dependencies[] = field_group
+dependencies[] = list
+dependencies[] = options
+dependencies[] = text
+features[ctools][] = field_group:field_group:1
+features[features_api][] = api:2
+features[field_base][] = field_sponsor_booth_number
+features[field_base][] = field_sponsor_booth_request
+features[field_group][] = group_sponsor_exhibit|node|sponsor|form
+features[field_instance][] = node-sponsor-field_sponsor_booth_number
+features[field_instance][] = node-sponsor-field_sponsor_booth_request
+features_exclude[dependencies][ctools] = ctools
+
+; Views includes.
+files[] = views/cod_sponsors_exhibits.views.inc
+
+; Information added by Drupal.org packaging script on 2015-05-01
+version = "7.x-1.0-beta9"
+core = "7.x"
+project = "cod_support"
+datestamp = "1430468586"
+

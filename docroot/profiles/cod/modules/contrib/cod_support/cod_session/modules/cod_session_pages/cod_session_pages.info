@@ -1,0 +1,30 @@
+name = COD Session Pages
+description = Manage Moderated Sessions, Session Items, and Voting
+core = 7.x
+package = COD Pages
+install_option = cod
+dependencies[] = cod_events_pages
+dependencies[] = cod_session
+dependencies[] = cod_session_management_pages
+dependencies[] = ctools
+dependencies[] = page_manager
+dependencies[] = panelizer
+dependencies[] = panels
+dependencies[] = panels_ipe
+dependencies[] = strongarm
+features[ctools][] = page_manager:pages_default:1
+features[ctools][] = panelizer:panelizer:1
+features[ctools][] = strongarm:strongarm:1
+features[features_api][] = api:2
+features[page_manager_pages][] = sessions
+features[panelizer_defaults][] = node:schedule_item:default:default
+features[panelizer_defaults][] = node:session:default:default
+features[variable][] = panelizer_defaults_node_schedule_item
+features[variable][] = panelizer_defaults_node_session
+
+; Information added by Drupal.org packaging script on 2015-05-01
+version = "7.x-1.0-beta9"
+core = "7.x"
+project = "cod_support"
+datestamp = "1430468586"
+

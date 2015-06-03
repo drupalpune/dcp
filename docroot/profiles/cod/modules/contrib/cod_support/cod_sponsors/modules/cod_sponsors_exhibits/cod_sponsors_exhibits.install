@@ -1,0 +1,8 @@
+<?php
+
+function cod_sponsors_exhibits_enable() {
+  $revert = array(
+    'cod_sponsors' => array('views_view'),
+  );
+  features_revert($revert);
+}

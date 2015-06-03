@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * Enable panel pages when cod_schedule is first installed.
+ */
+function cod_schedule_install() {
+  // Enabled the associated schedule pages
+  $module_list = array('cod_schedule_pages');
+  module_enable($module_list);
+  return array();
+}
+
+/**
+ * Enable the views_json module.
+ */
+function cod_schedule_update_7001() {
+  module_enable(array('views_json'));
+  return array();
+}
+
+/**
+ * Revert the feature to include hide the view when no schedule items appear,
+ * and change the entityreference views widget handler to cod_timeslots.
+ */
+function cod_schedule_update_7002() {
+
+  $revert = array(
+    'cod_schedule' => array('field_base', 'field_instance', 'views_view'),
+  );
+  features_revert($revert);
+}
+
+/**
+ * Update session timeslot permissions, remove old session_track fields from view.
+ */
+function cod_schedule_update_7003() {
+
+  $revert = array(
+    'cod_schedule' => array('user_permission', 'views_view'),
+  );
+  features_revert($revert);
+}
+
+/**
+ * Enable the COD Schedule Pages module.
+ */
+function cod_schedule_update_7004() {
+  module_enable(array('cod_schedule_pages'));
+  return array();
+}
+
+/**
+ * Update session timeslot permissions, move schedule path for view.
+ */
+function cod_schedule_update_7005() {
+
+  $revert = array(
+    'cod_schedule' => array('field_instance', 'views_view'),
+  );
+  features_revert($revert);
+}
+
+/**
+ * Update add the duplicate timeslots view.
+ */
+function cod_schedule_update_7006() {
+
+  $revert = array(
+    'cod_schedule' => array('views_view'),
+  );
+  features_revert($revert);
+}
+
+/**
+ * Revert cod_bof view feature to convert to the panel if the page is enabled.
+ */
+function cod_schedule_update_7007() {
+  if (module_exists('cod_schedule_pages')){
+    $revert = array(
+      'cod_schedule' => array('views_view'),
+      'cod_schedule_pages' => array('page_manager_pages'),
+    );
+    features_revert($revert);
+  }
+
+  return array();
+}

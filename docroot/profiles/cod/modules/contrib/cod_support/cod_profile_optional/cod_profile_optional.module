@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the COD Profile (Optional fields) feature.
+ */
+
+include_once 'cod_profile_optional.features.inc';
