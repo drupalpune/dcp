@@ -1,0 +1,73 @@
+<div class="page-wrapper {% if is_front %}front{% endif %}">
+  <div class="page">
+    <header>
+      <!-- banner -->
+      {{ page.header }}
+    </header>
+
+    {% if messages %}
+      <div id="messages"><div class="section clearfix">
+        {{ messages }}
+      </div></div> <!-- /.section, /#messages -->
+    {% endif %}
+
+    {# FEATURED #}
+    {% if page.featured %}
+      <div class="page-featured region" role="contentinfo">
+        <div class="region-inner">
+          {{ page.featured }}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="maincontent-wrapper">
+      <div class="content">
+        {# HIHGLIGHTED #}
+        {% if page.highlighted %}
+          <div class="page-highlighted region" role="contentinfo">
+            <div class="region-inner">
+              {{ page.highlighted }}
+            </div>
+          </div>
+        {% endif %}
+
+        <a id="main-content"></a>
+        {% if page.help %}
+          <div class="page-help region" role="contentinfo">
+            <div class="region-inner">
+              {{ page.help }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if title %}
+          <h1 class="title" id="page-title">
+            {{ title }}
+          </h1>
+        {% endif %}
+        {% if tabs %}
+          <div class="tabs" id="page-tabs">
+            {{ tabs }}
+          </div>
+        {% endif %}
+        <main class="page-content region {% if is_front %}dcp-homepage{% else%}not-homepage{% endif %}" role="main"><div class="center-wrapper">
+          <div class="region-inner content-left">
+            {{page.content}}
+          </div>
+          <div class="region-inner content-right">
+            {{page.sidebar}}
+          </div>
+        </div></main>
+      </div>
+    </div>
+    {# FOOTER #}
+    {% if page.footer %}
+      <footer class="page-footer region" role="contentinfo">
+        <div class="region-inner">
+          {{ page.footer }}
+        </div>
+      </footer>
+    {% endif %}
+  </div>
+</div>
+

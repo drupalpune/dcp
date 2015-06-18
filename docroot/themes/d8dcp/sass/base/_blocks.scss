@@ -1,0 +1,17 @@
+/* --- twitter + fb block --- */
+
+.not-homepage .region-sidebar {
+  background: url(../images/hornok.png) no-repeat;
+  background-size: 100% 100%;
+  padding: 110px 0;
+  iframe {
+    width: 100% !important;
+    padding: 5px;
+    background: white;
+  }
+  h2 {
+    padding: 10px;
+    text-transform: uppercase;
+    color: white;
+  }
+}

@@ -1,0 +1,22 @@
+name: d8dcp
+type: theme
+description: 'An intentionally plain theme with almost no styling to demonstrate default Drupal’s HTML and CSS. Learn how to build a custom theme from d8dcp in the <a href="http://drupal.org/theme-guide">Theming Guide</a>.'
+package: Core
+version: 8.x-1.x
+core: 8.x
+libraries:
+  - d8dcp/global-styling
+regions:
+  header: Header
+  help: Help
+  pagetop: Page Top
+  featured: Featured
+  highlighted: Highlighted
+  content: Content
+  sidebar: Sidebar
+  pagebottom: Page Bottom
+  footer: Footer
+
+stylesheets-remove:
+  - core/misc/dropbutton/dropbutton.css
+  - core/misc/dropbutton/dropbutton.theme.css

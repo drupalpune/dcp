@@ -1,0 +1,9 @@
+global-styling:
+  version: 8.x-1.x
+  css:
+    base:
+      css/style.css: {}
+  js:
+    js/base.js: {}
+  dependencies:
+    - core/jquery
