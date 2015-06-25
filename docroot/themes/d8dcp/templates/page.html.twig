@@ -22,6 +22,15 @@
 
     <div class="maincontent-wrapper">
       <div class="content">
+        {# PAGE TOP #}
+        {% if page.pagetop %}
+          <div class="page-pagetop region" role="contentinfo">
+            <div class="region-inner">
+              {{ page.pagetop }}
+            </div>
+          </div>
+        {% endif %}
+
         {# HIHGLIGHTED #}
         {% if page.highlighted %}
           <div class="page-highlighted region" role="contentinfo">
@@ -60,6 +69,16 @@
         </div></main>
       </div>
     </div>
+
+    {# PAGE BOTTOM #}
+    {% if page.pagebottom %}
+      <div class="page-pagebottom region" role="contentinfo">
+        <div class="region-inner">
+          {{ page.pagebottom }}
+        </div>
+      </div>
+    {% endif %}
+
     {# FOOTER #}
     {% if page.footer %}
       <footer class="page-footer region" role="contentinfo">

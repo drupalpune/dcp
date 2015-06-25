@@ -284,7 +284,7 @@ $config_directories = array();
  *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  * @endcode
  */
-$settings['hash_salt'] = 'DUUfBKMiBiIP2IDzriVqjx-jyTjsqB_oPaV-78SjasKQcLipZNRt1OHza-WYlz87oB3FDuejFQ';
+$settings['hash_salt'] = 'Mj6HlqWRQAaJnNIVKCor3-1maQtXZvOtTt2bz2Zh_DW5WzJi7jtux_Qi3UML35usIaTp6RoWlQ';
 
 /**
  * Access control for update.php script.
@@ -683,8 +683,8 @@ $databases['default']['default'] = array (
   'driver' => 'mysql',
 );
 $settings['install_profile'] = 'standard';
-$config_directories['active'] = 'sites/default/files/config_n_LuTXKVZdk5-U7WKg0k03m7FUMw9Fpi25CEv_UNkhN8usK93UHx6CROnyGnkMDkddcyKg_XAA/active';
-$config_directories['staging'] = 'sites/default/files/config_n_LuTXKVZdk5-U7WKg0k03m7FUMw9Fpi25CEv_UNkhN8usK93UHx6CROnyGnkMDkddcyKg_XAA/staging';
+$config_directories['active'] = 'sites/default/files/config_vfFYT702U4_DRXyT9USTqHw88619M2TNO0ugSjEUKAaAkgIUQsQtMrAhAEZXDBam9sBcMioCVw/active';
+$config_directories['staging'] = 'sites/default/files/config_vfFYT702U4_DRXyT9USTqHw88619M2TNO0ugSjEUKAaAkgIUQsQtMrAhAEZXDBam9sBcMioCVw/staging';
 
 
 // On Acquia Cloud, this include file configures Drupal to use the correct

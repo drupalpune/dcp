@@ -9,8 +9,8 @@ libraries:
 regions:
   header: Header
   help: Help
-  pagetop: Page Top
   featured: Featured
+  pagetop: Page Top
   highlighted: Highlighted
   content: Content
   sidebar: Sidebar

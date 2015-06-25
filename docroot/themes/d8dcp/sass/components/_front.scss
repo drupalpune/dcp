@@ -1,31 +1,70 @@
+.region-pagetop {
+  @include clearfix;
+}
+
+#block-importantdates,
+#block-d8dcp-announcements {
+  @media #{$mobile}{
+    width:100%;
+  }
+  @media #{$tab}{
+    width:50%
+  }
+  @media #{$desktop}{
+    width:50%;
+  }
+}
+
 #block-d8dcp-announcements {
   background: $dark-blue;
   @media #{$mobile}{
     padding: 20px 1%;
+    float: none;
   }
   @media #{$tab}{
-    padding: 40px 5%;
+    padding: 40px 3%;
+    float: left;
   }
   @media #{$desktop}{
-    padding: 60px 10%;
+    padding: 60px 5%;
   }
   h2 {
-    color:  $yellow;
-    font-size: 40px;
+    color: $yellow;
     text-transform: uppercase;
+    @media #{$mobile}{font-size: 20px;}
+    @media #{$desktop}{font-size: 40px;}
   }
   p {
-    color:  #ebebeb;
+    color: #ebebeb;
     line-height: 1.5;
   }
 
-  a.venue-details {
-    color:  #ebebeb;
-    font-size: 30px;
-    padding-top: 20px;
-    display: block;
+  a.sims {
+    color:  $yellow;
   }
 
+
+}
+
+#block-importantdates {
+  background: $dark-blue;
+  @media #{$mobile}{
+    padding: 20px 1%;
+    float: none;
+  }
+  @media #{$tab}{
+    padding: 40px 3%;
+    float: right;
+  }
+  @media #{$desktop}{
+    padding: 60px 5%;
+  }
+  h2 {
+    color: $yellow;
+    text-transform: uppercase;
+    @media #{$mobile}{font-size: 20px;}
+    @media #{$desktop}{font-size: 40px;}
+  }
   ol {
     li {
       color: $yellow;
@@ -124,25 +163,34 @@
     h2{
       font-family: 'proximanova-bold';
       color: #fb6704;
-      font-size: 25px;
       text-transform: uppercase;
       background: url(../images/heading-bg.png) no-repeat;
       background-size: 100%;
       padding: 0px 85px;
+      @media #{$mobile}{font-size: 15px;}
+      @media #{$tab}{font-size: 25px;}
     }
     p {
       color:  #285689;
-      font-size: 16px;
       line-height: 1.5;
+      @media #{$mobile}{font-size: 12px;}
+      @media #{$tab}{font-size: 16px;}
     }
     a {
       color:  #fb6704;
-      padding: 15px 30px;
-      font-size:25px;
       border: 4px solid #fb6704;
       display: inline-block;
       text-align: center;
-      margin: 10px 10px 40px 0;
+      @media #{$mobile}{
+        font-size: 15px;
+        margin: 10px 10px 40px 0;
+        padding: 10px 20px;
+      }
+      @media #{$tab}{
+        font-size: 25px;
+        margin: 10px 10px 40px 0;
+        padding: 15px 30px;
+      }
     }
     .contextual-links-wrapper {
       a {
@@ -189,4 +237,72 @@
   display: none;
 }
 
+#block-d8dcp-becomeasponsor {
+  @media #{$desktop}{
+    padding: 0 30px;
+    p {
+      padding: 20px 10px;
+    }
+  }
+}
 
+.page-pagebottom {
+  background-color: #04c5f5;
+  .region-inner {
+    background:  url(../images/silhouette.png) bottom no-repeat;
+    background-size: contain;
+    width: 100%;
+    @media #{$mobile}{
+      height: 140px;
+    }
+    @media #{$tab}{
+      height: 300px;
+    }
+    @media #{$desktop}{
+      height: 500px;
+    }
+  }
+  .region-pagebottom{
+    @media #{$mobile}{
+      padding-top: 50px;
+    }
+    @media #{$tab}{
+      padding-top: 100px;
+    }
+    @media #{$desktop}{
+      padding-top: 160px;
+    }
+  }
+  #block-becomeasponsor-2 {
+    margin: 0 auto;
+    text-align: center;
+    background: url(../images/bas-bg.png) center no-repeat;
+    background-size: contain;
+    @media #{$mobile}{
+      padding: 15px 0;
+      width: 60%;
+    }
+    @media #{$tab}{
+      padding: 35px 0;
+      width: 60%;
+    }
+    @media #{$desktop}{
+      padding: 65px 0;
+      width: 25%;
+    }
+    .sponsor-link-hp {
+      color: $yellow;
+      text-transform: uppercase;
+      font-family: 'proximanova-bold';
+      @media #{$mobile}{
+        font-size: 15px;
+      }
+      @media #{$tab}{
+        font-size: 20px;
+      }
+      @media #{$desktop}{
+        font-size: 30px;
+      }
+    }
+  }
+}

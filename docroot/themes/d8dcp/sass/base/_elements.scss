@@ -1,9 +1,27 @@
+/* -------------- titles -------------- */
+h2 {
+  margin-top: 25px;
+  font-family: 'proximanova-bold';
+  font-size: 22px;
+}
+
+
 /* -------------- buttons -------------- */
-
-
+.draggable,
+tr.drag-previous {
+  background-color: #ffd;
+}
 
 /* -------------- links -------------- */
-
+.region-content {
+  a.active, a, a:visited  {
+    color: red;
+    font-family: 'proximanova-bold';
+  }
+  strong {
+    font-family: 'proximanova-bold';
+  }
+}
 /* -------------- images -------------- */
 
 /* -------------- paragraphs -------------- */
@@ -28,7 +46,7 @@
       background-color: transparent; //#0a3a84;
       border-color: #0a3a84;
       border: none;
-      color: #0a3a84;
+      color: $white;
       padding: 1em 1em 1em 1em;
       border-bottom: 5px solid #bbb;
       text-transform: uppercase;
@@ -36,8 +54,8 @@
 
     li a:hover,
     li.active a {
-      background-color: #0a3a84;
-      color: #fff;
+      background-color:#fff ;
+      color: #0a3a84;
       border: none;
       border-bottom: 5px solid #0a3a84;
     }
@@ -57,7 +75,7 @@ ul.primary {
     background-color: transparent; //#0a3a84;
     border-color: #0a3a84;
     border: none;
-    color: #0a3a84;
+    color: $white;
     padding: 1em 1em 1em 1em;
     border-bottom: 5px solid #bbb;
     text-transform: uppercase;
@@ -65,8 +83,8 @@ ul.primary {
 
   li a:hover,
   li.active a {
-    background-color: #0a3a84;
-    color: #fff;
+    background-color: #fff;
+    color: #0a3a84;
     border: none;
     border-bottom: 5px solid #0a3a84;
   }
@@ -93,13 +111,6 @@ div[rel="schema:author"] {
 .form-radios {
   padding-left: 20px;
 }
-
-h2 {
-  margin-top: 10px;
-  font-family: 'proximanova-bold';
-  font-size: 22px;
-}
-
 
 .field-block-content--body {
   a[href="/user/login"] {
@@ -161,24 +172,6 @@ input[type="submit"],
   @include rounded(30px);
 }
 
-// .path-user {
-  .user-pass,
-  .user-register-form,
-  .user-login-form {
-    padding: 40px 80px;
-    @media #{$mobile}{
-      width: 98%;
-      margin: 0 auto;
-    }
-    @media #{$tab}{
-      width: 85%;
-    }
-    @media #{$desktop}{
-      width: 75%;
-    }
-  }
-// }
-
 .form-item input.form-checkbox,
 .form-item input.form-radio {
   -webkit-appearance: radio;
@@ -203,6 +196,7 @@ h1#page-title {
   font-size: 40px;
   text-align: center;
   font-family: 'proximanova-bold';
+  color: $white;
 }
 
 a.tabledrag-handle .handle {
@@ -254,4 +248,18 @@ a.tabledrag-handle .handle {
       font-family: 'proximanova-bold';
     }
   }
+}
+
+
+// radio item - making flex
+
+.form-radios {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.form-radios .form-item {
+  display: inline-block;
+  flex-grow: 0;
+  padding-right: 20px;
 }

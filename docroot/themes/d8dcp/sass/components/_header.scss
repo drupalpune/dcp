@@ -11,17 +11,16 @@ header {
 }
 
 .region-header {
-  text-align: center;
   margin: 0 auto;
   padding-bottom: 10px;
   @media #{$mobile}{
     width: 100%;
   }
   @media #{$tab}{
-    width: 90%;
+    width: 98%;
   }
   @media #{$desktop}{
-    width: 80%;
+    width: 92%;
   }
 }
 
@@ -45,15 +44,15 @@ header {
   }
   @media #{$tab}{
     float: right;
-    width: 35%;
+    width: 20%;
+    text-align: right;
   }
   @media #{$desktop}{
 
   }
 }
 
-#block-d8dcp-userloginmenu,
-#block-d8dcp-account-menu,
+
 #block-d8dcp-main-menu {
   ul.menu-top {
     li {
@@ -166,5 +165,53 @@ header {
 .region-featured {
   img{
     @extend %img;
+  }
+}
+
+
+#block-d8dcp-userloginmenu,
+#block-d8dcp-account-menu {
+  ul.menu-top {
+    li {
+      display: inline-block;
+      border: none;
+      float: none;
+      background-color: transparent;
+      position:relative;
+      padding-bottom: 8px;
+      @media #{$mobile}{
+        width:100%;
+      }
+      @media #{$tab}{
+        width:auto;
+      }
+      &:hover {
+        background: none;
+      }
+      &>a{
+        color: $white;
+        line-height: 1;
+        text-transform: uppercase;
+        display: inline-block;
+        @media #{$mobile}{
+          padding:5px;
+          font-size: 18px;
+          width:100%;
+          &.is-active,
+          &:hover{
+            color: white;
+          }
+        }
+        @media #{$tab}{
+          width:auto;
+          padding:5px 2px;
+          font-size: 11px;
+        }
+        @media #{$desktop}{
+          padding:20px 8px 0 8px;
+          font-size: 13px;
+        }
+      }
+    }
   }
 }

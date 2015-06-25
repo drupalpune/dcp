@@ -3,9 +3,15 @@
   .maincontent-wrapper {
     width: 100%;
     overflow: hidden;
+    background-color: #285689;
   }
 }
 
+.region-featured {
+  p {
+    line-height: 0;
+  }
+}
 
 .not-front .maincontent-wrapper {
   @media #{$mobile}{
