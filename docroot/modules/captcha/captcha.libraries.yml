@@ -1,0 +1,9 @@
+base:
+  version: 1.0
+  js:
+    captcha.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery.once
