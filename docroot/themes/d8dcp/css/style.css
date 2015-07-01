@@ -410,6 +410,10 @@ input[type="submit"],
   border-radius: 30px;
 }
 
+.edit-actions input[type="submit"] {
+  display: inline;
+}
+
 .form-item input.form-checkbox,
 .form-item input.form-radio {
   -webkit-appearance: radio;
