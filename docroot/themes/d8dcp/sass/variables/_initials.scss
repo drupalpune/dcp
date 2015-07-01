@@ -9,20 +9,7 @@ $susy: (
   gutters: .25,
   column-width: false,
   global-box-sizing: content-box,
-  last-flow: to,
-  debug: (
-    image: show,
-    color: rgba(#66f, .25),
-    output: overlay,
-    toggle: top right,
-  ),
-  use-custom: (
-    background-image: true,
-    background-options: false,
-    box-sizing: true,
-    clearfix: false,
-    rem: true,
-  )
+  last-flow: to
 );
 /* Makes border-box properties */
 @include border-box-sizing;
