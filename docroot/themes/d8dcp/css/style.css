@@ -354,6 +354,10 @@ input {
   border: 1px solid #eaeced;
 }
 
+.form-textarea {
+  width: 100%;
+}
+
 .form-textarea,
 .form-item,
 .form-type-textfield,

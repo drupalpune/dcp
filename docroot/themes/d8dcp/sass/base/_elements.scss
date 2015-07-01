@@ -138,6 +138,10 @@ input {
   border: 1px solid $light-grey-text;
 }
 
+.form-textarea {
+  width:100%;
+}
+
 .form-textarea,
 .form-item,
 .form-type-textfield,
