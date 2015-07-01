@@ -354,11 +354,13 @@ input {
   border: 1px solid #eaeced;
 }
 
+.form-textarea,
 .form-item,
 .form-type-textfield,
 .form-type-email {
   font-family: 'proximanova';
 }
+.form-textarea label,
 .form-item label,
 .form-type-textfield label,
 .form-type-email label {
@@ -368,6 +370,7 @@ input {
   text-align: left;
   padding-bottom: 10px;
 }
+.form-textarea input,
 .form-item input,
 .form-type-textfield input,
 .form-type-email input {
@@ -379,6 +382,7 @@ input {
   -webkit-border-radius: 3px;
   border-radius: 3px;
 }
+.form-textarea .description,
 .form-item .description,
 .form-type-textfield .description,
 .form-type-email .description {
