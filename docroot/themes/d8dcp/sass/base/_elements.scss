@@ -177,7 +177,7 @@ input[type="submit"],
   @include rounded(30px);
 }
 
-.edit-actions {
+#edit-actions {
   input[type="submit"] {
       display: inline;
   }
