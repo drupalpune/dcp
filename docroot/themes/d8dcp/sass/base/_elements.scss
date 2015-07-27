@@ -212,6 +212,19 @@ h1#page-title {
   width: 80%;
 }
 
+.field-node--field-status,
+.field-node--field-experience-level,
+.field-node--field-speaker-s-{
+  .field-label{
+    float:left;
+    margin-right: 20px;
+    font-family: 'proximanova-bold';
+  }
+  .field-items{
+    display: inline;
+  }
+}
+
 a.tabledrag-handle .handle {
   background: url(../../../misc/icons/787878/move.svg) no-repeat 6px 7px;
   height: 25px;
