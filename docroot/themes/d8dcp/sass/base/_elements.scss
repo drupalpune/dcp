@@ -215,13 +215,22 @@ h1#page-title {
 .field-node--field-status,
 .field-node--field-experience-level,
 .field-node--field-speaker-s-{
+  @include clearfix;
   .field-label{
     float:left;
     margin-right: 20px;
     font-family: 'proximanova-bold';
+    border: 1px solid;
+    padding: 2px;
+    width:30%;
+    margin:2px 4px;
   }
   .field-items{
-    display: inline;
+    width: 67%;
+    float: right;
+    border: 1px solid;
+    padding: 2px;
+    margin:2px 4px;
   }
 }
 

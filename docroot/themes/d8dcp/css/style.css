@@ -443,17 +443,40 @@ h1#page-title {
   width: 80%;
 }
 
+.field-node--field-status,
+.field-node--field-experience-level,
+.field-node--field-speaker-s- {
+  *zoom: 1;
+}
+.field-node--field-status:after,
+.field-node--field-experience-level:after,
+.field-node--field-speaker-s-:after {
+  content: "\0020";
+  display: block;
+  height: 0;
+  clear: both;
+  overflow: hidden;
+  visibility: hidden;
+}
 .field-node--field-status .field-label,
 .field-node--field-experience-level .field-label,
 .field-node--field-speaker-s- .field-label {
   float: left;
   margin-right: 20px;
   font-family: 'proximanova-bold';
+  border: 1px solid;
+  padding: 2px;
+  width: 30%;
+  margin: 2px 4px;
 }
 .field-node--field-status .field-items,
 .field-node--field-experience-level .field-items,
 .field-node--field-speaker-s- .field-items {
-  display: inline;
+  width: 67%;
+  float: right;
+  border: 1px solid;
+  padding: 2px;
+  margin: 2px 4px;
 }
 
 a.tabledrag-handle .handle {
