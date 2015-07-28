@@ -39,6 +39,13 @@
 //proposed Sessions
 
 .proposed-sessions {
+  @include clearfix;
+  .form-item-field-experience-level-value{
+    float:left;
+  }
+  #edit-actions{
+    float:right;
+  }
   padding-bottom: 20px;
   .views-exposed-form {
     display: table;
@@ -87,7 +94,7 @@
     }
   }
   .views-row {
-    margin-top: 20px;
+    margin-top: 50px;
     .views-field-title {
       font-size: 22px;
       font-family: 'proximanova-bold';

@@ -1484,7 +1484,22 @@ header:after {
 }
 
 .proposed-sessions {
+  *zoom: 1;
   padding-bottom: 20px;
+}
+.proposed-sessions:after {
+  content: "\0020";
+  display: block;
+  height: 0;
+  clear: both;
+  overflow: hidden;
+  visibility: hidden;
+}
+.proposed-sessions .form-item-field-experience-level-value {
+  float: left;
+}
+.proposed-sessions #edit-actions {
+  float: right;
 }
 .proposed-sessions .views-exposed-form {
   display: table;
@@ -1551,7 +1566,7 @@ header:after {
   }
 }
 .proposed-sessions .views-row {
-  margin-top: 20px;
+  margin-top: 50px;
 }
 .proposed-sessions .views-row .views-field-title {
   font-size: 22px;
