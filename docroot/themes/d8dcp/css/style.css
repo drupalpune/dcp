@@ -1574,3 +1574,11 @@ header:after {
 .proposed-sessions .views-row .views-field-body ul li {
   line-height: 1.3em;
 }
+
+.field-item {
+  padding: 0 3px;
+}
+
+article.profile {
+  display: inline-flex;
+}
