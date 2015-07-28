@@ -22,6 +22,21 @@ tr.drag-previous {
     font-family: 'proximanova-bold';
   }
 }
+
+.proposed-sessions {
+  a.active, a, a:visited  {
+    color: black;
+    font-family: 'proximanova-bold';
+    font-size: 30px;
+  }
+  .speakers {
+    a.active, a, a:visited  {
+      color: red;
+      font-family: 'proximanova-bold';
+      font-size: 13px;
+    }
+  }
+}
 /* -------------- images -------------- */
 
 /* -------------- paragraphs -------------- */
