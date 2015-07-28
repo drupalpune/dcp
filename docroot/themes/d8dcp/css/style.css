@@ -1579,6 +1579,6 @@ header:after {
   padding: 0 3px;
 }
 
-article.profile {
+.speakers article {
   display: inline-flex;
 }
