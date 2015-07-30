@@ -1442,6 +1442,14 @@ header:after {
   }
 }
 
+.field-node--field-logo .field-items {
+  background: #fff;
+}
+.field-node--field-logo .field-items img {
+  width: 100%;
+  height: auto;
+}
+
 .sponsors .views-row {
   text-align: center;
   padding: 2px;

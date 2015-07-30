@@ -1,5 +1,15 @@
 // sponsor page view theming
 
+.field-node--field-logo{
+  .field-items{
+    background: #fff;
+    img {
+      width:100%;
+      height: auto;
+    }
+  }
+}
+
 .sponsors {
   .views-row {
     text-align: center;
