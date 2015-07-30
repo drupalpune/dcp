@@ -718,6 +718,10 @@ a.tabledrag-handle .handle {
   }
 }
 
+.region-featured .field-item {
+  padding: 0;
+}
+
 /* ----------Footer--------- */
 .region-footer {
   background: url(../images/truck.png) no-repeat;
