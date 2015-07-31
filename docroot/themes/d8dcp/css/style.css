@@ -1137,10 +1137,10 @@ a.tabledrag-handle .handle {
     height: 500px;
   }
 }
-.page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 {
+.page-pagebottom #block-views-block-sponsors-block-1 {
   *zoom: 1;
 }
-.page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1:after {
+.page-pagebottom #block-views-block-sponsors-block-1:after {
   content: "\0020";
   display: block;
   height: 0;
@@ -1148,7 +1148,7 @@ a.tabledrag-handle .handle {
   overflow: hidden;
   visibility: hidden;
 }
-.page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 .sponsors .views-row {
+.page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
   text-align: center;
   padding: 2px;
   margin: 5px 1%;
@@ -1157,18 +1157,18 @@ a.tabledrag-handle .handle {
   background-color: #fff;
 }
 @media only screen {
-  .page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 .sponsors .views-row {
+  .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
     width: 100%;
   }
 }
 @media only screen and (min-width: 768px) {
-  .page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 .sponsors .views-row {
+  .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
     width: 32%;
     float: left;
   }
 }
 @media only screen and (min-width: 1025px) {
-  .page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 .sponsors .views-row {
+  .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
     width: 32%;
   }
 }
