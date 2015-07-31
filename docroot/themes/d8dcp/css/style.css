@@ -1120,8 +1120,6 @@ a.tabledrag-handle .handle {
   background-color: #04c5f5;
 }
 .page-pagebottom .region-inner {
-  background: url(../images/silhouette.png) bottom no-repeat;
-  background-size: contain;
   width: 100%;
 }
 @media only screen {
@@ -1139,63 +1137,39 @@ a.tabledrag-handle .handle {
     height: 500px;
   }
 }
-@media only screen {
-  .page-pagebottom .region-pagebottom {
-    padding-top: 50px;
-  }
+.page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 {
+  *zoom: 1;
 }
-@media only screen and (min-width: 768px) {
-  .page-pagebottom .region-pagebottom {
-    padding-top: 100px;
-  }
+.page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1:after {
+  content: "\0020";
+  display: block;
+  height: 0;
+  clear: both;
+  overflow: hidden;
+  visibility: hidden;
 }
-@media only screen and (min-width: 1025px) {
-  .page-pagebottom .region-pagebottom {
-    padding-top: 160px;
-  }
-}
-.page-pagebottom #block-becomeasponsor-2 {
-  margin: 0 auto;
+.page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 .sponsors .views-row {
   text-align: center;
-  background: url(../images/bas-bg.png) center no-repeat;
-  background-size: contain;
+  padding: 2px;
+  margin: 5px 1%;
+  height: 200px;
+  overflow: hidden;
+  background-color: #fff;
 }
 @media only screen {
-  .page-pagebottom #block-becomeasponsor-2 {
-    padding: 15px 0;
-    width: 60%;
+  .page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 .sponsors .views-row {
+    width: 100%;
   }
 }
 @media only screen and (min-width: 768px) {
-  .page-pagebottom #block-becomeasponsor-2 {
-    padding: 35px 0;
-    width: 60%;
+  .page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 .sponsors .views-row {
+    width: 32%;
+    float: left;
   }
 }
 @media only screen and (min-width: 1025px) {
-  .page-pagebottom #block-becomeasponsor-2 {
-    padding: 65px 0;
-    width: 25%;
-  }
-}
-.page-pagebottom #block-becomeasponsor-2 .sponsor-link-hp {
-  color: #f3cb02;
-  text-transform: uppercase;
-  font-family: 'proximanova-bold';
-}
-@media only screen {
-  .page-pagebottom #block-becomeasponsor-2 .sponsor-link-hp {
-    font-size: 15px;
-  }
-}
-@media only screen and (min-width: 768px) {
-  .page-pagebottom #block-becomeasponsor-2 .sponsor-link-hp {
-    font-size: 20px;
-  }
-}
-@media only screen and (min-width: 1025px) {
-  .page-pagebottom #block-becomeasponsor-2 .sponsor-link-hp {
-    font-size: 30px;
+  .page-pagebottom #block-becomeasponsor-2 #block-views-block-sponsors-block-1 .sponsors .views-row {
+    width: 32%;
   }
 }
 

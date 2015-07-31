@@ -249,8 +249,8 @@
 .page-pagebottom {
   background-color: #04c5f5;
   .region-inner {
-    background:  url(../images/silhouette.png) bottom no-repeat;
-    background-size: contain;
+    //background:  url(../images/silhouette.png) bottom no-repeat;
+    //background-size: contain;
     width: 100%;
     @media #{$mobile}{
       height: 140px;
@@ -263,45 +263,68 @@
     }
   }
   .region-pagebottom{
-    @media #{$mobile}{
-      padding-top: 50px;
-    }
-    @media #{$tab}{
-      padding-top: 100px;
-    }
-    @media #{$desktop}{
-      padding-top: 160px;
-    }
+    // @media #{$mobile}{
+    //   padding-top: 50px;
+    // }
+    // @media #{$tab}{
+    //   padding-top: 100px;
+    // }
+    // @media #{$desktop}{
+    //   padding-top: 160px;
+    // }
   }
   #block-becomeasponsor-2 {
-    margin: 0 auto;
-    text-align: center;
-    background: url(../images/bas-bg.png) center no-repeat;
-    background-size: contain;
-    @media #{$mobile}{
-      padding: 15px 0;
-      width: 60%;
-    }
-    @media #{$tab}{
-      padding: 35px 0;
-      width: 60%;
-    }
-    @media #{$desktop}{
-      padding: 65px 0;
-      width: 25%;
-    }
-    .sponsor-link-hp {
-      color: $yellow;
-      text-transform: uppercase;
-      font-family: 'proximanova-bold';
-      @media #{$mobile}{
-        font-size: 15px;
-      }
-      @media #{$tab}{
-        font-size: 20px;
-      }
-      @media #{$desktop}{
-        font-size: 30px;
+    // margin: 0 auto;
+    // text-align: center;
+    // background: url(../images/bas-bg.png) center no-repeat;
+    // background-size: contain;
+    // @media #{$mobile}{
+    //   padding: 15px 0;
+    //   width: 60%;
+    // }
+    // @media #{$tab}{
+    //   padding: 35px 0;
+    //   width: 60%;
+    // }
+    // @media #{$desktop}{
+    //   padding: 65px 0;
+    //   width: 25%;
+    // }
+    // .sponsor-link-hp {
+    //   color: $yellow;
+    //   text-transform: uppercase;
+    //   font-family: 'proximanova-bold';
+    //   @media #{$mobile}{
+    //     font-size: 15px;
+    //   }
+    //   @media #{$tab}{
+    //     font-size: 20px;
+    //   }
+    //   @media #{$desktop}{
+    //     font-size: 30px;
+    //   }
+    // }
+    #block-views-block-sponsors-block-1 {
+      @include clearfix;
+      .sponsors{
+        .views-row {
+          text-align: center;
+          padding: 2px;
+          margin: 5px 1%;
+          height: 200px;
+          overflow: hidden;
+          background-color: #fff;
+          @media #{$mobile}{
+            width: 100%;
+          }
+          @media #{$tab}{
+            width: 32%;
+            float: left;
+          }
+          @media #{$desktop}{
+            width: 32%;
+          }
+        }
       }
     }
   }
