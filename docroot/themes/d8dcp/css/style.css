@@ -1163,13 +1163,13 @@ a.tabledrag-handle .handle {
 }
 @media only screen and (min-width: 768px) {
   .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
-    width: 32%;
+    width: 31%;
     float: left;
   }
 }
 @media only screen and (min-width: 1025px) {
   .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
-    width: 32%;
+    width: 31%;
   }
 }
 
