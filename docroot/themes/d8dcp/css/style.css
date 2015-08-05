@@ -1172,6 +1172,16 @@ a.tabledrag-handle .handle {
     width: 31%;
   }
 }
+.page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row a {
+  position: relative;
+}
+.page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row a img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+}
 
 /* ----------Header--------- */
 header {
@@ -1463,6 +1473,14 @@ header:after {
   display: block;
   width: 100%;
   height: 100%;
+  position: relative;
+}
+.sponsors .views-row a img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
 }
 
 .proposed-sessions {
