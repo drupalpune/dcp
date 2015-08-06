@@ -541,6 +541,7 @@ a.tabledrag-handle .handle {
 }
 .pager .pager__item a {
   font-family: 'proximanova-bold';
+  font-size: 16px;
 }
 
 .form-radios {
