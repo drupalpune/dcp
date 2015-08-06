@@ -1424,7 +1424,7 @@ header:after {
 }
 
 .field-node--field-logo .field-items {
-  background: #fff;
+  background: transparent;
 }
 .field-node--field-logo .field-items img {
   width: 100%;
@@ -1437,7 +1437,7 @@ header:after {
   margin: 5px 1%;
   height: 200px;
   overflow: hidden;
-  background-color: #fff;
+  background-color: #e8e2c3;
 }
 @media only screen {
   .sponsors .views-row {

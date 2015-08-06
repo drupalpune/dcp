@@ -2,7 +2,7 @@
 
 .field-node--field-logo{
   .field-items{
-    background: #fff;
+    background: transparent;
     img {
       width:100%;
       height: auto;
@@ -17,7 +17,7 @@
     margin: 5px 1%;
     height: 200px;
     overflow: hidden;
-    background-color: #fff;
+    background-color: rgba(232, 226, 195, 1);
     @media #{$mobile}{
       width: 100%;
     }
