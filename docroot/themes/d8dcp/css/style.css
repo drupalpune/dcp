@@ -1117,25 +1117,16 @@ a.tabledrag-handle .handle {
 }
 
 .page-pagebottom {
-  background-color: #04c5f5;
+  background-color: #e8e2c3;
+}
+.page-pagebottom #block-views-block-sponsors-block-1 h2 {
+  text-align: center;
+  font-size: 50px;
+  color: #fb6704;
+  text-transform: uppercase;
 }
 .page-pagebottom .region-inner {
   width: 100%;
-}
-@media only screen {
-  .page-pagebottom .region-inner {
-    height: 140px;
-  }
-}
-@media only screen and (min-width: 768px) {
-  .page-pagebottom .region-inner {
-    height: 300px;
-  }
-}
-@media only screen and (min-width: 1025px) {
-  .page-pagebottom .region-inner {
-    height: 500px;
-  }
 }
 .page-pagebottom #block-views-block-sponsors-block-1 {
   *zoom: 1;
@@ -1154,7 +1145,7 @@ a.tabledrag-handle .handle {
   margin: 5px 1%;
   height: 200px;
   overflow: hidden;
-  background-color: #fff;
+  background-color: transparent;
 }
 @media only screen {
   .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
@@ -1163,13 +1154,13 @@ a.tabledrag-handle .handle {
 }
 @media only screen and (min-width: 768px) {
   .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
-    width: 31%;
+    width: 50%;
     float: left;
   }
 }
 @media only screen and (min-width: 1025px) {
   .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row {
-    width: 31%;
+    width: 23%;
   }
 }
 .page-pagebottom #block-views-block-sponsors-block-1 .sponsors .views-row a {

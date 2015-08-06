@@ -247,20 +247,28 @@
 }
 
 .page-pagebottom {
-  background-color: #04c5f5;
+  background-color: rgba(232, 226, 195, 1);
+  #block-views-block-sponsors-block-1 {
+    h2 {
+      text-align: center;
+      font-size: 50px;
+      color: #fb6704;
+      text-transform: uppercase;
+    }
+  }
   .region-inner {
     //background:  url(../images/silhouette.png) bottom no-repeat;
     //background-size: contain;
     width: 100%;
-    @media #{$mobile}{
-      height: 140px;
-    }
-    @media #{$tab}{
-      height: 300px;
-    }
-    @media #{$desktop}{
-      height: 500px;
-    }
+    // @media #{$mobile}{
+    //   height: 140px;
+    // }
+    // @media #{$tab}{
+    //   height: 300px;
+    // }
+    // @media #{$desktop}{
+    //   height: 500px;
+    // }
   }
 
   #block-views-block-sponsors-block-1 {
@@ -272,16 +280,16 @@
         margin: 5px 1%;
         height: 200px;
         overflow: hidden;
-        background-color: #fff;
+        background-color: transparent;
         @media #{$mobile}{
           width: 100%;
         }
         @media #{$tab}{
-          width: 31%;
+          width: 50%;
           float: left;
         }
         @media #{$desktop}{
-          width: 31%;
+          width: 23%;
         }
         a {
           position:relative;
