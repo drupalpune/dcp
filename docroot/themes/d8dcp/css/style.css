@@ -1124,6 +1124,8 @@ a.tabledrag-handle .handle {
   font-size: 50px;
   color: #fb6704;
   text-transform: uppercase;
+  margin-top: 0;
+  padding-top: 10px;
 }
 .page-pagebottom .region-inner {
   width: 100%;
