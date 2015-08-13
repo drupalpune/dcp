@@ -144,3 +144,13 @@
   display: inline-flex;
 }
 
+#block-d8dcp-content {
+  .field-name-body.field-type-text-with-summary {
+    .field-item{
+      img {
+        width: 100%;
+        height: auto;
+      }
+    }
+  }
+}
