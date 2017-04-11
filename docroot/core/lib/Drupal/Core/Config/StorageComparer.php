@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\StorageComparer.
- */
-
 namespace Drupal\Core\Config;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Cache\MemoryBackend;
 use Drupal\Core\Config\Entity\ConfigDependencyManager;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
@@ -196,7 +190,7 @@ class StorageComparer implements StorageComparerInterface {
       // ensure the array is keyed from 0.
       $this->changelist[$collection][$op] = array_values(array_intersect($sort_order, $this->changelist[$collection][$op]));
       if ($count != count($this->changelist[$collection][$op])) {
-        throw new \InvalidArgumentException(SafeMarkup::format('Sorting the @op changelist should not change its length.', array('@op' => $op)));
+        throw new \InvalidArgumentException("Sorting the $op changelist should not change its length.");
       }
     }
   }
@@ -212,7 +206,7 @@ class StorageComparer implements StorageComparerInterface {
       $this->addChangelistUpdate($collection);
       $this->addChangelistDelete($collection);
       // Only collections that support configuration entities can have renames.
-      if ($this->configManager->supportsConfigurationEntities($collection)) {
+      if ($collection == StorageInterface::DEFAULT_COLLECTION) {
         $this->addChangelistRename($collection);
       }
     }
@@ -415,7 +409,7 @@ class StorageComparer implements StorageComparerInterface {
     $source_data = $source_storage->readMultiple($source_names);
     // If the collection only supports simple configuration do not use
     // configuration dependencies.
-    if ($this->configManager->supportsConfigurationEntities($collection)) {
+    if ($collection == StorageInterface::DEFAULT_COLLECTION) {
       $dependency_manager = new ConfigDependencyManager();
       $this->targetNames[$collection] = $dependency_manager->setData($target_data)->sortAll();
       $this->sourceNames[$collection] = $dependency_manager->setData($source_data)->sortAll();

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\FieldItemListInterface.
- */
-
 namespace Drupal\Core\Field;
 
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -27,6 +22,8 @@ use Drupal\Core\TypedData\ListInterface;
  *
  * When implementing this interface which extends Traversable, make sure to list
  * IteratorAggregate or Iterator before this interface in the implements clause.
+ *
+ * @see \Drupal\Core\Field\FieldItemInterface
  */
 interface FieldItemListInterface extends ListInterface, AccessibleInterface {
 
@@ -49,7 +46,7 @@ interface FieldItemListInterface extends ListInterface, AccessibleInterface {
   /**
    * Gets the langcode of the field values held in the object.
    *
-   * @return $langcode
+   * @return string
    *   The langcode.
    */
   public function getLangcode();
@@ -102,54 +99,57 @@ interface FieldItemListInterface extends ListInterface, AccessibleInterface {
   /**
    * Magic method: Gets a property value of to the first field item.
    *
-   * @see \Drupal\Core\Field\FieldItemInterface::__get()
+   * @see \Drupal\Core\Field\FieldItemInterface::__set()
    */
   public function __get($property_name);
 
   /**
    * Magic method: Sets a property value of the first field item.
    *
-   * @see \Drupal\Core\Field\FieldItemInterface::__set()
+   * @see \Drupal\Core\Field\FieldItemInterface::__get()
    */
   public function __set($property_name, $value);
 
   /**
    * Magic method: Determines whether a property of the first field item is set.
    *
-   * @see \Drupal\Core\Field\FieldItemInterface::__isset()
+   * @see \Drupal\Core\Field\FieldItemInterface::__unset()
    */
   public function __isset($property_name);
 
   /**
    * Magic method: Unsets a property of the first field item.
    *
-   * @see \Drupal\Core\Field\FieldItemInterface::__unset()
+   * @see \Drupal\Core\Field\FieldItemInterface::__isset()
    */
   public function __unset($property_name);
 
   /**
    * Defines custom presave behavior for field values.
    *
-   * This method is called before either insert() or update() methods, and
-   * before values are written into storage.
+   * This method is called during the process of saving an entity, just before
+   * item values are written into storage.
+   *
+   * @see \Drupal\Core\Field\FieldItemInterface::preSave()
    */
   public function preSave();
 
   /**
-   * Defines custom insert behavior for field values.
+   * Defines custom post-save behavior for field values.
    *
-   * This method is called after the save() method, and before values are
-   * written into storage.
-   */
-  public function insert();
-
-  /**
-   * Defines custom update behavior for field values.
+   * This method is called during the process of saving an entity, just after
+   * item values are written into storage.
    *
-   * This method is called after the save() method, and before values are
-   * written into storage.
+   * @param bool $update
+   *   Specifies whether the entity is being updated or created.
+   *
+   * @return bool
+   *   Whether field items should be rewritten to the storage as a consequence
+   *   of the logic implemented by the custom behavior.
+   *
+   * @see \Drupal\Core\Field\FieldItemInterface::postSave()
    */
-  public function update();
+  public function postSave($update);
 
   /**
    * Defines custom delete behavior for field values.
@@ -183,7 +183,7 @@ interface FieldItemListInterface extends ListInterface, AccessibleInterface {
    */
   public function view($display_options = array());
 
-  /*
+  /**
    * Populates a specified number of field items with valid sample data.
    *
    * @param int $count
@@ -247,7 +247,7 @@ interface FieldItemListInterface extends ListInterface, AccessibleInterface {
    * in order to be a valid runtime value for the field type; e.g., a date field
    * could process the defined value of 'NOW' to a valid date.
    *
-   * @param array
+   * @param array $default_value
    *   The unprocessed default value defined for the field, as a numerically
    *   indexed array of items, each item being an array of property/value pairs.
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity

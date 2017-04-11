@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\path\Tests\PathLanguageUiTest.
- */
-
 namespace Drupal\path\Tests;
 
 /**
@@ -19,12 +14,12 @@ class PathLanguageUiTest extends PathTestBase {
    *
    * @var array
    */
-  public static $modules = array('path', 'locale');
+  public static $modules = array('path', 'locale', 'locale_test');
 
   protected function setUp() {
     parent::setUp();
 
-    // Create and login user.
+    // Create and log in user.
     $web_user = $this->drupalCreateUser(array('edit any page content', 'create page content', 'administer url aliases', 'create url aliases', 'administer languages', 'access administration pages'));
     $this->drupalLogin($web_user);
 
@@ -45,8 +40,8 @@ class PathLanguageUiTest extends PathTestBase {
   function testLanguageNeutralUrl() {
     $name = $this->randomMachineName(8);
     $edit = array();
-    $edit['source'] = 'admin/config/search/path';
-    $edit['alias'] = $name;
+    $edit['source'] = '/admin/config/search/path';
+    $edit['alias'] = '/' . $name;
     $this->drupalPostForm('admin/config/search/path/add', $edit, t('Save'));
 
     $this->drupalGet($name);
@@ -59,8 +54,8 @@ class PathLanguageUiTest extends PathTestBase {
   function testDefaultLanguageUrl() {
     $name = $this->randomMachineName(8);
     $edit = array();
-    $edit['source'] = 'admin/config/search/path';
-    $edit['alias'] = $name;
+    $edit['source'] = '/admin/config/search/path';
+    $edit['alias'] = '/' . $name;
     $edit['langcode'] = 'en';
     $this->drupalPostForm('admin/config/search/path/add', $edit, t('Save'));
 
@@ -74,12 +69,13 @@ class PathLanguageUiTest extends PathTestBase {
   function testNonDefaultUrl() {
     $name = $this->randomMachineName(8);
     $edit = array();
-    $edit['source'] = 'admin/config/search/path';
-    $edit['alias'] = $name;
+    $edit['source'] = '/admin/config/search/path';
+    $edit['alias'] = '/' . $name;
     $edit['langcode'] = 'fr';
     $this->drupalPostForm('admin/config/search/path/add', $edit, t('Save'));
 
     $this->drupalGet('fr/' . $name);
     $this->assertText(t('Filter aliases'), 'Foreign URL alias works');
   }
+
 }

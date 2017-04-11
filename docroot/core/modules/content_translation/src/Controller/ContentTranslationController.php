@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\content_translation\Controller\ContentTranslationController.
- */
-
 namespace Drupal\content_translation\Controller;
 
 use Drupal\content_translation\ContentTranslationManagerInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Language\LanguageInterface;
@@ -30,7 +26,7 @@ class ContentTranslationController extends ControllerBase {
   /**
    * Initializes a content translation controller.
    *
-   * @param \Drupal\content_translation\ContentTranslationManagerInterface
+   * @param \Drupal\content_translation\ContentTranslationManagerInterface $manager
    *   A content translation manager instance.
    */
   public function __construct(ContentTranslationManagerInterface $manager) {
@@ -57,7 +53,21 @@ class ContentTranslationController extends ControllerBase {
   public function prepareTranslation(ContentEntityInterface $entity, LanguageInterface $source, LanguageInterface $target) {
     /* @var \Drupal\Core\Entity\ContentEntityInterface $source_translation */
     $source_translation = $entity->getTranslation($source->getId());
-    $entity->addTranslation($target->getId(), $source_translation->toArray());
+    $target_translation = $entity->addTranslation($target->getId(), $source_translation->toArray());
+
+    // Make sure we do not inherit the affected status from the source values.
+    if ($entity->getEntityType()->isRevisionable()) {
+      $target_translation->setRevisionTranslationAffected(NULL);
+    }
+
+    /** @var \Drupal\user\UserInterface $user */
+    $user = $this->entityManager()->getStorage('user')->load($this->currentUser()->id());
+    $metadata = $this->manager->getTranslationMetadata($target_translation);
+
+    // Update the translation author to current user, as well the translation
+    // creation time.
+    $metadata->setAuthor($user);
+    $metadata->setCreatedTime(REQUEST_TIME);
   }
 
   /**
@@ -67,8 +77,8 @@ class ContentTranslationController extends ControllerBase {
    *   The route match.
    * @param string $entity_type_id
    *   (optional) The entity type ID.
-   * @return array Array of page elements to render.
-   * Array of page elements to render.
+   * @return array
+   *   Array of page elements to render.
    */
   public function overview(RouteMatchInterface $route_match, $entity_type_id = NULL) {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
@@ -77,6 +87,10 @@ class ContentTranslationController extends ControllerBase {
     $handler = $this->entityManager()->getHandler($entity_type_id, 'translation');
     $manager = $this->manager;
     $entity_type = $entity->getEntityType();
+
+    // Start collecting the cacheability metadata, starting with the entity and
+    // later merge in the access result cacheability metadata.
+    $cacheability = CacheableMetadata::createFromObject($entity);
 
     $languages = $this->languageManager()->getLanguages();
     $original = $entity->getUntranslated()->language()->getId();
@@ -108,7 +122,7 @@ class ContentTranslationController extends ControllerBase {
         $langcode = $language->getId();
 
         $add_url = new Url(
-          'content_translation.translation_add_' . $entity_type_id,
+          "entity.$entity_type_id.content_translation_add",
           array(
             'source' => $original,
             'target' => $language->getId(),
@@ -119,7 +133,7 @@ class ContentTranslationController extends ControllerBase {
           )
         );
         $edit_url = new Url(
-          'content_translation.translation_edit_' . $entity_type_id,
+          "entity.$entity_type_id.content_translation_edit",
           array(
             'language' => $language->getId(),
             $entity_type_id => $entity->id(),
@@ -129,7 +143,7 @@ class ContentTranslationController extends ControllerBase {
           )
         );
         $delete_url = new Url(
-          'content_translation.translation_delete_' . $entity_type_id,
+          "entity.$entity_type_id.content_translation_delete",
           array(
             'language' => $language->getId(),
             $entity_type_id => $entity->id(),
@@ -166,11 +180,16 @@ class ContentTranslationController extends ControllerBase {
           // If the user is allowed to edit the entity we point the edit link to
           // the entity form, otherwise if we are not dealing with the original
           // language we point the link to the translation form.
-          if ($entity->access('update') && $entity_type->hasLinkTemplate('edit-form')) {
+          $update_access = $entity->access('update', NULL, TRUE);
+          $translation_access = $handler->getTranslationAccess($entity, 'update');
+          $cacheability = $cacheability
+            ->merge(CacheableMetadata::createFromObject($update_access))
+            ->merge(CacheableMetadata::createFromObject($translation_access));
+          if ($update_access->isAllowed() && $entity_type->hasLinkTemplate('edit-form')) {
             $links['edit']['url'] = $entity->urlInfo('edit-form');
             $links['edit']['language'] = $language;
           }
-          elseif (!$is_original && $handler->getTranslationAccess($entity, 'update')->isAllowed()) {
+          elseif (!$is_original && $translation_access->isAllowed()) {
             $links['edit']['url'] = $edit_url;
           }
 
@@ -192,6 +211,11 @@ class ContentTranslationController extends ControllerBase {
           }
           else {
             $source_name = isset($languages[$source]) ? $languages[$source]->getName() : $this->t('n/a');
+            $delete_access = $entity->access('delete', NULL, TRUE);
+            $translation_access = $handler->getTranslationAccess($entity, 'delete');
+            $cacheability = $cacheability
+              ->merge(CacheableMetadata::createFromObject($delete_access))
+              ->merge(CacheableMetadata::createFromObject($translation_access));
             if ($entity->access('delete') && $entity_type->hasLinkTemplate('delete-form')) {
               $links['delete'] = array(
                 'title' => $this->t('Delete'),
@@ -199,7 +223,7 @@ class ContentTranslationController extends ControllerBase {
                 'language' => $language,
               );
             }
-            elseif ($handler->getTranslationAccess($entity, 'delete')->isAllowed()) {
+            elseif ($translation_access->isAllowed()) {
               $links['delete'] = array(
                 'title' => $this->t('Delete'),
                 'url' => $delete_url,
@@ -212,7 +236,10 @@ class ContentTranslationController extends ControllerBase {
           $row_title = $source_name = $this->t('n/a');
           $source = $entity->language()->getId();
 
-          if ($source != $langcode && $handler->getTranslationAccess($entity, 'create')->isAllowed()) {
+          $create_translation_access = $handler->getTranslationAccess($entity, 'create');
+          $cacheability = $cacheability
+            ->merge(CacheableMetadata::createFromObject($create_translation_access));
+          if ($source != $langcode && $create_translation_access->isAllowed()) {
             if ($translatable) {
               $links['add'] = array(
                 'title' => $this->t('Add'),
@@ -270,6 +297,9 @@ class ContentTranslationController extends ControllerBase {
     // Add metadata to the build render array to let other modules know about
     // which entity this is.
     $build['#entity'] = $entity;
+    $cacheability
+      ->addCacheTags($entity->getCacheTags())
+      ->applyTo($build);
 
     $build['content_translation_overview'] = array(
       '#theme' => 'table',
@@ -289,7 +319,7 @@ class ContentTranslationController extends ControllerBase {
    * @param \Drupal\Core\Language\LanguageInterface $target
    *   The language of the translated values. Defaults to the current content
    *   language.
-   * @param \Drupal\Core\Routing\RouteMatchInterface
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match object from which to extract the entity type.
    * @param string $entity_type_id
    *   (optional) The entity type ID.
@@ -324,7 +354,7 @@ class ContentTranslationController extends ControllerBase {
    * @param \Drupal\Core\Language\LanguageInterface $language
    *   The language of the translated values. Defaults to the current content
    *   language.
-   * @param \Drupal\Core\Routing\RouteMatchInterface
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match object from which to extract the entity type.
    * @param string $entity_type_id
    *   (optional) The entity type ID.

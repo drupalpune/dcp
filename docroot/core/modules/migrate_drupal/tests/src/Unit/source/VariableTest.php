@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\migrate_drupal\Unit\source\VariableTest.
- */
-
 namespace Drupal\Tests\migrate_drupal\Unit\source;
 
 use Drupal\Tests\migrate\Unit\MigrateSqlSourceTestCase;
@@ -21,7 +16,6 @@ class VariableTest extends MigrateSqlSourceTestCase {
   protected $migrationConfiguration = array(
     'id' => 'test',
     'highWaterProperty' => array('field' => 'test'),
-    'idlist' => array(),
     'source' => array(
       'plugin' => 'd6_variable',
       'variables' => array(
@@ -33,6 +27,7 @@ class VariableTest extends MigrateSqlSourceTestCase {
 
   protected $expectedResults = array(
     array(
+      'id' => 'foo',
       'foo' => 1,
       'bar' => FALSE,
     ),
@@ -45,18 +40,4 @@ class VariableTest extends MigrateSqlSourceTestCase {
     ),
   );
 
-}
-
-namespace Drupal\Tests\migrate_drupal\Unit\source;
-
-use Drupal\Core\Database\Connection;
-use Drupal\Core\Extension\ModuleHandlerInterface;
-
-class TestVariable extends \Drupal\migrate_drupal\Plugin\migrate\source\Variable {
-  public function setDatabase(Connection $database) {
-    $this->database = $database;
-  }
-  public function setModuleHandler(ModuleHandlerInterface $module_handler) {
-    $this->moduleHandler = $module_handler;
-  }
 }

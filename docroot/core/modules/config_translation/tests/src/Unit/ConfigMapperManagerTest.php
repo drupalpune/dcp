@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\config_translation\Unit\ConfigMapperManagerTest.
- */
-
 namespace Drupal\Tests\config_translation\Unit;
 
 use Drupal\config_translation\ConfigMapperManager;
@@ -13,7 +8,6 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\TypedData\TypedDataInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\Core\TypedData\DataDefinitionInterface;
 
 /**
  * Tests the functionality provided by configuration translation mapper manager.
@@ -48,14 +42,7 @@ class ConfigMapperManagerTest extends UnitTestCase {
       ->getMock();
 
     $module_handler = $this->getMock('Drupal\Core\Extension\ModuleHandlerInterface');
-    $module_handler->expects($this->once())
-      ->method('getModuleList')
-      ->with()
-      ->will($this->returnValue(array()));
     $theme_handler = $this->getMock('Drupal\Core\Extension\ThemeHandlerInterface');
-    $theme_handler->expects($this->any())
-      ->method('listInfo')
-      ->will($this->returnValue(array()));
 
     $this->configMapperManager = new ConfigMapperManager(
       $this->getMock('Drupal\Core\Cache\CacheBackendInterface'),

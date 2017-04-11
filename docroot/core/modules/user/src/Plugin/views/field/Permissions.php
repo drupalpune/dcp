@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\user\Plugin\views\field\Permissions.
- */
-
 namespace Drupal\user\Plugin\views\field;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -66,7 +61,7 @@ class Permissions extends PrerenderList {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\field\FieldPluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
@@ -116,17 +111,5 @@ class Permissions extends PrerenderList {
   function render_item($count, $item) {
     return $item['permission'];
   }
-
-  /*
-  protected function documentSelfTokens(&$tokens) {
-    $tokens['[' . $this->options['id'] . '-role' . ']'] = $this->t('The name of the role.');
-    $tokens['[' . $this->options['id'] . '-rid' . ']'] = $this->t('The role ID of the role.');
-  }
-
-  protected function addSelfTokens(&$tokens, $item) {
-    $tokens['[' . $this->options['id'] . '-role' . ']'] = $item['role'];
-    $tokens['[' . $this->options['id'] . '-rid' . ']'] = $item['rid'];
-  }
-  */
 
 }

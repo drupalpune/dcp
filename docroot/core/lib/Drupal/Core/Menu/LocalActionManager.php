@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Menu\LocalActionManager.
- */
-
 namespace Drupal\Core\Menu;
 
 use Drupal\Core\Access\AccessManagerInterface;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -125,8 +121,6 @@ class LocalActionManager extends DefaultPluginManager implements LocalActionMana
   public function __construct(ControllerResolverInterface $controller_resolver, RequestStack $request_stack, RouteMatchInterface $route_match, RouteProviderInterface $route_provider, ModuleHandlerInterface $module_handler, CacheBackendInterface $cache_backend, LanguageManagerInterface $language_manager, AccessManagerInterface $access_manager, AccountInterface $account) {
     // Skip calling the parent constructor, since that assumes annotation-based
     // discovery.
-    $this->discovery = new YamlDiscovery('links.action', $module_handler->getModuleDirectories());
-    $this->discovery = new ContainerDerivativeDiscoveryDecorator($this->discovery);
     $this->factory = new ContainerFactory($this, 'Drupal\Core\Menu\LocalActionInterface');
     $this->controllerResolver = $controller_resolver;
     $this->requestStack = $request_stack;
@@ -137,6 +131,18 @@ class LocalActionManager extends DefaultPluginManager implements LocalActionMana
     $this->account = $account;
     $this->alterInfo('menu_local_actions');
     $this->setCacheBackend($cache_backend, 'local_action_plugins:' . $language_manager->getCurrentLanguage()->getId(), array('local_action'));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getDiscovery() {
+    if (!isset($this->discovery)) {
+      $yaml_discovery = new YamlDiscovery('links.action', $this->moduleHandler->getModuleDirectories());
+      $yaml_discovery->addTranslatableProperty('title', 'title_context');
+      $this->discovery = new ContainerDerivativeDiscoveryDecorator($yaml_discovery);
+    }
+    return $this->discovery;
   }
 
   /**
@@ -172,8 +178,10 @@ class LocalActionManager extends DefaultPluginManager implements LocalActionMana
     $links = array();
     /** @var $plugin \Drupal\Core\Menu\LocalActionInterface */
     foreach ($this->instances[$route_appears] as $plugin_id => $plugin) {
+      $cacheability = new CacheableMetadata();
       $route_name = $plugin->getRouteName();
       $route_parameters = $plugin->getRouteParameters($this->routeMatch);
+      $access = $this->accessManager->checkNamedRoute($route_name, $route_parameters, $this->account, TRUE);
       $links[$plugin_id] = array(
         '#theme' => 'menu_local_action',
         '#link' => array(
@@ -181,10 +189,14 @@ class LocalActionManager extends DefaultPluginManager implements LocalActionMana
           'url' => Url::fromRoute($route_name, $route_parameters),
           'localized_options' => $plugin->getOptions($this->routeMatch),
         ),
-        '#access' => $this->accessManager->checkNamedRoute($route_name, $route_parameters, $this->account),
+        '#access' => $access,
         '#weight' => $plugin->getWeight(),
       );
+      $cacheability->addCacheableDependency($access)->addCacheableDependency($plugin);
+      $cacheability->applyTo($links[$plugin_id]);
     }
+    $links['#cache']['contexts'][] = 'route';
+
     return $links;
   }
 

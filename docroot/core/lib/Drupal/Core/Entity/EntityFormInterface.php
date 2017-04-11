@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityFormInterface.
- */
-
 namespace Drupal\Core\Entity;
 
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -95,19 +90,6 @@ interface EntityFormInterface extends BaseFormIdInterface {
   public function buildEntity(array $form, FormStateInterface $form_state);
 
   /**
-   * Validates the submitted form values of the entity form.
-   *
-   * @param array $form
-   *   A nested array form elements comprising the form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current state of the form.
-   *
-   * @return \Drupal\Core\Entity\ContentEntityTypeInterface
-   *   The built entity.
-   */
-  public function validate(array $form, FormStateInterface $form_state);
-
-  /**
    * Form submission handler for the 'save' action.
    *
    * Normally this method should be overridden to provide specific messages to
@@ -150,7 +132,21 @@ interface EntityFormInterface extends BaseFormIdInterface {
    *   The entity manager.
    *
    * @return $this
+   *
+   * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0.
+   *
+   * @todo Remove this set call in https://www.drupal.org/node/2603542.
    */
   public function setEntityManager(EntityManagerInterface $entity_manager);
+
+  /**
+   * Sets the entity type manager for this form.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   *
+   * @return $this
+   */
+  public function setEntityTypeManager(EntityTypeManagerInterface $entity_type_manager);
 
 }

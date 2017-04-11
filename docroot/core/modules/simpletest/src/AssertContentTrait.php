@@ -1,16 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\simpletest\AssertContentTrait.
- */
-
 namespace Drupal\simpletest;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Xss;
-use Symfony\Component\CssSelector\CssSelector;
+use Drupal\Core\Render\RenderContext;
+use Symfony\Component\CssSelector\CssSelectorConverter;
 
 /**
  * Provides test methods to assert content.
@@ -65,7 +62,7 @@ trait AssertContentTrait {
     $this->plainTextContent = NULL;
     $this->elements = NULL;
     $this->drupalSettings = array();
-    if (preg_match('/var drupalSettings = (.*?);$/m', $content, $matches)) {
+    if (preg_match('@<script type="application/json" data-drupal-selector="drupal-settings-json">([^<]*)</script>@', $content, $matches)) {
       $this->drupalSettings = Json::decode($matches[1]);
     }
   }
@@ -75,7 +72,10 @@ trait AssertContentTrait {
    */
   protected function getTextContent() {
     if (!isset($this->plainTextContent)) {
-      $this->plainTextContent = Xss::filter($this->getRawContent(), array());
+      $raw_content = $this->getRawContent();
+      // Strip everything between the HEAD tags.
+      $raw_content = preg_replace('@<head>(.+?)</head>@si', '', $raw_content);
+      $this->plainTextContent = Xss::filter($raw_content, array());
     }
     return $this->plainTextContent;
   }
@@ -117,7 +117,7 @@ trait AssertContentTrait {
   /**
    * Parse content returned from curlExec using DOM and SimpleXML.
    *
-   * @return \SimpleXMLElement|FALSE
+   * @return \SimpleXMLElement|false
    *   A SimpleXMLElement or FALSE on failure.
    */
   protected function parse() {
@@ -173,6 +173,10 @@ trait AssertContentTrait {
   protected function buildXPathQuery($xpath, array $args = array()) {
     // Replace placeholders.
     foreach ($args as $placeholder => $value) {
+      // Cast MarkupInterface objects to string.
+      if (is_object($value)) {
+        $value = (string) $value;
+      }
       // XPath 1.0 doesn't support a way to escape single or double quotes in a
       // string literal. We split double quotes out of the string, and encode
       // them separately.
@@ -211,23 +215,23 @@ trait AssertContentTrait {
    *   placeholders in the query. The values may be either strings or numeric
    *   values.
    *
-   * @return array
-   *   The return value of the xpath search. For details on the xpath string
-   *   format and return values see the SimpleXML documentation,
-   *   http://php.net/manual/function.simplexml-element-xpath.php.
+   * @return \SimpleXMLElement[]|bool
+   *   The return value of the xpath search or FALSE on failure. For details on
+   *   the xpath string format and return values see the SimpleXML
+   *   documentation.
+   *
+   * @see http://php.net/manual/function.simplexml-element-xpath.php
    */
-  protected function xpath($xpath, array $arguments = array()) {
+  protected function xpath($xpath, array $arguments = []) {
     if ($this->parse()) {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $this->elements->xpath($xpath);
       // Some combinations of PHP / libxml versions return an empty array
       // instead of the documented FALSE. Forcefully convert any falsish values
       // to an empty array to allow foreach(...) constructions.
-      return $result ? $result : array();
+      return $result ?: [];
     }
-    else {
-      return FALSE;
-    }
+    return FALSE;
   }
 
   /**
@@ -243,7 +247,7 @@ trait AssertContentTrait {
    *   selector to an XPath selector.
    */
   protected function cssSelect($selector) {
-    return $this->xpath(CssSelector::toXPath($selector));
+    return $this->xpath((new CssSelectorConverter())->toXPath($selector));
   }
 
   /**
@@ -276,13 +280,13 @@ trait AssertContentTrait {
    *
    * An optional link index may be passed.
    *
-   * @param string $label
+   * @param string|\Drupal\Component\Render\MarkupInterface $label
    *   Text between the anchor tags.
    * @param int $index
    *   Link position counting from zero.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
+   *   messages: use strtr() to embed variables in the message text, not
    *   t(). If left blank, a default message will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
@@ -294,20 +298,23 @@ trait AssertContentTrait {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertLink($label, $index = 0, $message = '', $group = 'Other') {
+    // Cast MarkupInterface objects to string.
+    $label = (string) $label;
     $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
-    $message = ($message ? $message : SafeMarkup::format('Link with label %label found.', array('%label' => $label)));
+    $message = ($message ? $message : strtr('Link with label %label found.', array('%label' => $label)));
     return $this->assert(isset($links[$index]), $message, $group);
   }
 
   /**
    * Passes if a link with the specified label is not found.
    *
-   * @param string $label
+   * @param string|\Drupal\Component\Render\MarkupInterface $label
    *   Text between the anchor tags.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -318,6 +325,8 @@ trait AssertContentTrait {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertNoLink($label, $message = '', $group = 'Other') {
+    // Cast MarkupInterface objects to string.
+    $label = (string) $label;
     $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
     $message = ($message ? $message : SafeMarkup::format('Link with label %label not found.', array('%label' => $label)));
     return $this->assert(empty($links), $message, $group);
@@ -332,8 +341,9 @@ trait AssertContentTrait {
    *   Link position counting from zero.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -356,8 +366,9 @@ trait AssertContentTrait {
    *   The full or partial value of the 'href' attribute of the anchor tag.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -374,6 +385,31 @@ trait AssertContentTrait {
   }
 
   /**
+   * Passes if a link containing a given href is not found in the main region.
+   *
+   * @param string $href
+   *   The full or partial value of the 'href' attribute of the anchor tag.
+   * @param string $message
+   *   (optional) A message to display with the assertion. Do not translate
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
+   * @param string $group
+   *   (optional) The group this message is in, which is displayed in a column
+   *   in test output. Use 'Debug' to indicate this is debugging output. Do not
+   *   translate this string. Defaults to 'Other'; most tests do not override
+   *   this default.
+   *
+   * @return bool
+   *   TRUE if the assertion succeeded, FALSE otherwise.
+   */
+  protected function assertNoLinkByHrefInMainRegion($href, $message = '', $group = 'Other') {
+    $links = $this->xpath('//main//a[contains(@href, :href)]', array(':href' => $href));
+    $message = ($message ? $message : SafeMarkup::format('No link containing href %href found.', array('%href' => $href)));
+    return $this->assert(empty($links), $message, $group);
+  }
+
+  /**
    * Passes if the raw text IS found on the loaded page, fail otherwise.
    *
    * Raw text refers to the raw HTML that the page generated.
@@ -382,8 +418,9 @@ trait AssertContentTrait {
    *   Raw (HTML) string to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -395,9 +432,9 @@ trait AssertContentTrait {
    */
   protected function assertRaw($raw, $message = '', $group = 'Other') {
     if (!$message) {
-      $message = SafeMarkup::format('Raw "@raw" found', array('@raw' => $raw));
+      $message = 'Raw "' . Html::escape($raw) . '" found';
     }
-    return $this->assert(strpos($this->getRawContent(), $raw) !== FALSE, $message, $group);
+    return $this->assert(strpos($this->getRawContent(), (string) $raw) !== FALSE, $message, $group);
   }
 
   /**
@@ -409,8 +446,9 @@ trait AssertContentTrait {
    *   Raw (HTML) string to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -422,9 +460,9 @@ trait AssertContentTrait {
    */
   protected function assertNoRaw($raw, $message = '', $group = 'Other') {
     if (!$message) {
-      $message = SafeMarkup::format('Raw "@raw" not found', array('@raw' => $raw));
+      $message = 'Raw "' . Html::escape($raw) . '" not found';
     }
-    return $this->assert(strpos($this->getRawContent(), $raw) === FALSE, $message, $group);
+    return $this->assert(strpos($this->getRawContent(), (string) $raw) === FALSE, $message, $group);
   }
 
   /**
@@ -436,8 +474,9 @@ trait AssertContentTrait {
    *   Raw (HTML) string to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -449,9 +488,9 @@ trait AssertContentTrait {
    */
   protected function assertEscaped($raw, $message = '', $group = 'Other') {
     if (!$message) {
-      $message = SafeMarkup::format('Escaped "@raw" found', array('@raw' => $raw));
+      $message = 'Escaped "' . Html::escape($raw) . '" found';
     }
-    return $this->assert(strpos($this->getRawContent(), SafeMarkup::checkPlain($raw)) !== FALSE, $message, $group);
+    return $this->assert(strpos($this->getRawContent(), Html::escape($raw)) !== FALSE, $message, $group);
   }
 
   /**
@@ -464,8 +503,9 @@ trait AssertContentTrait {
    *   Raw (HTML) string to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -477,9 +517,9 @@ trait AssertContentTrait {
    */
   protected function assertNoEscaped($raw, $message = '', $group = 'Other') {
     if (!$message) {
-      $message = SafeMarkup::format('Escaped "@raw" not found', array('@raw' => $raw));
+      $message = 'Escaped "' . Html::escape($raw) . '" not found';
     }
-    return $this->assert(strpos($this->getRawContent(), SafeMarkup::checkPlain($raw)) === FALSE, $message, $group);
+    return $this->assert(strpos($this->getRawContent(), Html::escape($raw)) === FALSE, $message, $group);
   }
 
   /**
@@ -492,8 +532,9 @@ trait AssertContentTrait {
    *   Plain text to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -519,8 +560,9 @@ trait AssertContentTrait {
    *   Plain text to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -545,8 +587,9 @@ trait AssertContentTrait {
    *   Plain text to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -573,12 +616,13 @@ trait AssertContentTrait {
    * through a web browser. In other words the HTML has been filtered out of
    * the contents.
    *
-   * @param string $text
+   * @param string|\Drupal\Component\Render\MarkupInterface $text
    *   Plain text to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -599,12 +643,13 @@ trait AssertContentTrait {
    * through a web browser. In other words the HTML has been filtered out of
    * the contents.
    *
-   * @param string $text
+   * @param string|\Drupal\Component\Render\MarkupInterface $text
    *   Plain text to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -623,12 +668,13 @@ trait AssertContentTrait {
    *
    * It is not recommended to call this function directly.
    *
-   * @param string $text
+   * @param string|\Drupal\Component\Render\MarkupInterface $text
    *   Plain text to look for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -642,6 +688,8 @@ trait AssertContentTrait {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertUniqueTextHelper($text, $message = '', $group = 'Other', $be_unique = FALSE) {
+    // Cast MarkupInterface objects to string.
+    $text = (string) $text;
     if (!$message) {
       $message = '"' . $text . '"' . ($be_unique ? ' found only once' : ' found more than once');
     }
@@ -661,8 +709,9 @@ trait AssertContentTrait {
    *   Perl regex to look for including the regex delimiters.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -686,8 +735,9 @@ trait AssertContentTrait {
    *   Perl regex to look for including the regex delimiters.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -734,8 +784,9 @@ trait AssertContentTrait {
    *   The string the title should be.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -746,14 +797,21 @@ trait AssertContentTrait {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertTitle($title, $message = '', $group = 'Other') {
-    $actual = (string) current($this->xpath('//title'));
-    if (!$message) {
-      $message = SafeMarkup::format('Page title @actual is equal to @expected.', array(
-        '@actual' => var_export($actual, TRUE),
-        '@expected' => var_export($title, TRUE),
-      ));
+    // Don't use xpath as it messes with HTML escaping.
+    preg_match('@<title>(.*)</title>@', $this->getRawContent(), $matches);
+    if (isset($matches[1])) {
+      $actual = $matches[1];
+      $actual = $this->castSafeStrings($actual);
+      $title = $this->castSafeStrings($title);
+      if (!$message) {
+        $message = SafeMarkup::format('Page title @actual is equal to @expected.', array(
+          '@actual' => var_export($actual, TRUE),
+          '@expected' => var_export($title, TRUE),
+        ));
+      }
+      return $this->assertEqual($actual, $title, $message, $group);
     }
-    return $this->assertEqual($actual, $title, $message, $group);
+    return $this->fail('No title element found on the page.');
   }
 
   /**
@@ -763,8 +821,9 @@ trait AssertContentTrait {
    *   The string the title should not be.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -796,8 +855,9 @@ trait AssertContentTrait {
    *   The expected themed output string.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -808,10 +868,18 @@ trait AssertContentTrait {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertThemeOutput($callback, array $variables = array(), $expected = '', $message = '', $group = 'Other') {
-    $output = \Drupal::theme()->render($callback, $variables);
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+
+    // The string cast is necessary because theme functions return
+    // MarkupInterface objects. This means we can assert that $expected
+    // matches the theme output without having to worry about 0 == ''.
+    $output = (string) $renderer->executeInRenderContext(new RenderContext(), function() use ($callback, $variables) {
+      return \Drupal::theme()->render($callback, $variables);
+    });
     $this->verbose(
-      '<hr />' . 'Result:' . '<pre>' . SafeMarkup::checkPlain(var_export($output, TRUE)) . '</pre>'
-      . '<hr />' . 'Expected:' . '<pre>' . SafeMarkup::checkPlain(var_export($expected, TRUE)) . '</pre>'
+      '<hr />' . 'Result:' . '<pre>' . Html::escape(var_export($output, TRUE)) . '</pre>'
+      . '<hr />' . 'Expected:' . '<pre>' . Html::escape(var_export($expected, TRUE)) . '</pre>'
       . '<hr />' . $output
     );
     if (!$message) {
@@ -822,18 +890,18 @@ trait AssertContentTrait {
   }
 
   /**
-   * Asserts that a field exists in the current page by the given XPath.
+   * Asserts that a field exists in the current page with a given Xpath result.
    *
-   * @param string $xpath
-   *   XPath used to find the field.
+   * @param \SimpleXmlElement[] $fields
+   *   Xml elements.
    * @param string $value
-   *   (optional) Value of the field to assert. You may pass in NULL (default)
-   *   to skip checking the actual value, while still checking that the field
-   *   exists.
+   *   (optional) Value of the field to assert. You may pass in NULL (default) to skip
+   *   checking the actual value, while still checking that the field exists.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -843,9 +911,7 @@ trait AssertContentTrait {
    * @return bool
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertFieldByXPath($xpath, $value = NULL, $message = '', $group = 'Other') {
-    $fields = $this->xpath($xpath);
-
+  protected function assertFieldsByValue($fields, $value = NULL, $message = '', $group = 'Other') {
     // If value specified then check array for match.
     $found = TRUE;
     if (isset($value)) {
@@ -881,6 +947,35 @@ trait AssertContentTrait {
   }
 
   /**
+   * Asserts that a field exists in the current page by the given XPath.
+   *
+   * @param string $xpath
+   *   XPath used to find the field.
+   * @param string $value
+   *   (optional) Value of the field to assert. You may pass in NULL (default)
+   *   to skip checking the actual value, while still checking that the field
+   *   exists.
+   * @param string $message
+   *   (optional) A message to display with the assertion. Do not translate
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
+   * @param string $group
+   *   (optional) The group this message is in, which is displayed in a column
+   *   in test output. Use 'Debug' to indicate this is debugging output. Do not
+   *   translate this string. Defaults to 'Other'; most tests do not override
+   *   this default.
+   *
+   * @return bool
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertFieldByXPath($xpath, $value = NULL, $message = '', $group = 'Other') {
+    $fields = $this->xpath($xpath);
+
+    return $this->assertFieldsByValue($fields, $value, $message, $group);
+  }
+
+  /**
    * Get the selected value from a select field.
    *
    * @param \SimpleXmlElement $element
@@ -913,8 +1008,9 @@ trait AssertContentTrait {
    *   page does not match it.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -953,8 +1049,9 @@ trait AssertContentTrait {
    *   exists.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -993,8 +1090,9 @@ trait AssertContentTrait {
    *   default value ('') asserts that the field value is not an empty string.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1013,15 +1111,16 @@ trait AssertContentTrait {
    *
    * @param string $id
    *   ID of field to assert.
-   * @param string $value
+   * @param string|\Drupal\Component\Render\MarkupInterface $value
    *   (optional) Value for the field to assert. You may pass in NULL to skip
    *   checking the value, while still checking that the field exists.
    *   However, the default value ('') asserts that the field value is an empty
    *   string.
-   * @param string $message
+   * @param string|\Drupal\Component\Render\MarkupInterface $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1032,6 +1131,11 @@ trait AssertContentTrait {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertFieldById($id, $value = '', $message = '', $group = 'Browser') {
+    // Cast MarkupInterface objects to string.
+    if (isset($value)) {
+      $value = (string) $value;
+    }
+    $message = (string) $message;
     return $this->assertFieldByXPath($this->constructFieldXpath('id', $id), $value, $message ? $message : SafeMarkup::format('Found field by id @id', array('@id' => $id)), $group);
   }
 
@@ -1047,8 +1151,9 @@ trait AssertContentTrait {
    *   value ('') asserts that the field value is not an empty string.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1069,8 +1174,9 @@ trait AssertContentTrait {
    *   ID of field to assert.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1092,8 +1198,9 @@ trait AssertContentTrait {
    *   ID of field to assert.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1117,8 +1224,9 @@ trait AssertContentTrait {
    *   Option to assert.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1134,6 +1242,50 @@ trait AssertContentTrait {
   }
 
   /**
+   * Asserts that a select option with the visible text exists.
+   *
+   * @param string $id
+   *   The ID of the select field to assert.
+   * @param string $text
+   *   The text for the option tag to assert.
+   * @param string $message
+   *   (optional) A message to display with the assertion.
+   *
+   * @return bool
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertOptionByText($id, $text, $message = '') {
+    $options = $this->xpath('//select[@id=:id]//option[normalize-space(text())=:text]', [':id' => $id, ':text' => $text]);
+    return $this->assertTrue(isset($options[0]), $message ?: 'Option with text label ' . $text . ' for select field ' . $id . ' exits.');
+  }
+
+  /**
+   * Asserts that a select option in the current page exists.
+   *
+   * @param string $drupal_selector
+   *   The data drupal selector of select field to assert.
+   * @param string $option
+   *   Option to assert.
+   * @param string $message
+   *   (optional) A message to display with the assertion. Do not translate
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
+   * @param string $group
+   *   (optional) The group this message is in, which is displayed in a column
+   *   in test output. Use 'Debug' to indicate this is debugging output. Do not
+   *   translate this string. Defaults to 'Browser'; most tests do not override
+   *   this default.
+   *
+   * @return bool
+   *   TRUE on pass, FALSE on fail.
+   */
+  protected function assertOptionWithDrupalSelector($drupal_selector, $option, $message = '', $group = 'Browser') {
+    $options = $this->xpath('//select[@data-drupal-selector=:data_drupal_selector]//option[@value=:option]', array(':data_drupal_selector' => $drupal_selector, ':option' => $option));
+    return $this->assertTrue(isset($options[0]), $message ? $message : SafeMarkup::format('Option @option for field @data_drupal_selector exists.', array('@option' => $option, '@data_drupal_selector' => $drupal_selector)), $group);
+  }
+
+  /**
    * Asserts that a select option in the current page does not exist.
    *
    * @param string $id
@@ -1142,8 +1294,9 @@ trait AssertContentTrait {
    *   Option to assert.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1168,8 +1321,9 @@ trait AssertContentTrait {
    *   Option to assert.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1187,6 +1341,34 @@ trait AssertContentTrait {
   }
 
   /**
+   * Asserts that a select option in the current page is checked.
+   *
+   * @param string $drupal_selector
+   *   The data drupal selector of select field to assert.
+   * @param string $option
+   *   Option to assert.
+   * @param string $message
+   *   (optional) A message to display with the assertion. Do not translate
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
+   * @param string $group
+   *   (optional) The group this message is in, which is displayed in a column
+   *   in test output. Use 'Debug' to indicate this is debugging output. Do not
+   *   translate this string. Defaults to 'Browser'; most tests do not override
+   *   this default.
+   *
+   * @return bool
+   *   TRUE on pass, FALSE on fail.
+   *
+   * @todo $id is unusable. Replace with $name.
+   */
+  protected function assertOptionSelectedWithDrupalSelector($drupal_selector, $option, $message = '', $group = 'Browser') {
+    $elements = $this->xpath('//select[@data-drupal-selector=:data_drupal_selector]//option[@value=:option]', array(':data_drupal_selector' => $drupal_selector, ':option' => $option));
+    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['selected']), $message ? $message : SafeMarkup::format('Option @option for field @data_drupal_selector is selected.', array('@option' => $option, '@data_drupal_selector' => $drupal_selector)), $group);
+  }
+
+  /**
    * Asserts that a select option in the current page is not checked.
    *
    * @param string $id
@@ -1195,8 +1377,9 @@ trait AssertContentTrait {
    *   Option to assert.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1218,8 +1401,9 @@ trait AssertContentTrait {
    *   Name or ID of field to assert.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1240,8 +1424,9 @@ trait AssertContentTrait {
    *   Name or ID of field to assert.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not
@@ -1260,8 +1445,9 @@ trait AssertContentTrait {
    *
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use format_string() to embed variables in the message text, not
-   *   t(). If left blank, a default message will be displayed.
+   *   messages: use \Drupal\Component\Utility\SafeMarkup::format() to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
    * @param string $group
    *   (optional) The group this message is in, which is displayed in a column
    *   in test output. Use 'Debug' to indicate this is debugging output. Do not

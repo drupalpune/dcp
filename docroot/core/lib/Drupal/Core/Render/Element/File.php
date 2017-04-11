@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\File.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -12,6 +7,13 @@ use Drupal\Core\Render\Element;
 
 /**
  * Provides a form element for uploading a file.
+ *
+ * If you add this element to a form the enctype="multipart/form-data" attribute
+ * will automatically be added to the form element.
+ *
+ * Properties:
+ * - #multiple: A Boolean indicating whether multiple files may be uploaded.
+ * - #size: The size of the file input element in characters.
  *
  * @FormElement("file")
  */
@@ -65,7 +67,7 @@ class File extends FormElement {
   public static function preRenderFile($element) {
     $element['#attributes']['type'] = 'file';
     Element::setAttributes($element, array('id', 'name', 'size'));
-    static::setAttributes($element, array('form-file'));
+    static::setAttributes($element, array('js-form-file', 'form-file'));
 
     return $element;
   }

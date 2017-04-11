@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\content_translation\Tests\Views\TranslationLinkTest.
- */
-
 namespace Drupal\content_translation\Tests\Views;
 
-use Drupal\views\Tests\ViewTestBase;
 use Drupal\content_translation\Tests\ContentTranslationTestBase;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\Core\Language\Language;
@@ -52,6 +46,15 @@ class TranslationLinkTest extends ContentTranslationTestBase {
     $user->save();
 
     ViewTestData::createTestViews(get_class($this), array('content_translation_test_views'));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getTranslatorPermissions() {
+    $permissions = parent::getTranslatorPermissions();
+    $permissions[] = 'access user profiles';
+    return $permissions;
   }
 
   /**

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\basic_auth\Authentication\Provider\BasicAuth.
- */
-
 namespace Drupal\basic_auth\Authentication\Provider;
 
 use Drupal\Component\Utility\SafeMarkup;
@@ -135,7 +130,7 @@ class BasicAuth implements AuthenticationProviderInterface, AuthenticationProvid
     $challenge = SafeMarkup::format('Basic realm="@realm"', array(
       '@realm' => !empty($site_name) ? $site_name : 'Access restricted',
     ));
-    return new UnauthorizedHttpException($challenge, 'No authentication credentials provided.', $previous);
+    return new UnauthorizedHttpException((string) $challenge, 'No authentication credentials provided.', $previous);
   }
 
 }

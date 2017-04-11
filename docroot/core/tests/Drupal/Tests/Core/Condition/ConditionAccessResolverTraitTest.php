@@ -8,7 +8,6 @@
 namespace Drupal\Tests\Core\Condition;
 
 use Drupal\Component\Plugin\Exception\ContextException;
-use Drupal\Core\Condition\ConditionAccessResolverTrait;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -44,6 +43,16 @@ class ConditionAccessResolverTraitTest extends UnitTestCase {
     $condition_exception->expects($this->any())
       ->method('execute')
       ->will($this->throwException(new ContextException()));
+    $condition_exception->expects($this->atLeastOnce())
+      ->method('isNegated')
+      ->will($this->returnValue(FALSE));
+    $condition_negated = $this->getMock('Drupal\Core\Condition\ConditionInterface');
+    $condition_negated->expects($this->any())
+      ->method('execute')
+      ->will($this->throwException(new ContextException()));
+    $condition_negated->expects($this->atLeastOnce())
+      ->method('isNegated')
+      ->will($this->returnValue(TRUE));
 
     $conditions = array();
     $data[] = array($conditions, 'and', TRUE);
@@ -80,6 +89,14 @@ class ConditionAccessResolverTraitTest extends UnitTestCase {
     $conditions = array($condition_exception, $condition_false);
     $data[] = array($conditions, 'or', FALSE);
     $data[] = array($conditions, 'and', FALSE);
+
+    $conditions = array($condition_negated);
+    $data[] = array($conditions, 'or', TRUE);
+    $data[] = array($conditions, 'and', TRUE);
+
+    $conditions = array($condition_negated, $condition_negated);
+    $data[] = array($conditions, 'or', TRUE);
+    $data[] = array($conditions, 'and', TRUE);
     return $data;
   }
 
@@ -89,4 +106,5 @@ class TestConditionAccessResolverTrait {
   use \Drupal\Core\Condition\ConditionAccessResolverTrait {
     resolveConditions as public;
   }
+
 }

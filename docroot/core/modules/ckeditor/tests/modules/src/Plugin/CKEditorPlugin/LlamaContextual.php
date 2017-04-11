@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ckeditor_test\Plugin\CKEditorPlugin\LlamaContextual.
- */
-
 namespace Drupal\ckeditor_test\Plugin\CKEditorPlugin;
 
 use Drupal\ckeditor\CKEditorPluginContextualInterface;
-use Drupal\Component\Plugin\PluginBase;
 use Drupal\editor\Entity\Editor;
 
 /**
@@ -22,7 +16,7 @@ use Drupal\editor\Entity\Editor;
 class LlamaContextual extends Llama implements CKEditorPluginContextualInterface {
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginContextualInterface::isEnabled().
+   * {@inheritdoc}
    */
   function isEnabled(Editor $editor) {
     // Automatically enable this plugin if the Underline button is enabled.
@@ -38,7 +32,7 @@ class LlamaContextual extends Llama implements CKEditorPluginContextualInterface
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::getFile().
+   * {@inheritdoc}
    */
   function getFile() {
     return drupal_get_path('module', 'ckeditor_test') . '/js/llama_contextual.js';

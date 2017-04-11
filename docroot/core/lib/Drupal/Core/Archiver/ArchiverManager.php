@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Archiver\ArchiverManager.
- */
-
 namespace Drupal\Core\Archiver;
 
 use Drupal\Component\Plugin\Factory\DefaultFactory;
@@ -39,7 +34,7 @@ class ArchiverManager extends DefaultPluginManager {
   }
 
   /**
-   * Overrides \Drupal\Component\Plugin\PluginManagerBase::createInstance().
+   * {@inheritdoc}
    */
   public function createInstance($plugin_id, array $configuration = array()) {
     $plugin_definition = $this->getDefinition($plugin_id);
@@ -48,7 +43,7 @@ class ArchiverManager extends DefaultPluginManager {
   }
 
   /**
-   * Implements \Drupal\Core\PluginManagerInterface::getInstance().
+   * {@inheritdoc}
    */
   public function getInstance(array $options) {
     $filepath = $options['filepath'];

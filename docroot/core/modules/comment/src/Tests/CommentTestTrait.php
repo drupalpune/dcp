@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Tests\CommentTestTrait.
- */
-
 namespace Drupal\comment\Tests;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 
@@ -35,17 +29,17 @@ trait CommentTestTrait {
    *   CommentItemInterface::OPEN.
    * @param string $comment_type_id
    *   (optional) ID of comment type to use. Defaults to 'comment'.
+   * @param string $comment_view_mode
+   *   (optional) The comment view mode to be used in comment field formatter.
+   *   Defaults to 'full'.
    */
-  public function addDefaultCommentField($entity_type, $bundle, $field_name = 'comment', $default_value = CommentItemInterface::OPEN, $comment_type_id = 'comment') {
+  public function addDefaultCommentField($entity_type, $bundle, $field_name = 'comment', $default_value = CommentItemInterface::OPEN, $comment_type_id = 'comment', $comment_view_mode = 'full') {
     $entity_manager = \Drupal::entityManager();
     // Create the comment type if needed.
     $comment_type_storage = $entity_manager->getStorage('comment_type');
     if ($comment_type = $comment_type_storage->load($comment_type_id)) {
       if ($comment_type->getTargetEntityTypeId() !== $entity_type) {
-        throw new \InvalidArgumentException(SafeMarkup::format('The given comment type id %id can only be used with the %entity_type entity type', array(
-          '%id' => $comment_type_id,
-          '%entity_type' => $entity_type,
-        )));
+        throw new \InvalidArgumentException("The given comment type id $comment_type_id can only be used with the $entity_type entity type");
       }
     }
     else {
@@ -115,6 +109,7 @@ trait CommentTestTrait {
           'label' => 'above',
           'type' => 'comment_default',
           'weight' => 20,
+          'settings' => array('view_mode' => $comment_view_mode),
         ))
         ->save();
       foreach ($entity_manager->getViewModes($entity_type) as $id => $view_mode) {

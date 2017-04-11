@@ -1,21 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Form\CommentAdminOverview.
- */
-
 namespace Drupal\comment\Form;
 
 use Drupal\comment\CommentInterface;
 use Drupal\comment\CommentStorageInterface;
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Datetime\DateFormatter;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -40,7 +34,7 @@ class CommentAdminOverview extends FormBase {
   /**
    * The date formatter service.
    *
-   * @var \Drupal\Core\Datetime\DateFormatter
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected $dateFormatter;
 
@@ -58,12 +52,12 @@ class CommentAdminOverview extends FormBase {
    *   The entity manager service.
    * @param \Drupal\comment\CommentStorageInterface $comment_storage
    *   The comment storage.
-   * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    */
-  public function __construct(EntityManagerInterface $entity_manager, CommentStorageInterface $comment_storage, DateFormatter $date_formatter, ModuleHandlerInterface $module_handler) {
+  public function __construct(EntityManagerInterface $entity_manager, CommentStorageInterface $comment_storage, DateFormatterInterface $date_formatter, ModuleHandlerInterface $module_handler) {
     $this->entityManager = $entity_manager;
     $this->commentStorage = $comment_storage;
     $this->dateFormatter = $date_formatter;
@@ -157,10 +151,10 @@ class CommentAdminOverview extends FormBase {
       'operations' => $this->t('Operations'),
     );
     $cids = $this->commentStorage->getQuery()
-     ->condition('status', $status)
-     ->tableSort($header)
-     ->pager(50)
-     ->execute();
+      ->condition('status', $status)
+      ->tableSort($header)
+      ->pager(50)
+      ->execute();
 
     /** @var $comments \Drupal\comment\CommentInterface[] */
     $comments = $this->commentStorage->loadMultiple($cids);
@@ -183,18 +177,12 @@ class CommentAdminOverview extends FormBase {
     foreach ($comments as $comment) {
       /** @var $commented_entity \Drupal\Core\Entity\EntityInterface */
       $commented_entity = $commented_entities[$comment->getCommentedEntityTypeId()][$comment->getCommentedEntityId()];
-      $username = array(
-        '#theme' => 'username',
-        '#account' => $comment->getOwner(),
-      );
-      $body = '';
-      if (!empty($comment->comment_body->value)) {
-        $body = $comment->comment_body->value;
-      }
       $comment_permalink = $comment->permalink();
-      $attributes = $comment_permalink->getOption('attributes') ?: array();
-      $attributes += array('title' => Unicode::truncate($body, 128));
-      $comment_permalink->setOption('attributes', $attributes);
+      if ($comment->hasField('comment_body') && ($body = $comment->get('comment_body')->value)) {
+        $attributes = $comment_permalink->getOption('attributes') ?: array();
+        $attributes += array('title' => Unicode::truncate($body, 128));
+        $comment_permalink->setOption('attributes', $attributes);
+      }
       $options[$comment->id()] = array(
         'title' => array('data' => array('#title' => $comment->getSubject() ?: $comment->id())),
         'subject' => array(
@@ -204,7 +192,12 @@ class CommentAdminOverview extends FormBase {
             '#url' => $comment_permalink,
           ),
         ),
-        'author' => drupal_render($username),
+        'author' => array(
+          'data' => array(
+            '#theme' => 'username',
+            '#account' => $comment->getOwner(),
+          ),
+        ),
         'posted_in' => array(
           'data' => array(
             '#type' => 'link',
@@ -215,16 +208,16 @@ class CommentAdminOverview extends FormBase {
         ),
         'changed' => $this->dateFormatter->format($comment->getChangedTimeAcrossTranslations(), 'short'),
       );
-      $comment_uri_options = $comment->urlInfo()->getOptions();
+      $comment_uri_options = $comment->urlInfo()->getOptions() + ['query' => $destination];
       $links = array();
       $links['edit'] = array(
         'title' => $this->t('Edit'),
-        'url' => Url::fromRoute('entity.comment.edit_form', ['comment' => $comment->id()], $comment_uri_options + ['query' => $destination]),
+        'url' => $comment->urlInfo('edit-form', $comment_uri_options),
       );
       if ($this->moduleHandler->moduleExists('content_translation') && $this->moduleHandler->invoke('content_translation', 'translate_access', array($comment))->isAllowed()) {
         $links['translate'] = array(
           'title' => $this->t('Translate'),
-          'url' => Url::fromRoute('entity.comment.content_translation_overview', ['comment' => $comment->id()], $comment_uri_options + ['query' => $destination]),
+          'url' => $comment->urlInfo('drupal:content-translation-overview', $comment_uri_options),
         );
       }
       $options[$comment->id()]['operations']['data'] = array(

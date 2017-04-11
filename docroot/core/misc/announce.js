@@ -1,9 +1,12 @@
 /**
+ * @file
  * Adds an HTML element and method to trigger audio UAs to read system messages.
  *
- * Use Drupal.announce() to indicate to screen reader users that an element on
- * the page has changed state. For instance, if clicking a link loads 10 more
- * items into a list, one might announce the change like this.
+ * Use {@link Drupal.announce} to indicate to screen reader users that an
+ * element on the page has changed state. For instance, if clicking a link
+ * loads 10 more items into a list, one might announce the change like this.
+ *
+ * @example
  * $('#search-list')
  *   .on('itemInsert', function (event, data) {
  *     // Insert the new items.
@@ -14,16 +17,21 @@
  *     ));
  *   });
  */
+
 (function (Drupal, debounce) {
 
-  "use strict";
+  'use strict';
 
   var liveElement;
   var announcements = [];
 
   /**
-   * Builds a div element with the aria-live attribute and attaches it
-   * to the DOM.
+   * Builds a div element with the aria-live attribute and add it to the DOM.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behavior for drupalAnnouce.
    */
   Drupal.behaviors.drupalAnnounce = {
     attach: function (context) {
@@ -80,17 +88,20 @@
    *
    * The aria-live region will only read the text that currently populates its
    * text node. Replacing text quickly in rapid calls to announce results in
-   * only the text from the most recent call to Drupal.announce() being read.
-   * By wrapping the call to announce in a debounce function, we allow for
-   * time for multiple calls to Drupal.announce() to queue up their messages.
-   * These messages are then joined and append to the aria-live region as one
-   * text node.
+   * only the text from the most recent call to {@link Drupal.announce} being
+   * read. By wrapping the call to announce in a debounce function, we allow for
+   * time for multiple calls to {@link Drupal.announce} to queue up their
+   * messages. These messages are then joined and append to the aria-live region
+   * as one text node.
    *
-   * @param String text
+   * @param {string} text
    *   A string to be read by the UA.
-   * @param String priority
+   * @param {string} [priority='polite']
    *   A string to indicate the priority of the message. Can be either
-   *   'polite' or 'assertive'. Polite is the default.
+   *   'polite' or 'assertive'.
+   *
+   * @return {function}
+   *   The return of the call to debounce.
    *
    * @see http://www.w3.org/WAI/PF/aria-practices/#liveprops
    */

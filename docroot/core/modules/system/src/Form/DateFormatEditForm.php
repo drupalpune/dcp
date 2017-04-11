@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Form\DateFormatEditForm.
- */
-
 namespace Drupal\system\Form;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -21,7 +16,7 @@ class DateFormatEditForm extends DateFormatFormBase {
     $form = parent::form($form, $form_state);
 
     $now = t('Displayed as %date', array('%date' => $this->dateFormatter->format(REQUEST_TIME, $this->entity->id())));
-    $form['date_format_pattern']['#field_suffix'] = ' <small id="edit-date-format-suffix">' . $now . '</small>';
+    $form['date_format_pattern']['#field_suffix'] = ' <small data-drupal-date-formatter="preview">' . $now . '</small>';
     $form['date_format_pattern']['#default_value'] = $this->entity->getPattern();
 
     return $form;

@@ -33,7 +33,13 @@
   width: auto;
 }
 .install-page table td {
-  word-break: break-word;
+  word-break: break-all;
+}
+
+.install-page .site-version {
+  vertical-align: super;
+  font-size: 0.5em;
+  color: #595959;
 }
 
 @media all and (max-width: 1010px) and (min-width: 48em) {

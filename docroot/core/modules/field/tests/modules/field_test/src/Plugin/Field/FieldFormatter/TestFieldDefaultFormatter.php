@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_test\Plugin\field\formatter\TestFieldDefaultFormatter.
- */
-
 namespace Drupal\field_test\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FormatterBase;
@@ -62,7 +57,7 @@ class TestFieldDefaultFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = array();
 
     foreach ($items as $delta => $item) {
@@ -71,4 +66,5 @@ class TestFieldDefaultFormatter extends FormatterBase {
 
     return $elements;
   }
+
 }

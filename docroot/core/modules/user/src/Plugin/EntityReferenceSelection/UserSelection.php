@@ -1,16 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Plugin\EntityReferenceSelection\UserSelection.
- */
-
 namespace Drupal\user\Plugin\EntityReferenceSelection;
 
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
-use Drupal\Core\Entity\Plugin\EntityReferenceSelection\SelectionBase;
+use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -28,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   weight = 1
  * )
  */
-class UserSelection extends SelectionBase {
+class UserSelection extends DefaultSelection {
 
   /**
    * The database connection.
@@ -120,7 +115,7 @@ class UserSelection extends SelectionBase {
     $form['filter']['settings'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('entity_reference-settings')),
-      '#process' => array('_entity_reference_form_process_merge_parent'),
+      '#process' => array(array('\Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem', 'formProcessMergeParent')),
     );
 
     if ($selection_handler_settings['filter']['type'] == 'role') {
@@ -148,6 +143,13 @@ class UserSelection extends SelectionBase {
    */
   protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS') {
     $query = parent::buildEntityQuery($match, $match_operator);
+    $handler_settings = $this->configuration['handler_settings'];
+
+    // Filter out the Anonymous user if the selection handler is configured to
+    // exclude it.
+    if (isset($handler_settings['include_anonymous']) && !$handler_settings['include_anonymous']) {
+      $query->condition('uid', 0, '<>');
+    }
 
     // The user entity doesn't have a label column.
     if (isset($match)) {
@@ -155,7 +157,6 @@ class UserSelection extends SelectionBase {
     }
 
     // Filter by role.
-    $handler_settings = $this->configuration['handler_settings'];
     if (!empty($handler_settings['filter']['role'])) {
       $query->condition('roles', $handler_settings['filter']['role'], 'IN');
     }
@@ -166,6 +167,42 @@ class UserSelection extends SelectionBase {
       $query->condition('status', 1);
     }
     return $query;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createNewEntity($entity_type_id, $bundle, $label, $uid) {
+    $user = parent::createNewEntity($entity_type_id, $bundle, $label, $uid);
+
+    // In order to create a referenceable user, it needs to be active.
+    if (!$this->currentUser->hasPermission('administer users')) {
+      /** @var \Drupal\user\UserInterface $user */
+      $user->activate();
+    }
+
+    return $user;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateReferenceableNewEntities(array $entities) {
+    $entities = parent::validateReferenceableNewEntities($entities);
+    // Mirror the conditions checked in buildEntityQuery().
+    if (!empty($this->configuration['handler_settings']['filter']['role'])) {
+      $entities = array_filter($entities, function ($user) {
+        /** @var \Drupal\user\UserInterface $user */
+        return !empty(array_intersect($user->getRoles(), $this->configuration['handler_settings']['filter']['role']));
+      });
+    }
+    if (!$this->currentUser->hasPermission('administer users')) {
+      $entities = array_filter($entities, function ($user) {
+        /** @var \Drupal\user\UserInterface $user */
+        return $user->isActive();
+      });
+    }
+    return $entities;
   }
 
   /**
@@ -202,7 +239,7 @@ class UserSelection extends SelectionBase {
           $value_part->condition('anonymous_name', $condition['value'], $condition['operator']);
           $value_part->compile($this->connection, $query);
           $or->condition(db_and()
-            ->where(str_replace('anonymous_name', ':anonymous_name', (string) $value_part), $value_part->arguments() + array(':anonymous_name' => user_format_name($this->userStorage->load(0))))
+            ->where(str_replace('anonymous_name', ':anonymous_name', (string) $value_part), $value_part->arguments() + array(':anonymous_name' => \Drupal::config('user.settings')->get('anonymous')))
             ->condition('base_table.uid', 0)
           );
           $query->condition($or);

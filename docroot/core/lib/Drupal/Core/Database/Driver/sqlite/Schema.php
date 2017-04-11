@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Driver\sqlite\Schema
- */
-
 namespace Drupal\Core\Database\Driver\sqlite;
 
 use Drupal\Component\Utility\Unicode;
@@ -17,6 +12,9 @@ use Drupal\Core\Database\Schema as DatabaseSchema;
  * @{
  */
 
+/**
+ * SQLite implementation of \Drupal\Core\Database\Schema.
+ */
 class Schema extends DatabaseSchema {
 
   /**
@@ -48,7 +46,7 @@ class Schema extends DatabaseSchema {
    */
   public function createTableSql($name, $table) {
     $sql = array();
-    $sql[] = "CREATE TABLE {" . $name . "} (\n" . $this->createColumnsSql($name, $table) . "\n);\n";
+    $sql[] = "CREATE TABLE {" . $name . "} (\n" . $this->createColumnsSql($name, $table) . "\n)\n";
     return array_merge($sql, $this->createIndexSql($name, $table));
   }
 
@@ -60,12 +58,12 @@ class Schema extends DatabaseSchema {
     $info = $this->getPrefixInfo($tablename);
     if (!empty($schema['unique keys'])) {
       foreach ($schema['unique keys'] as $key => $fields) {
-        $sql[] = 'CREATE UNIQUE INDEX ' . $info['schema'] . '.' . $info['table'] . '_' . $key . ' ON ' . $info['table'] . ' (' . $this->createKeySql($fields) . "); \n";
+        $sql[] = 'CREATE UNIQUE INDEX ' . $info['schema'] . '.' . $info['table'] . '_' . $key . ' ON ' . $info['table'] . ' (' . $this->createKeySql($fields) . ")\n";
       }
     }
     if (!empty($schema['indexes'])) {
       foreach ($schema['indexes'] as $key => $fields) {
-        $sql[] = 'CREATE INDEX ' . $info['schema'] . '.' . $info['table'] . '_' . $key . ' ON ' . $info['table'] . ' (' . $this->createKeySql($fields) . "); \n";
+        $sql[] = 'CREATE INDEX ' . $info['schema'] . '.' . $info['table'] . '_' . $key . ' ON ' . $info['table'] . ' (' . $this->createKeySql($fields) . ")\n";
       }
     }
     return $sql;
@@ -260,7 +258,7 @@ class Schema extends DatabaseSchema {
     $schema = $this->introspectSchema($table);
 
     // SQLite doesn't allow you to rename tables outside of the current
-    // database. So the syntax '...RENAME TO database.table' would fail.
+    // database. So the syntax '... RENAME TO database.table' would fail.
     // So we must determine the full table name here rather than surrounding
     // the table with curly braces in case the db_prefix contains a reference
     // to a database outside of our existing database.
@@ -318,6 +316,11 @@ class Schema extends DatabaseSchema {
           ->fields(array($field => $specification['initial']))
           ->execute();
       }
+      if (isset($specification['initial_from_field'])) {
+        $this->connection->update($table)
+          ->expression($field, $specification['initial_from_field'])
+          ->execute();
+      }
     }
     else {
       // We cannot add the field directly. Use the slower table alteration
@@ -335,6 +338,13 @@ class Schema extends DatabaseSchema {
         $mapping[$field] = array(
           'expression' => ':newfieldinitial',
           'arguments' => array(':newfieldinitial' => $specification['initial']),
+        );
+      }
+      elseif (isset($specification['initial_from_field'])) {
+        // If we have a initial value, copy it over.
+        $mapping[$field] = array(
+          'expression' => $specification['initial_from_field'],
+          'arguments' => [],
         );
       }
       else {
@@ -422,9 +432,12 @@ class Schema extends DatabaseSchema {
    *
    * @param $table
    *   Name of the table.
+   *
    * @return
    *   An array representing the schema, from drupal_get_schema().
-   * @see drupal_get_schema()
+   *
+   * @throws \Exception
+   *   If a column of the table could not be parsed.
    */
   protected function introspectSchema($table) {
     $mapped_fields = array_flip($this->getFieldTypeMap());
@@ -462,7 +475,7 @@ class Schema extends DatabaseSchema {
         }
       }
       else {
-        new \Exception("Unable to parse the column type " . $row->type);
+        throw new \Exception("Unable to parse the column type " . $row->type);
       }
     }
     $indexes = array();
@@ -583,7 +596,10 @@ class Schema extends DatabaseSchema {
     return $key_definition;
   }
 
-  public function addIndex($table, $name, $fields) {
+  /**
+   * {@inheritdoc}
+   */
+  public function addIndex($table, $name, $fields, array $spec) {
     if (!$this->tableExists($table)) {
       throw new SchemaObjectDoesNotExistException(t("Cannot add index @name to table @table: table doesn't exist.", array('@table' => $table, '@name' => $name)));
     }
@@ -694,16 +710,31 @@ class Schema extends DatabaseSchema {
     $this->alterTable($table, $old_schema, $new_schema);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function findTables($table_expression) {
-    // Don't add the prefix, $table_expression already includes the prefix.
-    $info = $this->getPrefixInfo($table_expression, FALSE);
+    $tables = [];
 
-    // Can't use query placeholders for the schema because the query would have
-    // to be :prefixsqlite_master, which does not work.
-    $result = db_query("SELECT name FROM " . $info['schema'] . ".sqlite_master WHERE type = :type AND name LIKE :table_name", array(
-      ':type' => 'table',
-      ':table_name' => $info['table'],
-    ));
-    return $result->fetchAllKeyed(0, 0);
+    // The SQLite implementation doesn't need to use the same filtering strategy
+    // as the parent one because individually prefixed tables live in their own
+    // schema (database), which means that neither the main database nor any
+    // attached one will contain a prefixed table name, so we just need to loop
+    // over all known schemas and filter by the user-supplied table expression.
+    $attached_dbs = $this->connection->getAttachedDatabases();
+    foreach ($attached_dbs as $schema) {
+      // Can't use query placeholders for the schema because the query would
+      // have to be :prefixsqlite_master, which does not work. We also need to
+      // ignore the internal SQLite tables.
+      $result = $this->connection->query("SELECT name FROM " . $schema . ".sqlite_master WHERE type = :type AND name LIKE :table_name AND name NOT LIKE :pattern", array(
+        ':type' => 'table',
+        ':table_name' => $table_expression,
+        ':pattern' => 'sqlite_%',
+      ));
+      $tables += $result->fetchAllKeyed(0, 0);
+    }
+
+    return $tables;
   }
+
 }

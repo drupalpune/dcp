@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Component\PhpStorage\FileStorage.
- */
-
 namespace Drupal\Component\PhpStorage;
 
 /**
@@ -33,14 +28,14 @@ class FileStorage implements PhpStorageInterface {
   }
 
   /**
-   * Implements Drupal\Component\PhpStorage\PhpStorageInterface::exists().
+   * {@inheritdoc}
    */
   public function exists($name) {
     return file_exists($this->getFullPath($name));
   }
 
   /**
-   * Implements Drupal\Component\PhpStorage\PhpStorageInterface::load().
+   * {@inheritdoc}
    */
   public function load($name) {
     // The FALSE returned on failure is enough for the caller to handle this,
@@ -49,13 +44,13 @@ class FileStorage implements PhpStorageInterface {
   }
 
   /**
-   * Implements Drupal\Component\PhpStorage\PhpStorageInterface::save().
+   * {@inheritdoc}
    */
   public function save($name, $code) {
     $path = $this->getFullPath($name);
     $directory = dirname($path);
     if ($this->ensureDirectory($directory)) {
-      $htaccess_path =  $directory . '/.htaccess';
+      $htaccess_path = $directory . '/.htaccess';
       if (!file_exists($htaccess_path) && file_put_contents($htaccess_path, static::htaccessLines())) {
         @chmod($htaccess_path, 0444);
       }
@@ -79,8 +74,7 @@ class FileStorage implements PhpStorageInterface {
   public static function htaccessLines($private = TRUE) {
     $lines = <<<EOF
 # Turn off all options we don't need.
-Options None
-Options +FollowSymLinks
+Options -Indexes -ExecCGI -Includes -MultiViews
 
 # Set the catch-all handler to prevent scripts from being executed.
 SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
@@ -106,8 +100,8 @@ EOF;
 <IfModule !mod_authz_core.c>
   Deny from all
 </IfModule>
-EOF
-      . $lines;
+$lines
+EOF;
     }
 
     return $lines;
@@ -132,7 +126,7 @@ EOF
    */
   protected function ensureDirectory($directory, $mode = 0777) {
     if ($this->createDirectory($directory, $mode)) {
-      $htaccess_path =  $directory . '/.htaccess';
+      $htaccess_path = $directory . '/.htaccess';
       if (!file_exists($htaccess_path) && file_put_contents($htaccess_path, static::htaccessLines())) {
         @chmod($htaccess_path, 0444);
       }
@@ -183,7 +177,7 @@ EOF
   }
 
   /**
-   * Implements Drupal\Component\PhpStorage\PhpStorageInterface::delete().
+   * {@inheritdoc}
    */
   public function delete($name) {
     $path = $this->getFullPath($name);
@@ -201,14 +195,14 @@ EOF
   }
 
   /**
-   * Implements Drupal\Component\PhpStorage\PhpStorageInterface::writeable().
+   * {@inheritdoc}
    */
   public function writeable() {
     return TRUE;
   }
 
   /**
-   * Implements Drupal\Component\PhpStorage\PhpStorageInterface::deleteAll().
+   * {@inheritdoc}
    */
   public function deleteAll() {
     return $this->unlink($this->directory);
@@ -224,7 +218,7 @@ EOF
    * @param string $path
    *   A string containing either a file or directory path.
    *
-   * @return boolean
+   * @return bool
    *   TRUE for success or if path does not exist, FALSE in the event of an
    *   error.
    */
@@ -264,6 +258,12 @@ EOF
       }
     }
     return $names;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function garbageCollection() {
   }
 
 }

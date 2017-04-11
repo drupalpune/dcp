@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains FallbackPluginManagerInterface.php.
- */
-
 namespace Drupal\Component\Plugin;
 
 /**

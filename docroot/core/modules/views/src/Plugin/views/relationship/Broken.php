@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\relationship\Broken.
- */
-
 namespace Drupal\views\Plugin\views\relationship;
 
 use Drupal\views\Plugin\views\BrokenHandlerTrait;

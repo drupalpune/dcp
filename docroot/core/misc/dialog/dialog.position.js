@@ -1,6 +1,17 @@
+/**
+ * @file
+ * Positioning extensions for dialogs.
+ */
+
+/**
+ * Triggers when content inside a dialog changes.
+ *
+ * @event dialogContentResize
+ */
+
 (function ($, Drupal, drupalSettings, debounce, displace) {
 
-  "use strict";
+  'use strict';
 
   // autoResize option will turn off resizable and draggable.
   drupalSettings.dialog = $.extend({autoResize: true, maxHeight: '95%'}, drupalSettings.dialog);
@@ -11,7 +22,14 @@
    * This is used as a window resize and scroll callback to reposition the
    * jQuery UI dialog. Although not a built-in jQuery UI option, this can
    * be disabled by setting autoResize: false in the options array when creating
-   * a new Drupal.dialog().
+   * a new {@link Drupal.dialog}.
+   *
+   * @function Drupal.dialog~resetSize
+   *
+   * @param {jQuery.Event} event
+   *   The event triggered.
+   *
+   * @fires event:dialogContentResize
    */
   function resetSize(event) {
     var positionOptions = ['width', 'height', 'minWidth', 'minHeight', 'maxHeight', 'maxWidth', 'position'];
@@ -38,7 +56,9 @@
       }
     }
     // Offset the dialog center to be at the center of Drupal.displace.offsets.
-    adjustedOptions = resetPosition(adjustedOptions);
+    if (!event.data.settings.modal) {
+      adjustedOptions = resetPosition(adjustedOptions);
+    }
     event.data.$element
       .dialog('option', adjustedOptions)
       .trigger('dialogContentResize');
@@ -46,6 +66,14 @@
 
   /**
    * Position the dialog's center at the center of displace.offsets boundaries.
+   *
+   * @function Drupal.dialog~resetPosition
+   *
+   * @param {object} options
+   *   Options object.
+   *
+   * @return {object}
+   *   Altered options object.
    */
   function resetPosition(options) {
     var offsets = displace.offsets;
@@ -72,11 +100,12 @@
         $(window)
           .on('resize.dialogResize scroll.dialogResize', eventData, autoResize)
           .trigger('resize.dialogResize');
-        $(document).on('drupalViewportOffsetChange', eventData, autoResize);
+        $(document).on('drupalViewportOffsetChange.dialogResize', eventData, autoResize);
       }
     },
     'dialog:beforeclose': function (event, dialog, $element) {
       $(window).off('.dialogResize');
+      $(document).off('.dialogResize');
     }
   });
 

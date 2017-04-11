@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\EventSubscriber\EntityRouteProviderSubscriber.
- */
-
 namespace Drupal\Core\EventSubscriber;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -48,12 +43,14 @@ class EntityRouteProviderSubscriber implements EventSubscriberInterface {
         foreach ($this->entityManager->getRouteProviders($entity_type->id()) as $route_provider) {
           // Allow to both return an array of routes or a route collection,
           // like route_callbacks in the routing.yml file.
+
           $routes = $route_provider->getRoutes($entity_type);
           if ($routes instanceof RouteCollection) {
-            $route_collection->addCollection($routes);
+            $routes = $routes->all();
           }
-          elseif (is_array($routes)) {
-            foreach ($routes as $route_name => $route) {
+          foreach ($routes as $route_name => $route) {
+            // Don't override existing routes.
+            if (!$route_collection->get($route_name)) {
               $route_collection->add($route_name, $route);
             }
           }
@@ -71,4 +68,3 @@ class EntityRouteProviderSubscriber implements EventSubscriberInterface {
   }
 
 }
-

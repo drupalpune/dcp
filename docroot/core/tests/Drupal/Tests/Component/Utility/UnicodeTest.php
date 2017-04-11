@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Component\Utility\UnicodeTest.
- */
-
 namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Tests\UnitTestCase;
@@ -24,7 +19,7 @@ class UnicodeTest extends UnitTestCase {
    *
    * @covers ::check
    */
-  public function setUp() {
+  protected function setUp() {
     // Initialize unicode component.
     Unicode::check();
   }
@@ -291,6 +286,7 @@ class UnicodeTest extends UnitTestCase {
     return array(
       array('tHe QUIcK bRoWn', 15),
       array('ÜBER-åwesome', 12),
+      array('以呂波耳・ほへとち。リヌルヲ。', 15),
     );
   }
 
@@ -478,11 +474,11 @@ class UnicodeTest extends UnitTestCase {
   /**
    * Provides data for self::testValidateUtf8().
    *
+   * Invalid UTF-8 examples sourced from http://stackoverflow.com/a/11709412/109119.
+   *
    * @return array
    *   An array of arrays, each containing the parameters for
    *   self::testValidateUtf8().
-   *
-   * Invalid UTF-8 examples sourced from http://stackoverflow.com/a/11709412/109119.
    */
   public function providerTestValidateUtf8() {
     return array(
@@ -526,6 +522,48 @@ class UnicodeTest extends UnitTestCase {
       array(chr(0x97), 'Windows-1252', '—'),
       array(chr(0x99), 'Windows-1252', '™'),
       array(chr(0x80), 'Windows-1252', '€'),
+    );
+  }
+
+  /**
+   * Tests multibyte strpos.
+   *
+   * @dataProvider providerStrpos
+   * @covers ::strpos
+   */
+  public function testStrpos($haystack, $needle, $offset, $expected) {
+    // Run through multibyte code path.
+    Unicode::setStatus(Unicode::STATUS_MULTIBYTE);
+    $this->assertEquals($expected, Unicode::strpos($haystack, $needle, $offset));
+    // Run through singlebyte code path.
+    Unicode::setStatus(Unicode::STATUS_SINGLEBYTE);
+    $this->assertEquals($expected, Unicode::strpos($haystack, $needle, $offset));
+  }
+
+  /**
+   * Data provider for testStrpos().
+   *
+   * @see testStrpos()
+   *
+   * @return array
+   *   An array containing:
+   *     - The haystack string to be searched in.
+   *     - The needle string to search for.
+   *     - The offset integer to start at.
+   *     - The expected integer/FALSE result.
+   */
+  public function providerStrpos() {
+    return array(
+      array('frànçAIS is über-åwesome', 'frànçAIS is über-åwesome', 0, 0),
+      array('frànçAIS is über-åwesome', 'rànçAIS is über-åwesome', 0, 1),
+      array('frànçAIS is über-åwesome', 'not in string', 0, FALSE),
+      array('frànçAIS is über-åwesome', 'r', 0, 1),
+      array('frànçAIS is über-åwesome', 'nçAIS', 0, 3),
+      array('frànçAIS is über-åwesome', 'nçAIS', 2, 3),
+      array('frànçAIS is über-åwesome', 'nçAIS', 3, 3),
+      array('以呂波耳・ほへとち。リヌルヲ。', '波耳', 0, 2),
+      array('以呂波耳・ほへとち。リヌルヲ。', '波耳', 1, 2),
+      array('以呂波耳・ほへとち。リヌルヲ。', '波耳', 2, 2),
     );
   }
 

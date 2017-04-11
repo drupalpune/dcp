@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\comment\Unit\CommentStatisticsTest.
- */
-
 namespace Drupal\Tests\comment\Unit;
 
 use Drupal\comment\CommentStatistics;
@@ -55,7 +50,7 @@ class CommentStatisticsUnitTest extends UnitTestCase {
    * Sets up required mocks and the CommentStatistics service under test.
    */
   protected function setUp() {
-    $this->statement = $this->getMockBuilder('Drupal\Core\Database\Driver\fake\FakeStatement')
+    $this->statement = $this->getMockBuilder('Drupal\Core\Database\Driver\sqlite\Statement')
       ->disableOriginalConstructor()
       ->getMock();
 
@@ -116,13 +111,13 @@ class CommentStatisticsUnitTest extends UnitTestCase {
     switch ($this->calls_to_fetch) {
       case 1:
         return 'something';
-        break;
+
       case 2:
         return 'something-else';
-        break;
+
       default:
         return FALSE;
-        break;
     }
   }
+
 }

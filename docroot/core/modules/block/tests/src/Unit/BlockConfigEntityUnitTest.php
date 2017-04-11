@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\block\Unit\BlockConfigEntityUnitTest.
- */
-
 namespace Drupal\Tests\block\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -100,7 +95,7 @@ class BlockConfigEntityUnitTest extends UnitTestCase {
       ->method('getPluginCollections')
       ->will($this->returnValue(array($plugin_collection)));
 
-    $dependencies = $entity->calculateDependencies();
+    $dependencies = $entity->calculateDependencies()->getDependencies();
     $this->assertContains('test', $dependencies['module']);
     $this->assertContains('stark', $dependencies['theme']);
   }

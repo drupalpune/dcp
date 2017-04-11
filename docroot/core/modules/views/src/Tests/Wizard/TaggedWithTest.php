@@ -1,14 +1,11 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Tests\Wizard\TaggedWithTest.
- */
-
 namespace Drupal\views\Tests\Wizard;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\entity_reference\Tests\EntityReferenceTestTrait;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
+use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Tests the ability of the views wizard to create views filtered by taxonomy.
@@ -41,14 +38,14 @@ class TaggedWithTest extends WizardTestBase {
   protected $nodeTypeWithoutTags;
 
   /**
-   * Node type without an autocomplete tagging field.
+   * The vocabulary used for the test tag field.
    *
    * @var \Drupal\taxonomy\VocabularyInterface
    */
   protected $tagVocabulary;
 
   /**
-   * Node type without an autocomplete tagging field.
+   * Holds the field storage for test tag field.
    *
    * @var \Drupal\field\FieldStorageConfigInterface
    */
@@ -77,10 +74,10 @@ class TaggedWithTest extends WizardTestBase {
     $this->nodeTypeWithoutTags = $this->drupalCreateContentType();
 
     // Create the vocabulary for the tag field.
-    $this->tagVocabulary = entity_create('taxonomy_vocabulary',  array(
+    $this->tagVocabulary = Vocabulary::create([
       'name' => 'Views testing tags',
       'vid' => 'views_testing_tags',
-    ));
+    ]);
     $this->tagVocabulary->save();
 
     // Create the tag field itself.
@@ -196,12 +193,12 @@ class TaggedWithTest extends WizardTestBase {
     $this->drupalPostForm('admin/structure/views/add', $view, t('Update "of type" choice'));
     $this->assertFieldByXpath($tags_xpath);
     $view['show[type]'] = $this->nodeTypeWithoutTags->id();
-    $this->drupalPostForm(NULL, $view, t('Update "of type" choice'));
+    $this->drupalPostForm(NULL, $view, t('Update "of type" choice (2)'));
     $this->assertNoFieldByXpath($tags_xpath);
 
     // If we add an instance of the tagging field to the second node type, the
     // "tagged with" form element should not appear for it too.
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_name' => $this->tagFieldName,
       'entity_type' => 'node',
       'bundle' => $this->nodeTypeWithoutTags->id(),
@@ -214,7 +211,7 @@ class TaggedWithTest extends WizardTestBase {
           'auto_create' => TRUE,
         ),
       ),
-    ))->save();
+    ])->save();
     entity_get_form_display('node', $this->nodeTypeWithoutTags->id(), 'default')
       ->setComponent($this->tagFieldName, array(
         'type' => 'entity_reference_autocomplete_tags',
@@ -225,7 +222,7 @@ class TaggedWithTest extends WizardTestBase {
     $this->drupalPostForm('admin/structure/views/add', $view, t('Update "of type" choice'));
     $this->assertFieldByXpath($tags_xpath);
     $view['show[type]'] = $this->nodeTypeWithoutTags->id();
-    $this->drupalPostForm(NULL, $view, t('Update "of type" choice'));
+    $this->drupalPostForm(NULL, $view, t('Update "of type" choice (2)'));
     $this->assertFieldByXpath($tags_xpath);
   }
 

@@ -1,11 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\quickedit\Ajax\EntitySavedCommand.
- */
-
 namespace Drupal\quickedit\Ajax;
+
+use Drupal\Core\Ajax\BaseCommand;
 
 /**
  * AJAX command to indicate the entity was loaded from PrivateTempStore and

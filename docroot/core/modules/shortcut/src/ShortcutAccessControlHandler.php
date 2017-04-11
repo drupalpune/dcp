@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\shortcut\ShortcutAccessControlHandler.
- */
-
 namespace Drupal\shortcut;
 
 use Drupal\Core\Access\AccessResult;
@@ -55,13 +50,13 @@ class ShortcutAccessControlHandler extends EntityAccessControlHandler implements
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     if ($shortcut_set = $this->shortcutSetStorage->load($entity->bundle())) {
       return shortcut_set_edit_access($shortcut_set, $account);
     }
     // @todo Fix this bizarre code: how can a shortcut exist without a shortcut
     // set? The above if-test is unnecessary. See https://www.drupal.org/node/2339903.
-    return AccessResult::neutral()->cacheUntilEntityChanges($entity);
+    return AccessResult::neutral()->addCacheableDependency($entity);
   }
 
   /**

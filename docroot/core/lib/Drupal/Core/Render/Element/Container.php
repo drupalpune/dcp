@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Container.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Component\Utility\Html as HtmlUtility;
@@ -15,6 +10,31 @@ use Drupal\Core\Form\FormStateInterface;
  *
  * Surrounds child elements with a <div> and adds attributes such as classes or
  * an HTML ID.
+ *
+ * Usage example:
+ * @code
+ * $form['needs_accommodation'] = array(
+ *   '#type' => 'checkbox',
+ *   '#title' => $this->t('Need Special Accommodations?'),
+ * );
+ *
+ * $form['accommodation'] = array(
+ *   '#type' => 'container',
+ *   '#attributes' => array(
+ *     'class' => 'accommodation',
+ *   ),
+ *   '#states' => array(
+ *     'invisible' => array(
+ *       'input[name="needs_accommodation"]' => array('checked' => FALSE),
+ *     ),
+ *   ),
+ * );
+ *
+ * $form['accommodation']['diet'] = array(
+ *   '#type' => 'textfield',
+ *   '#title' => $this->t('Dietary Restrictions'),
+ * );
+ * @endcode
  *
  * @RenderElement("container")
  */

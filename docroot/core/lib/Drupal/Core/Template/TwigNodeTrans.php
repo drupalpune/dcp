@@ -1,8 +1,9 @@
 <?php
 
+namespace Drupal\Core\Template;
+
 /**
- * @file
- * Contains \Drupal\Core\Template\TwigNodeTrans.
+ * A class that defines the Twig 'trans' tag for Drupal.
  *
  * This Twig extension was originally based on Twig i18n extension. It has been
  * severely modified to work properly with the complexities of the Drupal
@@ -11,21 +12,12 @@
  * @see http://twig.sensiolabs.org/doc/extensions/i18n.html
  * @see https://github.com/fabpot/Twig-extensions
  */
-
-namespace Drupal\Core\Template;
-
-use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Site\Settings;
-
-/**
- * A class that defines the Twig 'trans' tag for Drupal.
- */
 class TwigNodeTrans extends \Twig_Node {
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(\Twig_NodeInterface $body, \Twig_NodeInterface $plural = NULL, \Twig_Node_Expression $count = NULL, \Twig_Node_Expression $options = NULL, $lineno, $tag = NULL) {
+  public function __construct(\Twig_Node $body, \Twig_Node $plural = NULL, \Twig_Node_Expression $count = NULL, \Twig_Node_Expression $options = NULL, $lineno, $tag = NULL) {
     parent::__construct(array(
       'count' => $count,
       'body' => $body,
@@ -82,20 +74,7 @@ class TwigNodeTrans extends \Twig_Node {
     // Write function closure.
     $compiler->raw(')');
 
-    // Append translation debug markup, if necessary.
-    if ($compiler->getEnvironment()->isDebug()) {
-      $compiler->raw(" . '\n<!-- TRANSLATION: ");
-      $compiler->subcompile($singular);
-      if (!empty($plural)) {
-        $compiler->raw(', PLURAL: ')->subcompile($plural);
-      }
-      if (!empty($options)) {
-        foreach ($options->getKeyValuePairs() as $pair) {
-          $compiler->raw(', ' . Unicode::strtoupper($pair['key']->getAttribute('value')) . ': ')->subcompile($pair['value']);
-        }
-      }
-      $compiler->raw(" -->\n'");
-    }
+    // @todo Add debug output, see https://www.drupal.org/node/2512672
 
     // End writing.
     $compiler->raw(";\n");
@@ -104,7 +83,7 @@ class TwigNodeTrans extends \Twig_Node {
   /**
    * Extracts the text and tokens for the "trans" tag.
    *
-   * @param \Twig_NodeInterface $body
+   * @param \Twig_Node $body
    *   The node to compile.
    *
    * @return array
@@ -114,7 +93,7 @@ class TwigNodeTrans extends \Twig_Node {
    *   - array $tokens
    *       The extracted tokens as new \Twig_Node_Expression_Name instances.
    */
-  protected function compileString(\Twig_NodeInterface $body) {
+  protected function compileString(\Twig_Node $body) {
     if ($body instanceof \Twig_Node_Expression_Name || $body instanceof \Twig_Node_Expression_Constant || $body instanceof \Twig_Node_Expression_TempName) {
       return array($body, array());
     }
@@ -149,9 +128,6 @@ class TwigNodeTrans extends \Twig_Node {
           $argPrefix = '@';
           while ($args instanceof \Twig_Node_Expression_Filter) {
             switch ($args->getNode('filter')->getAttribute('value')) {
-              case 'passthrough':
-                $argPrefix = '!';
-                break;
               case 'placeholder':
                 $argPrefix = '%';
                 break;
@@ -192,6 +168,9 @@ class TwigNodeTrans extends \Twig_Node {
           $text .= $node->getAttribute('data');
         }
       }
+    }
+    elseif (!$body->hasAttribute('data')) {
+      throw new \Twig_Error_Syntax('{% trans %} tag cannot be empty');
     }
     else {
       $text = $body->getAttribute('data');

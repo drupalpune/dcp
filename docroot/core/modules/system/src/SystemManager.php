@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\system\SystemManager.
- */
 
 namespace Drupal\system;
 
@@ -11,8 +7,6 @@ use Drupal\Core\Menu\MenuActiveTrailInterface;
 use Drupal\Core\Menu\MenuLinkTreeInterface;
 use Drupal\Core\Menu\MenuLinkInterface;
 use Drupal\Core\Menu\MenuTreeParameters;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
-use Drupal\Core\Database\Connection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -95,7 +89,7 @@ class SystemManager {
   /**
    * Checks for requirement severity.
    *
-   * @return boolean
+   * @return bool
    *   Returns the status of the system.
    */
   public function checkRequirements() {
@@ -119,7 +113,7 @@ class SystemManager {
     usort($requirements, function($a, $b) {
       if (!isset($a['weight'])) {
         if (!isset($b['weight'])) {
-          return strcmp($a['title'], $b['title']);
+          return strcasecmp($a['title'], $b['title']);
         }
         return -$b['weight'];
       }

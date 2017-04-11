@@ -1,16 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\rest\LinkManager\RelationLinkManagerInterface.
- */
-
 namespace Drupal\rest\LinkManager;
 
 interface RelationLinkManagerInterface extends ConfigurableLinkManagerInterface {
 
   /**
    * Gets the URI that corresponds to a field.
+   *
+   * When using hypermedia formats, this URI can be used to indicate which
+   * field the data represents. Documentation about this field can also be
+   * provided at this URI.
    *
    * @param string $entity_type
    *   The bundle's entity type.

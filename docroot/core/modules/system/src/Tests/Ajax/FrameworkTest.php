@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Ajax\FrameworkTest.
- */
-
 namespace Drupal\system\Tests\Ajax;
 
 use Drupal\Core\Ajax\AddCssCommand;
@@ -22,13 +17,13 @@ use Drupal\Core\Asset\AttachedAssets;
  */
 class FrameworkTest extends AjaxTestBase {
   /**
-   * Ensures \Drupal\Core\Ajax\AjaxResponse::ajaxRender() returns JavaScript settings from the page request.
+   * Verifies the Ajax rendering of a command in the settings.
    */
   public function testAJAXRender() {
     // Verify that settings command is generated if JavaScript settings exist.
     $commands = $this->drupalGetAjax('ajax-test/render');
     $expected = new SettingsCommand(array('ajax' => 'test'), TRUE);
-    $this->assertCommand($commands, $expected->render(), '\Drupal\Core\Ajax\AjaxResponse::ajaxRender() loads JavaScript settings.');
+    $this->assertCommand($commands, $expected->render(), 'JavaScript settings command is present.');
   }
 
   /**
@@ -46,21 +41,21 @@ class FrameworkTest extends AjaxTestBase {
     $build['#attached']['library'][] = 'ajax_test/order-css-command';
     $assets = AttachedAssets::createFromRenderArray($build);
     $css_render_array = $css_collection_renderer->render($asset_resolver->getCssAssets($assets, FALSE));
-    $expected_commands[1] = new AddCssCommand($renderer->render($css_render_array));
+    $expected_commands[1] = new AddCssCommand($renderer->renderRoot($css_render_array));
     $build['#attached']['library'][] = 'ajax_test/order-header-js-command';
     $build['#attached']['library'][] = 'ajax_test/order-footer-js-command';
     $assets = AttachedAssets::createFromRenderArray($build);
     list($js_assets_header, $js_assets_footer) = $asset_resolver->getJsAssets($assets, FALSE);
     $js_header_render_array = $js_collection_renderer->render($js_assets_header);
     $js_footer_render_array = $js_collection_renderer->render($js_assets_footer);
-    $expected_commands[2] = new PrependCommand('head', $renderer->render($js_header_render_array));
-    $expected_commands[3] = new AppendCommand('body', $renderer->render($js_footer_render_array));
+    $expected_commands[2] = new PrependCommand('head', $js_header_render_array);
+    $expected_commands[3] = new AppendCommand('body', $js_footer_render_array);
     $expected_commands[4] = new HtmlCommand('body', 'Hello, world!');
 
     // Load any page with at least one CSS file, at least one JavaScript file
     // and at least one #ajax-powered element. The latter is an assumption of
-    // drupalPostAjaxForm(), the two former are assumptions of
-    // AjaxResponse::ajaxRender().
+    // drupalPostAjaxForm(), the two former are assumptions of the Ajax
+    // renderer.
     // @todo refactor AJAX Framework + tests to make less assumptions.
     $this->drupalGet('ajax_forms_test_lazy_load_form');
 
@@ -123,14 +118,14 @@ class FrameworkTest extends AjaxTestBase {
     $assets->setLibraries([$expected['library_1']])
       ->setAlreadyLoadedLibraries($original_libraries);
     $css_render_array = $css_collection_renderer->render($asset_resolver->getCssAssets($assets, FALSE));
-    $expected_css_html = $renderer->render($css_render_array);
+    $expected_css_html = $renderer->renderRoot($css_render_array);
 
     $assets->setLibraries([$expected['library_2']])
       ->setAlreadyLoadedLibraries($original_libraries);
     $js_assets = $asset_resolver->getJsAssets($assets, FALSE)[1];
     unset($js_assets['drupalSettings']);
     $js_render_array = $js_collection_renderer->render($js_assets);
-    $expected_js_html = $renderer->render($js_render_array);
+    $expected_js_html = $renderer->renderRoot($js_render_array);
 
     // Submit the AJAX request without triggering files getting added.
     $commands = $this->drupalPostAjaxForm(NULL, array('add_files' => FALSE), array('op' => t('Submit')));
@@ -165,7 +160,7 @@ class FrameworkTest extends AjaxTestBase {
     // the first AJAX command.
     $this->assertIdentical($new_settings[$expected['setting_name']], $expected['setting_value'], format_string('Page now has the %setting.', array('%setting' => $expected['setting_name'])));
     $expected_command = new SettingsCommand(array($expected['setting_name'] => $expected['setting_value']), TRUE);
-    $this->assertCommand(array_slice($commands, 0, 1), $expected_command->render(), format_string('The settings command was first.'));
+    $this->assertCommand(array_slice($commands, 0, 1), $expected_command->render(), 'The settings command was first.');
 
     // Verify the expected CSS file was added, both to drupalSettings, and as
     // the second AJAX command for inclusion into the HTML.
@@ -198,7 +193,7 @@ class FrameworkTest extends AjaxTestBase {
    * Tests that overridden CSS files are not added during lazy load.
    */
   public function testLazyLoadOverriddenCSS() {
-    // The test theme overrides system.module.css without an implementation,
+    // The test theme overrides js.module.css without an implementation,
     // thereby removing it.
     \Drupal::service('theme_handler')->install(array('test_theme'));
     $this->config('system.theme')
@@ -214,6 +209,7 @@ class FrameworkTest extends AjaxTestBase {
     // information about the file; we only really care about whether it appears
     // in a LINK or STYLE tag, for which Drupal always adds a query string for
     // cache control.
-    $this->assertNoText('system.module.css?', 'Ajax lazy loading does not add overridden CSS files.');
+    $this->assertNoText('js.module.css?', 'Ajax lazy loading does not add overridden CSS files.');
   }
+
 }

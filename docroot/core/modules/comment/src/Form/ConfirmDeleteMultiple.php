@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Form\ConfirmDeleteMultiple.
- */
-
 namespace Drupal\comment\Form;
 
 use Drupal\comment\CommentStorageInterface;
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -100,7 +95,7 @@ class ConfirmDeleteMultiple extends ConfirmFormBase {
         '#type' => 'hidden',
         '#value' => $cid,
         '#prefix' => '<li>',
-        '#suffix' => SafeMarkup::checkPlain($comment->label()) . '</li>'
+        '#suffix' => Html::escape($comment->label()) . '</li>'
       );
       $comment_counter++;
     }

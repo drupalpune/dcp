@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config\Tests\AssertConfigEntityImportTrait.
- */
-
 namespace Drupal\config\Tests;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
@@ -13,7 +8,7 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  * Provides test assertions for testing config entity synchronization.
  *
  * Can be used by test classes that extend \Drupal\simpletest\WebTestBase or
- * \Drupal\simpletest\KernelTestBase.
+ * \Drupal\KernelTests\KernelTestBase.
  */
 trait AssertConfigEntityImportTrait {
 
@@ -28,8 +23,8 @@ trait AssertConfigEntityImportTrait {
     $entity_uuid = $entity->uuid();
     $entity_type_id = $entity->getEntityTypeId();
     $original_data = $entity->toArray();
-    // Copy everything to staging.
-    $this->copyConfig(\Drupal::service('config.storage'), \Drupal::service('config.storage.staging'));
+    // Copy everything to sync.
+    $this->copyConfig(\Drupal::service('config.storage'), \Drupal::service('config.storage.sync'));
     // Delete the configuration from active. Don't worry about side effects of
     // deleting config like fields cleaning up field storages. The coming import
     // should recreate everything as necessary.

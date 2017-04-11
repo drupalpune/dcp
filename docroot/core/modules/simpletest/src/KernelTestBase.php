@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\simpletest\KernelTestBase.
- */
-
 namespace Drupal\simpletest;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Variable;
 use Drupal\Core\Database\Database;
@@ -32,6 +28,9 @@ use Symfony\Component\HttpFoundation\Request;
  * The module/hook system is functional and operates on a fixed module list.
  * Additional modules needed in a test may be loaded and added to the fixed
  * module list.
+ *
+ * @deprecated in Drupal 8.0.x, will be removed before Drupal 9.0.0. Use
+ *   \Drupal\KernelTests\KernelTestBase instead.
  *
  * @see \Drupal\simpletest\KernelTestBase::$modules
  * @see \Drupal\simpletest\KernelTestBase::enableModules()
@@ -112,23 +111,20 @@ abstract class KernelTestBase extends TestBase {
    * @see config_get_config_directory()
    *
    * @throws \RuntimeException
-   *   Thrown when CONFIG_ACTIVE_DIRECTORY or CONFIG_STAGING_DIRECTORY cannot
-   *   be created or made writable.
+   *   Thrown when CONFIG_SYNC_DIRECTORY cannot be created or made writable.
    */
   protected function prepareConfigDirectories() {
     $this->configDirectories = array();
     include_once DRUPAL_ROOT . '/core/includes/install.inc';
-    foreach (array(CONFIG_ACTIVE_DIRECTORY, CONFIG_STAGING_DIRECTORY) as $type) {
-      // Assign the relative path to the global variable.
-      $path = $this->siteDirectory . '/config_' . $type;
-      $GLOBALS['config_directories'][$type] = $path;
-      // Ensure the directory can be created and is writeable.
-      if (!install_ensure_config_directory($type)) {
-        throw new \RuntimeException("Failed to create '$type' config directory $path");
-      }
-      // Provide the already resolved path for tests.
-      $this->configDirectories[$type] = $path;
+    // Assign the relative path to the global variable.
+    $path = $this->siteDirectory . '/config_' . CONFIG_SYNC_DIRECTORY;
+    $GLOBALS['config_directories'][CONFIG_SYNC_DIRECTORY] = $path;
+    // Ensure the directory can be created and is writeable.
+    if (!install_ensure_config_directory(CONFIG_SYNC_DIRECTORY)) {
+      throw new \RuntimeException("Failed to create '" . CONFIG_SYNC_DIRECTORY . "' config directory $path");
     }
+    // Provide the already resolved path for tests.
+    $this->configDirectories[CONFIG_SYNC_DIRECTORY] = $path;
   }
 
   /**
@@ -188,6 +184,22 @@ EOD;
       Settings::initialize(DRUPAL_ROOT, $site_path, $class_loader);
     }
     $this->kernel->boot();
+
+    // Ensure database install tasks have been run.
+    require_once __DIR__ . '/../../../includes/install.inc';
+    $connection = Database::getConnection();
+    $errors = db_installer_object($connection->driver())->runTasks();
+    if (!empty($errors)) {
+      $this->fail('Failed to run installer database tasks: ' . implode(', ', $errors));
+    }
+
+    // Reboot the kernel because the container might contain a connection to the
+    // database that has been closed during the database install tasks. This
+    // prevents any services created during the first boot from having stale
+    // database connections, for example, \Drupal\Core\Config\DatabaseStorage.
+    $this->kernel->shutdown();
+    $this->kernel->boot();
+
 
     // Save the original site directory path, so that extensions in the
     // site-specific directory can still be discovered in the test site
@@ -254,6 +266,12 @@ EOD;
     // The temporary stream wrapper is able to operate both with and without
     // configuration.
     $this->registerStreamWrapper('temporary', 'Drupal\Core\StreamWrapper\TemporaryStream');
+
+    // Manually configure the test mail collector implementation to prevent
+    // tests from sending out emails and collect them in state instead.
+    // While this should be enforced via settings.php prior to installation,
+    // some tests expect to be able to test mail system implementations.
+    $GLOBALS['config']['system.mail']['interface']['default'] = 'test_mail_collector';
   }
 
   /**
@@ -305,6 +323,7 @@ EOD;
       $container
         ->register('simpletest.config_schema_checker', 'Drupal\Core\Config\Testing\ConfigSchemaChecker')
         ->addArgument(new Reference('config.typed'))
+        ->addArgument($this->getConfigSchemaExclusions())
         ->addTag('event_subscriber');
     }
 
@@ -381,9 +400,7 @@ EOD;
   protected function installConfig(array $modules) {
     foreach ($modules as $module) {
       if (!$this->container->get('module_handler')->moduleExists($module)) {
-        throw new \RuntimeException(format_string("'@module' module is not enabled.", array(
-          '@module' => $module,
-        )));
+        throw new \RuntimeException("'$module' module is not enabled");
       }
       \Drupal::service('config.installer')->installDefaultConfig('module', $module);
     }
@@ -405,31 +422,30 @@ EOD;
    *   found in the module specified.
    */
   protected function installSchema($module, $tables) {
-    // drupal_get_schema_unprocessed() is technically able to install a schema
+    // drupal_get_module_schema() is technically able to install a schema
     // of a non-enabled module, but its ability to load the module's .install
     // file depends on many other factors. To prevent differences in test
     // behavior and non-reproducible test failures, we only allow the schema of
     // explicitly loaded/enabled modules to be installed.
     if (!$this->container->get('module_handler')->moduleExists($module)) {
-      throw new \RuntimeException(format_string("'@module' module is not enabled.", array(
-        '@module' => $module,
-      )));
+      throw new \RuntimeException("'$module' module is not enabled");
     }
+
     $tables = (array) $tables;
     foreach ($tables as $table) {
-      $schema = drupal_get_schema_unprocessed($module, $table);
+      $schema = drupal_get_module_schema($module, $table);
       if (empty($schema)) {
-        throw new \RuntimeException(format_string("Unknown '@table' table schema in '@module' module.", array(
-          '@module' => $module,
-          '@table' => $table,
-        )));
+        // BC layer to avoid some contrib tests to fail.
+        // @todo Remove the BC layer before 8.1.x release.
+        // @see https://www.drupal.org/node/2670360
+        // @see https://www.drupal.org/node/2670454
+        if ($module == 'system') {
+          continue;
+        }
+        throw new \RuntimeException("Unknown '$table' table schema in '$module' module.");
       }
       $this->container->get('database')->schema()->createTable($table, $schema);
     }
-    // We need to refresh the schema cache, as any call to drupal_get_schema()
-    // would not know of/return the schema otherwise.
-    // @todo Refactor Schema API to make this obsolete.
-    drupal_get_schema(NULL, TRUE);
     $this->pass(format_string('Installed %module tables: %tables.', array(
       '%tables' => '{' . implode('}, {', $tables) . '}',
       '%module' => $module,
@@ -478,6 +494,12 @@ EOD;
   /**
    * Enables modules for this test.
    *
+   * To install test modules outside of the testing environment, add
+   * @code
+   * $settings['extension_discovery_scan_tests'] = TRUE;
+   * @endcode
+   * to your settings.php.
+   *
    * @param array $modules
    *   A list of modules to enable. Dependencies are not resolved; i.e.,
    *   multiple modules have to be specified with dependent modules first.
@@ -497,7 +519,7 @@ EOD;
 
     // Write directly to active storage to avoid early instantiation of
     // the event dispatcher which can prevent modules from registering events.
-    $active_storage =  \Drupal::service('config.storage');
+    $active_storage = \Drupal::service('config.storage');
     $extensions = $active_storage->read('core.extension');
 
     foreach ($modules as $module) {
@@ -511,7 +533,8 @@ EOD;
     $module_filenames = $module_handler->getModuleList();
     $this->kernel->updateModules($module_filenames, $module_filenames);
 
-    // Ensure isLoaded() is TRUE in order to make _theme() work.
+    // Ensure isLoaded() is TRUE in order to make
+    // \Drupal\Core\Theme\ThemeManagerInterface::render() work.
     // Note that the kernel has rebuilt the container; this $module_handler is
     // no longer the $module_handler instance from above.
     $this->container->get('module_handler')->reload();
@@ -544,7 +567,8 @@ EOD;
     // Update the kernel to remove their services.
     $this->kernel->updateModules($module_filenames, $module_filenames);
 
-    // Ensure isLoaded() is TRUE in order to make _theme() work.
+    // Ensure isLoaded() is TRUE in order to make
+    // \Drupal\Core\Theme\ThemeManagerInterface::render() work.
     // Note that the kernel has rebuilt the container; this $module_handler is
     // no longer the $module_handler instance from above.
     $module_handler = $this->container->get('module_handler');
@@ -579,10 +603,14 @@ EOD;
    *   The rendered string output (typically HTML).
    */
   protected function render(array &$elements) {
-    $content = $this->container->get('renderer')->renderRoot($elements);
-    drupal_process_attached($elements);
+    // Use the bare HTML page renderer to render our links.
+    $renderer = $this->container->get('bare_html_page_renderer');
+    $response = $renderer->renderBarePage($elements, '', 'maintenance_page');
+
+    // Glean the content from the response object.
+    $content = $response->getContent();
     $this->setRawContent($content);
-    $this->verbose('<pre style="white-space: pre-wrap">' . SafeMarkup::checkPlain($content));
+    $this->verbose('<pre style="white-space: pre-wrap">' . Html::escape($content));
     return $content;
   }
 

@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\argument_validator\Entity.
- */
-
 namespace Drupal\views\Plugin\views\argument_validator;
 
-use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormStateInterface;

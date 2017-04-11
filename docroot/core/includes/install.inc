@@ -9,7 +9,6 @@ use Drupal\Component\Utility\Unicode;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\OpCodeCache;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Extension\ExtensionDiscovery;
 use Drupal\Core\Site\Settings;
@@ -113,10 +112,34 @@ function drupal_install_profile_distribution_name() {
 }
 
 /**
+ * Loads the installation profile, extracting its defined version.
+ *
+ * @return string Distribution version defined in the profile's .info.yml file.
+ *   Defaults to \Drupal::VERSION if no version is explicitly provided
+ *   by the installation profile.
+ *
+ * @see install_profile_info()
+ */
+function drupal_install_profile_distribution_version() {
+  // During installation, the profile information is stored in the global
+  // installation state (it might not be saved anywhere yet).
+  if (drupal_installation_attempted()) {
+    global $install_state;
+    return isset($install_state['profile_info']['version']) ? $install_state['profile_info']['version'] : \Drupal::VERSION;
+  }
+  // At all other times, we load the profile via standard methods.
+  else {
+    $profile = drupal_get_profile();
+    $info = system_get_info('module', $profile);
+    return $info['version'];
+  }
+}
+
+/**
  * Detects all supported databases that are compiled into PHP.
  *
  * @return
- *  An array of database types compiled into PHP.
+ *   An array of database types compiled into PHP.
  */
 function drupal_detect_database_types() {
   $databases = drupal_get_database_types();
@@ -179,25 +202,20 @@ function drupal_get_database_types() {
  *   and comment properties.
  *   @code
  *   $settings['config_directories'] = array(
- *     CONFIG_ACTIVE_DIRECTORY => (object) array(
- *       'value' => 'config_hash/active'
- *       'required' => TRUE,
- *     ),
- *     CONFIG_STAGING_DIRECTORY => (object) array(
- *       'value' => 'config_hash/staging',
+ *     CONFIG_SYNC_DIRECTORY => (object) array(
+ *       'value' => 'config_hash/sync',
  *       'required' => TRUE,
  *     ),
  *   );
  *   @endcode
  *   gets dumped as:
  *   @code
- *   $config_directories['active'] = 'config_hash/active';
- *   $config_directories['staging'] = 'config_hash/staging'
+ *   $config_directories['sync'] = 'config_hash/sync'
  *   @endcode
  */
 function drupal_rewrite_settings($settings = array(), $settings_file = NULL) {
   if (!isset($settings_file)) {
-    $settings_file = conf_path(FALSE) . '/settings.php';
+    $settings_file = \Drupal::service('site.path') . '/settings.php';
   }
   // Build list of setting names and insert the values into the global namespace.
   $variable_names = array();
@@ -209,9 +227,9 @@ function drupal_rewrite_settings($settings = array(), $settings_file = NULL) {
     else {
       _drupal_rewrite_settings_global($settings_settings, $data);
     }
-    $variable_names['$'. $setting] = $setting;
+    $variable_names['$' . $setting] = $setting;
   }
-  $contents = file_get_contents(DRUPAL_ROOT . '/' . $settings_file);
+  $contents = file_get_contents($settings_file);
   if ($contents !== FALSE) {
     // Initialize the contents for the settings.php file if it is empty.
     if (trim($contents) === '') {
@@ -316,7 +334,7 @@ function drupal_rewrite_settings($settings = array(), $settings_file = NULL) {
     }
 
     // Write the new settings file.
-    if (file_put_contents(DRUPAL_ROOT . '/' . $settings_file, $buffer) === FALSE) {
+    if (file_put_contents($settings_file, $buffer) === FALSE) {
       throw new Exception(t('Failed to modify %settings. Verify the file permissions.', array('%settings' => $settings_file)));
     }
     else {
@@ -344,13 +362,14 @@ function drupal_rewrite_settings($settings = array(), $settings_file = NULL) {
  * Checks whether this token represents a scalar or NULL.
  *
  * @param int $type
- *   The token type
- *   @see token_name().
+ *   The token type.
  * @param string $value
  *   The value of the token.
  *
  * @return bool
  *   TRUE if this token represents a scalar or NULL.
+ *
+ * @see token_name()
  */
 function _drupal_rewrite_settings_is_simple($type, $value) {
   $is_integer = $type == T_LNUMBER;
@@ -368,11 +387,12 @@ function _drupal_rewrite_settings_is_simple($type, $value) {
  * string.
  *
  * @param int $type
- *   The token type
- *   @see token_name().
+ *   The token type.
  *
  * @return bool
  *   TRUE if this token represents a number or a string.
+ *
+ * @see token_name()
  */
 function _drupal_rewrite_settings_is_array_index($type) {
   $is_integer = $type == T_LNUMBER;
@@ -466,55 +486,36 @@ function drupal_install_config_directories() {
 
   // Add a randomized config directory name to settings.php, unless it was
   // manually defined in the existing already.
-  $settings = [];
-  $config_directories_hash = Crypt::randomBytesBase64(55);
-  if (empty($config_directories[CONFIG_ACTIVE_DIRECTORY])) {
-    $settings['config_directories'][CONFIG_ACTIVE_DIRECTORY] = (object) [
-      'value' => conf_path() . '/files/config_' . $config_directories_hash . '/active',
+  if (empty($config_directories[CONFIG_SYNC_DIRECTORY])) {
+    $config_directories[CONFIG_SYNC_DIRECTORY] = \Drupal::service('site.path') . '/files/config_' . Crypt::randomBytesBase64(55) . '/sync';
+    $settings['config_directories'][CONFIG_SYNC_DIRECTORY] = (object) [
+      'value' => $config_directories[CONFIG_SYNC_DIRECTORY],
       'required' => TRUE,
     ];
-  }
-  if (empty($config_directories[CONFIG_STAGING_DIRECTORY])) {
-    $settings['config_directories'][CONFIG_STAGING_DIRECTORY] = (object) [
-      'value' => conf_path() . '/files/config_' . $config_directories_hash . '/staging',
-      'required' => TRUE,
-    ];
-  }
-
-  if (!empty($settings)) {
     // Rewrite settings.php, which also sets the value as global variable.
     drupal_rewrite_settings($settings);
   }
 
-  // Ensure the config directories exist or can be created, and are writable.
-  foreach (array(CONFIG_ACTIVE_DIRECTORY, CONFIG_STAGING_DIRECTORY) as $config_type) {
-    // This should never fail, since if the config directory was specified in
-    // settings.php it will have already been created and verified earlier, and
-    // if it wasn't specified in settings.php, it is created here inside the
-    // public files directory, which has already been verified to be writable
-    // itself. But if it somehow fails anyway, the installation cannot proceed.
-    // Bail out using a similar error message as in system_requirements().
-    if (!install_ensure_config_directory($config_type)) {
-      throw new Exception(t('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">online handbook</a>.', array(
-        '%directory' => config_get_config_directory($config_type),
-        '@handbook_url' => 'https://www.drupal.org/server-permissions',
-      )));
-    }
-
-    // Put a README.txt into each config directory. This is required so that
-    // they can later be added to git. Since these directories are auto-
-    // created, we have to write out the README rather than just adding it
-    // to the drupal core repo.
-    switch ($config_type) {
-      case CONFIG_ACTIVE_DIRECTORY:
-        $text = 'If you change the configuration system to use file storage instead of the database for the active Drupal site configuration, this directory will contain the active configuration. By default, this directory will be empty. If you are using files to store the active configuration, and you want to move it between environments, files from this directory should be placed in the staging directory on the target server. To make this configuration active, visit admin/config/development/configuration/sync on the target server.';
-        break;
-      case CONFIG_STAGING_DIRECTORY:
-        $text = 'This directory contains configuration to be imported into your Drupal site. To make this configuration active, visit admin/config/development/configuration/sync.';
-        break;
-    }
-    $text .=  ' For information about deploying configuration between servers, see https://www.drupal.org/documentation/administer/config';
-    file_put_contents(config_get_config_directory($config_type) . '/README.txt', $text);
+  // This should never fail, since if the config directory was specified in
+  // settings.php it will have already been created and verified earlier, and
+  // if it wasn't specified in settings.php, it is created here inside the
+  // public files directory, which has already been verified to be writable
+  // itself. But if it somehow fails anyway, the installation cannot proceed.
+  // Bail out using a similar error message as in system_requirements().
+  if (!file_prepare_directory($config_directories[CONFIG_SYNC_DIRECTORY], FILE_CREATE_DIRECTORY)
+    && !file_exists($config_directories[CONFIG_SYNC_DIRECTORY])) {
+    throw new Exception(t('The directory %directory could not be created. To proceed with the installation, either create the directory or ensure that the installer has the permissions to create it automatically. For more information, see the <a href=":handbook_url">online handbook</a>.', array(
+      '%directory' => config_get_config_directory(CONFIG_SYNC_DIRECTORY),
+      ':handbook_url' => 'https://www.drupal.org/server-permissions',
+    )));
+  }
+  elseif (is_writable($config_directories[CONFIG_SYNC_DIRECTORY])) {
+    // Put a README.txt into the sync config directory. This is required so that
+    // they can later be added to git. Since this directory is auto-created, we
+    // have to write out the README rather than just adding it to the drupal core
+    // repo.
+    $text = 'This directory contains configuration to be imported into your Drupal site. To make this configuration active, visit admin/config/development/configuration/sync.' . ' For information about deploying configuration between servers, see https://www.drupal.org/documentation/administer/config';
+    file_put_contents(config_get_config_directory(CONFIG_SYNC_DIRECTORY) . '/README.txt', $text);
   }
 }
 
@@ -522,11 +523,13 @@ function drupal_install_config_directories() {
  * Ensures that the config directory exists and is writable, or can be made so.
  *
  * @param string $type
- *   Type of config directory to return. Drupal core provides 'active' and
- *   'staging'.
+ *   Type of config directory to return. Drupal core provides 'sync'.
  *
  * @return bool
  *   TRUE if the config directory exists and is writable.
+ *
+ * @deprecated in Drupal 8.1.x, will be removed before Drupal 9.0.x. Use
+ *   config_get_config_directory() and file_prepare_directory() instead.
  */
 function install_ensure_config_directory($type) {
   // The config directory must be defined in settings.php.
@@ -571,16 +574,22 @@ function drupal_verify_profile($install_state) {
 
   $requirements = array();
 
-  if (count($missing_modules)) {
-    $modules = array();
+  if ($missing_modules) {
+    $build = [
+      '#theme' => 'item_list',
+      '#context' => ['list_style' => 'comma-list'],
+    ];
+
     foreach ($missing_modules as $module) {
-      $modules[] = '<span class="admin-missing">' . Unicode::ucfirst($module) . '</span>';
+      $build['#items'][] = array('#markup' => '<span class="admin-missing">' . Unicode::ucfirst($module) . '</span>');
     }
+
+    $modules_list = \Drupal::service('renderer')->renderPlain($build);
     $requirements['required_modules'] = array(
-      'title'       => t('Required modules'),
-      'value'       => t('Required modules not found.'),
-      'severity'    => REQUIREMENT_ERROR,
-      'description' => t('The following modules are required but were not found. Move them into the appropriate modules subdirectory, such as <em>/modules</em>. Missing modules: !modules', array('!modules' => implode(', ', $modules))),
+      'title' => t('Required modules'),
+      'value' => t('Required modules not found.'),
+      'severity' => REQUIREMENT_ERROR,
+      'description' => t('The following modules are required but were not found. Move them into the appropriate modules subdirectory, such as <em>/modules</em>. Missing modules: @modules', array('@modules' => $modules_list)),
     );
   }
   return $requirements;
@@ -709,14 +718,14 @@ function drupal_verify_install_file($file, $mask = NULL, $type = 'file') {
  * Creates a directory with the specified permissions.
  *
  * @param $file
- *  The name of the directory to create;
+ *   The name of the directory to create;
  * @param $mask
- *  The permissions of the directory to create.
+ *   The permissions of the directory to create.
  * @param $message
- *  (optional) Whether to output messages. Defaults to TRUE.
+ *   (optional) Whether to output messages. Defaults to TRUE.
  *
  * @return
- *  TRUE/FALSE whether or not the directory was successfully created.
+ *   TRUE/FALSE whether or not the directory was successfully created.
  */
 function drupal_install_mkdir($file, $mask, $message = TRUE) {
   $mod = 0;
@@ -758,14 +767,14 @@ function drupal_install_mkdir($file, $mask, $message = TRUE) {
  * 0700 and get the correct value of 0500.
  *
  * @param $file
- *  The name of the file with permissions to fix.
+ *   The name of the file with permissions to fix.
  * @param $mask
- *  The desired permissions for the file.
+ *   The desired permissions for the file.
  * @param $message
- *  (optional) Whether to output messages. Defaults to TRUE.
+ *   (optional) Whether to output messages. Defaults to TRUE.
  *
  * @return
- *  TRUE/FALSE whether or not we were able to fix the file's permissions.
+ *   TRUE/FALSE whether or not we were able to fix the file's permissions.
  */
 function drupal_install_fix_file($file, $mask, $message = TRUE) {
   // If $file does not exist, fileperms() issues a PHP warning.
@@ -865,9 +874,11 @@ function install_goto($path) {
  * @return
  *   The URL of the current script, with query parameters modified by the
  *   passed-in $query. The URL is not sanitized, so it still needs to be run
- *   through check_url() if it will be used as an HTML attribute value.
+ *   through \Drupal\Component\Utility\UrlHelper::filterBadProtocol() if it will be
+ *   used as an HTML attribute value.
  *
  * @see drupal_requirements_url()
+ * @see Drupal\Component\Utility\UrlHelper::filterBadProtocol()
  */
 function drupal_current_script_url($query = array()) {
   $uri = $_SERVER['SCRIPT_NAME'];
@@ -891,10 +902,12 @@ function drupal_current_script_url($query = array()) {
  *
  * @return
  *   A URL for attempting to proceed to the next step of the script. The URL is
- *   not sanitized, so it still needs to be run through check_url() if it will
- *   be used as an HTML attribute value.
+ *   not sanitized, so it still needs to be run through
+ *   \Drupal\Component\Utility\UrlHelper::filterBadProtocol() if it will be used
+ *   as an HTML attribute value.
  *
  * @see drupal_current_script_url()
+ * @see \Drupal\Component\Utility\UrlHelper::filterBadProtocol()
  */
 function drupal_requirements_url($severity) {
   $query = array();
@@ -911,35 +924,41 @@ function drupal_requirements_url($severity) {
  *
  * @param string $profile
  *   Name of installation profile to check.
- * @param array $install_state
- *   The current state in the install process.
  *
  * @return array
  *   Array of the installation profile's requirements.
  */
-function drupal_check_profile($profile, array $install_state) {
+function drupal_check_profile($profile) {
   $info = install_profile_info($profile);
-
   // Collect requirement testing results.
   $requirements = array();
-
   // Performs an ExtensionDiscovery scan as the system module is unavailable and
   // we don't yet know where all the modules are located.
   // @todo Remove as part of https://www.drupal.org/node/2186491
-  $listing = new ExtensionDiscovery(\Drupal::root());
-  $module_list = $listing->scan('module');
-  foreach ($info['dependencies'] as $module) {
-    $file = \Drupal::root() . '/' . $module_list[$module]->getPath() . "/$module.install";
-    if (is_file($file)) {
-      require_once $file;
-    }
-    $function = $module . '_requirements';
+  $drupal_root = \Drupal::root();
+  $module_list = (new ExtensionDiscovery($drupal_root))->scan('module');
 
-    drupal_classloader_register($module, $module_list[$module]->getPath());
-    if (function_exists($function)) {
-      $requirements = array_merge($requirements, $function('install'));
+  foreach ($info['dependencies'] as $module) {
+    // If the module is in the module list we know it exists and we can continue
+    // including and registering it.
+    // @see \Drupal\Core\Extension\ExtensionDiscovery::scanDirectory()
+    if (isset($module_list[$module])) {
+      $function = $module . '_requirements';
+      $module_path = $module_list[$module]->getPath();
+      $install_file = "$drupal_root/$module_path/$module.install";
+
+      if (is_file($install_file)) {
+        require_once $install_file;
+      }
+
+      drupal_classloader_register($module, $module_path);
+
+      if (function_exists($function)) {
+        $requirements = array_merge($requirements, $function('install'));
+      }
     }
   }
+
   return $requirements;
 }
 
@@ -980,14 +999,11 @@ function drupal_check_module($module) {
     // Print any error messages
     foreach ($requirements as $requirement) {
       if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
-        $message = SafeMarkup::escape($requirement['description']);
+        $message = $requirement['description'];
         if (isset($requirement['value']) && $requirement['value']) {
-          $message .= ' (' . t('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) . ')';
+          $message = t('@requirements_message (Currently using @item version @version)', array('@requirements_message' => $requirement['description'], '@item' => $requirement['title'], '@version' => $requirement['value']));
         }
-        // The string was previously checked as safe or escaped properly with
-        // SafeMarkup::escape() method and the concatinated message string is
-        // designated safe by running through the t() function.
-        drupal_set_message(SafeMarkup::set($message), 'error');
+        drupal_set_message($message, 'error');
       }
     }
     return FALSE;
@@ -1028,10 +1044,11 @@ function drupal_check_module($module) {
  *
  * Example of .info.yml file:
  * @code
- *    name = Minimal
- *    description = Start fresh, with only a few modules enabled.
- *    dependencies[] = block
- *    dependencies[] = dblog
+ *    name: Minimal
+ *    description: Start fresh, with only a few modules enabled.
+ *    dependencies:
+ *      - block
+ *      - dblog
  * @endcode
  *
  * @param $profile
@@ -1070,19 +1087,6 @@ function install_profile_info($profile, $langcode = 'en') {
     $cache[$profile][$langcode] = $info;
   }
   return $cache[$profile][$langcode];
-}
-
-/**
- * Ensures the environment for a Drupal database on a predefined connection.
- *
- * This will run tasks that check that Drupal can perform all of the functions
- * on a database, that Drupal needs. Tasks include simple checks like CREATE
- * TABLE to database specific functions like stored procedures and client
- * encoding.
- */
-function db_run_tasks($driver) {
-  db_installer_object($driver)->runTasks();
-  return TRUE;
 }
 
 /**

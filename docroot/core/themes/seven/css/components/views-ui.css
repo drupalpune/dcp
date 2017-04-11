@@ -43,6 +43,13 @@ details.fieldset-no-legend {
 [dir="rtl"] .views-admin a.button,
 [dir="rtl"] .views-ui-dialog a.button {
   margin-left: 0;
+  margin-right: 1em;
+}
+[dir="rtl"] .views-admin input.form-submit:first-child,
+[dir="rtl"] .views-ui-dialog input.form-submit:first-child,
+[dir="rtl"] .views-admin a.button:first-child,
+[dir="rtl"] .views-ui-dialog a.button:first-child {
+  margin-right: 0;
 }
 
 .form-radios > .form-item {
@@ -229,8 +236,13 @@ details.fieldset-no-legend {
 /* @group Rearrange filter criteria */
 
 .views-ui-rearrange-filter-form .action-links {
-  margin: 0;
+  float: left;
+  margin: 0 0 1em;
   padding: 0;
+}
+.views-ui-rearrange-filter-form .tabledrag-toggle-weight-wrapper {
+  float: right;
+  margin-bottom: 1em;
 }
 
 .views-ui-rearrange-filter-form table {

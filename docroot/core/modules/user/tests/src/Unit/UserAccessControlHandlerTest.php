@@ -1,14 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\user\Unit\UserAccessControlHandlerTest.
- */
-
 namespace Drupal\Tests\user\Unit;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Context\CacheContextsManager;
+use Drupal\Core\DependencyInjection\Container;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserAccessControlHandler;
 
@@ -60,8 +56,16 @@ class UserAccessControlHandlerTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
+
+    $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
+    $cache_contexts_manager->assertValidTokens()->willReturn(TRUE);
+    $cache_contexts_manager->reveal();
+    $container = new Container();
+    $container->set('cache_contexts_manager', $cache_contexts_manager);
+    \Drupal::setContainer($container);
+
     $this->viewer = $this->getMock('\Drupal\Core\Session\AccountInterface');
     $this->viewer
       ->expects($this->any())
@@ -125,13 +129,8 @@ class UserAccessControlHandlerTest extends UnitTestCase {
       ->will($this->returnValue($this->{$target}));
 
     foreach (array('view' => $view, 'edit' => $edit) as $operation => $result) {
-      $message = SafeMarkup::format("User @field field access returns @result with operation '@op' for @account accessing @target", array(
-        '@field' => $field,
-        '@result' => !isset($result) ? 'null' : ($result ? 'true' : 'false'),
-        '@op' => $operation,
-        '@account' => $viewer,
-        '@target' => $target,
-      ));
+      $result_text = !isset($result) ? 'null' : ($result ? 'true' : 'false');
+      $message = "User '$field' field access returns '$result_text' with operation '$operation' for '$viewer' accessing '$target'";
       $this->assertSame($result, $this->accessControlHandler->fieldAccess($operation, $field_definition, $this->{$viewer}, $this->items), $message);
     }
   }

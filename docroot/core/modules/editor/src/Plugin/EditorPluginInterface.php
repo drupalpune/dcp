@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\editor\Plugin\EditorPluginInterface.
- */
-
 namespace Drupal\editor\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
@@ -95,7 +90,7 @@ interface EditorPluginInterface extends PluginInspectionInterface {
    *   An array of settings that will be added to the page for use by this text
    *   editor's JavaScript integration.
    *
-   * @see drupal_process_attached()
+   * @see \Drupal\Core\Render\AttachmentsResponseProcessorInterface::processAttachments()
    * @see EditorManager::getAttachments()
    */
   public function getJSSettings(Editor $editor);
@@ -114,7 +109,7 @@ interface EditorPluginInterface extends PluginInspectionInterface {
    *   An array of libraries that will be added to the page for use by this text
    *   editor.
    *
-   * @see drupal_process_attached()
+   * @see \Drupal\Core\Render\AttachmentsResponseProcessorInterface::processAttachments()
    * @see EditorManager::getAttachments()
    */
   public function getLibraries(Editor $editor);

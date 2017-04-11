@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityForm.
- */
-
 namespace Drupal\Core\Entity;
 
 use Drupal\Core\Form\FormBase;
@@ -41,8 +36,17 @@ class EntityForm extends FormBase implements EntityFormInterface {
    * The entity manager.
    *
    * @var \Drupal\Core\Entity\EntityManagerInterface
+   *
+   * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0.
    */
   protected $entityManager;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
 
   /**
    * The entity being used by this form.
@@ -99,6 +103,12 @@ class EntityForm extends FormBase implements EntityFormInterface {
     // allow for initial preparation before form building and processing.
     if (!$form_state->has('entity_form_initialized')) {
       $this->init($form_state);
+    }
+
+    // Ensure that edit forms have the correct cacheability metadata so they can
+    // be cached.
+    if (!$this->entity->isNew()) {
+      \Drupal::service('renderer')->addCacheableDependency($form, $this->entity);
     }
 
     // Retrieve the form array using the possibly updated entity in form state.
@@ -219,7 +229,6 @@ class EntityForm extends FormBase implements EntityFormInterface {
     $actions['submit'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Save'),
-      '#validate' => array('::validate'),
       '#submit' => array('::submitForm', '::save'),
     );
 
@@ -242,16 +251,6 @@ class EntityForm extends FormBase implements EntityFormInterface {
     }
 
     return $actions;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validate(array $form, FormStateInterface $form_state) {
-    // @todo Remove this.
-    // Execute legacy global validation handlers.
-    $form_state->setValidateHandlers([]);
-    \Drupal::service('form_validator')->executeValidateHandlers($form, $form_state);
   }
 
   /**
@@ -354,7 +353,19 @@ class EntityForm extends FormBase implements EntityFormInterface {
       $entity = $route_match->getParameter($entity_type_id);
     }
     else {
-      $entity = $this->entityManager->getStorage($entity_type_id)->create([]);
+      $values = [];
+      // If the entity has bundles, fetch it from the route match.
+      $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+      if ($bundle_key = $entity_type->getKey('bundle')) {
+        if (($bundle_entity_type_id = $entity_type->getBundleEntityType()) && $route_match->getRawParameter($bundle_entity_type_id)) {
+          $values[$bundle_key] = $route_match->getParameter($bundle_entity_type_id)->id();
+        }
+        elseif ($route_match->getRawParameter($bundle_key)) {
+          $values[$bundle_key] = $route_match->getParameter($bundle_key);
+        }
+      }
+
+      $entity = $this->entityTypeManager->getStorage($entity_type_id)->create($values);
     }
 
     return $entity;
@@ -406,6 +417,14 @@ class EntityForm extends FormBase implements EntityFormInterface {
    */
   public function setEntityManager(EntityManagerInterface $entity_manager) {
     $this->entityManager = $entity_manager;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setEntityTypeManager(EntityTypeManagerInterface $entity_type_manager) {
+    $this->entityTypeManager = $entity_type_manager;
     return $this;
   }
 

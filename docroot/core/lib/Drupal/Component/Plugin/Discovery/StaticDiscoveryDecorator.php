@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Component\Plugin\Discovery\StaticDiscoveryDecorator.
- */
-
 namespace Drupal\Component\Plugin\Discovery;
 
 /**
@@ -52,7 +47,7 @@ class StaticDiscoveryDecorator extends StaticDiscovery {
   }
 
   /**
-   * Implements Drupal\Component\Plugin\Discovery\DiscoveryInterface::getDefinitions().
+   * {@inheritdoc}
    */
   public function getDefinitions() {
     if (isset($this->registerDefinitions)) {
@@ -68,4 +63,5 @@ class StaticDiscoveryDecorator extends StaticDiscovery {
   public function __call($method, $args) {
     return call_user_func_array(array($this->decorated, $method), $args);
   }
+
 }

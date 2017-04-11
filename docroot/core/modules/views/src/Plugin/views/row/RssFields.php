@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\row\RssFields.
- */
-
 namespace Drupal\views\Plugin\views\row;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -147,7 +142,10 @@ class RssFields extends RowPluginBase {
     // @todo Views should expect and store a leading /. See:
     //   https://www.drupal.org/node/2423913
     $item->link = Url::fromUserInput('/' . $this->getField($row_index, $this->options['link_field']))->setAbsolute()->toString();
-    $item->description = $this->getField($row_index, $this->options['description_field']);
+
+    $field = $this->getField($row_index, $this->options['description_field']);
+    $item->description = is_array($field) ? $field : ['#markup' => $field];
+
     $item->elements = array(
       array('key' => 'pubDate', 'value' => $this->getField($row_index, $this->options['date_field'])),
       array(
@@ -185,7 +183,8 @@ class RssFields extends RowPluginBase {
       '#row' => $item,
       '#field_alias' => isset($this->field_alias) ? $this->field_alias : '',
     );
-    return drupal_render_root($build);
+
+    return $build;
   }
 
   /**
@@ -195,6 +194,11 @@ class RssFields extends RowPluginBase {
    *   The index count of the row as expected by views_plugin_style::getField().
    * @param $field_id
    *   The ID assigned to the required field in the display.
+   *
+   * @return string|null|\Drupal\Component\Render\MarkupInterface
+   *   An empty string if there is no style plugin, or the field ID is empty.
+   *   NULL if the field value is empty. If neither of these conditions apply,
+   *   a MarkupInterface object containing the rendered field value.
    */
   public function getField($index, $field_id) {
     if (empty($this->view->style_plugin) || !is_object($this->view->style_plugin) || empty($field_id)) {

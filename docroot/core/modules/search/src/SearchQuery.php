@@ -1,20 +1,14 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\search\SearchQuery.
- *
- * Search query extender and helper functions.
- */
-
 namespace Drupal\search;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Database\Query\SelectExtender;
 use Drupal\Core\Database\Query\SelectInterface;
-use Drupal\Core\Database\StatementEmpty;
 
 /**
+ * Search query extender and helper functions.
+ *
  * Performs a query on the full-text search index for a word or words.
  *
  * This query is used by search plugins that use the search index (not all
@@ -230,9 +224,9 @@ class SearchQuery extends SelectExtender {
   protected function parseSearchExpression() {
     // Matches words optionally prefixed by a - sign. A word in this case is
     // something between two spaces, optionally quoted.
-    preg_match_all('/ (-?)("[^"]+"|[^" ]+)/i', ' ' .  $this->searchExpression , $keywords, PREG_SET_ORDER);
+    preg_match_all('/ (-?)("[^"]+"|[^" ]+)/i', ' ' . $this->searchExpression, $keywords, PREG_SET_ORDER);
 
-    if (count($keywords) ==  0) {
+    if (count($keywords) == 0) {
       return;
     }
 
@@ -464,7 +458,7 @@ class SearchQuery extends SelectExtender {
   }
 
   /**
-   * {@inhertidoc}
+   * {@inheritdoc}
    */
   public function preExecute(SelectInterface $query = NULL) {
     if (!$this->executedPrepare) {

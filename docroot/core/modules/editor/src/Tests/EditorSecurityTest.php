@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Definition of \Drupal\editor\Tests\EditorSecurityTest.
- */
-
 namespace Drupal\editor\Tests;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\editor\Entity\Editor;
 use Drupal\simpletest\WebTestBase;
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\filter\Entity\FilterFormat;
 
 /**
  * Tests XSS protection for content creators when using text editors.
@@ -87,7 +83,7 @@ class EditorSecurityTest extends WebTestBase {
     // With text formats 2, 3 and 5, we also associate a text editor that does
     // not guarantee XSS safety. "restricted" means the text format has XSS
     // filters on output, "unrestricted" means the opposite.
-    $format = entity_create('filter_format', array(
+    $format = FilterFormat::create(array(
       'format' => 'restricted_without_editor',
       'name' => 'Restricted HTML, without text editor',
       'weight' => 0,
@@ -96,13 +92,13 @@ class EditorSecurityTest extends WebTestBase {
         'filter_html' => array(
           'status' => 1,
           'settings' => array(
-            'allowed_html' => '<h4> <h5> <h6> <p> <br> <strong> <a>',
+            'allowed_html' => '<h2> <h3> <h4> <h5> <h6> <p> <br> <strong> <a>',
           )
         ),
       ),
     ));
     $format->save();
-    $format = entity_create('filter_format', array(
+    $format = FilterFormat::create(array(
       'format' => 'restricted_with_editor',
       'name' => 'Restricted HTML, with text editor',
       'weight' => 1,
@@ -111,18 +107,18 @@ class EditorSecurityTest extends WebTestBase {
         'filter_html' => array(
           'status' => 1,
           'settings' => array(
-            'allowed_html' => '<h4> <h5> <h6> <p> <br> <strong> <a>',
+            'allowed_html' => '<h2> <h3> <h4> <h5> <h6> <p> <br> <strong> <a>',
           )
         ),
       ),
     ));
     $format->save();
-    $editor = entity_create('editor', array(
+    $editor = Editor::create([
       'format' => 'restricted_with_editor',
       'editor' => 'unicorn',
-    ));
+    ]);
     $editor->save();
-    $format = entity_create('filter_format', array(
+    $format = FilterFormat::create(array(
       'format' => 'restricted_plus_dangerous_tag_with_editor',
       'name' => 'Restricted HTML, dangerous tag allowed, with text editor',
       'weight' => 1,
@@ -131,35 +127,35 @@ class EditorSecurityTest extends WebTestBase {
         'filter_html' => array(
           'status' => 1,
           'settings' => array(
-            'allowed_html' => '<h4> <h5> <h6> <p> <br> <strong> <a> <embed>',
+            'allowed_html' => '<h2> <h3> <h4> <h5> <h6> <p> <br> <strong> <a> <embed>',
           )
         ),
       ),
     ));
     $format->save();
-    $editor = entity_create('editor', array(
+    $editor = Editor::create([
       'format' => 'restricted_plus_dangerous_tag_with_editor',
       'editor' => 'unicorn',
-    ));
+    ]);
     $editor->save();
-    $format = entity_create('filter_format', array(
+    $format = FilterFormat::create(array(
       'format' => 'unrestricted_without_editor',
       'name' => 'Unrestricted HTML, without text editor',
       'weight' => 0,
       'filters' => array(),
     ));
     $format->save();
-    $format = entity_create('filter_format', array(
+    $format = FilterFormat::create(array(
       'format' => 'unrestricted_with_editor',
       'name' => 'Unrestricted HTML, with text editor',
       'weight' => 1,
       'filters' => array(),
     ));
     $format->save();
-    $editor = entity_create('editor', array(
+    $editor = Editor::create([
       'format' => 'unrestricted_with_editor',
       'editor' => 'unicorn',
-    ));
+    ]);
     $editor->save();
 
 
@@ -388,7 +384,6 @@ class EditorSecurityTest extends WebTestBase {
     // Log in as the privileged user, and for every sample, do the following:
     //  - switch to every other text format/editor
     //  - assert the XSS-filtered values that we get from the server
-    $value_original_attribute = SafeMarkup::checkPlain(self::$sampleContent);
     $this->drupalLogin($this->privilegedUser);
     foreach ($expected as $case) {
       $this->drupalGet('node/' . $case['node_id'] . '/edit');
@@ -409,7 +404,7 @@ class EditorSecurityTest extends WebTestBase {
           'value' => self::$sampleContent,
           'original_format_id' => $case['format'],
         );
-        $response = $this->drupalPost('editor/filter_xss/' . $format, 'application/json', $post);
+        $response = $this->drupalPostWithFormat('editor/filter_xss/' . $format, 'json', $post);
         $this->assertResponse(200);
         $json = Json::decode($response);
         $this->assertIdentical($json, $expected_filtered_value, 'The value was correctly filtered for XSS attack vectors.');
@@ -436,4 +431,5 @@ class EditorSecurityTest extends WebTestBase {
     $dom_node = $this->xpath('//textarea[@id="edit-body-0-value"]');
     $this->assertIdentical(self::$sampleContent, (string) $dom_node[0], 'The value was filtered by the Insecure text editor XSS filter.');
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\sort\GroupByNumeric.
- */
-
 namespace Drupal\views\Plugin\views\sort;
 
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
@@ -19,7 +14,7 @@ use Drupal\views\Views;
 class GroupByNumeric extends SortPluginBase {
 
   /**
-   * Overrides \Drupal\views\Plugin\views\HandlerBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);

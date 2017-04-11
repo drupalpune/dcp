@@ -1,17 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Access\CsrfTokenGeneratorTest.
- */
-
 namespace Drupal\Tests\Core\Access;
 
 use Drupal\Core\Site\Settings;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\Access\CsrfTokenGenerator;
 use Drupal\Component\Utility\Crypt;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests the CsrfTokenGenerator class.

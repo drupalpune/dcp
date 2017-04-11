@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\image\Form\ImageEffectAddForm.
- */
-
 namespace Drupal\image\Form;
 
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\image\ImageEffectManager;
 use Drupal\image\ImageStyleInterface;

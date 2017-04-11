@@ -1,16 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Tests\Views\TaxonomyIndexTidUiTest.
- */
-
 namespace Drupal\taxonomy\Tests\Views;
 
+use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views_ui\Tests\UITestBase;
+use Drupal\views\Entity\View;
 
 /**
  * Tests the taxonomy index filter handler UI.
@@ -20,19 +17,21 @@ use Drupal\views_ui\Tests\UITestBase;
  */
 class TaxonomyIndexTidUiTest extends UITestBase {
 
+  use EntityReferenceTestTrait;
+
   /**
    * Views used by this test.
    *
    * @var array
    */
-  public static $testViews = array('test_filter_taxonomy_index_tid');
+  public static $testViews = array('test_filter_taxonomy_index_tid', 'test_taxonomy_term_name');
 
   /**
    * Modules to enable.
    *
    * @var array
    */
-  public static $modules = array('node', 'taxonomy', 'taxonomy_test_views');
+  public static $modules = ['node', 'taxonomy', 'views', 'views_ui', 'taxonomy_test_views'];
 
   /**
    * A nested array of \Drupal\taxonomy\TermInterface objects.
@@ -46,6 +45,9 @@ class TaxonomyIndexTidUiTest extends UITestBase {
    */
   protected function setUp() {
     parent::setUp();
+
+    $this->adminUser = $this->drupalCreateUser(['administer taxonomy', 'administer views']);
+    $this->drupalLogin($this->adminUser);
 
     Vocabulary::create([
       'vid' => 'tags',
@@ -70,6 +72,11 @@ class TaxonomyIndexTidUiTest extends UITestBase {
       }
     }
     ViewTestData::createTestViews(get_class($this), array('taxonomy_test_views'));
+
+    Vocabulary::create([
+      'vid' => 'empty_vocabulary',
+      'name' => 'Empty Vocabulary',
+    ])->save();
   }
 
   /**
@@ -96,7 +103,7 @@ class TaxonomyIndexTidUiTest extends UITestBase {
 
     // Ensure the autocomplete input element appears when using the 'textfield'
     // type.
-    $view = entity_load('view', 'test_filter_taxonomy_index_tid');
+    $view = View::load('test_filter_taxonomy_index_tid');
     $display =& $view->getDisplay('default');
     $display['display_options']['filters']['tid']['type'] = 'textfield';
     $view->save();
@@ -117,7 +124,98 @@ class TaxonomyIndexTidUiTest extends UITestBase {
         'user',
       ],
     ];
-    $this->assertIdentical($expected, $view->calculateDependencies());
+    $this->assertIdentical($expected, $view->calculateDependencies()->getDependencies());
+  }
+
+  /**
+   * Tests exposed taxonomy filters.
+   */
+  public function testExposedFilter() {
+    $node_type = $this->drupalCreateContentType(['type' => 'page']);
+
+    // Create the tag field itself.
+    $field_name = 'taxonomy_tags';
+    $this->createEntityReferenceField('node', $node_type->id(), $field_name, NULL, 'taxonomy_term');
+
+    // Create 4 nodes: 1 without a term, 2 with the same term, and 1 with a
+    // different term.
+    $node1 = $this->drupalCreateNode();
+    $node2 = $this->drupalCreateNode([
+      $field_name => [['target_id' => $this->terms[1][0]->id()]],
+    ]);
+    $node3 = $this->drupalCreateNode([
+      $field_name => [['target_id' => $this->terms[1][0]->id()]],
+    ]);
+    $node4 = $this->drupalCreateNode([
+      $field_name => [['target_id' => $this->terms[2][0]->id()]],
+    ]);
+
+    // Only the nodes with the selected term should be shown.
+    $this->drupalGet('test-filter-taxonomy-index-tid');
+    $xpath = $this->xpath('//div[@class="view-content"]//a');
+    $this->assertIdentical(2, count($xpath));
+    $xpath = $this->xpath('//div[@class="view-content"]//a[@href=:href]', [':href' => $node2->url()]);
+    $this->assertIdentical(1, count($xpath));
+    $xpath = $this->xpath('//div[@class="view-content"]//a[@href=:href]', [':href' => $node3->url()]);
+    $this->assertIdentical(1, count($xpath));
+
+    // Expose the filter.
+    $this->drupalPostForm('admin/structure/views/nojs/handler/test_filter_taxonomy_index_tid/default/filter/tid', [], 'Expose filter');
+    // Set the operator to 'empty' and remove the default term ID.
+    $this->drupalPostForm(NULL, [
+      'options[operator]' => 'empty',
+      'options[value][]' => [],
+    ], 'Apply');
+    // Save the view.
+    $this->drupalPostForm(NULL, [], 'Save');
+
+    // After switching to 'empty' operator, the node without a term should be
+    // shown.
+    $this->drupalGet('test-filter-taxonomy-index-tid');
+    $xpath = $this->xpath('//div[@class="view-content"]//a');
+    $this->assertIdentical(1, count($xpath));
+    $xpath = $this->xpath('//div[@class="view-content"]//a[@href=:href]', [':href' => $node1->url()]);
+    $this->assertIdentical(1, count($xpath));
+
+    // Set the operator to 'not empty'.
+    $this->drupalPostForm('admin/structure/views/nojs/handler/test_filter_taxonomy_index_tid/default/filter/tid', ['options[operator]' => 'not empty'], 'Apply');
+    // Save the view.
+    $this->drupalPostForm(NULL, [], 'Save');
+
+    // After switching to 'not empty' operator, all nodes with terms should be
+    // shown.
+    $this->drupalGet('test-filter-taxonomy-index-tid');
+    $xpath = $this->xpath('//div[@class="view-content"]//a');
+    $this->assertIdentical(3, count($xpath));
+    $xpath = $this->xpath('//div[@class="view-content"]//a[@href=:href]', [':href' => $node2->url()]);
+    $this->assertIdentical(1, count($xpath));
+    $xpath = $this->xpath('//div[@class="view-content"]//a[@href=:href]', [':href' => $node3->url()]);
+    $this->assertIdentical(1, count($xpath));
+    $xpath = $this->xpath('//div[@class="view-content"]//a[@href=:href]', [':href' => $node4->url()]);
+    $this->assertIdentical(1, count($xpath));
+
+    // Select 'Term ID' as the field to be displayed.
+    $edit = ['name[taxonomy_term_field_data.tid]' => TRUE];
+    $this->drupalPostForm('admin/structure/views/nojs/add-handler/test_taxonomy_term_name/default/field', $edit, 'Add and configure fields');
+    // Select 'Term' and 'Vocabulary' as filters.
+    $edit = [
+      'name[taxonomy_term_field_data.tid]' => TRUE,
+      'name[taxonomy_term_field_data.vid]' => TRUE
+    ];
+    $this->drupalPostForm('admin/structure/views/nojs/add-handler/test_taxonomy_term_name/default/filter', $edit, 'Add and configure filter criteria');
+    // Select 'Empty Vocabulary' and 'Autocomplete' from the list of options.
+    $this->drupalPostForm('admin/structure/views/nojs/handler-extra/test_taxonomy_term_name/default/filter/tid', [], 'Apply and continue');
+    // Expose the filter.
+    $edit = ['options[expose_button][checkbox][checkbox]' => TRUE];
+    $this->drupalPostForm('admin/structure/views/nojs/handler/test_taxonomy_term_name/default/filter/tid', $edit, 'Expose filter');
+    $this->drupalPostForm('admin/structure/views/nojs/handler/test_taxonomy_term_name/default/filter/tid', $edit, 'Apply');
+    // Filter 'Taxonomy terms' belonging to 'Empty Vocabulary'.
+    $edit = ['options[value][empty_vocabulary]' => TRUE];
+    $this->drupalPostForm('admin/structure/views/nojs/handler/test_taxonomy_term_name/default/filter/vid', $edit, 'Apply');
+    $this->drupalPostForm('admin/structure/views/view/test_taxonomy_term_name/edit/default', [], 'Save');
+    $this->drupalPostForm(NULL, [], t('Update preview'));
+    $preview = $this->xpath("//div[@class='view-content']");
+    $this->assertTrue(empty($preview), 'No results.');
   }
 
 }

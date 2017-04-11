@@ -1,19 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\TermStorageInterface.
-*/
-
 namespace Drupal\taxonomy;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\ContentEntityStorageInterface;
 
 /**
  * Defines an interface for taxonomy_term entity storage classes.
  */
-interface TermStorageInterface extends EntityStorageInterface {
+interface TermStorageInterface extends ContentEntityStorageInterface {
 
   /**
    * Removed reference to terms from term_hierarchy.
@@ -83,7 +78,7 @@ interface TermStorageInterface extends EntityStorageInterface {
    *   table to save execution time and memory consumption when listing large
    *   numbers of terms. Defaults to FALSE.
    *
-   * @return \Drupal\taxonomy\TermInterface[]
+   * @return object[]|\Drupal\taxonomy\TermInterface[]
    *   An array of term objects that are the children of the vocabulary $vid.
    */
   public function loadTree($vid, $parent = 0, $max_depth = NULL, $load_entities = FALSE);
@@ -121,6 +116,6 @@ interface TermStorageInterface extends EntityStorageInterface {
    * @return array
    *   An array of nids and the term entities they were tagged with.
    */
-  public function getNodeTerms($nids, $vocabs = array(), $langcode = NULL);
+  public function getNodeTerms(array $nids, array $vocabs = array(), $langcode = NULL);
 
 }

@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Sql\DefaultTableMapping.
- */
-
 namespace Drupal\Core\Entity\Sql;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
@@ -153,15 +147,16 @@ class DefaultTableMapping implements TableMappingInterface {
       //   https://www.drupal.org/node/2274017.
       /** @var \Drupal\Core\Entity\Sql\SqlContentEntityStorage $storage */
       $storage = \Drupal::entityManager()->getStorage($this->entityType->id());
+      $storage_definition = $this->fieldStorageDefinitions[$field_name];
       $table_names = array(
         $storage->getDataTable(),
         $storage->getBaseTable(),
         $storage->getRevisionTable(),
+        $this->getDedicatedDataTableName($storage_definition),
       );
 
       // Collect field columns.
       $field_columns = array();
-      $storage_definition = $this->fieldStorageDefinitions[$field_name];
       foreach (array_keys($storage_definition->getColumns()) as $property_name) {
         $field_columns[] = $this->getFieldColumnName($storage_definition, $property_name);
       }
@@ -178,7 +173,7 @@ class DefaultTableMapping implements TableMappingInterface {
     }
 
     if (!isset($result)) {
-      throw new SqlContentEntityStorageException(SafeMarkup::format('Table information not available for the "@field_name" field.', array('@field_name' => $field_name)));
+      throw new SqlContentEntityStorageException("Table information not available for the '$field_name' field.");
     }
 
     return $result;
@@ -190,9 +185,10 @@ class DefaultTableMapping implements TableMappingInterface {
   public function getColumnNames($field_name) {
     if (!isset($this->columnMapping[$field_name])) {
       $this->columnMapping[$field_name] = array();
-      $storage_definition = $this->fieldStorageDefinitions[$field_name];
-      foreach (array_keys($this->fieldStorageDefinitions[$field_name]->getColumns()) as $property_name) {
-        $this->columnMapping[$field_name][$property_name] = $this->getFieldColumnName($storage_definition, $property_name);
+      if (isset($this->fieldStorageDefinitions[$field_name]) && !$this->fieldStorageDefinitions[$field_name]->hasCustomStorage()) {
+        foreach (array_keys($this->fieldStorageDefinitions[$field_name]->getColumns()) as $property_name) {
+          $this->columnMapping[$field_name][$property_name] = $this->getFieldColumnName($this->fieldStorageDefinitions[$field_name], $property_name);
+        }
       }
     }
     return $this->columnMapping[$field_name];
@@ -205,13 +201,18 @@ class DefaultTableMapping implements TableMappingInterface {
     $field_name = $storage_definition->getName();
 
     if ($this->allowsSharedTableStorage($storage_definition)) {
-      $column_name = count($storage_definition->getColumns()) == 1 ? $field_name :  $field_name . '__' . $property_name;
+      $column_name = count($storage_definition->getColumns()) == 1 ? $field_name : $field_name . '__' . $property_name;
     }
     elseif ($this->requiresDedicatedTableStorage($storage_definition)) {
-      $column_name = !in_array($property_name, $this->getReservedColumns()) ? $field_name . '_' . $property_name : $property_name;
+      if ($property_name == TableMappingInterface::DELTA) {
+        $column_name = 'delta';
+      }
+      else {
+        $column_name = !in_array($property_name, $this->getReservedColumns()) ? $field_name . '_' . $property_name : $property_name;
+      }
     }
     else {
-      throw new SqlContentEntityStorageException(SafeMarkup::format('Column information not available for the "@field_name" field.', array('@field_name' => $field_name)));
+      throw new SqlContentEntityStorageException("Column information not available for the '$field_name' field.");
     }
 
     return $column_name;

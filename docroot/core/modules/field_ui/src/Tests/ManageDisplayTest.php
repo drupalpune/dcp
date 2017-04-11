@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_ui\Tests\ManageDisplayTest.
- */
-
 namespace Drupal\field_ui\Tests;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\node\Entity\NodeType;
@@ -139,9 +135,12 @@ class ManageDisplayTest extends WebTestBase {
     $this->drupalPostForm(NULL, array(), t('Save'));
 
     \Drupal::entityManager()->clearCachedFieldDefinitions();
-    $display = entity_load('entity_view_display', 'node.' . $this->type . '.default', TRUE);
+    $id = 'node.' . $this->type . '.default';
+    $storage = $this->container->get('entity_type.manager')->getStorage('entity_view_display');
+    $storage->resetCache([$id]);
+    $display = $storage->load($id);
     $this->assertEqual($display->getRenderer('field_test')->getThirdPartySetting('field_third_party_test', 'field_test_field_formatter_third_party_settings_form'), 'foo');
-    $this->assertTrue(in_array('field_third_party_test', $display->calculateDependencies()['module']), 'The display has a dependency on field_third_party_test module.');
+    $this->assertTrue(in_array('field_third_party_test', $display->calculateDependencies()->getDependencies()['module']), 'The display has a dependency on field_third_party_test module.');
 
     // Confirm that the third party settings are not updated on the settings form.
     $this->drupalPostAjaxForm(NULL, array(), "field_test_settings_edit");
@@ -163,12 +162,31 @@ class ManageDisplayTest extends WebTestBase {
     $edit = array('fields[field_test][type]' => 'field_no_settings', 'refresh_rows' => 'field_test');
     $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Refresh')));
     $this->assertFieldByName('field_test_settings_edit');
-    // Uninstall the module providing third party settings and ensure the button
-    // is no longer there.
+
+    // Make sure we can save the third party settings when there are no settings available
+    $this->drupalPostAjaxForm(NULL, array(), "field_test_settings_edit");
+    $this->drupalPostAjaxForm(NULL, $edit, "field_test_plugin_settings_update");
+
+    // When a module providing third-party settings to a formatter (or widget)
+    // is uninstalled, the formatter remains enabled but the provided settings,
+    // together with the corresponding form elements, are removed from the
+    // display component.
     \Drupal::service('module_installer')->uninstall(array('field_third_party_test'));
+
+    // Ensure the button is still there after the module has been disabled.
     $this->drupalGet($manage_display);
     $this->assertResponse(200);
-    $this->assertNoFieldByName('field_test_settings_edit');
+    $this->assertFieldByName('field_test_settings_edit');
+
+    // Ensure that third-party form elements are not present anymore.
+    $this->drupalPostAjaxForm(NULL, array(), 'field_test_settings_edit');
+    $fieldname = 'fields[field_test][settings_edit_form][third_party_settings][field_third_party_test][field_test_field_formatter_third_party_settings_form]';
+    $this->assertNoField($fieldname);
+
+    // Ensure that third-party settings were removed from the formatter.
+    $display = EntityViewDisplay::load("node.{$this->type}.default");
+    $component = $display->getComponent('field_test');
+    $this->assertFalse(array_key_exists('field_third_party_test', $component['third_party_settings']));
   }
 
   /**
@@ -246,9 +264,11 @@ class ManageDisplayTest extends WebTestBase {
     // Save the form to save the third party settings.
     $this->drupalPostForm(NULL, array(), t('Save'));
     \Drupal::entityManager()->clearCachedFieldDefinitions();
-    $display = entity_load('entity_form_display', 'node.' . $this->type . '.default', TRUE);
+    $storage = $this->container->get('entity_type.manager')->getStorage('entity_form_display');
+    $storage->resetCache(array('node.' . $this->type . '.default'));
+    $display = $storage->load('node.' . $this->type . '.default');
     $this->assertEqual($display->getRenderer('field_test')->getThirdPartySetting('field_third_party_test', 'field_test_widget_third_party_settings_form'), 'foo');
-    $this->assertTrue(in_array('field_third_party_test', $display->calculateDependencies()['module']), 'Form display does not have a dependency on field_third_party_test module.');
+    $this->assertTrue(in_array('field_third_party_test', $display->calculateDependencies()->getDependencies()['module']), 'Form display does not have a dependency on field_third_party_test module.');
 
     // Confirm that the third party settings are not updated on the settings form.
     $this->drupalPostAjaxForm(NULL, array(), "field_test_settings_edit");
@@ -289,7 +309,7 @@ class ManageDisplayTest extends WebTestBase {
     $field_test_with_prepare_view_settings = $formatter_plugin_manager->getDefaultSettings('field_test_with_prepare_view');
     $output = array(
       'field_test_default' => $field_test_default_settings['test_formatter_setting'] . '|' . $value,
-      'field_test_with_prepare_view' => $field_test_with_prepare_view_settings['test_formatter_setting_additional'] . '|' . $value. '|' . ($value + 1),
+      'field_test_with_prepare_view' => $field_test_with_prepare_view_settings['test_formatter_setting_additional'] . '|' . $value . '|' . ($value + 1),
     );
 
     // Check that the field is displayed with the default formatter in 'rss'
@@ -383,7 +403,7 @@ class ManageDisplayTest extends WebTestBase {
     ))->save();
 
     $this->drupalGet('admin/structure/types/manage/no_fields/display');
-    $this->assertRaw(t('There are no fields yet added. You can add new fields on the <a href="@link">Manage fields</a> page.', array('@link' => \Drupal::url('entity.node.field_ui_fields', array('node_type' => 'no_fields')))));
+    $this->assertRaw(t('There are no fields yet added. You can add new fields on the <a href=":link">Manage fields</a> page.', array(':link' => \Drupal::url('entity.node.field_ui_fields', array('node_type' => 'no_fields')))));
   }
 
   /**
@@ -454,8 +474,8 @@ class ManageDisplayTest extends WebTestBase {
     // Render a cloned node, so that we do not alter the original.
     $clone = clone $node;
     $element = node_view($clone, $view_mode);
-    $output = drupal_render($element);
-    $this->verbose(t('Rendered node - view mode: @view_mode', array('@view_mode' => $view_mode)) . '<hr />'. $output);
+    $output = \Drupal::service('renderer')->renderRoot($element);
+    $this->verbose(t('Rendered node - view mode: @view_mode', array('@view_mode' => $view_mode)) . '<hr />' . $output);
 
     // Assign content so that WebTestBase functions can be used.
     $this->setRawContent($output);

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Tests\SettingsTest.
- */
-
 namespace Drupal\views_ui\Tests;
 
 /**
@@ -20,6 +15,14 @@ class SettingsTest extends UITestBase {
    * @var \Drupal\user\User
    */
   protected $adminUser;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->drupalPlaceBlock('local_tasks_block');
+  }
 
   /**
    * Tests the settings for the edit ui.

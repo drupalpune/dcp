@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\TypedData\Validation\ExecutionContext.
- */
-
 namespace Drupal\Core\TypedData\Validation;
 
-use Symfony\Component\Translation\TranslatorInterface;
+use Drupal\Core\Validation\TranslatorInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -38,7 +33,7 @@ class ExecutionContext implements ExecutionContextInterface {
   protected $root;
 
   /**
-   * @var \Symfony\Component\Translation\TranslatorInterface
+   * @var \Drupal\Core\Validation\TranslatorInterface
    */
   protected $translator;
 
@@ -117,7 +112,7 @@ class ExecutionContext implements ExecutionContextInterface {
    *   The validator.
    * @param mixed $root
    *   The root.
-   * @param \Symfony\Component\Translation\TranslatorInterface $translator
+   * @param \Drupal\Core\Validation\TranslatorInterface $translator
    *   The translator.
    * @param string $translationDomain
    *   (optional) The translation domain.
@@ -317,4 +312,5 @@ class ExecutionContext implements ExecutionContextInterface {
   public function getMetadataFactory() {
     throw new \LogicException('Legacy validator API is unsupported.');
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\Field\FieldHandlerInterface
- */
-
 namespace Drupal\views\Plugin\views\field;
 
 use Drupal\views\ResultRow;
@@ -121,8 +116,9 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    * @param \Drupal\views\ResultRow $values
    *   An object containing all retrieved values.
    *
-   * @return \Drupal\Core\Entity\EntityInterface
-   *   Returns the entity matching the values.
+   * @return \Drupal\Core\Entity\EntityInterface|null
+   *   Returns the entity matching the values or NULL if there is no matching
+   *   entity.
    */
   public function getEntity(ResultRow $values);
 
@@ -136,7 +132,6 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    *   An object containing all retrieved values.
    * @param string $field
    *   Optional name of the field where the value is stored.
-   *
    */
   public function getValue(ResultRow $values, $field = NULL);
 
@@ -145,7 +140,7 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    * by in the style settings.
    *
    * @return bool
-   *  TRUE if this field handler is groupable, otherwise FALSE.
+   *   TRUE if this field handler is groupable, otherwise FALSE.
    */
   public function useStringGroupBy();
 
@@ -157,7 +152,6 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    *
    * @param \Drupal\views\ResultRow[] $values
    *   An array of all ResultRow objects returned from the query.
-   *
    */
   public function preRender(&$values);
 
@@ -167,9 +161,10 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    * @param \Drupal\views\ResultRow $values
    *   The values retrieved from a single row of a view's query result.
    *
-   * @return string
-   *   The rendered output.
-   *
+   * @return string|\Drupal\Component\Render\MarkupInterface
+   *   The rendered output. If the output is safe it will be wrapped in an
+   *   object that implements MarkupInterface. If it is empty or unsafe it
+   *   will be a string.
    */
   public function render(ResultRow $values);
 
@@ -179,7 +174,7 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    * This is meant to be used mainly to deal with field handlers whose output
    * cannot be cached at row level but can be cached at display level. The
    * typical example is the row counter. For completely uncacheable field output
-   * #post_render_cache should be used.
+   * placeholders should be used.
    *
    * @param \Drupal\views\ResultRow $row
    *   An array of all ResultRow objects returned from the query.
@@ -202,9 +197,10 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    * @param \Drupal\views\ResultRow $values
    *   The values retrieved from a single row of a view's query result.
    *
-   * @return string
-   *   The advanced rendered output.
-   *
+   * @return string|\Drupal\Component\Render\MarkupInterface
+   *   The advanced rendered output. If the output is safe it will be wrapped in
+   *   an object that implements MarkupInterface. If it is empty or unsafe
+   *   it will be a string.
    */
   public function advancedRender(ResultRow $values);
 
@@ -219,7 +215,7 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    *   Whether or not to use empty() to check the value.
    *
    * @return bool
-   * TRUE if the value is considered empty, FALSE otherwise.
+   *   TRUE if the value is considered empty, FALSE otherwise.
    */
   public function isValueEmpty($value, $empty_zero, $no_skip_empty = TRUE);
 
@@ -236,28 +232,12 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    *     - ellipsis: Show an ellipsis (…) at the end of the trimmed string.
    *     - html: Make sure that the html is correct.
    *
-   * @return string
-   *   The rendered string.
+   * @return string|\Drupal\Component\Render\MarkupInterface
+   *   The rendered output. If the output is safe it will be wrapped in an
+   *   object that implements MarkupInterface. If it is empty or unsafe it
+   *   will be a string.
    */
   public function renderText($alter);
-
-  /**
-   * Trims the field down to the specified length.
-   *
-   * @param array $alter
-   *   The alter array of options to use.
-   *     - max_length: Maximum length of the string, the rest gets truncated.
-   *     - word_boundary: Trim only on a word boundary.
-   *     - ellipsis: Show an ellipsis (…) at the end of the trimmed string.
-   *     - html: Make sure that the html is correct.
-   *
-   * @param string $value
-   *   The string which should be trimmed.
-   *
-   * @return string
-   *   The rendered trimmed string.
-   */
-  public function renderTrimText($alter, $value);
 
   /**
    * Gets the 'render' tokens to use for advanced rendering.
@@ -280,8 +260,10 @@ interface FieldHandlerInterface extends ViewsHandlerInterface {
    * @param \Drupal\views\ResultRow $values
    *   Holds single row of a view's result set.
    *
-   * @return string|false
-   *   Returns rendered output of the given theme implementation.
+   * @return string|\Drupal\Component\Render\MarkupInterface
+   *   Returns rendered output of the given theme implementation. If the output
+   *   is safe it will be wrapped in an object that implements
+   *   MarkupInterface. If it is empty or unsafe it will be a string.
    */
   function theme(ResultRow $values);
 

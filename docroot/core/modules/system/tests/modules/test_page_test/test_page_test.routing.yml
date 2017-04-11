@@ -21,6 +21,13 @@ test_page_test.static_title:
   requirements:
     _access: 'TRUE'
 
+test_page_test.cached_controller:
+  path: '/test-page-cached-controller'
+  defaults:
+    _controller: '\Drupal\test_page_test\Controller\Test::controllerWithCache'
+  requirements:
+    _access: 'TRUE'
+
 test_page_test.dynamic_title:
   path: '/test-page-dynamic-title'
   defaults:
@@ -33,5 +40,29 @@ test_page_test.admin_render_title:
   path: '/admin/test-render-title'
   defaults:
     _controller: '\Drupal\test_page_test\Controller\Test::renderTitle'
+  requirements:
+    _access: 'TRUE'
+
+test_page_test.http_response_exception:
+  path: '/test-http-response-exception/{code}'
+  defaults:
+    _controller: '\Drupal\test_page_test\Controller\Test::httpResponseException'
+    code: 200
+  requirements:
+    _access: 'TRUE'
+
+test_page_test.error:
+  path: '/test-error'
+  defaults:
+    _controller: '\Drupal\test_page_test\Controller\Test::error'
+    code: 200
+  requirements:
+    _access: 'TRUE'
+
+test_page_test.encoded:
+  path: '/test-encoded'
+  defaults:
+    _title: 'Page with encoded HTML'
+    _controller: '\Drupal\test_page_test\Controller\Test::renderEncodedMarkup'
   requirements:
     _access: 'TRUE'

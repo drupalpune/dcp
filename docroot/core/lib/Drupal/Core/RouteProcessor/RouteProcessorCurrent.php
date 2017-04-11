@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\RouteProcessor\RouteProcessorCurrent.
- */
-
 namespace Drupal\Core\RouteProcessor;
 
-use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\Routing\Route;
 
@@ -36,16 +31,24 @@ class RouteProcessorCurrent implements OutboundRouteProcessorInterface {
   /**
    * {@inheritdoc}
    */
-  public function processOutbound($route_name, Route $route, array &$parameters, CacheableMetadata $cacheable_metadata = NULL) {
+  public function processOutbound($route_name, Route $route, array &$parameters, BubbleableMetadata $bubbleable_metadata = NULL) {
     if ($route_name === '<current>') {
       if ($current_route = $this->routeMatch->getRouteObject()) {
+        $requirements = $current_route->getRequirements();
+        // Setting _method and _schema is deprecated since 2.7. Using
+        // setMethods() and setSchemes() are now the recommended ways.
+        unset($requirements['_method']);
+        unset($requirements['_schema']);
+        $route->setRequirements($requirements);
+
         $route->setPath($current_route->getPath());
-        $route->setRequirements($current_route->getRequirements());
+        $route->setSchemes($current_route->getSchemes());
+        $route->setMethods($current_route->getMethods());
         $route->setOptions($current_route->getOptions());
         $route->setDefaults($current_route->getDefaults());
         $parameters = array_merge($parameters, $this->routeMatch->getRawParameters()->all());
-        if ($cacheable_metadata) {
-          $cacheable_metadata->addCacheContexts(['route']);
+        if ($bubbleable_metadata) {
+          $bubbleable_metadata->addCacheContexts(['route']);
         }
       }
       else {

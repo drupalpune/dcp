@@ -1,0 +1,22 @@
+uuid: f3924aeb-0ac5-42a4-aed6-57c2dac7a018
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.sponsor_benefits
+    - field.storage.block_content.body
+  module:
+    - text
+id: block_content.sponsor_benefits.body
+field_name: body
+entity_type: block_content
+bundle: sponsor_benefits
+label: Body
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: false
+field_type: text_with_summary

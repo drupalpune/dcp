@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\rdf\Tests\EntityReferenceFieldAttributesTest.
- */
-
 namespace Drupal\rdf\Tests;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -103,7 +98,7 @@ class EntityReferenceFieldAttributesTest extends TaxonomyTestBase {
 
     // Render the node.
     $node_render_array = entity_view_multiple(array($node), 'teaser');
-    $html = drupal_render($node_render_array);
+    $html = \Drupal::service('renderer')->renderRoot($node_render_array);
 
     // Parse the teaser.
     $parser = new \EasyRdf_Parser_Rdfa();

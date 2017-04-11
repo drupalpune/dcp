@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Tests\UserBlocksTest.
- */
-
 namespace Drupal\user\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -40,6 +35,30 @@ class UserBlocksTest extends WebTestBase {
   }
 
   /**
+   * Tests that user login block is hidden from user/login.
+   */
+  function testUserLoginBlockVisibility() {
+    // Array keyed list where key being the URL address and value being expected
+    // visibility as boolean type.
+    $paths = [
+      'node' => TRUE,
+      'user/login' => FALSE,
+      'user/register' => TRUE,
+      'user/password' => TRUE,
+    ];
+    foreach ($paths as $path => $expected_visibility) {
+      $this->drupalGet($path);
+      $elements = $this->xpath('//div[contains(@class,"block-user-login-block") and @role="form"]');
+      if ($expected_visibility) {
+        $this->assertTrue(!empty($elements), 'User login block in path "' . $path . '" should be visible');
+      }
+      else {
+        $this->assertTrue(empty($elements), 'User login block in path "' . $path . '" should not be visible');
+      }
+    }
+  }
+
+  /**
    * Test the user login block.
    */
   function testUserLoginBlock() {
@@ -68,6 +87,17 @@ class UserBlocksTest extends WebTestBase {
     $this->drupalPostForm('http://example.com/', $edit, t('Log in'), array('external' => FALSE));
     // Check that we remain on the site after login.
     $this->assertUrl($user->url('canonical', ['absolute' => TRUE]), [], 'Redirected to user profile page after login from the frontpage');
+
+    // Verify that form validation errors are displayed immediately for forms
+    // in blocks and not on subsequent page requests.
+    $this->drupalLogout();
+    $edit = array();
+    $edit['name'] = 'foo';
+    $edit['pass'] = 'invalid password';
+    $this->drupalPostForm('filter/tips', $edit, t('Log in'));
+    $this->assertText(t('Unrecognized username or password. Forgot your password?'));
+    $this->drupalGet('filter/tips');
+    $this->assertNoText(t('Unrecognized username or password. Forgot your password?'));
   }
 
   /**
@@ -94,7 +124,7 @@ class UserBlocksTest extends WebTestBase {
     // Test block output.
     \Drupal::currentUser()->setAccount($user1);
     $content = entity_view($block, 'block');
-    $this->setRawContent(render($content));
+    $this->setRawContent(\Drupal::service('renderer')->renderRoot($content));
     $this->assertRaw(t('2 users'), 'Correct number of online users (2 users).');
     $this->assertText($user1->getUsername(), 'Active user 1 found in online list.');
     $this->assertText($user2->getUsername(), 'Active user 2 found in online list.');
@@ -111,4 +141,5 @@ class UserBlocksTest extends WebTestBase {
       ->fields(array('access' => $access))
       ->execute();
   }
+
 }

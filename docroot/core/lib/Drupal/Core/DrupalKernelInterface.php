@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\DrupalKernelInterface.
- */
-
 namespace Drupal\Core;
 
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -16,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
  * This interface extends Symfony's KernelInterface and adds methods for
  * responding to modules being enabled or disabled during its lifetime.
  */
-interface DrupalKernelInterface extends HttpKernelInterface {
+interface DrupalKernelInterface extends HttpKernelInterface, ContainerAwareInterface {
 
   /**
    * Boots the current kernel.
@@ -58,10 +54,23 @@ interface DrupalKernelInterface extends HttpKernelInterface {
   public function getContainer();
 
   /**
+   * Returns the cached container definition - if any.
+   *
+   * This also allows inspecting a built container for debugging purposes.
+   *
+   * @return array|null
+   *   The cached container definition or NULL if not found in cache.
+   */
+  public function getCachedContainerDefinition();
+
+  /**
    * Set the current site path.
    *
-   * @param $path
+   * @param string $path
    *   The current site path.
+   *
+   * @throws \LogicException
+   *   In case the kernel is already booted.
    */
   public function setSitePath($path);
 
@@ -94,6 +103,18 @@ interface DrupalKernelInterface extends HttpKernelInterface {
   public function updateModules(array $module_list, array $module_filenames = array());
 
   /**
+   * Force a container rebuild.
+   *
+   * @return \Symfony\Component\DependencyInjection\ContainerInterface
+   */
+  public function rebuildContainer();
+
+  /**
+   * Invalidate the service container for the next request.
+   */
+  public function invalidateContainer();
+
+  /**
    * Prepare the kernel for handling a request without handling the request.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -101,8 +122,8 @@ interface DrupalKernelInterface extends HttpKernelInterface {
    *
    * @return $this
    *
-   * @deprecated 8.x
-   *   Only used by legacy front-controller scripts.
+   * @deprecated in Drupal 8.0.x and will be removed before 9.0.0. Only used by
+   *   legacy front-controller scripts.
    */
   public function prepareLegacyRequest(Request $request);
 

@@ -1,19 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\PluginBase.
- */
-
 namespace Drupal\views\Plugin\views;
 
 use Drupal\Component\Plugin\DependentPluginInterface;
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase as ComponentPluginBase;
 use Drupal\Core\Render\Element;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ViewExecutable;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -200,7 +196,6 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
    *
    * @param array $storage
    *   The stored options.
-   *
    * @param array $options
    *   The defined options.
    */
@@ -249,7 +244,7 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
 
         $this->unpackOptions($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array(), $all, FALSE);
       }
-      else if ($all || !empty($definition[$key])) {
+      elseif ($all || !empty($definition[$key])) {
         $storage[$key] = $value;
       }
     }
@@ -313,9 +308,9 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
   public function pluginTitle() {
     // Short_title is optional so its defaults to an empty string.
     if (!empty($this->definition['short_title'])) {
-      return SafeMarkup::checkPlain($this->definition['short_title']);
+      return $this->definition['short_title'];
     }
-    return SafeMarkup::checkPlain($this->definition['title']);
+    return $this->definition['title'];
   }
 
   /**
@@ -333,54 +328,86 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
   }
 
   /**
-   * Replaces Views' tokens in a given string. It is the responsibility of the
-   * calling function to ensure $text and $token replacements are sanitized.
-   *
-   * This used to be a simple strtr() scattered throughout the code. Some Views
-   * tokens, such as arguments (e.g.: %1 or !1), still use the old format so we
-   * handle those as well as the new Twig-based tokens (e.g.: {{ field_name }})
+   * Replaces Views' tokens in a given string. The resulting string will be
+   * sanitized with Xss::filterAdmin.
    *
    * @param $text
-   *   String with possible tokens.
+   *   Unsanitized string with possible tokens.
    * @param $tokens
    *   Array of token => replacement_value items.
    *
-   * @return String
+   * @return string
    */
   protected function viewsTokenReplace($text, $tokens) {
+    if (!strlen($text)) {
+      // No need to run filterAdmin on an empty string.
+      return '';
+    }
     if (empty($tokens)) {
-      return $text;
+      return Xss::filterAdmin($text);
     }
 
-    // Separate Twig tokens from other tokens (e.g.: contextual filter tokens in
-    // the form of %1).
     $twig_tokens = array();
-    $other_tokens = array();
     foreach ($tokens as $token => $replacement) {
+      // Twig wants a token replacement array stripped of curly-brackets.
+      // Some Views tokens come with curly-braces, others do not.
+      //@todo: https://www.drupal.org/node/2544392
       if (strpos($token, '{{') !== FALSE) {
         // Twig wants a token replacement array stripped of curly-brackets.
-        $token = trim(str_replace(array('{', '}'), '', $token));
+        $token = trim(str_replace(['{{', '}}'], '', $token));
+      }
+
+      // Check for arrays in Twig tokens. Internally these are passed as
+      // dot-delimited strings, but need to be turned into associative arrays
+      // for parsing.
+      if (strpos($token, '.') === FALSE) {
+        // We need to validate tokens are valid Twig variables. Twig uses the
+        // same variable naming rules as PHP.
+        // @see http://php.net/manual/language.variables.basics.php
+        assert('preg_match(\'/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/\', $token) === 1', 'Tokens need to be valid Twig variables.');
         $twig_tokens[$token] = $replacement;
       }
       else {
-        $other_tokens[$token] = $replacement;
+        $parts = explode('.', $token);
+        $top = array_shift($parts);
+        assert('preg_match(\'/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/\', $top) === 1', 'Tokens need to be valid Twig variables.');
+        $token_array = array(array_pop($parts) => $replacement);
+        foreach (array_reverse($parts) as $key) {
+          // The key could also be numeric (array index) so allow that.
+          assert('is_numeric($key) || (preg_match(\'/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/\', $key) === 1)', 'Tokens need to be valid Twig variables.');
+          $token_array = array($key => $token_array);
+        }
+        if (!isset($twig_tokens[$top])) {
+          $twig_tokens[$top] = [];
+        }
+        $twig_tokens[$top] += $token_array;
       }
     }
 
-    // Non-Twig tokens are a straight string replacement, Twig tokens get run
-    // through an inline template for rendering and replacement.
-    $text = strtr($text, $other_tokens);
-    if ($twig_tokens && !empty($text)) {
+    if ($twig_tokens) {
+      // Use the unfiltered text for the Twig template, then filter the output.
+      // Otherwise, Xss::filterAdmin could remove valid Twig syntax before the
+      // template is parsed.
+
       $build = array(
         '#type' => 'inline_template',
         '#template' => $text,
         '#context' => $twig_tokens,
+        '#post_render' => [
+          function ($children, $elements) {
+            return Xss::filterAdmin($children);
+          }
+        ],
       );
 
-      return $this->getRenderer()->render($build);
+      // Currently you cannot attach assets to tokens with
+      // Renderer::renderPlain(). This may be unnecessarily limiting. Consider
+      // using Renderer::executeInRenderContext() instead.
+      // @todo: https://www.drupal.org/node/2566621
+      return (string) $this->getRenderer()->renderPlain($build);
     }
     else {
-      return $text;
+      return Xss::filterAdmin($text);
     }
   }
 
@@ -454,7 +481,6 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
         unset($form[$key]);
       }
     }
-
     return $form;
   }
 
@@ -533,7 +559,14 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
     // Since this is not a real language, surround it by '***LANGUAGE_...***',
     // like the negotiated languages below.
     if ($flags & LanguageInterface::STATE_SITE_DEFAULT) {
-      $list[PluginBase::VIEWS_QUERY_LANGUAGE_SITE_DEFAULT] = $this->t($languages[LanguageInterface::LANGCODE_SITE_DEFAULT]->getName());
+      $name = $languages[LanguageInterface::LANGCODE_SITE_DEFAULT]->getName();
+      // The language name may have already been translated, no need to
+      // translate it again.
+      // @see Drupal\Core\Language::filterLanguages().
+      if (!$name instanceof TranslatableMarkup) {
+        $name = $this->t($name);
+      }
+      $list[PluginBase::VIEWS_QUERY_LANGUAGE_SITE_DEFAULT] = $name;
       // Remove site default language from $languages so it's not added
       // twice with the real languages below.
       unset($languages[LanguageInterface::LANGCODE_SITE_DEFAULT]);
@@ -549,7 +582,7 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
           $name = $types_info[$id]['name'];
           // Surround IDs by '***LANGUAGE_...***', to avoid query collisions.
           $id = '***LANGUAGE_' . $id . '***';
-          $list[$id] = $this->t('!type language selected for page', array('!type' => $name));
+          $list[$id] = $this->t('@type language selected for page', array('@type' => $name));
         }
       }
       if (!empty($current_values)) {
@@ -559,7 +592,7 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
           // add that option too, so it is not lost. If not among the current
           // values, skip displaying it to avoid user confusion.
           if (isset($type['name']) && !isset($list[$id]) && in_array($id, $current_values)) {
-            $list[$id] = $this->t('!type language selected for page', array('!type' => $type['name']));
+            $list[$id] = $this->t('@type language selected for page', array('@type' => $type['name']));
           }
         }
       }
@@ -567,7 +600,7 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
 
     // Add real languages.
     foreach ($languages as $id => $language) {
-      $list[$id] = $this->t($language->getName());
+      $list[$id] = $language->getName();
     }
 
     return $list;

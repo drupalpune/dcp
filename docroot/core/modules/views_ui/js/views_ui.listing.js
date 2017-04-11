@@ -1,13 +1,23 @@
+/**
+ * @file
+ * Views listing behaviors.
+ */
+
 (function ($, Drupal) {
 
-  "use strict";
+  'use strict';
 
   /**
    * Filters the view listing tables by a text input search string.
    *
    * Text search input: input.views-filter-text
    * Target table:      input.views-filter-text[data-table]
-   * Source text:       .views-table-filter-text-source
+   * Source text:       [data-drupal-selector="views-table-filter-text-source"]
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the filter functionality to the views admin text search field.
    */
   Drupal.behaviors.viewTableFilterByText = {
     attach: function (context, settings) {
@@ -20,7 +30,7 @@
 
         function showViewRow(index, row) {
           var $row = $(row);
-          var $sources = $row.find('.views-table-filter-text-source');
+          var $sources = $row.find('[data-drupal-selector="views-table-filter-text-source"]');
           var textMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
           $row.closest('tr').toggle(textMatch);
         }

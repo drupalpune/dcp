@@ -1,16 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityType.
- */
-
 namespace Drupal\Core\Entity;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\Exception\EntityTypeIdLengthException;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Provides an implementation of an entity type and its metadata.
@@ -111,7 +106,15 @@ class EntityType implements EntityTypeInterface {
   /**
    * The name of a callback that returns the label of the entity.
    *
-   * @var string|null
+   * @var callable|null
+   *
+   * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
+   *   Use Drupal\Core\Entity\EntityInterface::label() for complex label
+   *   generation as needed.
+   *
+   * @see \Drupal\Core\Entity\EntityInterface::label()
+   *
+   * @todo Remove usages of label_callback https://www.drupal.org/node/2450793.
    */
   protected $label_callback = NULL;
 
@@ -120,7 +123,7 @@ class EntityType implements EntityTypeInterface {
    *
    * @var string
    */
-  protected $bundle_entity_type = 'bundle';
+  protected $bundle_entity_type = NULL;
 
   /**
    * The name of the entity type for which bundles are provided.
@@ -179,6 +182,29 @@ class EntityType implements EntityTypeInterface {
   protected $label = '';
 
   /**
+   * The indefinite singular name of the type.
+   *
+   * @var string
+   */
+  protected $label_singular = '';
+
+  /**
+   * The indefinite plural name of the type.
+   *
+   * @var string
+   */
+  protected $label_plural = '';
+
+  /**
+   * A definite singular/plural name of the type.
+   *
+   * Needed keys: "singular" and "plural".
+   *
+   * @var string[]
+   */
+  protected $label_count = [];
+
+  /**
    * A callable that can be used to provide the entity URI.
    *
    * @var callable|null
@@ -234,6 +260,13 @@ class EntityType implements EntityTypeInterface {
   protected $constraints = array();
 
   /**
+   * Any additional properties and values.
+   *
+   * @var array
+   */
+  protected $additional = [];
+
+  /**
    * Constructs a new EntityType.
    *
    * @param array $definition
@@ -245,16 +278,11 @@ class EntityType implements EntityTypeInterface {
   public function __construct($definition) {
     // Throw an exception if the entity type ID is longer than 32 characters.
     if (Unicode::strlen($definition['id']) > static::ID_MAX_LENGTH) {
-      throw new EntityTypeIdLengthException(SafeMarkup::format(
-        'Attempt to create an entity type with an ID longer than @max characters: @id.', array(
-          '@max' => static::ID_MAX_LENGTH,
-          '@id' => $definition['id'],
-        )
-      ));
+      throw new EntityTypeIdLengthException('Attempt to create an entity type with an ID longer than ' . static::ID_MAX_LENGTH . " characters: {$definition['id']}.");
     }
 
     foreach ($definition as $property => $value) {
-      $this->{$property} = $value;
+      $this->set($property, $value);
     }
 
     // Ensure defaults.
@@ -267,6 +295,9 @@ class EntityType implements EntityTypeInterface {
     $this->handlers += array(
       'access' => 'Drupal\Core\Entity\EntityAccessControlHandler',
     );
+    if (isset($this->handlers['storage'])) {
+      $this->checkStorageClass($this->handlers['storage']);
+    }
 
     // Automatically add the EntityChanged constraint if the entity type tracks
     // the changed time.
@@ -278,21 +309,31 @@ class EntityType implements EntityTypeInterface {
     if (empty($this->list_cache_tags)) {
       $this->list_cache_tags = [$definition['id'] . '_list'];
     }
-
   }
 
   /**
    * {@inheritdoc}
    */
   public function get($property) {
-    return isset($this->{$property}) ? $this->{$property} : NULL;
+    if (property_exists($this, $property)) {
+      $value = isset($this->{$property}) ? $this->{$property} : NULL;
+    }
+    else {
+      $value = isset($this->additional[$property]) ? $this->additional[$property] : NULL;
+    }
+    return $value;
   }
 
   /**
    * {@inheritdoc}
    */
   public function set($property, $value) {
-    $this->{$property} = $value;
+    if (property_exists($this, $property)) {
+      $this->{$property} = $value;
+    }
+    else {
+      $this->additional[$property] = $value;
+    }
     return $this;
   }
 
@@ -439,7 +480,19 @@ class EntityType implements EntityTypeInterface {
    * {@inheritdoc}
    */
   public function setStorageClass($class) {
+    $this->checkStorageClass($class);
     $this->handlers['storage'] = $class;
+    return $this;
+  }
+
+  /**
+   * Checks that the provided class is compatible with the current entity type.
+   *
+   * @param string $class
+   *   The class to check.
+   */
+  protected function checkStorageClass($class) {
+    // Nothing to check by default.
   }
 
   /**
@@ -676,7 +729,7 @@ class EntityType implements EntityTypeInterface {
    * {@inheritdoc}
    */
   public function getLabel() {
-    return (string) $this->label;
+    return $this->label;
   }
 
   /**
@@ -684,6 +737,39 @@ class EntityType implements EntityTypeInterface {
    */
   public function getLowercaseLabel() {
     return Unicode::strtolower($this->getLabel());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSingularLabel() {
+    if (empty($this->label_singular)) {
+      $lowercase_label = $this->getLowercaseLabel();
+      $this->label_singular = $lowercase_label;
+    }
+    return $this->label_singular;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPluralLabel() {
+    if (empty($this->label_plural)) {
+      $lowercase_label = $this->getLowercaseLabel();
+      $this->label_plural = new TranslatableMarkup('@label entities', ['@label' => $lowercase_label], [], $this->getStringTranslation());
+    }
+    return $this->label_plural;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCountLabel($count) {
+    if (empty($this->label_count)) {
+      return $this->formatPlural($count, '@count @label', '@count @label entities', ['@label' => $this->getLowercaseLabel()], ['context' => 'Entity type label']);
+    }
+    $context = isset($this->label_count['context']) ? $this->label_count['context'] : 'Entity type label';
+    return $this->formatPlural($count, $this->label_count['singular'], $this->label_count['plural'], ['context' => $context]);
   }
 
   /**
@@ -713,7 +799,7 @@ class EntityType implements EntityTypeInterface {
    * {@inheritdoc}
    */
   public function getGroupLabel() {
-    return !empty($this->group_label) ? (string) $this->group_label : $this->t('Other', array(), array('context' => 'Entity type group'));
+    return !empty($this->group_label) ? $this->group_label : $this->t('Other', array(), array('context' => 'Entity type group'));
   }
 
   /**
@@ -768,6 +854,32 @@ class EntityType implements EntityTypeInterface {
   public function addConstraint($constraint_name, $options = NULL) {
     $this->constraints[$constraint_name] = $options;
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getBundleConfigDependency($bundle) {
+    // If this entity type uses entities to manage its bundles then depend on
+    // the bundle entity.
+    if ($bundle_entity_type_id = $this->getBundleEntityType()) {
+      if (!$bundle_entity = \Drupal::entityManager()->getStorage($bundle_entity_type_id)->load($bundle)) {
+        throw new \LogicException(sprintf('Missing bundle entity, entity type %s, entity id %s.', $bundle_entity_type_id, $bundle));
+      }
+      $config_dependency = [
+        'type' => 'config',
+        'name' => $bundle_entity->getConfigDependencyName(),
+      ];
+    }
+    else {
+      // Depend on the provider of the entity type.
+      $config_dependency = [
+        'type' => 'module',
+        'name' => $this->getProvider(),
+      ];
+    }
+
+    return $config_dependency;
   }
 
 }

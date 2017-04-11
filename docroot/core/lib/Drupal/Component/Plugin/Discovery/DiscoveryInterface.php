@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Component\Plugin\Discovery\DiscoveryInterface.
- */
-
 namespace Drupal\Component\Plugin\Discovery;
 
 /**

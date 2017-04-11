@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_test\Plugin\Validation\Constraint\TestFieldConstraint.
- */
-
 namespace Drupal\field_test\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraints\NotEqualTo;
@@ -12,7 +7,7 @@ use Symfony\Component\Validator\Constraints\NotEqualTo;
 /**
  * Checks if a value is not equal.
  *
- * @Plugin(
+ * @Constraint(
  *   id = "TestField",
  *   label = @Translation("Test Field", context = "Validation"),
  *   type = { "integer" }

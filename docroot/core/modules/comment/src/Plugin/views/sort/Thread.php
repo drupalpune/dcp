@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\comment\Plugin\views\sort\Thread.
- */
-
 namespace Drupal\comment\Plugin\views\sort;
 
 use Drupal\views\Plugin\views\sort\SortPluginBase;

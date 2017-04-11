@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Ajax\ShowButtonsCommand.
- */
-
 namespace Drupal\views\Ajax;
 
 use Drupal\Core\Ajax\CommandInterface;
@@ -35,7 +30,7 @@ class ShowButtonsCommand implements CommandInterface {
   }
 
   /**
-   * Implements \Drupal\Core\Ajax\CommandInterface::render().
+   * {@inheritdoc}
    */
   public function render() {
     return array(

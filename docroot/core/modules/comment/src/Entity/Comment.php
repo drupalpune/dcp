@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Entity\Comment.
- */
-
 namespace Drupal\comment\Entity;
 
 use Drupal\Component\Utility\Number;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\comment\CommentInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
@@ -24,11 +20,12 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "comment",
  *   label = @Translation("Comment"),
- *   bundle_label = @Translation("Content type"),
+ *   bundle_label = @Translation("Comment type"),
  *   handlers = {
  *     "storage" = "Drupal\comment\CommentStorage",
  *     "storage_schema" = "Drupal\comment\CommentStorageSchema",
  *     "access" = "Drupal\comment\CommentAccessControlHandler",
+ *     "list_builder" = "Drupal\Core\Entity\EntityListBuilder",
  *     "view_builder" = "Drupal\comment\CommentViewBuilder",
  *     "views_data" = "Drupal\comment\CommentViewsData",
  *     "form" = {
@@ -81,7 +78,7 @@ class Comment extends ContentEntityBase implements CommentInterface {
     }
     if ($this->isNew()) {
       // Add the comment to database. This next section builds the thread field.
-      // Also see the documentation for comment_view().
+      // @see \Drupal\comment\CommentViewBuilder::buildComponents()
       $thread = $this->getThread();
       if (empty($thread)) {
         if ($this->threadLock) {
@@ -153,6 +150,11 @@ class Comment extends ContentEntityBase implements CommentInterface {
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
 
+    // Always invalidate the cache tag for the commented entity.
+    if ($commented_entity = $this->getCommentedEntity()) {
+      Cache::invalidateTags($commented_entity->getCacheTagsToInvalidate());
+    }
+
     $this->releaseThreadLock();
     // Update the {comment_entity_statistics} table prior to executing the hook.
     \Drupal::service('comment.statistics')->update($this);
@@ -197,8 +199,7 @@ class Comment extends ContentEntityBase implements CommentInterface {
    * {@inheritdoc}
    */
   public function permalink() {
-    $entity = $this->getCommentedEntity();
-    $uri = $entity->urlInfo();
+    $uri = $this->urlInfo();
     $uri->setOption('fragment', 'comment-' . $this->id());
     return $uri;
   }
@@ -207,16 +208,18 @@ class Comment extends ContentEntityBase implements CommentInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['cid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Comment ID'))
-      ->setDescription(t('The comment ID.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
+    /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
+    $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The comment UUID.'))
-      ->setReadOnly(TRUE);
+    $fields['cid']->setLabel(t('Comment ID'))
+      ->setDescription(t('The comment ID.'));
+
+    $fields['uuid']->setDescription(t('The comment UUID.'));
+
+    $fields['comment_type']->setLabel(t('Comment Type'))
+      ->setDescription(t('The comment type.'));
+
+    $fields['langcode']->setDescription(t('The comment language code.'));
 
     $fields['pid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Parent ID'))
@@ -227,18 +230,6 @@ class Comment extends ContentEntityBase implements CommentInterface {
       ->setLabel(t('Entity ID'))
       ->setDescription(t('The ID of the entity of which this comment is a reply.'))
       ->setRequired(TRUE);
-
-    $fields['langcode'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language'))
-      ->setDescription(t('The comment language code.'))
-      ->setTranslatable(TRUE)
-      ->setDisplayOptions('view', array(
-        'type' => 'hidden',
-      ))
-      ->setDisplayOptions('form', array(
-        'type' => 'language_select',
-        'weight' => 2,
-      ));
 
     $fields['subject'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Subject'))
@@ -310,11 +301,6 @@ class Comment extends ContentEntityBase implements CommentInterface {
       ->setDescription(t('The entity type to which this comment is attached.'))
       ->setSetting('is_ascii', TRUE)
       ->setSetting('max_length', EntityTypeInterface::ID_MAX_LENGTH);
-
-    $fields['comment_type'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Comment Type'))
-      ->setDescription(t('The comment type.'))
-      ->setSetting('target_type', 'comment_type');
 
     $fields['field_name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Comment field name'))
@@ -519,13 +505,6 @@ class Comment extends ContentEntityBase implements CommentInterface {
   public function setThread($thread) {
     $this->set('thread', $thread);
     return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getChangedTime() {
-    return $this->get('changed')->value;
   }
 
   /**

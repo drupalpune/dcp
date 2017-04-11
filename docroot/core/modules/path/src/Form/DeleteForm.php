@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\path\Form\DeleteForm.
- */
-
 namespace Drupal\path\Form;
 
 use Drupal\Core\Form\ConfirmFormBase;
@@ -59,7 +54,7 @@ class DeleteForm extends ConfirmFormBase {
   }
 
   /**
-   * Implements \Drupal\Core\Form\ConfirmFormBase::getQuestion().
+   * {@inheritdoc}
    */
   public function getQuestion() {
     return t('Are you sure you want to delete path alias %title?', array('%title' => $this->pathAlias['alias']));

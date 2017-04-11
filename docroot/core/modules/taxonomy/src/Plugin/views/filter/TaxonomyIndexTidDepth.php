@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\taxonomy\Plugin\views\filter\TaxonomyIndexTidDepth.
- */
-
 namespace Drupal\taxonomy\Plugin\views\filter;
 
 use Drupal\Core\Form\FormStateInterface;

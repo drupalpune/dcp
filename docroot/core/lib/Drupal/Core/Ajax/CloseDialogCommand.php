@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Ajax\CloseDialogCommand.
- */
-
 namespace Drupal\Core\Ajax;
 
 /**
@@ -42,7 +37,7 @@ class CloseDialogCommand implements CommandInterface {
   }
 
   /**
-   * Implements \Drupal\Core\Ajax\CommandInterface::render().
+   * {@inheritdoc}
    */
   public function render() {
     return array(
@@ -51,4 +46,5 @@ class CloseDialogCommand implements CommandInterface {
       'persist' => $this->persist,
     );
   }
+
 }

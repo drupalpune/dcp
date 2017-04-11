@@ -1,15 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\Plugin\Field\FieldType\PasswordItem.
- */
-
 namespace Drupal\Core\Field\Plugin\Field\FieldType;
 
 use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Core\StringTranslation\TranslationWrapper;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
@@ -29,10 +24,12 @@ class PasswordItem extends StringItem {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['value'] = DataDefinition::create('string')
-      ->setLabel(new TranslationWrapper('The hashed password'))
+      ->setLabel(new TranslatableMarkup('The hashed password'))
       ->setSetting('case_sensitive', TRUE);
     $properties['existing'] = DataDefinition::create('string')
-      ->setLabel(new TranslationWrapper('Existing password'));
+      ->setLabel(new TranslatableMarkup('Existing password'));
+    $properties['pre_hashed'] = DataDefinition::create('boolean')
+      ->setLabel(new TranslatableMarkup('Determines if a password needs hashing'));
 
     return $properties;
   }
@@ -45,8 +42,11 @@ class PasswordItem extends StringItem {
 
     $entity = $this->getEntity();
 
-    // Update the user password if it has changed.
-    if ($entity->isNew() || ($this->value && $this->value != $entity->original->{$this->getFieldDefinition()->getName()}->value)) {
+    if ($this->pre_hashed) {
+      // Reset the pre_hashed value since it has now been used.
+      $this->pre_hashed = FALSE;
+    }
+    elseif ($entity->isNew() || (strlen(trim($this->value)) > 0 && $this->value != $entity->original->{$this->getFieldDefinition()->getName()}->value)) {
       // Allow alternate password hashing schemes.
       $this->value = \Drupal::service('password')->hash(trim($this->value));
       // Abort if the hashing failed and returned FALSE.
@@ -62,5 +62,20 @@ class PasswordItem extends StringItem {
         $this->value = $entity->original->{$this->getFieldDefinition()->getName()}->value;
       }
     }
+    // Ensure that the existing password is unset to minimise risks of it
+    // getting serialized and stored somewhere.
+    $this->existing = NULL;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isEmpty() {
+    // We cannot use the parent implementation from StringItem as it does not
+    // consider the additional 'existing' property that PasswordItem contains.
+    $value = $this->get('value')->getValue();
+    $existing = $this->get('existing')->getValue();
+    return $value === NULL && $existing === NULL;
+  }
+
 }

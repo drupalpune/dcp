@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\user\Plugin\views\field\Roles.
- */
-
 namespace Drupal\user\Plugin\views\field;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Database\Connection;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ViewExecutable;
@@ -56,7 +50,7 @@ class Roles extends PrerenderList {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\field\FieldPluginBase::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
@@ -81,7 +75,7 @@ class Roles extends PrerenderList {
       $roles = user_roles();
       $result = $this->database->query('SELECT u.entity_id as uid, u.roles_target_id as rid FROM {user__roles} u WHERE u.entity_id IN ( :uids[] ) AND u.roles_target_id IN ( :rids[] )', array(':uids[]' => $uids, ':rids[]' => array_keys($roles)));
       foreach ($result as $role) {
-        $this->items[$role->uid][$role->rid]['role'] = SafeMarkup::checkPlain($roles[$role->rid]->label());
+        $this->items[$role->uid][$role->rid]['role'] = $roles[$role->rid]->label();
         $this->items[$role->uid][$role->rid]['rid'] = $role->rid;
       }
       // Sort the roles for each user by role weight.
@@ -101,14 +95,14 @@ class Roles extends PrerenderList {
   }
 
   protected function documentSelfTokens(&$tokens) {
-    $tokens['[' . $this->options['id'] . '-role' . ']'] = $this->t('The name of the role.');
-    $tokens['[' . $this->options['id'] . '-rid' . ']'] = $this->t('The role machine-name of the role.');
+    $tokens['{{ ' . $this->options['id'] . '__role' . ' }}'] = $this->t('The name of the role.');
+    $tokens['{{ ' . $this->options['id'] . '__rid' . ' }}'] = $this->t('The role machine-name of the role.');
   }
 
   protected function addSelfTokens(&$tokens, $item) {
     if (!empty($item['role'])) {
-      $tokens['[' . $this->options['id'] . '-role' . ']'] = $item['role'];
-      $tokens['[' . $this->options['id'] . '-rid' . ']'] = $item['rid'];
+      $tokens['{{ ' . $this->options['id'] . '__role' . ' }}'] = $item['role'];
+      $tokens['{{ ' . $this->options['id'] . '__rid' . ' }}'] = $item['rid'];
     }
   }
 

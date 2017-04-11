@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Entity\ItemsImporter.
- */
-
 namespace Drupal\aggregator;
 
 use Drupal\aggregator\Plugin\AggregatorPluginManager;

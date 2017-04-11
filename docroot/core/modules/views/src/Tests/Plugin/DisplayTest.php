@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Tests\Plugin\DisplayTest.
- */
-
 namespace Drupal\views\Tests\Plugin;
 
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\views\Entity\View;
 use Drupal\views\Views;
 use Drupal\views_test_data\Plugin\views\display\DisplayTest as DisplayTestPlugin;
 
@@ -23,7 +19,7 @@ class DisplayTest extends PluginTestBase {
    *
    * @var array
    */
-  public static $testViews = array('test_filter_groups', 'test_get_attach_displays', 'test_view', 'test_display_more', 'test_display_invalid', 'test_display_empty');
+  public static $testViews = array('test_filter_groups', 'test_get_attach_displays', 'test_view', 'test_display_more', 'test_display_invalid', 'test_display_empty', 'test_exposed_relationship_admin_ui');
 
   /**
    * Modules to enable.
@@ -52,6 +48,8 @@ class DisplayTest extends PluginTestBase {
    * @see \Drupal\views_test_data\Plugin\views\display\DisplayTest
    */
   public function testDisplayPlugin() {
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
     $view = Views::getView('test_view');
 
     // Add a new 'display_test' display and test it's there.
@@ -97,7 +95,7 @@ class DisplayTest extends PluginTestBase {
     $this->assertIdentical($view->display_handler->getOption('test_option'), '');
 
     $output = $view->preview();
-    $output = drupal_render($output);
+    $output = $renderer->renderRoot($output);
 
     $this->assertTrue(strpos($output, '<h1></h1>') !== FALSE, 'An empty value for test_option found in output.');
 
@@ -106,7 +104,7 @@ class DisplayTest extends PluginTestBase {
     $view->save();
 
     $output = $view->preview();
-    $output = drupal_render($output);
+    $output = $renderer->renderRoot($output);
 
     // Test we have our custom <h1> tag in the output of the view.
     $this->assertTrue(strpos($output, '<h1>Test option title</h1>') !== FALSE, 'The test_option value found in display output title.');
@@ -166,6 +164,9 @@ class DisplayTest extends PluginTestBase {
    * Tests the readmore functionality.
    */
   public function testReadMore() {
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
+
     if (!isset($this->options['validate']['type'])) {
       return;
     }
@@ -175,7 +176,7 @@ class DisplayTest extends PluginTestBase {
     $this->executeView($view);
 
     $output = $view->preview();
-    $output = drupal_render($output);
+    $output = $renderer->renderRoot($output);
 
     $this->setRawContent($output);
     $result = $this->xpath('//a[@class=:class]', array(':class' => 'more-link'));
@@ -185,7 +186,7 @@ class DisplayTest extends PluginTestBase {
     // Test the renderMoreLink method directly. This could be directly unit
     // tested.
     $more_link = $view->display_handler->renderMoreLink();
-    $more_link = drupal_render($more_link);
+    $more_link = $renderer->renderRoot($more_link);
     $this->setRawContent($more_link);
     $result = $this->xpath('//a[@class=:class]', array(':class' => 'more-link'));
     $this->assertEqual($result[0]->attributes()->href, \Drupal::url('view.test_display_more.page_1'), 'The right more link is shown.');
@@ -201,7 +202,7 @@ class DisplayTest extends PluginTestBase {
     $view->display_handler->setOption('use_more', 0);
     $this->executeView($view);
     $output = $view->preview();
-    $output = drupal_render($output);
+    $output = $renderer->renderRoot($output);
     $this->setRawContent($output);
     $result = $this->xpath('//a[@class=:class]', array(':class' => 'more-link'));
     $this->assertTrue(empty($result), 'The more link is not shown.');
@@ -219,13 +220,13 @@ class DisplayTest extends PluginTestBase {
     ));
     $this->executeView($view);
     $output = $view->preview();
-    $output = drupal_render($output);
+    $output = $renderer->renderRoot($output);
     $this->setRawContent($output);
     $result = $this->xpath('//a[@class=:class]', array(':class' => 'more-link'));
     $this->assertTrue(empty($result), 'The more link is not shown when view has more records.');
 
     // Test the default value of use_more_always.
-    $view = entity_create('view')->getExecutable();
+    $view = View::create()->getExecutable();
     $this->assertTrue($view->getDisplay()->getOption('use_more_always'), 'Always display the more link by default.');
   }
 
@@ -285,7 +286,7 @@ class DisplayTest extends PluginTestBase {
     $config->save();
 
     // Place the block display.
-    $block = $this->drupalPlaceBlock('views_block:test_display_invalid-block_1', array(), array('title' => 'Invalid display'));
+    $block = $this->drupalPlaceBlock('views_block:test_display_invalid-block_1', array('label' => 'Invalid display'));
 
     $this->drupalGet('<front>');
     $this->assertResponse(200);
@@ -302,6 +303,31 @@ class DisplayTest extends PluginTestBase {
     $this->assertResponse(200);
     $this->assertText('The &quot;invalid&quot; plugin does not exist.');
     $this->assertNoBlockAppears($block);
+  }
+
+  /**
+   * Tests display validation when a required relationship is missing.
+   */
+  public function testMissingRelationship() {
+    $view = Views::getView('test_exposed_relationship_admin_ui');
+
+    // Remove the relationship that is not used by other handlers.
+    $view->removeHandler('default', 'relationship', 'uid_1');
+    $errors = $view->validate();
+    // Check that no error message is shown.
+    $this->assertTrue(empty($errors['default']), 'No errors found when removing unused relationship.');
+
+    // Unset cached relationships (see DisplayPluginBase::getHandlers())
+    unset($view->display_handler->handlers['relationship']);
+
+    // Remove the relationship used by other handlers.
+    $view->removeHandler('default', 'relationship', 'uid');
+    // Validate display
+    $errors = $view->validate();
+    // Check that the error messages are shown.
+    $this->assertTrue(count($errors['default']) == 2, 'Error messages found for required relationship');
+    $this->assertEqual($errors['default'][0], t('The %handler_type %handler uses a relationship that has been removed.', array('%handler_type' => 'field', '%handler' => 'User: Last login')));
+    $this->assertEqual($errors['default'][1], t('The %handler_type %handler uses a relationship that has been removed.', array('%handler_type' => 'field', '%handler' => 'User: Created')));
   }
 
   /**

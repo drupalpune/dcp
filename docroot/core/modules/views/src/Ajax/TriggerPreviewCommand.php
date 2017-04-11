@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Ajax\TriggerPreviewCommand.
- */
-
 namespace Drupal\views\Ajax;
 
 use Drupal\Core\Ajax\CommandInterface;
@@ -17,7 +12,7 @@ use Drupal\Core\Ajax\CommandInterface;
 class TriggerPreviewCommand implements CommandInterface {
 
   /**
-   * Implements \Drupal\Core\Ajax\CommandInterface::render().
+   * {@inheritdoc}
    */
   public function render() {
     return array(

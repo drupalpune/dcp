@@ -1,9 +1,0 @@
-# Schema for the configuration files of the d8dcp theme.
-
-d8dcp.settings:
-  type: theme_settings
-  label: 'd8dcp settings'
-
-d8dcp.breakpoints:
-  type: theme_breakpoints_default
-  label: 'd8dcp breakpoints'

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\style\Mapping.
- */
-
 namespace Drupal\views\Plugin\views\style;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -47,7 +42,7 @@ abstract class Mapping extends StylePluginBase {
   abstract protected function defineMapping();
 
   /**
-   * Overrides Drupal\views\Plugin\views\style\StylePluginBase::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -69,7 +64,7 @@ abstract class Mapping extends StylePluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\style\StylePluginBase::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
@@ -103,7 +98,8 @@ abstract class Mapping extends StylePluginBase {
       // Optionally filter the available fields.
       if (isset($mapping[$key]['#filter'])) {
         $this->view->initHandlers();
-        $this::$mapping[$key]['#filter']($field_options);
+        $filter = $mapping[$key]['#filter'];
+        $this::$filter($field_options);
         unset($mapping[$key]['#filter']);
       }
 

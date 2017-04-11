@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config_events_test\EventSubscriber.
- */
-
 namespace Drupal\config_events_test;
 
 
@@ -37,11 +32,13 @@ class EventSubscriber implements EventSubscriberInterface {
    *
    * @param \Drupal\Core\Config\ConfigCrudEvent $event
    *   The configuration event.
+   * @param string $name
+   *   The event name.
    */
-  public function configEventRecorder(ConfigCrudEvent $event) {
+  public function configEventRecorder(ConfigCrudEvent $event, $name) {
     $config = $event->getConfig();
     $this->state->set('config_events_test.event', array(
-      'event_name' => $event->getName(),
+      'event_name' => $name,
       'current_config_data' => $config->get(),
       'original_config_data' => $config->getOriginal(),
       'raw_config_data' => $config->getRawData()
@@ -57,4 +54,5 @@ class EventSubscriber implements EventSubscriberInterface {
     $events[ConfigEvents::RENAME][] = array('configEventRecorder');
     return $events;
   }
+
 }

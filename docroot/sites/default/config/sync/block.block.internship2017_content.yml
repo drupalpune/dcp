@@ -1,0 +1,22 @@
+uuid: cf68fdaf-2b9a-4c0a-a68b-bc6306c9ae8c
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - internship2017
+_core:
+  default_config_hash: 9EoWV2Lot6FVSr50t4hoKgiz1LIXYWNG-IIPYsWxBqo
+id: internship2017_content
+theme: internship2017
+region: content
+weight: -15
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: 'Main page content'
+  provider: system
+  label_display: '0'
+visibility: {  }

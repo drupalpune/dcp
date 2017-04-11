@@ -1,16 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\book\Form\BookRemoveForm.
- */
-
 namespace Drupal\book\Form;
 
 use Drupal\book\BookManagerInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

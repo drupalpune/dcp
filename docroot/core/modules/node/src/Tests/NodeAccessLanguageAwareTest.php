@@ -1,15 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\Tests\NodeAccessLanguageAwareTest.
- */
-
 namespace Drupal\node\Tests;
 
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\user\Entity\User;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests node_access and db_select() with node_access tag functionality with
@@ -29,7 +26,7 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
   /**
    * A set of nodes to use in testing.
    *
-   * @var array
+   * @var \Drupal\node\NodeInterface[]
    */
   protected $nodes = array();
 
@@ -52,7 +49,7 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
 
     // Create the 'private' field, which allows the node to be marked as private
     // (restricted access) in a given translation.
-    $field_storage = entity_create('field_storage_config', array(
+    $field_storage = FieldStorageConfig::create(array(
       'field_name' => 'field_private',
       'entity_type' => 'node',
       'type' => 'boolean',
@@ -60,7 +57,7 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
     ));
     $field_storage->save();
 
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_storage' => $field_storage,
       'bundle' => 'page',
       'widget' => array(
@@ -70,7 +67,7 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
         'on_label' => 'Private',
         'off_label' => 'Not private',
       ),
-    ))->save();
+    ])->save();
 
     // After enabling a node access module, the access table has to be rebuild.
     node_access_rebuild();
@@ -103,7 +100,8 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
       'langcode' => 'hu',
       'field_private' => array(array('value' => 0)),
     ));
-    $translation = $node->getTranslation('ca');
+    $translation = $node->addTranslation('ca');
+    $translation->title->value = $this->randomString();
     $translation->field_private->value = 0;
     $node->save();
 
@@ -112,7 +110,8 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
       'langcode' => 'hu',
       'field_private' => array(array('value' => 0)),
     ));
-    $translation = $node->getTranslation('ca');
+    $translation = $node->addTranslation('ca');
+    $translation->title->value = $this->randomString();
     $translation->field_private->value = 1;
     $node->save();
 
@@ -121,7 +120,8 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
       'langcode' => 'hu',
       'field_private' => array(array('value' => 1)),
     ));
-    $translation = $node->getTranslation('ca');
+    $translation = $node->addTranslation('ca');
+    $translation->title->value = $this->randomString();
     $translation->field_private->value = 0;
     $node->save();
 
@@ -130,7 +130,8 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
       'langcode' => 'hu',
       'field_private' => array(array('value' => 1)),
     ));
-    $translation = $node->getTranslation('ca');
+    $translation = $node->addTranslation('ca');
+    $translation->title->value = $this->randomString();
     $translation->field_private->value = 1;
     $node->save();
 
@@ -153,68 +154,50 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
     $expected_node_access_no_access = array('view' => FALSE, 'update' => FALSE, 'delete' => FALSE);
 
     // When both Hungarian and Catalan are marked as public, access to the
-    // Hungarian translation should be granted when no language is specified or
+    // Hungarian translation should be granted with the default entity object or
     // when the Hungarian translation is specified explicitly.
     $this->assertNodeAccess($expected_node_access, $this->nodes['both_public'], $this->webUser);
-    $this->assertNodeAccess($expected_node_access, $this->nodes['both_public'], $this->webUser, 'hu');
+    $this->assertNodeAccess($expected_node_access, $this->nodes['both_public']->getTranslation('hu'), $this->webUser);
     // Access to the Catalan translation should also be granted.
-    $this->assertNodeAccess($expected_node_access, $this->nodes['both_public'], $this->webUser, 'ca');
-    // There is no English translation, so a request to access the English
-    // translation is denied.
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['both_public'], $this->webUser, 'en');
+    $this->assertNodeAccess($expected_node_access, $this->nodes['both_public']->getTranslation('ca'), $this->webUser);
 
     // When Hungarian is marked as private, access to the Hungarian translation
-    // should be denied when no language is specified or when the Hungarian
+    // should be denied with the default entity object or when the Hungarian
     // translation is specified explicitly.
     $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['hu_private'], $this->webUser);
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['hu_private'], $this->webUser, 'hu');
+    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['hu_private']->getTranslation('hu'), $this->webUser);
     // Access to the Catalan translation should be granted.
-    $this->assertNodeAccess($expected_node_access, $this->nodes['hu_private'], $this->webUser, 'ca');
-    // There is no English translation, so a request to access the English
-    // translation is denied.
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['hu_private'], $this->webUser, 'en');
+    $this->assertNodeAccess($expected_node_access, $this->nodes['hu_private']->getTranslation('ca'), $this->webUser);
 
     // When Catalan is marked as private, access to the Hungarian translation
-    // should be granted when no language is specified or when the Hungarian
+    // should be granted with the default entity object or when the Hungarian
     // translation is specified explicitly.
     $this->assertNodeAccess($expected_node_access, $this->nodes['ca_private'], $this->webUser);
-    $this->assertNodeAccess($expected_node_access, $this->nodes['ca_private'], $this->webUser, 'hu');
+    $this->assertNodeAccess($expected_node_access, $this->nodes['ca_private']->getTranslation('hu'), $this->webUser);
     // Access to the Catalan translation should be granted.
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['ca_private'], $this->webUser, 'ca');
-    // There is no English translation, so a request to access the English
-    // translation is denied.
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['ca_private'], $this->webUser, 'en');
+    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['ca_private']->getTranslation('ca'), $this->webUser);
 
     // When both translations are marked as private, access should be denied
-    // regardless of the language specified.
+    // regardless of the entity object specified.
     $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['both_private'], $this->webUser);
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['both_private'], $this->webUser, 'hu');
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['both_private'], $this->webUser, 'ca');
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['both_private'], $this->webUser, 'en');
+    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['both_private']->getTranslation('hu'), $this->webUser);
+    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['both_private']->getTranslation('ca'), $this->webUser);
 
-    // When no language is specified for a private node, access to every
-    // language is denied.
+    // When no language is specified for a private node, access to every node
+    // translation is denied.
     $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['no_language_private'], $this->webUser);
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['no_language_private'], $this->webUser, 'hu');
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['no_language_private'], $this->webUser, 'ca');
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['no_language_private'], $this->webUser, 'en');
 
-    // When no language is specified for a public node, access should be granted
-    // only for the existing language (not specified), so only the request with
-    // no language will give access, as this request will be made with the
-    // langcode of the node, which is "not specified".
+    // When no language is specified for a public node, access should be
+    // granted.
     $this->assertNodeAccess($expected_node_access, $this->nodes['no_language_public'], $this->webUser);
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['no_language_public'], $this->webUser, 'hu');
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['no_language_public'], $this->webUser, 'ca');
-    $this->assertNodeAccess($expected_node_access_no_access, $this->nodes['no_language_public'], $this->webUser, 'en');
 
     // Query the node table with the node access tag in several languages.
 
     // Query with no language specified. The fallback (hu) will be used.
     $select = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->addMetaData('account', $this->webUser)
-    ->addTag('node_access');
+      ->fields('n', array('nid'))
+      ->addMetaData('account', $this->webUser)
+      ->addTag('node_access');
     $nids = $select->execute()->fetchAllAssoc('nid');
 
     // Three nodes should be returned:
@@ -228,10 +211,10 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
 
     // Query with Hungarian (hu) specified.
     $select = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->addMetaData('account', $this->webUser)
-    ->addMetaData('langcode', 'hu')
-    ->addTag('node_access');
+      ->fields('n', array('nid'))
+      ->addMetaData('account', $this->webUser)
+      ->addMetaData('langcode', 'hu')
+      ->addTag('node_access');
     $nids = $select->execute()->fetchAllAssoc('nid');
 
     // Two nodes should be returned: the node with both translations public, and
@@ -242,10 +225,10 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
 
     // Query with Catalan (ca) specified.
     $select = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->addMetaData('account', $this->webUser)
-    ->addMetaData('langcode', 'ca')
-    ->addTag('node_access');
+      ->fields('n', array('nid'))
+      ->addMetaData('account', $this->webUser)
+      ->addMetaData('langcode', 'ca')
+      ->addTag('node_access');
     $nids = $select->execute()->fetchAllAssoc('nid');
 
     // Two nodes should be returned: the node with both translations public, and
@@ -256,10 +239,10 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
 
     // Query with German (de) specified.
     $select = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->addMetaData('account', $this->webUser)
-    ->addMetaData('langcode', 'de')
-    ->addTag('node_access');
+      ->fields('n', array('nid'))
+      ->addMetaData('account', $this->webUser)
+      ->addMetaData('langcode', 'de')
+      ->addTag('node_access');
     $nids = $select->execute()->fetchAllAssoc('nid');
 
     // There are no nodes with German translations, so no results are returned.
@@ -268,9 +251,9 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
     // Query the nodes table as admin user (full access) with the node access
     // tag and no specific langcode.
     $select = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->addMetaData('account', $this->adminUser)
-    ->addTag('node_access');
+      ->fields('n', array('nid'))
+      ->addMetaData('account', $this->adminUser)
+      ->addTag('node_access');
     $nids = $select->execute()->fetchAllAssoc('nid');
 
     // All nodes are returned.
@@ -279,10 +262,10 @@ class NodeAccessLanguageAwareTest extends NodeTestBase {
     // Query the nodes table as admin user (full access) with the node access
     // tag and langcode de.
     $select = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->addMetaData('account', $this->adminUser)
-    ->addMetaData('langcode', 'de')
-    ->addTag('node_access');
+      ->fields('n', array('nid'))
+      ->addMetaData('account', $this->adminUser)
+      ->addMetaData('langcode', 'de')
+      ->addTag('node_access');
     $nids = $select->execute()->fetchAllAssoc('nid');
 
     // Even though there is no German translation, all nodes are returned

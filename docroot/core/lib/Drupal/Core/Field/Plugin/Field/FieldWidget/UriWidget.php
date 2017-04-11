@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\Plugin\Field\FieldWidget\UriWidget.
- */
-
 namespace Drupal\Core\Field\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -60,7 +55,7 @@ class UriWidget extends WidgetBase {
   public function settingsSummary() {
     $summary = array();
 
-    $summary[] = $this->t('URI field size: !size', array('!size' => $this->getSetting('size')));
+    $summary[] = $this->t('URI field size: @size', array('@size' => $this->getSetting('size')));
     $placeholder = $this->getSetting('placeholder');
     if (!empty($placeholder)) {
       $summary[] = $this->t('Placeholder: @placeholder', array('@placeholder' => $placeholder));

@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Component\Utility\UrlHelperTest.
- */
-
 namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Component\Utility\UrlHelper;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -94,7 +88,7 @@ class UrlHelperTest extends UnitTestCase {
   public function testValidAbsolute($url, $scheme) {
     $test_url = $scheme . '://' . $url;
     $valid_url = UrlHelper::isValid($test_url, TRUE);
-    $this->assertTrue($valid_url, SafeMarkup::format('@url is a valid URL.', array('@url' => $test_url)));
+    $this->assertTrue($valid_url, $test_url . ' is a valid URL.');
   }
 
   /**
@@ -125,7 +119,7 @@ class UrlHelperTest extends UnitTestCase {
   public function testInvalidAbsolute($url, $scheme) {
     $test_url = $scheme . '://' . $url;
     $valid_url = UrlHelper::isValid($test_url, TRUE);
-    $this->assertFalse($valid_url, SafeMarkup::format('@url is NOT a valid URL.', array('@url' => $test_url)));
+    $this->assertFalse($valid_url, $test_url . ' is NOT a valid URL.');
   }
 
   /**
@@ -159,7 +153,7 @@ class UrlHelperTest extends UnitTestCase {
   public function testValidRelative($url, $prefix) {
     $test_url = $prefix . $url;
     $valid_url = UrlHelper::isValid($test_url);
-    $this->assertTrue($valid_url, SafeMarkup::format('@url is a valid URL.', array('@url' => $test_url)));
+    $this->assertTrue($valid_url, $test_url . ' is a valid URL.');
   }
 
   /**
@@ -190,7 +184,7 @@ class UrlHelperTest extends UnitTestCase {
   public function testInvalidRelative($url, $prefix) {
     $test_url = $prefix . $url;
     $valid_url = UrlHelper::isValid($test_url);
-    $this->assertFalse($valid_url, SafeMarkup::format('@url is NOT a valid URL.', array('@url' => $test_url)));
+    $this->assertFalse($valid_url, $test_url . ' is NOT a valid URL.');
   }
 
   /**
@@ -247,7 +241,7 @@ class UrlHelperTest extends UnitTestCase {
    */
   public function testParse($url, $expected) {
     $parsed = UrlHelper::parse($url);
-    $this->assertEquals($expected, $parsed, 'The url was not properly parsed.');
+    $this->assertEquals($expected, $parsed, 'The URL was not properly parsed.');
   }
 
   /**
@@ -362,6 +356,30 @@ class UrlHelperTest extends UnitTestCase {
       array('//www.drupal.org/foo/bar?foo=bar&bar=baz&baz#foo', TRUE),
       // Internal URL starting with a slash.
       array('/www.drupal.org', FALSE),
+      // Simple external URLs.
+      array('http://example.com', TRUE),
+      array('https://example.com', TRUE),
+      array('http://drupal.org/foo/bar?foo=bar&bar=baz&baz#foo', TRUE),
+      array('//drupal.org', TRUE),
+      // Some browsers ignore or strip leading control characters.
+      array("\x00//www.example.com", TRUE),
+      array("\x08//www.example.com", TRUE),
+      array("\x1F//www.example.com", TRUE),
+      array("\n//www.example.com", TRUE),
+      // JSON supports decoding directly from UTF-8 code points.
+      array(json_decode('"\u00AD"') . "//www.example.com", TRUE),
+      array(json_decode('"\u200E"') . "//www.example.com", TRUE),
+      array(json_decode('"\uE0020"') . "//www.example.com", TRUE),
+      array(json_decode('"\uE000"') . "//www.example.com", TRUE),
+      // Backslashes should be normalized to forward.
+      array('\\\\example.com', TRUE),
+      // Local URLs.
+      array('node', FALSE),
+      array('/system/ajax', FALSE),
+      array('?q=foo:bar', FALSE),
+      array('node/edit:me', FALSE),
+      array('/drupal.org', FALSE),
+      array('<front>', FALSE),
     );
   }
 
@@ -381,8 +399,10 @@ class UrlHelperTest extends UnitTestCase {
    */
   public function testFilterBadProtocol($uri, $expected, $protocols) {
     UrlHelper::setAllowedProtocols($protocols);
-    $filtered = UrlHelper::filterBadProtocol($uri);
-    $this->assertEquals($expected, $filtered);
+    $this->assertEquals($expected, UrlHelper::filterBadProtocol($uri));
+    // Multiple calls to UrlHelper::filterBadProtocol() do not cause double
+    // escaping.
+    $this->assertEquals($expected, UrlHelper::filterBadProtocol(UrlHelper::filterBadProtocol($uri)));
   }
 
   /**
@@ -564,4 +584,5 @@ class UrlHelperTest extends UnitTestCase {
       array('http://', 'http://example.com/foo'),
     );
   }
+
 }

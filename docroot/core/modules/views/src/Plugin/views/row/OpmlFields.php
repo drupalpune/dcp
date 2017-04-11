@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\row\OpmlFields.
- */
-
 namespace Drupal\views\Plugin\views\row;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -134,7 +129,7 @@ class OpmlFields extends RowPluginBase {
     $form['url_field'] = array(
       '#type' => 'select',
       '#title' => $this->t('URL attribute'),
-      '#description' => $this->t('The field that is going to be used as the OPML url attribute for each row.'),
+      '#description' => $this->t('The field that is going to be used as the OPML URL attribute for each row.'),
       '#options' => $view_fields_labels,
       '#default_value' => $this->options['url_field'],
       '#states' => array(
@@ -212,12 +207,15 @@ class OpmlFields extends RowPluginBase {
    *   The index count of the row as expected by views_plugin_style::getField().
    * @param $field_id
    *   The ID assigned to the required field in the display.
+   *
+   * @return string
+   *   The rendered field value.
    */
   public function getField($index, $field_id) {
     if (empty($this->view->style_plugin) || !is_object($this->view->style_plugin) || empty($field_id)) {
       return '';
     }
-    return $this->view->style_plugin->getField($index, $field_id);
+    return (string) $this->view->style_plugin->getField($index, $field_id);
   }
 
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\editor\Entity\Editor.
- */
-
 namespace Drupal\editor\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
@@ -16,6 +11,9 @@ use Drupal\editor\EditorInterface;
  * @ConfigEntityType(
  *   id = "editor",
  *   label = @Translation("Text Editor"),
+ *   handlers = {
+ *     "access" = "Drupal\editor\EditorAccessControlHandler",
+ *   },
  *   entity_keys = {
  *     "id" = "format"
  *   },
@@ -107,7 +105,7 @@ class Editor extends ConfigEntityBase implements EditorInterface {
     //   config entity and dependency on provider is managed automatically.
     $definition = $this->editorPluginManager()->createInstance($this->editor)->getPluginDefinition();
     $this->addDependency('module', $definition['provider']);
-    return $this->dependencies;
+    return $this;
   }
 
   /**

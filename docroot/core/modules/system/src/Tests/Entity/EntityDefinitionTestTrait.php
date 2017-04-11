@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Entity\EntityDefinitionTestTrait.
- */
-
 namespace Drupal\system\Tests\Entity;
 
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -105,6 +100,20 @@ trait EntityDefinitionTestTrait {
   }
 
   /**
+   * Adds a long-named base field to the 'entity_test_update' entity type.
+   */
+  protected function addLongNameBaseField() {
+    $key = 'entity_test_update.additional_base_field_definitions';
+    $definitions = $this->state->get($key, []);
+    $definitions['new_long_named_entity_reference_base_field'] = BaseFieldDefinition::create('entity_reference')
+      ->setName('new_long_named_entity_reference_base_field')
+      ->setLabel(t('A new long-named base field'))
+      ->setSetting('target_type', 'user')
+      ->setSetting('handler', 'default');
+    $this->state->set($key, $definitions);
+  }
+
+  /**
    * Adds a new revisionable base field to the 'entity_test_update' entity type.
    *
    * @param string $type
@@ -123,6 +132,17 @@ trait EntityDefinitionTestTrait {
    */
   protected function modifyBaseField() {
     $this->addBaseField('text');
+  }
+
+  /**
+   * Promotes a field to an entity key.
+   */
+  protected function makeBaseFieldEntityKey() {
+    $entity_type = clone $this->entityManager->getDefinition('entity_test_update');
+    $entity_keys = $entity_type->getKeys();
+    $entity_keys['new_base_field'] = 'new_base_field';
+    $entity_type->set('entity_keys', $entity_keys);
+    $this->state->set('entity_test_update.entity_type', $entity_type);
   }
 
   /**
@@ -179,7 +199,7 @@ trait EntityDefinitionTestTrait {
   /**
    * Adds an index to the 'entity_test_update' entity type's base table.
    *
-   * @see \Drupal\entity_test\EntityTestStorageSchema::getEntitySchema().
+   * @see \Drupal\entity_test\EntityTestStorageSchema::getEntitySchema()
    */
   protected function addEntityIndex() {
     $indexes = array(

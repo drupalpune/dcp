@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\KeyValueStore\KeyValueDatabaseFactory.
- */
-
 namespace Drupal\Core\KeyValueStore;
 
 use Drupal\Component\Serialization\SerializationInterface;
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Database\Database;
 
 /**
  * Defines the key/value store factory for the database backend.
@@ -49,4 +43,5 @@ class KeyValueDatabaseFactory implements KeyValueFactoryInterface {
   public function get($collection) {
     return new DatabaseStorage($collection, $this->serializer, $this->connection);
   }
+
 }

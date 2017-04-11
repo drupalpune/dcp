@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_plugins_test\Plugin\Field\FieldFormatter\TextTrimmedFormatter.
- */
-
 namespace Drupal\field_plugins_test\Plugin\Field\FieldFormatter;
 
 use Drupal\text\Plugin\Field\FieldFormatter\TextTrimmedFormatter;

@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Definition of Drupal\Component\Plugin\Factory\ReflectionFactory.
- */
 
 namespace Drupal\Component\Plugin\Factory;
 
@@ -15,7 +11,7 @@ namespace Drupal\Component\Plugin\Factory;
 class ReflectionFactory extends DefaultFactory {
 
   /**
-   * Implements Drupal\Component\Plugin\Factory\FactoryInterface::createInstance().
+   * {@inheritdoc}
    */
   public function createInstance($plugin_id, array $configuration = array()) {
     $plugin_definition = $this->discovery->getDefinition($plugin_id);
@@ -46,7 +42,7 @@ class ReflectionFactory extends DefaultFactory {
    * @param string $plugin_id
    *   The identifier of the plugin implementation.
    * @param mixed $plugin_definition
-   *   The definition associated to the plugin_id.
+   *   The definition associated with the plugin_id.
    * @param array $configuration
    *   An array of configuration that may be passed to the instance.
    *
@@ -80,4 +76,5 @@ class ReflectionFactory extends DefaultFactory {
     }
     return $arguments;
   }
+
 }

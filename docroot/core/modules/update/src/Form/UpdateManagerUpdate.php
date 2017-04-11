@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\update\Form\UpdateManagerUpdate.
- */
-
 namespace Drupal\update\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -40,7 +34,7 @@ class UpdateManagerUpdate extends FormBase {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    * @param \Drupal\Core\State\StateInterface $state
-   *  The state service.
+   *   The state service.
    */
   public function __construct(ModuleHandlerInterface $module_handler, StateInterface $state) {
     $this->moduleHandler = $module_handler;
@@ -115,14 +109,14 @@ class UpdateManagerUpdate extends FormBase {
           $project_name = $this->l($project['title'], Url::fromUri($project['link']));
         }
         else {
-          $project_name = SafeMarkup::checkPlain($project['title']);
+          $project_name = $project['title'];
         }
       }
       elseif (!empty($project['info']['name'])) {
-        $project_name = SafeMarkup::checkPlain($project['info']['name']);
+        $project_name = $project['info']['name'];
       }
       else {
-        $project_name = SafeMarkup::checkPlain($name);
+        $project_name = $name;
       }
       if ($project['project_type'] == 'theme' || $project['project_type'] == 'theme-disabled') {
         $project_name .= ' ' . $this->t('(Theme)');
@@ -198,9 +192,9 @@ class UpdateManagerUpdate extends FormBase {
 
       if ($needs_manual) {
         // There are no checkboxes in the 'Manual updates' table so it will be
-        // rendered by _theme('table'), not _theme('tableselect'). Since the data
-        // formats are incompatible, we convert now to the format expected by
-        // _theme('table').
+        // rendered by '#theme' => 'table', not '#theme' => 'tableselect'. Since
+        // the data formats are incompatible, we convert now to the format
+        // expected by '#theme' => 'table'.
         unset($entry['#weight']);
         $attributes = $entry['#attributes'];
         unset($entry['#attributes']);

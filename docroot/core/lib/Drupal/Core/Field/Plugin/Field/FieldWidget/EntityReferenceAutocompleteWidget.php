@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\Plugin\Field\FieldWidget\AutocompleteWidget.
- */
-
 namespace Drupal\Core\Field\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -46,10 +41,7 @@ class EntityReferenceAutocompleteWidget extends WidgetBase {
       '#type' => 'radios',
       '#title' => t('Autocomplete matching'),
       '#default_value' => $this->getSetting('match_operator'),
-      '#options' => array(
-        'STARTS_WITH' => t('Starts with'),
-        'CONTAINS' => t('Contains'),
-      ),
+      '#options' => $this->getMatchOperatorOptions(),
       '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of entities.'),
     );
     $element['size'] = array(
@@ -74,8 +66,9 @@ class EntityReferenceAutocompleteWidget extends WidgetBase {
   public function settingsSummary() {
     $summary = array();
 
-    $summary[] = t('Autocomplete matching: @match_operator', array('@match_operator' => $this->getSetting('match_operator')));
-    $summary[] = t('Textfield size: !size', array('!size' => $this->getSetting('size')));
+    $operators = $this->getMatchOperatorOptions();
+    $summary[] = t('Autocomplete matching: @match_operator', array('@match_operator' => $operators[$this->getSetting('match_operator')]));
+    $summary[] = t('Textfield size: @size', array('@size' => $this->getSetting('size')));
     $placeholder = $this->getSetting('placeholder');
     if (!empty($placeholder)) {
       $summary[] = t('Placeholder: @placeholder', array('@placeholder' => $placeholder));
@@ -94,11 +87,14 @@ class EntityReferenceAutocompleteWidget extends WidgetBase {
     $entity = $items->getEntity();
     $referenced_entities = $items->referencedEntities();
 
+    // Append the match operation to the selection settings.
+    $selection_settings = $this->getFieldSetting('handler_settings') + ['match_operator' => $this->getSetting('match_operator')];
+
     $element += array(
       '#type' => 'entity_autocomplete',
       '#target_type' => $this->getFieldSetting('target_type'),
       '#selection_handler' => $this->getFieldSetting('handler'),
-      '#selection_settings' => $this->getFieldSetting('handler_settings'),
+      '#selection_settings' => $selection_settings,
       // Entity reference field items are handling validation themselves via
       // the 'ValidReference' constraint.
       '#validate_reference' => FALSE,
@@ -108,9 +104,9 @@ class EntityReferenceAutocompleteWidget extends WidgetBase {
       '#placeholder' => $this->getSetting('placeholder'),
     );
 
-    if ($this->getSelectionHandlerSetting('auto_create')) {
+    if ($this->getSelectionHandlerSetting('auto_create') && ($bundle = $this->getAutocreateBundle())) {
       $element['#autocreate'] = array(
-        'bundle' => $this->getAutocreateBundle(),
+        'bundle' => $bundle,
         'uid' => ($entity instanceof EntityOwnerInterface) ? $entity->getOwnerId() : \Drupal::currentUser()->id()
       );
     }
@@ -122,7 +118,7 @@ class EntityReferenceAutocompleteWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function errorElement(array $element, ConstraintViolationInterface $error, array $form, FormStateInterface $form_state) {
-    return $element['target_id'];
+    return isset($element['target_id']) ? $element['target_id'] : FALSE;
   }
 
   /**
@@ -149,18 +145,20 @@ class EntityReferenceAutocompleteWidget extends WidgetBase {
    */
   protected function getAutocreateBundle() {
     $bundle = NULL;
-    if ($this->getSelectionHandlerSetting('auto_create')) {
-      // If the 'target_bundles' setting is restricted to a single choice, we
-      // can use that.
-      if (($target_bundles = $this->getSelectionHandlerSetting('target_bundles')) && count($target_bundles) == 1) {
+    if ($this->getSelectionHandlerSetting('auto_create') && $target_bundles = $this->getSelectionHandlerSetting('target_bundles')) {
+      // If there's only one target bundle, use it.
+      if (count($target_bundles) == 1) {
         $bundle = reset($target_bundles);
       }
-      // Otherwise use the first bundle as a fallback.
-      else {
-        // @todo Expose a proper UI for choosing the bundle for autocreated
-        // entities in https://www.drupal.org/node/2412569.
-        $bundles = entity_get_bundles($this->getFieldSetting('target_type'));
-        $bundle = key($bundles);
+      // Otherwise use the target bundle stored in selection handler settings.
+      elseif (!$bundle = $this->getSelectionHandlerSetting('auto_create_bundle')) {
+        // If no bundle has been set as auto create target means that there is
+        // an inconsistency in entity reference field settings.
+        trigger_error(sprintf(
+          "The 'Create referenced entities if they don't already exist' option is enabled but a specific destination bundle is not set. You should re-visit and fix the settings of the '%s' (%s) field.",
+          $this->fieldDefinition->getLabel(),
+          $this->fieldDefinition->getName()
+        ), E_USER_WARNING);
       }
     }
 
@@ -179,6 +177,19 @@ class EntityReferenceAutocompleteWidget extends WidgetBase {
   protected function getSelectionHandlerSetting($setting_name) {
     $settings = $this->getFieldSetting('handler_settings');
     return isset($settings[$setting_name]) ? $settings[$setting_name] : NULL;
+  }
+
+  /**
+   * Returns the options for the match operator.
+   *
+   * @return array
+   *   List of options.
+   */
+  protected function getMatchOperatorOptions() {
+    return [
+      'STARTS_WITH' => t('Starts with'),
+      'CONTAINS' => t('Contains'),
+    ];
   }
 
 }

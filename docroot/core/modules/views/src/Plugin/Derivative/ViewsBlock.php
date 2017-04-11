@@ -1,20 +1,16 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\Derivative\ViewsBlock.
- */
-
 namespace Drupal\views\Plugin\Derivative;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides block plugin definitions for all Views block displays.
  *
- * @see \Drupal\views\Plugin\block\block\ViewsBlock
+ * @see \Drupal\views\Plugin\Block\ViewsBlock
  */
 class ViewsBlock implements ContainerDeriverInterface {
 
@@ -89,19 +85,24 @@ class ViewsBlock implements ContainerDeriverInterface {
         // Add a block plugin definition for each block display.
         if (isset($display) && !empty($display->definition['uses_hook_block'])) {
           $delta = $view->id() . '-' . $display->display['id'];
-          $desc = $display->getOption('block_description');
 
-          if (empty($desc)) {
+          $admin_label = $display->getOption('block_description');
+          if (empty($admin_label)) {
             if ($display->display['display_title'] == $display->definition['title']) {
-              $desc = t('!view', array('!view' => $view->label()));
+              $admin_label = $view->label();
             }
             else {
-              $desc = t('!view: !display', array('!view' => $view->label(), '!display' => $display->display['display_title']));
+              // Allow translators to control the punctuation. Plugin
+              // definitions get cached, so use TranslatableMarkup() instead of
+              // t() to avoid double escaping when $admin_label is rendered
+              // during requests that use the cached definition.
+              $admin_label = new TranslatableMarkup('@view: @display', ['@view' => $view->label(), '@display' => $display->display['display_title']]);
             }
           }
+
           $this->derivatives[$delta] = array(
             'category' => $display->getOption('block_category'),
-            'admin_label' => $desc,
+            'admin_label' => $admin_label,
             'config_dependencies' => array(
               'config' => array(
                 $view->getConfigDependencyName(),

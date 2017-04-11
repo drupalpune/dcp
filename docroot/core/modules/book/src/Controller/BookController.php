@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\book\Controller\BookController.
- */
-
 namespace Drupal\book\Controller;
 
 use Drupal\book\BookExport;
 use Drupal\book\BookManagerInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
-use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -38,16 +33,26 @@ class BookController extends ControllerBase {
   protected $bookExport;
 
   /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * Constructs a BookController object.
    *
    * @param \Drupal\book\BookManagerInterface $bookManager
    *   The book manager.
    * @param \Drupal\book\BookExport $bookExport
    *   The book export service.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
    */
-  public function __construct(BookManagerInterface $bookManager, BookExport $bookExport) {
+  public function __construct(BookManagerInterface $bookManager, BookExport $bookExport, RendererInterface $renderer) {
     $this->bookManager = $bookManager;
     $this->bookExport = $bookExport;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -56,7 +61,8 @@ class BookController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('book.manager'),
-      $container->get('book.export')
+      $container->get('book.export'),
+      $container->get('renderer')
     );
   }
 
@@ -65,7 +71,6 @@ class BookController extends ControllerBase {
    *
    * @return array
    *   A render array representing the administrative page content.
-   *
    */
   public function adminOverview() {
     $rows = array();
@@ -154,7 +159,7 @@ class BookController extends ControllerBase {
     }
 
     $exported_book = $this->bookExport->{$method}($node);
-    return new Response(drupal_render($exported_book));
+    return new Response($this->renderer->renderRoot($exported_book));
   }
 
 }

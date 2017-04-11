@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationBrowser.
- */
-
 namespace Drupal\language\Plugin\LanguageNegotiation;
 
 use Drupal\Component\Utility\UserAgent;
@@ -14,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Class for identifying language from the browser Accept-language HTTP header.
  *
- * @Plugin(
+ * @LanguageNegotiation(
  *   id = \Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationBrowser::METHOD_ID,
  *   weight = -2,
  *   name = @Translation("Browser"),

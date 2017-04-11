@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field\FieldConfigAccessControlHandler.
- */
-
 namespace Drupal\field;
 
 use Drupal\Core\Access\AccessResult;
@@ -22,14 +17,14 @@ class FieldConfigAccessControlHandler extends EntityAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     if ($operation == 'delete') {
       $field_storage_entity = $entity->getFieldStorageDefinition();
       if ($field_storage_entity->isLocked()) {
-        return AccessResult::forbidden()->cacheUntilEntityChanges($field_storage_entity);
+        return AccessResult::forbidden()->addCacheableDependency($field_storage_entity);
       }
       else {
-        return AccessResult::allowedIfHasPermission($account, 'administer ' . $entity->getTargetEntityTypeId() . ' fields')->cacheUntilEntityChanges($field_storage_entity);
+        return AccessResult::allowedIfHasPermission($account, 'administer ' . $entity->getTargetEntityTypeId() . ' fields')->addCacheableDependency($field_storage_entity);
       }
     }
     return AccessResult::allowedIfHasPermission($account, 'administer ' . $entity->getTargetEntityTypeId() . ' fields');

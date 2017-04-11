@@ -1,21 +1,16 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\NodeInterface.
- */
-
 namespace Drupal\node;
 
+use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\user\UserInterface;
 
 /**
  * Provides an interface defining a node entity.
  */
-interface NodeInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface {
+interface NodeInterface extends ContentEntityInterface, EntityChangedInterface, EntityOwnerInterface, RevisionLogInterface {
 
   /**
    * Gets the node type.
@@ -146,6 +141,9 @@ interface NodeInterface extends ContentEntityInterface, EntityChangedInterface, 
    *
    * @return \Drupal\user\UserInterface
    *   The user entity for the revision author.
+   *
+   * @deprecated in Drupal 8.2.0, will be removed before Drupal 9.0.0. Use
+   *   \Drupal\Core\Entity\RevisionLogInterface::getRevisionUser() instead.
    */
   public function getRevisionAuthor();
 
@@ -157,15 +155,10 @@ interface NodeInterface extends ContentEntityInterface, EntityChangedInterface, 
    *
    * @return \Drupal\node\NodeInterface
    *   The called node entity.
+   *
+   * @deprecated in Drupal 8.2.0, will be removed before Drupal 9.0.0. Use
+   *   \Drupal\Core\Entity\RevisionLogInterface::setRevisionUserId() instead.
    */
   public function setRevisionAuthorId($uid);
-
-  /**
-   * Prepares the langcode for a node.
-   *
-   * @return string
-   *   The langcode for this node.
-   */
-  public function prepareLangcode();
 
 }

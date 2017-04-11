@@ -1,14 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\ckeditor\Plugin\CKEditorPlugin\Internal.
- */
-
 namespace Drupal\ckeditor\Plugin\CKEditorPlugin;
 
 use Drupal\ckeditor\CKEditorPluginBase;
-use Drupal\Component\Utility\NestedArray;
+use Drupal\ckeditor\CKEditorPluginContextualInterface;
+use Drupal\ckeditor\CKEditorPluginManager;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -24,7 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   label = @Translation("CKEditor core")
  * )
  */
-class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInterface {
+class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInterface, CKEditorPluginContextualInterface {
 
   /**
    * The cache backend.
@@ -75,14 +72,23 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::isInternal().
+   * {@inheritdoc}
    */
   public function isInternal() {
     return TRUE;
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::getFile().
+   * {@inheritdoc}
+   */
+  public function isEnabled(Editor $editor) {
+    // This plugin represents the core CKEditor plugins. They're always enabled:
+    // its configuration is always necessary.
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getFile() {
     // This plugin is already part of Drupal core's CKEditor build.
@@ -90,7 +96,7 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::getConfig().
+   * {@inheritdoc}
    */
   public function getConfig(Editor $editor) {
     // Reasonable defaults that provide expected basic behavior.
@@ -100,6 +106,7 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
       'resize_dir' => 'vertical',
       'justifyClasses' => array('text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify'),
       'entities' => FALSE,
+      'disableNativeSpellChecker' => FALSE,
     );
 
     // Add the allowedContent setting, which ensures CKEditor only allows tags
@@ -107,14 +114,7 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
     list($config['allowedContent'], $config['disallowedContent']) = $this->generateACFSettings($editor);
 
     // Add the format_tags setting, if its button is enabled.
-    $toolbar_rows = array();
-    $settings = $editor->getSettings();
-    foreach ($settings['toolbar']['rows'] as $row_number => $row) {
-      $toolbar_rows[] = array_reduce($settings['toolbar']['rows'][$row_number], function (&$result, $button_group) {
-        return array_merge($result, $button_group['items']);
-      }, array());
-    }
-    $toolbar_buttons = array_unique(NestedArray::mergeDeepArray($toolbar_rows));
+    $toolbar_buttons = CKEditorPluginManager::getEnabledButtons($editor);
     if (in_array('Format', $toolbar_buttons)) {
       $config['format_tags'] = $this->generateFormatTagsSetting($editor);
     }
@@ -123,11 +123,25 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
   }
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginButtonsInterface::getButtons().
+   * {@inheritdoc}
    */
   public function getButtons() {
     $button = function($name, $direction = 'ltr') {
-      return '<a href="#" class="cke-icon-only cke_' . $direction . '" role="button" title="' . $name . '" aria-label="' . $name . '"><span class="cke_button_icon cke_button__' . str_replace(' ', '', $name) . '_icon">' . $name . '</span></a>';
+      // In the markup below, we mostly use the name (which may include spaces),
+      // but in one spot we use it as a CSS class, so strip spaces.
+      // Note: this uses str_replace() instead of Html::cleanCssIdentifier()
+      // because we must provide these class names exactly how CKEditor expects
+      // them in its library, which cleanCssIdentifier() does not do.
+      $class_name = str_replace(' ', '', $name);
+      return [
+        '#type' => 'inline_template',
+        '#template' => '<a href="#" class="cke-icon-only cke_{{ direction }}" role="button" title="{{ name }}" aria-label="{{ name }}"><span class="cke_button_icon cke_button__{{ classname }}_icon">{{ name }}</span></a>',
+        '#context' => [
+          'direction' => $direction,
+          'name' => $name,
+          'classname' => $class_name,
+        ],
+      ];
     };
 
     return array(
@@ -135,48 +149,59 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
       'Bold' => array(
         'label' => t('Bold'),
         'image_alternative' => $button('bold'),
+        'image_alternative_rtl' => $button('bold', 'rtl'),
       ),
       'Italic' => array(
         'label' => t('Italic'),
         'image_alternative' => $button('italic'),
+        'image_alternative_rtl' => $button('italic', 'rtl'),
       ),
       'Underline' => array(
         'label' => t('Underline'),
         'image_alternative' => $button('underline'),
+        'image_alternative_rtl' => $button('underline', 'rtl'),
       ),
       'Strike' => array(
         'label' => t('Strike-through'),
         'image_alternative' => $button('strike'),
+        'image_alternative_rtl' => $button('strike', 'rtl'),
       ),
       'Superscript' => array(
         'label' => t('Superscript'),
         'image_alternative' => $button('super script'),
+        'image_alternative_rtl' => $button('super script', 'rtl'),
       ),
       'Subscript' => array(
         'label' => t('Subscript'),
         'image_alternative' => $button('sub script'),
+        'image_alternative_rtl' => $button('sub script', 'rtl'),
       ),
       // "removeformat" plugin.
       'RemoveFormat' => array(
         'label' => t('Remove format'),
         'image_alternative' => $button('remove format'),
+        'image_alternative_rtl' => $button('remove format', 'rtl'),
       ),
       // "justify" plugin.
       'JustifyLeft' => array(
         'label' => t('Align left'),
         'image_alternative' => $button('justify left'),
+        'image_alternative_rtl' => $button('justify left', 'rtl'),
       ),
       'JustifyCenter' => array(
         'label' => t('Align center'),
         'image_alternative' => $button('justify center'),
+        'image_alternative_rtl' => $button('justify center', 'rtl'),
       ),
       'JustifyRight' => array(
         'label' => t('Align right'),
         'image_alternative' => $button('justify right'),
+        'image_alternative_rtl' => $button('justify right', 'rtl'),
       ),
       'JustifyBlock' => array(
         'label' => t('Justify'),
         'image_alternative' => $button('justify block'),
+        'image_alternative_rtl' => $button('justify block', 'rtl'),
       ),
       // "list" plugin.
       'BulletedList' => array(
@@ -215,11 +240,13 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
       'Blockquote' => array(
         'label' => t('Blockquote'),
         'image_alternative' => $button('blockquote'),
+        'image_alternative_rtl' => $button('blockquote', 'rtl'),
       ),
       // "horizontalrule" plugin
       'HorizontalRule' => array(
         'label' => t('Horizontal rule'),
         'image_alternative' => $button('horizontal rule'),
+        'image_alternative_rtl' => $button('horizontal rule', 'rtl'),
       ),
       // "clipboard" plugin.
       'Cut' => array(
@@ -253,15 +280,23 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
       'SpecialChar' => array(
         'label' => t('Character map'),
         'image_alternative' => $button('special char'),
+        'image_alternative_rtl' => $button('special char', 'rtl'),
       ),
       'Format' => array(
         'label' => t('HTML block format'),
-        'image_alternative' => '<a href="#" role="button" aria-label="' . t('Format') . '"><span class="ckeditor-button-dropdown">' . t('Format') . '<span class="ckeditor-button-arrow"></span></span></a>',
+        'image_alternative' => [
+          '#type' => 'inline_template',
+          '#template' => '<a href="#" role="button" aria-label="{{ format_text }}"><span class="ckeditor-button-dropdown">{{ format_text }}<span class="ckeditor-button-arrow"></span></span></a>',
+          '#context' => [
+            'format_text' => t('Format'),
+          ],
+        ],
       ),
       // "table" plugin.
       'Table' => array(
         'label' => t('Table'),
         'image_alternative' => $button('table'),
+        'image_alternative_rtl' => $button('table', 'rtl'),
       ),
       // "showblocks" plugin.
       'ShowBlocks' => array(
@@ -273,16 +308,24 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
       'Source' => array(
         'label' => t('Source code'),
         'image_alternative' => $button('source'),
+        'image_alternative_rtl' => $button('source', 'rtl'),
       ),
       // "maximize" plugin.
       'Maximize' => array(
         'label' => t('Maximize'),
         'image_alternative' => $button('maximize'),
+        'image_alternative_rtl' => $button('maximize', 'rtl'),
       ),
       // No plugin, separator "button" for toolbar builder UI use only.
       '-' => array(
         'label' => t('Separator'),
-        'image_alternative' => '<a href="#" role="button" aria-label="' . t('Button separator') . '" class="ckeditor-separator"></a>',
+        'image_alternative' => [
+          '#type' => 'inline_template',
+          '#template' => '<a href="#" role="button" aria-label="{{ button_separator_text }}" class="ckeditor-separator"></a>',
+          '#context' => [
+            'button_separator_text' => t('Button separator'),
+          ],
+        ],
         'attributes' => array(
           'class' => array('ckeditor-button-separator'),
           'data-drupal-ckeditor-type' => 'separator',
@@ -302,10 +345,6 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
    *
    * @return array
    *   An array containing the "format_tags" configuration.
-   *
-   * @see ckeditor_rebuild()
-   * @see ckeditor_filter_format_insert()
-   * @see ckeditor_filter_format_update()
    */
   protected function generateFormatTagsSetting(Editor $editor) {
     // When no text format is associated yet, assume no tag is allowed.
@@ -315,9 +354,35 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
     }
 
     $format = $editor->getFilterFormat();
-    // The <p> tag is always allowed — HTML without <p> tags is nonsensical.
-    $default = 'p';
-    return \Drupal::state()->get('ckeditor_internal_format_tags:' . $format->id(), $default);
+    $cid = 'ckeditor_internal_format_tags:' . $format->id();
+
+    if ($cached = $this->cache->get($cid)) {
+      $format_tags = $cached->data;
+    }
+    else {
+      // The <p> tag is always allowed — HTML without <p> tags is nonsensical.
+      $format_tags = ['p'];
+
+      // Given the list of possible format tags, automatically determine whether
+      // the current text format allows this tag, and thus whether it should show
+      // up in the "Format" dropdown.
+      $possible_format_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre'];
+      foreach ($possible_format_tags as $tag) {
+        $input = '<' . $tag . '>TEST</' . $tag . '>';
+        $output = trim(check_markup($input, $editor->id()));
+        if (Html::load($output)->getElementsByTagName($tag)->length !== 0) {
+          $format_tags[] = $tag;
+        }
+      }
+      $format_tags = implode(';', $format_tags);
+
+      // Cache the "format_tags" configuration. This cache item is infinitely
+      // valid; it only changes whenever the text format is changed, hence it's
+      // tagged with the text format's cache tag.
+      $this->cache->set($cid, $format_tags, Cache::PERMANENT, $format->getCacheTags());
+    }
+
+    return $format_tags;
   }
 
   /**
@@ -412,11 +477,11 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
           //     Once validated, an element or its property cannot be
           //     invalidated by another rule.
           // That means that the most permissive setting wins. Which means that
-          // it will still be allowed by CKEditor to e.g. define any style, no
-          // matter what the "*" tag's restrictions may be. If there's a setting
-          // for either the "style" or "class" attribute, it cannot possibly be
-          // more permissive than what was set above. Hence: inherit from the
-          // "*" tag where possible.
+          // it will still be allowed by CKEditor, for instance, to define any
+          // style, no matter what the "*" tag's restrictions may be. If there
+          // is a setting for either the "style" or "class" attribute, it cannot
+          // possibly be more permissive than what was set above. Hence, inherit
+          // from the "*" tag where possible.
           if (isset($html_restrictions['allowed']['*'])) {
             $wildcard = $html_restrictions['allowed']['*'];
             if (isset($wildcard['style'])) {
@@ -451,6 +516,13 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
         }
         // Tell CKEditor the tag is allowed, along with some tags.
         elseif (is_array($attributes)) {
+          // Set defaults (these will be overridden below if more specific
+          // values are present).
+          $allowed[$tag] = array(
+            'attributes' => FALSE,
+            'styles' => FALSE,
+            'classes' => FALSE,
+          );
           // Configure allowed attributes, allowed "style" attribute values and
           // allowed "class" attribute values.
           // CKEditor only allows specific values for the "class" and "style"
@@ -466,16 +538,26 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
           if (count($allowed_attributes)) {
             $allowed[$tag]['attributes'] = implode(',', array_keys($allowed_attributes));
           }
-          if (isset($allowed_attributes['style']) && is_array($allowed_attributes['style'])) {
-            $allowed_styles = $get_attribute_values($allowed_attributes['style'], TRUE);
-            if (isset($allowed_styles)) {
-              $allowed[$tag]['styles'] = $allowed_styles;
+          if (isset($allowed_attributes['style'])) {
+            if (is_bool($allowed_attributes['style'])) {
+              $allowed[$tag]['styles'] = $allowed_attributes['style'];
+            }
+            elseif (is_array($allowed_attributes['style'])) {
+              $allowed_classes = $get_attribute_values($allowed_attributes['style'], TRUE);
+              if (isset($allowed_classes)) {
+                $allowed[$tag]['styles'] = $allowed_classes;
+              }
             }
           }
-          if (isset($allowed_attributes['class']) && is_array($allowed_attributes['class'])) {
-            $allowed_classes = $get_attribute_values($allowed_attributes['class'], TRUE);
-            if (isset($allowed_classes)) {
-              $allowed[$tag]['classes'] = $allowed_classes;
+          if (isset($allowed_attributes['class'])) {
+            if (is_bool($allowed_attributes['class'])) {
+              $allowed[$tag]['classes'] = $allowed_attributes['class'];
+            }
+            elseif (is_array($allowed_attributes['class'])) {
+              $allowed_classes = $get_attribute_values($allowed_attributes['class'], TRUE);
+              if (isset($allowed_classes)) {
+                $allowed[$tag]['classes'] = $allowed_classes;
+              }
             }
           }
 
@@ -514,6 +596,9 @@ class Internal extends CKEditorPluginBase implements ContainerFactoryPluginInter
           }
         }
       }
+
+      ksort($allowed);
+      ksort($disallowed);
 
       return array($allowed, $disallowed);
     }

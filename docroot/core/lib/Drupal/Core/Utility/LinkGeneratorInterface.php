@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Utility\LinkGeneratorInterface.
- */
-
 namespace Drupal\Core\Utility;
 
 use Drupal\Core\Link;
@@ -31,12 +26,12 @@ interface LinkGeneratorInterface {
    * However, for links enclosed in translatable text you should use t() and
    * embed the HTML anchor tag directly in the translated string. For example:
    * @code
-   * $text = t('Visit the <a href="@url">content types</a> page', array('@url' => \Drupal::url('entity.node_type.collection')));
+   * $text = t('Visit the <a href=":url">content types</a> page', array(':url' => \Drupal::url('entity.node_type.collection')));
    * @endcode
    * This keeps the context of the link title ('settings' in the example) for
    * translators.
    *
-   * @param string|array $text
+   * @param string|array|\Drupal\Component\Render\MarkupInterface $text
    *   The link text for the anchor tag as a translated string or render array.
    *   Strings will be sanitized automatically. If you need to output HTML in
    *   the link text, use a render array or an already sanitized string such as
@@ -60,14 +55,10 @@ interface LinkGeneratorInterface {
    *     class will be applied to the link. It is important to use this
    *     sparingly since it is usually unnecessary and requires extra
    *     processing.
-   * @param bool $collect_cacheability_metadata
-   *   (optional) Defaults to FALSE. When TRUE, both the generated link and its
-   *   associated cacheability metadata are returned.
    *
-   * @return string|\Drupal\Core\GeneratedLink
-   *   An HTML string containing a link to the given route and parameters.
-   *   When $collect_cacheability_metadata is TRUE, a GeneratedLink object is
-   *   returned, containing the generated link plus cacheability metadata.
+   * @return \Drupal\Core\GeneratedLink
+   *   A GeneratedLink object containing a link to the given route and
+   *   parameters and bubbleable metadata.
    *
    * @throws \Symfony\Component\Routing\Exception\RouteNotFoundException
    *   Thrown when the named route doesn't exist.
@@ -76,23 +67,26 @@ interface LinkGeneratorInterface {
    * @throws \Symfony\Component\Routing\Exception\InvalidParameterException
    *   Thrown when a parameter value for a placeholder is not correct because it
    *   does not match the requirement.
+   *
+   * @internal
+   *   Should not be used in user code. Use \Drupal\Core\Link instead.
    */
-  public function generate($text, Url $url, $collect_cacheability_metadata = FALSE);
+  public function generate($text, Url $url);
 
   /**
    * Renders a link from a link object.
    *
    * @param \Drupal\Core\Link $link
    *   A link object to convert to a string.
-   * @param bool $collect_cacheability_metadata
-   *   (optional) Defaults to FALSE. When TRUE, both the generated link and its
-   *   associated cacheability metadata are returned.
    *
-   * @return string|\Drupal\Core\GeneratedLink
-   *   An HTML string containing a link to the given route and parameters.
-   *   When $collect_cacheability_metadata is TRUE, a GeneratedLink object is
-   *   returned, containing the generated link plus cacheability metadata.
+   * @return \Drupal\Core\GeneratedLink
+   *   A GeneratedLink object containing a link to the given route and
+   *   parameters and bubbleable metadata.
+   *
+   * @internal
+   *   Should not be used in user code.
+   *   Use \Drupal\Core\Link instead.
    */
-  public function generateFromLink(Link $link, $collect_cacheability_metadata = FALSE);
+  public function generateFromLink(Link $link);
 
 }

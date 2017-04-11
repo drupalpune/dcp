@@ -1,14 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Installer\InstallerExistingSettingsTest.
- */
-
 namespace Drupal\system\Tests\Installer;
 
 use Drupal\simpletest\InstallerTestBase;
 use Drupal\Core\Database\Database;
+use Drupal\Core\DrupalKernel;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests the installer with an existing settings file.
@@ -48,19 +45,17 @@ class InstallerExistingSettingsTest extends InstallerTestBase {
       'required' => TRUE,
     );
 
+    // Use the kernel to find the site path because the site.path service should
+    // not be available at this point in the install process.
+    $site_path = DrupalKernel::findSitePath(Request::createFromGlobals());
     // Pre-configure config directories.
     $this->settings['config_directories'] = array(
-      CONFIG_ACTIVE_DIRECTORY => (object) array(
-        'value' => conf_path() . '/files/config_active',
-        'required' => TRUE,
-      ),
-      CONFIG_STAGING_DIRECTORY => (object) array(
-        'value' => conf_path() . '/files/config_staging',
+      CONFIG_SYNC_DIRECTORY => (object) array(
+        'value' => $site_path . '/files/config_sync',
         'required' => TRUE,
       ),
     );
-    mkdir($this->settings['config_directories'][CONFIG_ACTIVE_DIRECTORY]->value, 0777, TRUE);
-    mkdir($this->settings['config_directories'][CONFIG_STAGING_DIRECTORY]->value, 0777, TRUE);
+    mkdir($this->settings['config_directories'][CONFIG_SYNC_DIRECTORY]->value, 0777, TRUE);
 
     parent::setUp();
   }

@@ -1,16 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block_content\Tests\BlockContentCacheTagsTest.
- */
-
 namespace Drupal\block_content\Tests;
 
+use Drupal\block_content\Entity\BlockContent;
+use Drupal\block_content\Entity\BlockContentType;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\system\Tests\Entity\EntityCacheTagsTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -30,7 +26,7 @@ class BlockContentCacheTagsTest extends EntityCacheTagsTestBase {
    * {@inheritdoc}
    */
   protected function createEntity() {
-    $block_content_type = entity_create('block_content_type', array(
+    $block_content_type = BlockContentType::create(array(
       'id' => 'basic',
       'label' => 'basic',
       'revision' => FALSE
@@ -39,7 +35,7 @@ class BlockContentCacheTagsTest extends EntityCacheTagsTestBase {
     block_content_add_body_field($block_content_type->id());
 
     // Create a "Llama" custom block.
-    $block_content = entity_create('block_content', array(
+    $block_content = BlockContent::create(array(
       'info' => 'Llama',
       'type' => 'basic',
       'body' => array(
@@ -84,23 +80,26 @@ class BlockContentCacheTagsTest extends EntityCacheTagsTestBase {
     //   Drupal\Core\Render\Renderer.
     $request_stack = $this->container->get('request_stack');
     $request_stack->push(new Request());
-    $this->container->get('renderer')->render($build);
+    $this->container->get('renderer')->renderRoot($build);
     $request_stack->pop();
 
     // Expected keys, contexts, and tags for the block.
     // @see \Drupal\block\BlockViewBuilder::viewMultiple()
     $expected_block_cache_keys = ['entity_view', 'block', $block->id()];
-    $expected_block_cache_contexts = ['languages:' . LanguageInterface::TYPE_INTERFACE, 'theme'];
-    $expected_block_cache_tags = Cache::mergeTags(['block_view', 'rendered'], $block->getCacheTags(), $block->getPlugin()->getCacheTags());
+    $expected_block_cache_contexts = ['languages:' . LanguageInterface::TYPE_INTERFACE, 'theme', 'user.permissions'];
+    $expected_block_cache_tags = Cache::mergeTags(['block_view', 'rendered'], $block->getCacheTags());
+    $expected_block_cache_tags = Cache::mergeTags($expected_block_cache_tags, $block->getPlugin()->getCacheTags());
 
     // Expected contexts and tags for the BlockContent entity.
     // @see \Drupal\Core\Entity\EntityViewBuilder::getBuildDefaults().
     $expected_entity_cache_contexts = ['theme'];
-    $expected_entity_cache_tags = Cache::mergeTags(['block_content_view'], $this->entity->getCacheTags(), $this->getAdditionalCacheTagsForEntity($this->entity));
+    $expected_entity_cache_tags = Cache::mergeTags(['block_content_view'], $this->entity->getCacheTags());
+    $expected_entity_cache_tags = Cache::mergeTags($expected_entity_cache_tags, $this->getAdditionalCacheTagsForEntity($this->entity));
 
     // Verify that what was render cached matches the above expectations.
     $cid = $this->createCacheId($expected_block_cache_keys, $expected_block_cache_contexts);
     $redirected_cid = $this->createCacheId($expected_block_cache_keys, Cache::mergeContexts($expected_block_cache_contexts, $expected_entity_cache_contexts));
     $this->verifyRenderCache($cid, Cache::mergeTags($expected_block_cache_tags, $expected_entity_cache_tags), ($cid !== $redirected_cid) ? $redirected_cid : NULL);
   }
+
 }

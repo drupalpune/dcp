@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\FeedViewBuilder.
- */
-
 namespace Drupal\aggregator;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -16,7 +11,7 @@ use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Render controller for aggregator feed items.
+ * View builder handler for aggregator feeds.
  */
 class FeedViewBuilder extends EntityViewBuilder {
 
@@ -52,8 +47,8 @@ class FeedViewBuilder extends EntityViewBuilder {
   /**
    * {@inheritdoc}
    */
-  public function buildComponents(array &$build, array $entities, array $displays, $view_mode, $langcode = NULL) {
-    parent::buildComponents($build, $entities, $displays, $view_mode, $langcode);
+  public function buildComponents(array &$build, array $entities, array $displays, $view_mode) {
+    parent::buildComponents($build, $entities, $displays, $view_mode);
 
     foreach ($entities as $id => $entity) {
       $bundle = $entity->bundle();
@@ -69,7 +64,7 @@ class FeedViewBuilder extends EntityViewBuilder {
 
         $build[$id]['items'] = $this->entityManager
           ->getViewBuilder('aggregator_item')
-          ->viewMultiple($items, $view_mode, $langcode);
+          ->viewMultiple($items, $view_mode, $entity->language()->getId());
 
         if ($view_mode == 'full') {
           // Also add the pager.
@@ -79,7 +74,8 @@ class FeedViewBuilder extends EntityViewBuilder {
 
       if ($display->getComponent('description')) {
         $build[$id]['description'] = array(
-          '#markup' => aggregator_filter_xss($entity->getDescription()),
+          '#markup' => $entity->getDescription(),
+          '#allowed_tags' => _aggregator_allowed_tags(),
           '#prefix' => '<div class="feed-description">',
           '#suffix' => '</div>',
         );
@@ -113,7 +109,7 @@ class FeedViewBuilder extends EntityViewBuilder {
         $build[$id]['feed_icon'] = array(
           '#theme' => 'feed_icon',
           '#url' => $entity->getUrl(),
-          '#title' => t('!title feed', array('!title' => $entity->label())),
+          '#title' => t('@title feed', array('@title' => $entity->label())),
         );
       }
 

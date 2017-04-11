@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Common\NoJavaScriptAnonymousTest.
- */
-
 namespace Drupal\system\Tests\Common;
 
 use Drupal\simpletest\WebTestBase;
@@ -57,7 +52,8 @@ class NoJavaScriptAnonymousTest extends WebTestBase {
    */
   protected function assertNoJavaScriptExceptHtml5Shiv() {
     // Ensure drupalSettings is not set.
-    $this->assertNoRaw('var drupalSettings = {', 'drupalSettings is not set.');
+    $settings = $this->getDrupalSettings();
+    $this->assertTrue(empty($settings), 'drupalSettings is not set.');
 
     // Ensure the HTML5 shiv exists.
     $this->assertRaw('html5shiv/html5shiv.min.js', 'HTML5 shiv JavaScript exists.');

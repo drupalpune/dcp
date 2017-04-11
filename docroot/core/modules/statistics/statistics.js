@@ -1,10 +1,15 @@
+/**
+ * @file
+ * Statistics functionality.
+ */
+
 (function ($, Drupal, drupalSettings) {
 
-  "use strict";
+  'use strict';
 
   $(document).ready(function () {
     $.ajax({
-      type: "POST",
+      type: 'POST',
       cache: false,
       url: drupalSettings.statistics.url,
       data: drupalSettings.statistics.data

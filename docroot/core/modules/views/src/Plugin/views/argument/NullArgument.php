@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\argument\NullArgument.
- */
-
 namespace Drupal\views\Plugin\views\argument;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -35,7 +30,7 @@ class NullArgument extends ArgumentPluginBase {
       '#title' => $this->t('Fail basic validation if any argument is given'),
       '#default_value' => !empty($this->options['must_not_be']),
       '#description' => $this->t('By checking this field, you can use this to make sure views with more arguments than necessary fail validation.'),
-      '#fieldset' => 'more',
+      '#group' => 'options][more',
     );
 
     unset($form['exception']);

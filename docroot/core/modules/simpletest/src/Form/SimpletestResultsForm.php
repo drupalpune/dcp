@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\simpletest\Form\SimpletestResultsForm.
- */
-
 namespace Drupal\simpletest\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormState;
@@ -74,7 +68,7 @@ class SimpletestResultsForm extends FormBase {
     );
     $image_fail = array(
       '#theme' => 'image',
-      '#uri' => 'core/misc/icons/ea2800/error.svg',
+      '#uri' => 'core/misc/icons/e32700/error.svg',
       '#width' => 18,
       '#height' => 18,
       '#alt' => 'Fail',
@@ -94,10 +88,10 @@ class SimpletestResultsForm extends FormBase {
       '#alt' => 'Debug',
     );
     return array(
-      'pass' => drupal_render($image_pass),
-      'fail' => drupal_render($image_fail),
-      'exception' => drupal_render($image_exception),
-      'debug' => drupal_render($image_debug),
+      'pass' => $image_pass,
+      'fail' => $image_fail,
+      'exception' => $image_exception,
+      'debug' => $image_debug,
     );
   }
 
@@ -205,7 +199,7 @@ class SimpletestResultsForm extends FormBase {
     // Under normal circumstances, a form object's submitForm() should never be
     // called directly, FormBuilder::submitForm() should be called instead.
     // However, it calls $form_state->setProgrammed(), which disables the Batch API.
-    $simpletest_test_form = new SimpletestTestForm();
+    $simpletest_test_form = SimpletestTestForm::create(\Drupal::getContainer());
     $simpletest_test_form->buildForm($form_execute, $form_state_execute);
     $simpletest_test_form->submitForm($form_execute, $form_state_execute);
     if ($redirect = $form_state_execute->getRedirect()) {
@@ -220,7 +214,7 @@ class SimpletestResultsForm extends FormBase {
    *   The test_id to retrieve results of.
    *
    * @return array
-   *  Array of results grouped by test_class.
+   *   Array of results grouped by test_class.
    */
   protected function getResults($test_id) {
     return $this->database->select('simpletest')
@@ -313,13 +307,12 @@ class SimpletestResultsForm extends FormBase {
       $rows = array();
       foreach ($assertions as $assertion) {
         $row = array();
-        // Assertion messages are in code, so we assume they are safe.
-        $row[] = SafeMarkup::set($assertion->message);
+        $row[] = ['data' => ['#markup' => $assertion->message]];
         $row[] = $assertion->message_group;
         $row[] = \Drupal::service('file_system')->basename(($assertion->file));
         $row[] = $assertion->line;
         $row[] = $assertion->function;
-        $row[] = $image_status_map[$assertion->status];
+        $row[] = ['data' => $image_status_map[$assertion->status]];
 
         $class = 'simpletest-' . $assertion->status;
         if ($assertion->message_group == 'Debug') {

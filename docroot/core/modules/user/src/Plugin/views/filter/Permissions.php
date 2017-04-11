@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\user\Plugin\views\filter\Permissions.
- */
-
 namespace Drupal\user\Plugin\views\filter;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\user\PermissionHandlerInterface;
 use Drupal\views\Plugin\views\filter\ManyToOne;
@@ -76,8 +71,9 @@ class Permissions extends ManyToOne {
       foreach ($permissions as $perm => $perm_item) {
         $provider = $perm_item['provider'];
         $display_name = $this->moduleHandler->getName($provider);
-        $this->valueOptions[$display_name][$perm] = SafeMarkup::checkPlain(strip_tags($perm_item['title']));
+        $this->valueOptions[$display_name][$perm] = Html::escape(strip_tags($perm_item['title']));
       }
+      return $this->valueOptions;
     }
     else {
       return $this->valueOptions;
@@ -93,11 +89,14 @@ class Permissions extends ManyToOne {
   public function query() {
     // @todo user_role_names() should maybe support multiple permissions.
     $rids = array();
-    // Get all roles, that have the configured permissions.
+    // Get all role IDs that have the configured permissions.
     foreach ($this->value as $permission) {
       $roles = user_role_names(FALSE, $permission);
-      $rids += array_keys($roles);
+      // user_role_names() returns an array with the role IDs as keys, so take
+      // the array keys and merge them with previously found role IDs.
+      $rids = array_merge($rids, array_keys($roles));
     }
+    // Remove any duplicate role IDs.
     $rids = array_unique($rids);
     $this->value = $rids;
 

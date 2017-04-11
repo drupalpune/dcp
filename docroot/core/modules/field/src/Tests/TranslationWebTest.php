@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\field\Tests\TranslationWebTest.
- */
-
 namespace Drupal\field\Tests;
 
 use Drupal\Component\Utility\Unicode;
@@ -65,14 +60,14 @@ class TranslationWebTest extends FieldTestBase {
       'type' => 'test_field',
       'cardinality' => 4,
     );
-    entity_create('field_storage_config', $field_storage)->save();
+    FieldStorageConfig::create($field_storage)->save();
     $this->fieldStorage = FieldStorageConfig::load($this->entityTypeId . '.' . $this->fieldName);
 
     $field = array(
       'field_storage' => $this->fieldStorage,
       'bundle' => $this->entityTypeId,
     );
-    entity_create('field_config', $field)->save();
+    FieldConfig::create($field)->save();
     $this->field = FieldConfig::load($this->entityTypeId . '.' . $field['bundle'] . '.' . $this->fieldName);
 
     entity_get_form_display($this->entityTypeId, $this->entityTypeId, 'default')
@@ -96,7 +91,9 @@ class TranslationWebTest extends FieldTestBase {
 
     // Prepare the field translations.
     field_test_entity_info_translatable($this->entityTypeId, TRUE);
-    $entity = entity_create($this->entityTypeId);
+    $entity = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityTypeId)
+      ->create();
     $available_langcodes = array_flip(array_keys($this->container->get('language_manager')->getLanguages()));
     $field_name = $this->fieldStorage->getName();
 
@@ -104,7 +101,8 @@ class TranslationWebTest extends FieldTestBase {
     ksort($available_langcodes);
     $entity->langcode->value = key($available_langcodes);
     foreach ($available_langcodes as $langcode => $value) {
-      $entity->getTranslation($langcode)->{$field_name}->value = $value + 1;
+      $translation = $entity->hasTranslation($langcode) ? $entity->getTranslation($langcode) : $entity->addTranslation($langcode);
+      $translation->{$field_name}->value = $value + 1;
     }
     $entity->save();
 
@@ -113,7 +111,7 @@ class TranslationWebTest extends FieldTestBase {
       "{$field_name}[0][value]" => $entity->{$field_name}->value,
       'revision' => TRUE,
     );
-    $this->drupalPostForm($this->entityTypeId . '/manage/' . $entity->id(), $edit, t('Save'));
+    $this->drupalPostForm($this->entityTypeId . '/manage/' . $entity->id() . '/edit', $edit, t('Save'));
 
     // Check translation revisions.
     $this->checkTranslationRevisions($entity->id(), $entity->getRevisionId(), $available_langcodes);
@@ -132,4 +130,5 @@ class TranslationWebTest extends FieldTestBase {
       $this->assertTrue($passed, format_string('The @language translation for revision @revision was correctly stored', array('@language' => $langcode, '@revision' => $entity->getRevisionId())));
     }
   }
+
 }

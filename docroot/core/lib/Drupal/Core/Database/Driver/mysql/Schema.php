@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Driver\mysql\Schema
- */
-
 namespace Drupal\Core\Database\Driver\mysql;
 
-use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Query\Condition;
+use Drupal\Core\Database\SchemaException;
 use Drupal\Core\Database\SchemaObjectExistsException;
 use Drupal\Core\Database\SchemaObjectDoesNotExistException;
 use Drupal\Core\Database\Schema as DatabaseSchema;
@@ -19,6 +14,9 @@ use Drupal\Component\Utility\Unicode;
  * @{
  */
 
+/**
+ * MySQL implementation of \Drupal\Core\Database\Schema.
+ */
 class Schema extends DatabaseSchema {
 
   /**
@@ -30,6 +28,19 @@ class Schema extends DatabaseSchema {
    * Maximum length of a column comment in MySQL.
    */
   const COMMENT_MAX_COLUMN = 255;
+
+  /**
+   * @var array
+   *   List of MySQL string types.
+   */
+  protected $mysqlStringTypes = array(
+    'VARCHAR',
+    'CHAR',
+    'TINYTEXT',
+    'MEDIUMTEXT',
+    'LONGTEXT',
+    'TEXT',
+  );
 
   /**
    * Get information about the table and database name from the prefix.
@@ -47,8 +58,7 @@ class Schema extends DatabaseSchema {
       $info['table'] = substr($table, ++$pos);
     }
     else {
-      $db_info = Database::getConnectionInfo();
-      $info['database'] = $db_info[$this->connection->getTarget()]['database'];
+      $info['database'] = $this->connection->getConnectionOptions()['database'];
       $info['table'] = $table;
     }
     return $info;
@@ -87,7 +97,7 @@ class Schema extends DatabaseSchema {
     // Provide defaults if needed.
     $table += array(
       'mysql_engine' => 'InnoDB',
-      'mysql_character_set' => 'utf8',
+      'mysql_character_set' => 'utf8mb4',
     );
 
     $sql = "CREATE TABLE {" . $name . "} (\n";
@@ -108,9 +118,9 @@ class Schema extends DatabaseSchema {
 
     $sql .= 'ENGINE = ' . $table['mysql_engine'] . ' DEFAULT CHARACTER SET ' . $table['mysql_character_set'];
     // By default, MySQL uses the default collation for new tables, which is
-    // 'utf8_general_ci' for utf8. If an alternate collation has been set, it
-    // needs to be explicitly specified.
-    // @see DatabaseConnection_mysql
+    // 'utf8mb4_general_ci' for utf8mb4. If an alternate collation has been
+    // set, it needs to be explicitly specified.
+    // @see \Drupal\Core\Database\Driver\mysql\Schema
     if (!empty($info['collation'])) {
       $sql .= ' COLLATE ' . $info['collation'];
     }
@@ -129,15 +139,15 @@ class Schema extends DatabaseSchema {
    * Before passing a field out of a schema definition into this function it has
    * to be processed by _db_process_field().
    *
-   * @param $name
+   * @param string $name
    *   Name of the field.
-   * @param $spec
+   * @param array $spec
    *   The field specification, as per the schema data structure format.
    */
   protected function createFieldSql($name, $spec) {
     $sql = "`" . $name . "` " . $spec['mysql_type'];
 
-    if (in_array($spec['mysql_type'], array('VARCHAR', 'CHAR', 'TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT', 'TEXT'))) {
+    if (in_array($spec['mysql_type'], $this->mysqlStringTypes)) {
       if (isset($spec['length'])) {
         $sql .= '(' . $spec['length'] . ')';
       }
@@ -271,12 +281,76 @@ class Schema extends DatabaseSchema {
       }
     }
     if (!empty($spec['indexes'])) {
-      foreach ($spec['indexes'] as $index => $fields) {
+      $indexes = $this->getNormalizedIndexes($spec);
+      foreach ($indexes as $index => $fields) {
         $keys[] = 'INDEX `' . $index . '` (' . $this->createKeySql($fields) . ')';
       }
     }
 
     return $keys;
+  }
+
+  /**
+   * Gets normalized indexes from a table specification.
+   *
+   * Shortens indexes to 191 characters if they apply to utf8mb4-encoded
+   * fields, in order to comply with the InnoDB index limitation of 756 bytes.
+   *
+   * @param array $spec
+   *   The table specification.
+   *
+   * @return array
+   *   List of shortened indexes.
+   *
+   * @throws \Drupal\Core\Database\SchemaException
+   *   Thrown if field specification is missing.
+   */
+  protected function getNormalizedIndexes(array $spec) {
+    $indexes = isset($spec['indexes']) ? $spec['indexes'] : [];
+    foreach ($indexes as $index_name => $index_fields) {
+      foreach ($index_fields as $index_key => $index_field) {
+        // Get the name of the field from the index specification.
+        $field_name = is_array($index_field) ? $index_field[0] : $index_field;
+        // Check whether the field is defined in the table specification.
+        if (isset($spec['fields'][$field_name])) {
+          // Get the MySQL type from the processed field.
+          $mysql_field = $this->processField($spec['fields'][$field_name]);
+          if (in_array($mysql_field['mysql_type'], $this->mysqlStringTypes)) {
+            // Check whether we need to shorten the index.
+            if ((!isset($mysql_field['type']) || $mysql_field['type'] != 'varchar_ascii') && (!isset($mysql_field['length']) || $mysql_field['length'] > 191)) {
+              // Limit the index length to 191 characters.
+              $this->shortenIndex($indexes[$index_name][$index_key]);
+            }
+          }
+        }
+        else {
+          throw new SchemaException("MySQL needs the '$field_name' field specification in order to normalize the '$index_name' index");
+        }
+      }
+    }
+    return $indexes;
+  }
+
+  /**
+   * Helper function for normalizeIndexes().
+   *
+   * Shortens an index to 191 characters.
+   *
+   * @param array $index
+   *   The index array to be used in createKeySql.
+   *
+   * @see Drupal\Core\Database\Driver\mysql\Schema::createKeySql()
+   * @see Drupal\Core\Database\Driver\mysql\Schema::normalizeIndexes()
+   */
+  protected function shortenIndex(&$index) {
+    if (is_array($index)) {
+      if ($index[1] > 191) {
+        $index[1] = 191;
+      }
+    }
+    else {
+      $index = array($index, 191);
+    }
   }
 
   protected function createKeySql($fields) {
@@ -335,6 +409,11 @@ class Schema extends DatabaseSchema {
     if (isset($spec['initial'])) {
       $this->connection->update($table)
         ->fields(array($field => $spec['initial']))
+        ->execute();
+    }
+    if (isset($spec['initial_from_field'])) {
+      $this->connection->update($table)
+        ->expression($field, $spec['initial_from_field'])
         ->execute();
     }
     if ($fixnull) {
@@ -415,7 +494,10 @@ class Schema extends DatabaseSchema {
     return TRUE;
   }
 
-  public function addIndex($table, $name, $fields) {
+  /**
+   * {@inheritdoc}
+   */
+  public function addIndex($table, $name, $fields, array $spec) {
     if (!$this->tableExists($table)) {
       throw new SchemaObjectDoesNotExistException(t("Cannot add index @name to table @table: table doesn't exist.", array('@table' => $table, '@name' => $name)));
     }
@@ -423,7 +505,10 @@ class Schema extends DatabaseSchema {
       throw new SchemaObjectExistsException(t("Cannot add index @name to table @table: index already exists.", array('@table' => $table, '@name' => $name)));
     }
 
-    $this->connection->query('ALTER TABLE {' . $table . '} ADD INDEX `' . $name . '` (' . $this->createKeySql($fields) . ')');
+    $spec['indexes'][$name] = $fields;
+    $indexes = $this->getNormalizedIndexes($spec);
+
+    $this->connection->query('ALTER TABLE {' . $table . '} ADD INDEX `' . $name . '` (' . $this->createKeySql($indexes[$name]) . ')');
   }
 
   public function dropIndex($table, $name) {
@@ -456,7 +541,8 @@ class Schema extends DatabaseSchema {
       // Add table prefixes before truncating.
       $comment = Unicode::truncate($this->connection->prefixTables($comment), $length, TRUE, TRUE);
     }
-
+    // Remove semicolons to avoid triggering multi-statement check.
+    $comment = strtr($comment, array(';' => '.'));
     return $this->connection->quote($comment);
   }
 

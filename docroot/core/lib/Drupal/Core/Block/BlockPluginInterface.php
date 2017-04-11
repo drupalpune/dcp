@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Block\BlockPluginInterface.
- */
-
 namespace Drupal\Core\Block;
 
 use Drupal\Component\Plugin\DerivativeInspectionInterface;
@@ -62,6 +57,11 @@ interface BlockPluginInterface extends ConfigurablePluginInterface, PluginFormIn
 
   /**
    * Builds and returns the renderable array for this block plugin.
+   *
+   * If a block should not be rendered because it has no content, then this
+   * method must also ensure to return no content: it must then only return an
+   * empty array, or an empty array with #cache set (with cacheability metadata
+   * indicating the circumstances for it being empty).
    *
    * @return array
    *   A renderable array representing the content of the block.

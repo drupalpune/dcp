@@ -1,13 +1,8 @@
 <?php
-/**
- * @file
- * Contains \Drupal\locale\Controller\LocaleController.
- */
 
 namespace Drupal\locale\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Return response for manual check translations.

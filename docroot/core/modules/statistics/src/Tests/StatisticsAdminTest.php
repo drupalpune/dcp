@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\statistics\Tests\StatisticsAdminTest.
- */
-
 namespace Drupal\statistics\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -40,12 +35,15 @@ class StatisticsAdminTest extends WebTestBase {
   /**
    * The Guzzle HTTP client.
    *
-   * @var \GuzzleHttp\ClientInterface;
+   * @var \GuzzleHttp\Client;
    */
   protected $client;
 
   protected function setUp() {
     parent::setUp();
+
+    // Set the max age to 0 to simplify testing.
+    $this->config('statistics.settings')->set('display_max_age', 0)->save();
 
     // Create Basic page node type.
     if ($this->profile != 'standard') {
@@ -55,7 +53,6 @@ class StatisticsAdminTest extends WebTestBase {
     $this->drupalLogin($this->privilegedUser);
     $this->testNode = $this->drupalCreateNode(array('type' => 'page', 'uid' => $this->privilegedUser->id()));
     $this->client = \Drupal::httpClient();
-    $this->client->setDefaultOption('config/curl', array(CURLOPT_TIMEOUT => 10));
   }
 
   /**
@@ -77,18 +74,28 @@ class StatisticsAdminTest extends WebTestBase {
     $nid = $this->testNode->id();
     $post = array('nid' => $nid);
     global $base_url;
-    $stats_path = $base_url . '/' . drupal_get_path('module', 'statistics'). '/statistics.php';
-    $this->client->post($stats_path, array('body' => $post));
+    $stats_path = $base_url . '/' . drupal_get_path('module', 'statistics') . '/statistics.php';
+    $this->client->post($stats_path, array('form_params' => $post));
 
     // Hit the node again (the counter is incremented after the hit, so
     // "1 view" will actually be shown when the node is hit the second time).
     $this->drupalGet('node/' . $this->testNode->id());
-    $this->client->post($stats_path, array('body' => $post));
+    $this->client->post($stats_path, array('form_params' => $post));
     $this->assertText('1 view', 'Node is viewed once.');
 
     $this->drupalGet('node/' . $this->testNode->id());
-    $this->client->post($stats_path, array('body' => $post));
+    $this->client->post($stats_path, array('form_params' => $post));
     $this->assertText('2 views', 'Node is viewed 2 times.');
+
+    // Increase the max age to test that nodes are no longer immediately
+    // updated, visit the node once more to populate the cache.
+    $this->config('statistics.settings')->set('display_max_age', 3600)->save();
+    $this->drupalGet('node/' . $this->testNode->id());
+    $this->assertText('3 views', 'Node is viewed 3 times.');
+
+    $this->client->post($stats_path, array('form_params' => $post));
+    $this->drupalGet('node/' . $this->testNode->id());
+    $this->assertText('3 views', 'Views counter was not updated.');
   }
 
   /**
@@ -102,8 +109,8 @@ class StatisticsAdminTest extends WebTestBase {
     $nid = $this->testNode->id();
     $post = array('nid' => $nid);
     global $base_url;
-    $stats_path = $base_url . '/' . drupal_get_path('module', 'statistics'). '/statistics.php';
-    $this->client->post($stats_path, array('body' => $post));
+    $stats_path = $base_url . '/' . drupal_get_path('module', 'statistics') . '/statistics.php';
+    $this->client->post($stats_path, array('form_params' => $post));
 
     $result = db_select('node_counter', 'n')
       ->fields('n', array('nid'))
@@ -136,10 +143,10 @@ class StatisticsAdminTest extends WebTestBase {
     $nid = $this->testNode->id();
     $post = array('nid' => $nid);
     global $base_url;
-    $stats_path = $base_url . '/' . drupal_get_path('module', 'statistics'). '/statistics.php';
-    $this->client->post($stats_path, array('body' => $post));
+    $stats_path = $base_url . '/' . drupal_get_path('module', 'statistics') . '/statistics.php';
+    $this->client->post($stats_path, array('form_params' => $post));
     $this->drupalGet('node/' . $this->testNode->id());
-    $this->client->post($stats_path, array('body' => $post));
+    $this->client->post($stats_path, array('form_params' => $post));
     $this->assertText('1 view', 'Node is viewed once.');
 
     // statistics_cron() will subtract
@@ -159,4 +166,5 @@ class StatisticsAdminTest extends WebTestBase {
       ->fetchField();
     $this->assertFalse($result, 'Daycounter is zero.');
   }
+
 }

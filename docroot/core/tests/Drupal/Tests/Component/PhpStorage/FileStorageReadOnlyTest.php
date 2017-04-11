@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Component\PhpStorage\FileStorageReadOnlyTest.
- */
-
 namespace Drupal\Tests\Component\PhpStorage;
 
 use Drupal\Component\PhpStorage\FileStorage;
@@ -75,6 +70,7 @@ class FileStorageReadOnlyTest extends PhpStorageTestBase {
     // Saving and deleting should always fail.
     $this->assertFalse($php_read->save($name, $code));
     $this->assertFalse($php_read->delete($name));
+    unset($GLOBALS[$random]);
   }
 
   /**

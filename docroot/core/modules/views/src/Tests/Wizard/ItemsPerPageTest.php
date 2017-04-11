@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Tests\Wizard\ItemsPerPageTest.
- */
-
 namespace Drupal\views\Tests\Wizard;
 
 /**
@@ -14,6 +9,12 @@ namespace Drupal\views\Tests\Wizard;
  * @group views
  */
 class ItemsPerPageTest extends WizardTestBase {
+
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('page_title_block');
+  }
 
   /**
    * Tests the number of items per page.
@@ -71,6 +72,7 @@ class ItemsPerPageTest extends WizardTestBase {
 
     // Confirm that the block is listed in the block administration UI.
     $this->drupalGet('admin/structure/block/list/' . $this->config('system.theme')->get('default'));
+    $this->clickLinkPartialName('Place block');
     $this->assertText($view['label']);
 
     // Place the block, visit a page that displays the block, and check that the

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Entity\FeedInterface.
- */
-
 namespace Drupal\aggregator;
 
 use Drupal\Core\Entity\ContentEntityInterface;

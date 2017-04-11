@@ -19,11 +19,11 @@ function tracker_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.tracker':
       $output = '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The Activity Tracker module displays the most recently added and updated content on your site, and allows you to follow new content created by each user. This module has no configuration options. For more information, see the <a href="!tracker">online documentation for the Tracker module</a>.', array('!tracker' => 'https://www.drupal.org/documentation/modules/tracker')) . '</p>';
+      $output .= '<p>' . t('The Activity Tracker module displays the most recently added and updated content on your site, and allows you to follow new content created by each user. This module has no configuration options. For more information, see the <a href=":tracker">online documentation for the Activity Tracker module</a>.', array(':tracker' => 'https://www.drupal.org/documentation/modules/tracker')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Tracking new and updated site content') . '</dt>';
-      $output .= '<dd>' . t('The <a href="!recent">Recent content</a> page shows new and updated content in reverse chronological order, listing the content type, title, author\'s name, number of comments, and time of last update. Content is considered updated when changes occur in the text, or when new comments are added. The <em>My recent content</em> tab limits the list to the currently logged-in user.', array('!recent' => \Drupal::url('tracker.page'))) . '</dd>';
+      $output .= '<dd>' . t('The <a href=":recent">Recent content</a> page shows new and updated content in reverse chronological order, listing the content type, title, author\'s name, number of comments, and time of last update. Content is considered updated when changes occur in the text, or when new comments are added. The <em>My recent content</em> tab limits the list to the currently logged-in user.', array(':recent' => \Drupal::url('tracker.page'))) . '</dd>';
       $output .= '<dt>' . t('Tracking user-specific content') . '</dt>';
       $output .= '<dd>' . t("To follow a specific user's new and updated content, select the <em>Activity</em> tab from the user's profile page.") . '</dd>';
       $output .= '</dl>';
@@ -135,10 +135,10 @@ function tracker_cron() {
 /**
  * Access callback: Determines access permission for a user's own account.
  *
- * @param int $account
- *   The account ID to check.
+ * @param \Drupal\Core\Session\AccountInterface $account
+ *   The user account to track.
  *
- * @return boolean
+ * @return bool
  *   TRUE if a user is accessing tracking info for their own account and
  *   has permission to access the content.
  *
@@ -155,7 +155,7 @@ function _tracker_myrecent_access(AccountInterface $account) {
  * @param int $account
  *   The user account ID to track.
  *
- * @return boolean
+ * @return bool
  *   TRUE if a user has permission to access the account for $account and
  *   has permission to access the content.
  *
@@ -232,11 +232,11 @@ function tracker_comment_delete(CommentInterface $comment) {
 /**
  * Updates indexing tables when a node is added, updated, or commented on.
  *
- * @param $nid
+ * @param int $nid
  *   A node ID.
- * @param $uid
+ * @param int $uid
  *   The node or comment author.
- * @param $changed
+ * @param int $changed
  *   The node updated timestamp or comment timestamp.
  */
 function _tracker_add($nid, $uid, $changed) {
@@ -303,11 +303,11 @@ function _tracker_calculate_changed($node) {
 /**
  * Cleans up indexed data when nodes or comments are removed.
  *
- * @param $nid
- *  The node ID.
- * @param $uid
+ * @param int $nid
+ *   The node ID.
+ * @param int $uid
  *   The author of the node or comment.
- * @param $changed
+ * @param int $changed
  *   The last changed timestamp of the node.
  */
 function _tracker_remove($nid, $uid = NULL, $changed = NULL) {

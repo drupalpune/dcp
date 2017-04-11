@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Definition of Drupal\search\Tests\SearchNodeUpdateAndDeletionTest.
- */
 
 namespace Drupal\search\Tests;
 

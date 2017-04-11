@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\editor\EditorXssFilter\Standard.
- */
-
 namespace Drupal\editor\EditorXssFilter;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Xss;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\filter\FilterFormatInterface;
 use Drupal\editor\EditorXssFilterInterface;
 
@@ -114,7 +108,7 @@ class Standard extends Xss implements EditorXssFilterInterface {
         // value. There is no need to explicitly decode $node->value, since the
         // DOMAttr::value getter returns the decoded value.
         $value = Xss::filterAdmin($node->value);
-        $node->value = SafeMarkup::checkPlain($value);
+        $node->value = Html::escape($value);
       }
       $html = Html::serialize($dom);
     }
@@ -126,7 +120,7 @@ class Standard extends Xss implements EditorXssFilterInterface {
   /**
    * Get all allowed tags from a restrictions data structure.
    *
-   * @param array|FALSE $restrictions
+   * @param array|false $restrictions
    *   Restrictions as returned by FilterInterface::getHTMLRestrictions().
    *
    * @return array
@@ -150,7 +144,7 @@ class Standard extends Xss implements EditorXssFilterInterface {
   /**
    * Get all forbidden tags from a restrictions data structure.
    *
-   * @param array|FALSE $restrictions
+   * @param array|false $restrictions
    *   Restrictions as returned by FilterInterface::getHTMLRestrictions().
    *
    * @return array

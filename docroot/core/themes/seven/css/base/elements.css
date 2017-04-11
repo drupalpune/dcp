@@ -137,6 +137,10 @@ ul {
   margin-left: 0;
   margin-right: 1.5em;
 }
+/* This is required to win over specificity of [dir="rtl"] ul */
+[dir="rtl"] .messages__list {
+  margin-right: 0;
+}
 ol {
   list-style-type: decimal;
   margin: 0.25em 0 0.25em 2em; /* LTR */
@@ -150,11 +154,6 @@ quote,
 code {
   margin: .5em 0;
 }
-code,
-pre,
-kbd {
-  font-size: 1.231em;
-}
 pre {
   margin: 0.5em 0;
   white-space: pre-wrap;
@@ -167,9 +166,9 @@ details summary {
   padding-bottom: 0.5em;
 }
 details summary:focus {
-  border-top: 3px solid #0074bd;
   outline: none;
-  color: #0074bd;
-  margin-top: -3px;
+}
+details summary:focus,
+details summary:hover {
   text-decoration: underline;
 }

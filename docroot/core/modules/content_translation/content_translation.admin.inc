@@ -5,10 +5,11 @@
  * The content translation administration forms.
  */
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Config\Entity\ThirdPartySettingsInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Render\Element;
@@ -18,11 +19,14 @@ use Drupal\Core\Render\Element;
  *
  * @param \Drupal\Core\Field\FieldDefinitionInterface $field
  *   A field definition object.
+ * @param string $element_name
+ *   (optional) The element name, which is added to drupalSettings so that
+ *   javascript can manipulate the form element.
  *
  * @return array
  *   A form element to configure field synchronization.
  */
-function content_translation_field_sync_widget(FieldDefinitionInterface $field) {
+function content_translation_field_sync_widget(FieldDefinitionInterface $field, $element_name = 'third_party_settings[content_translation][translation_sync]') {
   // No way to store field sync information on this field.
   if (!($field instanceof ThirdPartySettingsInterface)) {
     return array();
@@ -32,15 +36,18 @@ function content_translation_field_sync_widget(FieldDefinitionInterface $field) 
   $definition = \Drupal::service('plugin.manager.field.field_type')->getDefinition($field->getType());
   $column_groups = $definition['column_groups'];
   if (!empty($column_groups) && count($column_groups) > 1) {
-    $options = array();
-    $default = array();
+    $options = [];
+    $default = [];
+    $require_all_groups_for_translation = [];
 
     foreach ($column_groups as $group => $info) {
       $options[$group] = $info['label'];
       $default[$group] = !empty($info['translatable']) ? $group : FALSE;
+      if (!empty($info['require_all_groups_for_translation'])) {
+        $require_all_groups_for_translation[] = $group;
+      }
     }
 
-    $settings = array('dependent_selectors' => array('instance[third_party_settings][content_translation][translation_sync]' => array('file')));
     $default = $field->getThirdPartySetting('content_translation', 'translation_sync', $default);
 
     $element = array(
@@ -48,15 +55,19 @@ function content_translation_field_sync_widget(FieldDefinitionInterface $field) 
       '#title' => t('Translatable elements'),
       '#options' => $options,
       '#default_value' => $default,
-      '#attached' => array(
-        'library' => array(
-          'content_translation/drupal.content_translation.admin',
-        ),
-        'drupalSettings' => [
-          'contentTranslationDependentOptions' => $settings,
-        ],
-      ),
     );
+
+    if ($require_all_groups_for_translation) {
+      // The actual checkboxes are sometimes rendered separately and the parent
+      // element is ignored. Attach to the first option to ensure that this
+      // does not get lost.
+      $element[key($options)]['#attached']['drupalSettings']['contentTranslationDependentOptions'] = [
+        'dependent_selectors' => [
+          $element_name => $require_all_groups_for_translation
+        ],
+      ];
+      $element[key($options)]['#attached']['library'][] = 'content_translation/drupal.content_translation.admin';
+    }
   }
 
   return $element;
@@ -81,14 +92,14 @@ function _content_translation_form_language_content_settings_form_alter(array &$
 
   $form['#attached']['library'][] = 'content_translation/drupal.content_translation.admin';
 
-  $dependent_options_settings = array();
   $entity_manager = Drupal::entityManager();
+  $bundle_info_service = \Drupal::service('entity_type.bundle.info');
   foreach ($form['#labels'] as $entity_type_id => $label) {
     $entity_type = $entity_manager->getDefinition($entity_type_id);
     $storage_definitions = $entity_type instanceof ContentEntityTypeInterface ? $entity_manager->getFieldStorageDefinitions($entity_type_id) : array();
 
     $entity_type_translatable = $content_translation_manager->isSupported($entity_type_id);
-    foreach (entity_get_bundles($entity_type_id) as $bundle => $bundle_info) {
+    foreach ($bundle_info_service->getBundleInfo($entity_type_id) as $bundle => $bundle_info) {
       // Here we do not want the widget to be altered and hold also the "Enable
       // translation" checkbox, which would be redundant. Hence we add this key
       // to be able to skip alterations. Alter the title and display the message
@@ -102,22 +113,16 @@ function _content_translation_form_language_content_settings_form_alter(array &$
       $fields = $entity_manager->getFieldDefinitions($entity_type_id, $bundle);
       if ($fields) {
         foreach ($fields as $field_name => $definition) {
-          // Allow to configure only fields supporting multilingual storage.
-          // We skip our own fields as they are always translatable.
-          if (!empty($storage_definitions[$field_name]) && $storage_definitions[$field_name]->isTranslatable() && $storage_definitions[$field_name]->getProvider() != 'content_translation' && $field_name != $entity_type->getKey('langcode') && $field_name != $entity_type->getKey('default_langcode')) {
+          if ($definition->isComputed() || (!empty($storage_definitions[$field_name]) && _content_translation_is_field_translatability_configurable($entity_type, $storage_definitions[$field_name]))) {
             $form['settings'][$entity_type_id][$bundle]['fields'][$field_name] = array(
               '#label' => $definition->getLabel(),
               '#type' => 'checkbox',
               '#default_value' => $definition->isTranslatable(),
             );
             // Display the column translatability configuration widget.
-            $column_element = content_translation_field_sync_widget($definition);
+            $column_element = content_translation_field_sync_widget($definition, "settings[{$entity_type_id}][{$bundle}][columns][{$field_name}]");
             if ($column_element) {
               $form['settings'][$entity_type_id][$bundle]['columns'][$field_name] = $column_element;
-              // @todo This should not concern only files.
-              if (isset($column_element['#options']['file'])) {
-                $dependent_options_settings["settings[{$entity_type_id}][{$bundle}][columns][{$field_name}]"] = array('file');
-              }
             }
           }
         }
@@ -133,10 +138,30 @@ function _content_translation_form_language_content_settings_form_alter(array &$
     }
   }
 
-  $settings = array('dependent_selectors' => $dependent_options_settings);
-  $form['#attached']['drupalSettings']['contentTranslationDependentOptions'] = $settings;
   $form['#validate'][] = 'content_translation_form_language_content_settings_validate';
   $form['#submit'][] = 'content_translation_form_language_content_settings_submit';
+}
+/**
+ * Checks whether translatability should be configurable for a field.
+ *
+ * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+ *   The entity type definition.
+ * @param \Drupal\Core\Field\FieldStorageDefinitionInterface $definition
+ *   The field storage definition.
+ *
+ * @return bool
+ *   TRUE if field translatability can be configured, FALSE otherwise.
+ *
+ * @internal
+ */
+function _content_translation_is_field_translatability_configurable(EntityTypeInterface $entity_type, FieldStorageDefinitionInterface $definition) {
+  // Allow to configure only fields supporting multilingual storage. We skip our
+  // own fields as they are always translatable. Additionally we skip a set of
+  // well-known fields implementing entity system business logic.
+  return
+    $definition->isTranslatable() &&
+    $definition->getProvider() != 'content_translation' &&
+    !in_array($definition->getName(), [$entity_type->getKey('langcode'), $entity_type->getKey('default_langcode'), 'revision_translation_affected']);
 }
 
 /**
@@ -194,10 +219,10 @@ function _content_translation_preprocess_language_content_settings_table(&$varia
               'bundle' => array(
                 '#prefix' => '<span class="visually-hidden">',
                 '#suffix' => '</span> ',
-                '#markup' => SafeMarkup::checkPlain($element[$bundle]['settings']['#label']),
+                '#plain_text' => $element[$bundle]['settings']['#label'],
               ),
               'field' => array(
-                '#markup' => SafeMarkup::checkPlain($field_element['#label']),
+                '#plain_text' => $field_element['#label'],
               ),
             ),
             'class' => array('field'),
@@ -228,15 +253,15 @@ function _content_translation_preprocess_language_content_settings_table(&$varia
                   'bundle' => array(
                     '#prefix' => '<span class="visually-hidden">',
                     '#suffix' => '</span> ',
-                    '#markup' => SafeMarkup::checkPlain($element[$bundle]['settings']['#label']),
+                    '#plain_text' => $element[$bundle]['settings']['#label'],
                   ),
                   'field' => array(
                     '#prefix' => '<span class="visually-hidden">',
                     '#suffix' => '</span> ',
-                    '#markup' => SafeMarkup::checkPlain($field_element['#label']),
+                    '#plain_text' => $field_element['#label'],
                   ),
                   'columns' => array(
-                    '#markup' => SafeMarkup::checkPlain($column_label),
+                    '#plain_text' => $column_label,
                   ),
                 ),
                 'class' => array('column'),

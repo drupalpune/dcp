@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\NodePermissions.
- */
-
 namespace Drupal\node;
 
 use Drupal\Core\Routing\UrlGeneratorTrait;
@@ -12,7 +7,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\node\Entity\NodeType;
 
 /**
- * Defines a class containing permission callbacks.
+ * Provides dynamic permissions for nodes of different types.
  */
 class NodePermissions {
 
@@ -20,22 +15,7 @@ class NodePermissions {
   use UrlGeneratorTrait;
 
   /**
-   * Gets an array of content permissions.
-   *
-   * @return array
-   *   The content permissions.
-   */
-  public function contentPermissions() {
-    return array(
-      'access content overview' => array(
-        'title' => $this->t('Access the Content overview page'),
-        'description' => $this->t('Get an overview of <a href="!url">all content</a>.', array('!url' => $this->url('system.admin_content'))),
-      ),
-    );
-  }
-
-  /**
-   * Gets an array of node type permissions.
+   * Returns an array of node type permissions.
    *
    * @return array
    *   The node type permissions.
@@ -52,13 +32,13 @@ class NodePermissions {
   }
 
   /**
-   * Builds a standard list of node permissions for a given type.
+   * Returns a list of node permissions for a given node type.
    *
    * @param \Drupal\node\Entity\NodeType $type
-   *   The machine name of the node type.
+   *   The node type.
    *
    * @return array
-   *   An array of permission names and descriptions.
+   *   An associative array of permission names and descriptions.
    */
   protected function buildPermissions(NodeType $type) {
     $type_id = $type->id();

@@ -185,10 +185,10 @@ function locale_translate_batch_build(array $files, array $options) {
  *     LOCALE_NOT_CUSTOMIZED.
  *   - 'message': Alternative message to display during import. Note, this must
  *     be sanitized text.
- * @param array $context
+ * @param array|\ArrayAccess $context.
  *   Contains a list of files imported.
  */
-function locale_translate_batch_import($file, array $options, array &$context) {
+function locale_translate_batch_import($file, array $options, &$context) {
   // Merge the default values in the $options array.
   $options += array(
     'overwrite_options' => array(),
@@ -208,7 +208,7 @@ function locale_translate_batch_import($file, array $options, array &$context) {
       // Update the seek and the number of items in the $options array().
       $options['seek'] = $context['sandbox']['parse_state']['seek'];
       $options['items'] = $context['sandbox']['parse_state']['chunk_size'];
-      $report = GetText::fileToDatabase($file, $options);
+      $report = Gettext::fileToDatabase($file, $options);
       // If not yet finished with reading, mark progress based on size and
       // position.
       if ($report['seek'] < filesize($file->uri)) {
@@ -220,7 +220,7 @@ function locale_translate_batch_import($file, array $options, array &$context) {
         // https://www.drupal.org/node/1089472.
         $context['finished'] = min(0.95, $report['seek'] / filesize($file->uri));
         if (isset($options['message'])) {
-          $context['message'] = t('!message (@percent%).', array('!message' => $options['message'], '@percent' => (int) ($context['finished'] * 100)));
+          $context['message'] = t('@message (@percent%).', array('@message' => $options['message'], '@percent' => (int) ($context['finished'] * 100)));
         }
         else {
           $context['message'] = t('Importing translation file: %filename (@percent%).', array('%filename' => $file->filename, '@percent' => (int) ($context['finished'] * 100)));
@@ -268,10 +268,10 @@ function locale_translate_batch_import($file, array $options, array &$context) {
  *
  * Save data of imported files.
  *
- * @param array $context
+ * @param array|\ArrayAccess $context.
  *   Contains a list of imported files.
  */
-function locale_translate_batch_import_save(array $context) {
+function locale_translate_batch_import_save($context) {
   if (isset($context['results']['files'])) {
     foreach ($context['results']['files'] as $file) {
       // Update the file history if both project and version are known. This
@@ -293,10 +293,10 @@ function locale_translate_batch_import_save(array $context) {
  *
  * Refreshes translations after importing strings.
  *
- * @param array $context
+ * @param array|\ArrayAccess $context.
  *   Contains a list of strings updated and information about the progress.
  */
-function locale_translate_batch_refresh(array &$context) {
+function locale_translate_batch_refresh(&$context) {
   if (!isset($context['sandbox']['refresh'])) {
     $strings = $langcodes = array();
     if (isset($context['results']['stats'])) {
@@ -340,7 +340,7 @@ function locale_translate_batch_refresh(array &$context) {
     // Clear cache and force refresh of JavaScript translations.
     _locale_refresh_translations($context['sandbox']['refresh']['languages'], $next);
     // Check whether we need to refresh configuration objects.
-    if ($names = \Drupal\locale\Locale::config()->getStringNames($next)) {
+    if ($names = Locale::config()->getStringNames($next)) {
       $context['sandbox']['refresh']['names_finished'] = $context['finished'];
       $context['sandbox']['refresh']['names'] = $names;
     }
@@ -367,7 +367,7 @@ function locale_translate_batch_finished($success, array $results) {
     $additions = $updates = $deletes = $skips = $config = 0;
     if (isset($results['failed_files'])) {
       if (\Drupal::moduleHandler()->moduleExists('dblog') && \Drupal::currentUser()->hasPermission('access site reports')) {
-        $message = \Drupal::translation()->formatPlural(count($results['failed_files']), 'One translation file could not be imported. <a href="@url">See the log</a> for details.', '@count translation files could not be imported. <a href="@url">See the log</a> for details.', array('@url' => \Drupal::url('dblog.overview')));
+        $message = \Drupal::translation()->formatPlural(count($results['failed_files']), 'One translation file could not be imported. <a href=":url">See the log</a> for details.', '@count translation files could not be imported. <a href=":url">See the log</a> for details.', array(':url' => \Drupal::url('dblog.overview')));
       }
       else {
         $message = \Drupal::translation()->formatPlural(count($results['failed_files']), 'One translation file could not be imported. See the log for details.', '@count translation files could not be imported. See the log for details.');
@@ -398,7 +398,7 @@ function locale_translate_batch_finished($success, array $results) {
 
       if ($skips) {
         if (\Drupal::moduleHandler()->moduleExists('dblog') && \Drupal::currentUser()->hasPermission('access site reports')) {
-          $message = \Drupal::translation()->formatPlural($skips, 'One translation string was skipped because of disallowed or malformed HTML. <a href="@url">See the log</a> for details.', '@count translation strings were skipped because of disallowed or malformed HTML. <a href="@url">See the log</a> for details.', array('@url' => \Drupal::url('dblog.overview')));
+          $message = \Drupal::translation()->formatPlural($skips, 'One translation string was skipped because of disallowed or malformed HTML. <a href=":url">See the log</a> for details.', '@count translation strings were skipped because of disallowed or malformed HTML. <a href=":url">See the log</a> for details.', array(':url' => \Drupal::url('dblog.overview')));
         }
         else {
           $message = \Drupal::translation()->formatPlural($skips, 'One translation string was skipped because of disallowed or malformed HTML. See the log for details.', '@count translation strings were skipped because of disallowed or malformed HTML. See the log for details.');
@@ -533,7 +533,7 @@ function locale_translate_delete_translation_files(array $projects = array(), ar
  */
 function locale_config_batch_update_components(array $options, array $langcodes = array(), array $components = array()) {
   $langcodes = $langcodes ? $langcodes : array_keys(\Drupal::languageManager()->getLanguages());
-  if ($langcodes && $names = \Drupal\locale\Locale::config()->getComponentNames($components)) {
+  if ($langcodes && $names = Locale::config()->getComponentNames($components)) {
     return locale_config_batch_build($names, $langcodes, $options);
   }
 }
@@ -597,12 +597,12 @@ function locale_config_batch_build(array $names, array $langcodes, array $option
  *   An array of names of configuration objects to update.
  * @param array $langcodes
  *   (optional) Array of language codes to update. Defaults to all languages.
- * @param array $context
+ * @param array|\ArrayAccess $context.
  *   Contains a list of files imported.
  *
  * @see locale_config_batch_build()
  */
-function locale_config_batch_refresh_name(array $names, array $langcodes, array &$context) {
+function locale_config_batch_refresh_name(array $names, array $langcodes, &$context) {
   if (!isset($context['result']['stats']['config'])) {
     $context['result']['stats']['config'] = 0;
   }

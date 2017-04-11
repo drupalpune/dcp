@@ -1,15 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\toolbar\Controller\ToolbarController.
- */
-
 namespace Drupal\toolbar\Controller;
 
+use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Drupal\toolbar\Ajax\SetSubtreesCommand;
 
 /**
  * Defines a controller for the toolbar module.
@@ -17,14 +14,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class ToolbarController extends ControllerBase {
 
   /**
-   * Returns the rendered subtree of each top-level toolbar link.
+   * Returns an AJAX response to render the toolbar subtrees.
    *
-   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   * @return \Drupal\Core\Ajax\AjaxResponse
    */
-  public function subtreesJsonp() {
-    $subtrees = toolbar_get_rendered_subtrees();
-    $response = new JsonResponse($subtrees);
-    $response->setCallback('Drupal.toolbar.setSubtrees.resolve');
+  public function subtreesAjax() {
+    list($subtrees, $cacheability) = toolbar_get_rendered_subtrees();
+    $response = new AjaxResponse();
+    $response->addCommand(new SetSubtreesCommand($subtrees));
 
     // The Expires HTTP header is the heart of the client-side HTTP caching. The
     // additional server-side page cache only takes effect when the client
@@ -46,14 +43,13 @@ class ToolbarController extends ControllerBase {
    *
    * @param string $hash
    *   The hash of the toolbar subtrees.
-   * @param string $langcode
-   *   The langcode of the requested site, NULL if none given.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function checkSubTreeAccess($hash, $langcode) {
-    return AccessResult::allowedIf($this->currentUser()->hasPermission('access toolbar') && $hash == _toolbar_get_subtrees_hash($langcode))->cachePerPermissions();
+  public function checkSubTreeAccess($hash) {
+    $expected_hash = _toolbar_get_subtrees_hash()[0];
+    return AccessResult::allowedIf($this->currentUser()->hasPermission('access toolbar') && Crypt::hashEquals($expected_hash, $hash))->cachePerPermissions();
   }
 
 }

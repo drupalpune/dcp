@@ -1,16 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_ui\Form\EntityDisplayFormBase.
- */
-
 namespace Drupal\field_ui\Form;
 
 use Drupal\Component\Plugin\Factory\DefaultFactory;
 use Drupal\Component\Plugin\PluginManagerBase;
-use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
@@ -18,8 +11,8 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\PluginSettingsInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\field_ui\Element\FieldUiTable;
 use Drupal\field_ui\FieldUI;
 
 /**
@@ -154,23 +147,18 @@ abstract class EntityDisplayFormBase extends EntityForm {
     );
 
     if (empty($field_definitions) && empty($extra_fields) && $route_info = FieldUI::getOverviewRouteInfo($this->entity->getTargetEntityTypeId(), $this->entity->getTargetBundle())) {
-      drupal_set_message($this->t('There are no fields yet added. You can add new fields on the <a href="@link">Manage fields</a> page.', array('@link' => $route_info->toString())), 'warning');
+      drupal_set_message($this->t('There are no fields yet added. You can add new fields on the <a href=":link">Manage fields</a> page.', array(':link' => $route_info->toString())), 'warning');
       return $form;
     }
 
     $table = array(
       '#type' => 'field_ui_table',
-      '#pre_render' => array(array($this, 'tablePreRender')),
-      '#tree' => TRUE,
       '#header' => $this->getTableHeader(),
       '#regions' => $this->getRegions(),
       '#attributes' => array(
         'class' => array('field-ui-overview'),
         'id' => 'field-display-overview',
       ),
-      // Add Ajax wrapper.
-      '#prefix' => '<div id="field-display-overview-wrapper">',
-      '#suffix' => '</div>',
       '#tabledrag' => array(
         array(
           'action' => 'order',
@@ -202,28 +190,27 @@ abstract class EntityDisplayFormBase extends EntityForm {
     // Custom display settings.
     if ($this->entity->getMode() == 'default') {
       // Only show the settings if there is at least one custom display mode.
-      if ($display_modes = $this->getDisplayModes()) {
+      $display_mode_options = $this->getDisplayModeOptions();
+      // Unset default option.
+      unset($display_mode_options['default']);
+      if ($display_mode_options) {
         $form['modes'] = array(
           '#type' => 'details',
           '#title' => $this->t('Custom display settings'),
         );
-        // Collect options and default values for the 'Custom display settings'
-        // checkboxes.
-        $options = array();
+        // Prepare default values for the 'Custom display settings' checkboxes.
         $default = array();
-        $display_statuses = $this->getDisplayStatuses();
-        foreach ($display_modes as $mode_name => $mode_info) {
-          $options[$mode_name] = $mode_info['label'];
-          if (!empty($display_statuses[$mode_name])) {
-            $default[] = $mode_name;
-          }
+        if ($enabled_displays = array_filter($this->getDisplayStatuses())) {
+          $default = array_keys(array_intersect_key($display_mode_options, $enabled_displays));
         }
         $form['modes']['display_modes_custom'] = array(
           '#type' => 'checkboxes',
-          '#title' => $this->t('Use custom display settings for the following modes'),
-          '#options' => $options,
+          '#title' => $this->t('Use custom display settings for the following @display_context modes', ['@display_context' => $this->displayContext]),
+          '#options' => $display_mode_options,
           '#default_value' => $default,
         );
+        // Provide link to manage display modes.
+        $form['modes']['display_modes_link'] = $this->getDisplayModesLink();
       }
     }
 
@@ -238,9 +225,9 @@ abstract class EntityDisplayFormBase extends EntityForm {
       '#type' => 'submit',
       '#value' => $this->t('Refresh'),
       '#op' => 'refresh_table',
-      '#submit' => array(array($this, 'multistepSubmit')),
+      '#submit' => array('::multistepSubmit'),
       '#ajax' => array(
-        'callback' => array($this, 'multistepAjax'),
+        'callback' => '::multistepAjax',
         'wrapper' => 'field-display-overview-wrapper',
         'effect' => 'fade',
         // The button stays hidden, so we hide the Ajax spinner too. Ad-hoc
@@ -280,6 +267,12 @@ abstract class EntityDisplayFormBase extends EntityForm {
     $display_options = $this->entity->getComponent($field_name);
     $label = $field_definition->getLabel();
 
+    // Disable fields without any applicable plugins.
+    if (empty($this->getApplicablePluginOptions($field_definition))) {
+      $this->entity->removeComponent($field_name)->save();
+      $display_options = $this->entity->getComponent($field_name);
+    }
+
     $regions = array_keys($this->getRegions());
     $field_row = array(
       '#attributes' => array('class' => array('draggable', 'tabledrag-leaf')),
@@ -290,7 +283,7 @@ abstract class EntityDisplayFormBase extends EntityForm {
         'defaultPlugin' => $this->getDefaultPlugin($field_definition->getType()),
       ),
       'human_name' => array(
-        '#markup' => SafeMarkup::checkPlain($label),
+        '#plain_text' => $label,
       ),
       'weight' => array(
         '#type' => 'textfield',
@@ -316,7 +309,6 @@ abstract class EntityDisplayFormBase extends EntityForm {
           '#attributes' => array('class' => array('field-name')),
         ),
       ),
-
     );
 
     $field_row['plugin'] = array(
@@ -332,27 +324,14 @@ abstract class EntityDisplayFormBase extends EntityForm {
       'settings_edit_form' => array(),
     );
 
-    // Check the currently selected plugin, and merge persisted values for its
-    // settings.
-    if ($display_type = $form_state->getValue(array('fields', $field_name, 'type'))) {
-      $display_options['type'] = $display_type;
-    }
-    $plugin_settings = $form_state->get('plugin_settings');
-    if (isset($plugin_settings[$field_name]['settings'])) {
-      $display_options['settings'] = $plugin_settings[$field_name]['settings'];
-    }
-    if (isset($plugin_settings[$field_name]['third_party_settings'])) {
-      $display_options['third_party_settings'] = $plugin_settings[$field_name]['third_party_settings'];
-    }
-
     // Get the corresponding plugin object.
-    $plugin = $this->getPlugin($field_definition, $display_options);
+    $plugin = $this->entity->getRenderer($field_name);
 
     // Base button element for the various plugin settings actions.
     $base_button = array(
-      '#submit' => array(array($this, 'multistepSubmit')),
+      '#submit' => array('::multistepSubmit'),
       '#ajax' => array(
-        'callback' => array($this, 'multistepAjax'),
+        'callback' => '::multistepAjax',
         'wrapper' => 'field-display-overview-wrapper',
         'effect' => 'fade',
       ),
@@ -517,6 +496,13 @@ abstract class EntityDisplayFormBase extends EntityForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    // If the main "Save" button was submitted while a field settings subform
+    // was being edited, update the new incoming settings when rebuilding the
+    // entity, just as if the subform's "Update" button had been submitted.
+    if ($edit_field = $form_state->get('plugin_settings_edit')) {
+      $form_state->set('plugin_settings_update', $edit_field);
+    }
+
     parent::submitForm($form, $form_state);
     $form_values = $form_state->getValues();
 
@@ -538,7 +524,7 @@ abstract class EntityDisplayFormBase extends EntityForm {
 
           $display_mode_label = $display_modes[$mode]['label'];
           $url = $this->getOverviewUrl($mode);
-          drupal_set_message($this->t('The %display_mode mode now uses custom display settings. You might want to <a href="@url">configure them</a>.', ['%display_mode' => $display_mode_label, '@url' => $url->toString()]));
+          drupal_set_message($this->t('The %display_mode mode now uses custom display settings. You might want to <a href=":url">configure them</a>.', ['%display_mode' => $display_mode_label, ':url' => $url->toString()]));
         }
         $statuses[$mode] = !empty($value);
       }
@@ -562,57 +548,30 @@ abstract class EntityDisplayFormBase extends EntityForm {
 
     // Collect data for 'regular' fields.
     foreach ($form['#fields'] as $field_name) {
-      // Retrieve the stored field settings to merge with the incoming
-      // values.
       $values = $form_values['fields'][$field_name];
 
       if ($values['type'] == 'hidden') {
         $entity->removeComponent($field_name);
       }
       else {
-        // Get plugin settings. They lie either directly in submitted form
-        // values (if the whole form was submitted while some plugin settings
-        // were being edited), or have been persisted in $form_state.
-        $plugin_settings = $form_state->get('plugin_settings');
-        $settings = array();
-        if (isset($values['settings_edit_form']['settings'])) {
-          $settings = $values['settings_edit_form']['settings'];
-        }
-        elseif (isset($plugin_settings[$field_name]['settings'])) {
-          $settings = $plugin_settings[$field_name]['settings'];
-        }
-        elseif ($current_options = $entity->getComponent($field_name)) {
-          $settings = $current_options['settings'];
-        }
-        $third_party_settings = array();
-        if (isset($values['settings_edit_form']['third_party_settings'])) {
-          $third_party_settings = $values['settings_edit_form']['third_party_settings'];
-        }
-        elseif (isset($plugin_settings[$field_name]['third_party_settings'])) {
-          $third_party_settings = $plugin_settings[$field_name]['third_party_settings'];
-        }
-        elseif (($current_options = $entity->getComponent($field_name)) && isset($current_options['third_party_settings'])) {
-          $third_party_settings = $current_options['third_party_settings'];
+        $options = $entity->getComponent($field_name);
+
+        // Update field settings only if the submit handler told us to.
+        if ($form_state->get('plugin_settings_update') === $field_name) {
+          // Only store settings actually used by the selected plugin.
+          $default_settings = $this->pluginManager->getDefaultSettings($options['type']);
+          $options['settings'] = isset($values['settings_edit_form']['settings']) ? array_intersect_key($values['settings_edit_form']['settings'], $default_settings) : [];
+          $options['third_party_settings'] = isset($values['settings_edit_form']['third_party_settings']) ? $values['settings_edit_form']['third_party_settings'] : [];
+          $form_state->set('plugin_settings_update', NULL);
         }
 
-        // Only save settings actually used by the selected plugin.
-        $default_settings = $this->pluginManager->getDefaultSettings($values['type']);
-        $settings = array_intersect_key($settings, $default_settings);
-
-        // Default component values.
-        $component_values = array(
-          'type' => $values['type'],
-          'weight' => $values['weight'],
-          'settings' => $settings,
-          'third_party_settings' => $third_party_settings,
-        );
-
+        $options['type'] = $values['type'];
+        $options['weight'] = $values['weight'];
         // Only formatters have configurable label visibility.
         if (isset($values['label'])) {
-          $component_values['label'] = $values['label'];
+          $options['label'] = $values['label'];
         }
-
-        $entity->setComponent($field_name, $component_values);
+        $entity->setComponent($field_name, $options);
       }
     }
 
@@ -644,15 +603,12 @@ abstract class EntityDisplayFormBase extends EntityForm {
         break;
 
       case 'update':
-        // Store the saved settings, and set the field back to 'non edit' mode.
+        // Set the field back to 'non edit' mode, and update $this->entity with
+        // the new settings fro the next rebuild.
         $field_name = $trigger['#field_name'];
-        if ($plugin_settings = $form_state->getValue(array('fields', $field_name, 'settings_edit_form', 'settings'))) {
-          $form_state->set(['plugin_settings', $field_name, 'settings'], $plugin_settings);
-        }
-        if ($plugin_third_party_settings = $form_state->getValue(array('fields', $field_name, 'settings_edit_form', 'third_party_settings'))) {
-          $form_state->set(['plugin_settings', $field_name, 'third_party_settings'], $plugin_third_party_settings);
-        }
         $form_state->set('plugin_settings_edit', NULL);
+        $form_state->set('plugin_settings_update', $field_name);
+        $this->entity = $this->buildEntity($form, $form_state);
         break;
 
       case 'cancel':
@@ -666,7 +622,6 @@ abstract class EntityDisplayFormBase extends EntityForm {
         $updated_rows = explode(' ', $form_state->getValue('refresh_rows'));
         $plugin_settings_edit = $form_state->get('plugin_settings_edit');
         if ($plugin_settings_edit && in_array($plugin_settings_edit, $updated_rows)) {
-
           $form_state->set('plugin_settings_edit', NULL);
         }
         break;
@@ -716,9 +671,6 @@ abstract class EntityDisplayFormBase extends EntityForm {
   /**
    * Performs pre-render tasks on field_ui_table elements.
    *
-   * This function is assigned as a #pre_render callback in
-   * field_ui_element_info().
-   *
    * @param array $elements
    *   A structured array containing two sub-levels of elements. Properties
    *   used:
@@ -726,87 +678,15 @@ abstract class EntityDisplayFormBase extends EntityForm {
    *     drupal_attach_tabledrag(). The HTML ID of the table is added to each
    *     $options array.
    *
+   * @return array
+   *
    * @see drupal_render()
    * @see \Drupal\Core\Render\Element\Table::preRenderTable()
+   *
+   * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0.
    */
   public function tablePreRender($elements) {
-    $js_settings = array();
-
-    // For each region, build the tree structure from the weight and parenting
-    // data contained in the flat form structure, to determine row order and
-    // indentation.
-    $regions = $elements['#regions'];
-    $tree = array('' => array('name' => '', 'children' => array()));
-    $trees = array_fill_keys(array_keys($regions), $tree);
-
-    $parents = array();
-    $children = Element::children($elements);
-    $list = array_combine($children, $children);
-
-    // Iterate on rows until we can build a known tree path for all of them.
-    while ($list) {
-      foreach ($list as $name) {
-        $row = &$elements[$name];
-        $parent = $row['parent_wrapper']['parent']['#value'];
-        // Proceed if parent is known.
-        if (empty($parent) || isset($parents[$parent])) {
-          // Grab parent, and remove the row from the next iteration.
-          $parents[$name] = $parent ? array_merge($parents[$parent], array($parent)) : array();
-          unset($list[$name]);
-
-          // Determine the region for the row.
-          $region_name = call_user_func($row['#region_callback'], $row);
-
-          // Add the element in the tree.
-          $target = &$trees[$region_name][''];
-          foreach ($parents[$name] as $key) {
-            $target = &$target['children'][$key];
-          }
-          $target['children'][$name] = array('name' => $name, 'weight' => $row['weight']['#value']);
-
-          // Add tabledrag indentation to the first row cell.
-          if ($depth = count($parents[$name])) {
-            $children = Element::children($row);
-            $cell = current($children);
-            $indentation = array(
-              '#theme' => 'indentation',
-              '#size' => $depth,
-            );
-            $row[$cell]['#prefix'] = drupal_render($indentation) . (isset($row[$cell]['#prefix']) ? $row[$cell]['#prefix'] : '');
-          }
-
-          // Add row id and associate JS settings.
-          $id = Html::getClass($name);
-          $row['#attributes']['id'] = $id;
-          if (isset($row['#js_settings'])) {
-            $row['#js_settings'] += array(
-              'rowHandler' => $row['#row_type'],
-              'name' => $name,
-              'region' => $region_name,
-            );
-            $js_settings[$id] = $row['#js_settings'];
-          }
-        }
-      }
-    }
-    // Determine rendering order from the tree structure.
-    foreach ($regions as $region_name => $region) {
-      $elements['#regions'][$region_name]['rows_order'] = array_reduce($trees[$region_name], array($this, 'reduceOrder'));
-    }
-
-    $elements['#attached']['drupalSettings']['fieldUIRowsData'] = $js_settings;
-
-    // If the custom #tabledrag is set and there is a HTML ID, add the table's
-    // HTML ID to the options and attach the behavior.
-    // @see \Drupal\Core\Render\Element\Table::preRenderTable()
-    if (!empty($elements['#tabledrag']) && isset($elements['#attributes']['id'])) {
-      foreach ($elements['#tabledrag'] as $options) {
-        $options['table_id'] = $elements['#attributes']['id'];
-        drupal_attach_tabledrag($elements, $options);
-      }
-    }
-
-    return $elements;
+    return FieldUiTable::tablePreRender($elements);
   }
 
   /**
@@ -814,17 +694,11 @@ abstract class EntityDisplayFormBase extends EntityForm {
    *
    * Callback for array_reduce() within
    * \Drupal\field_ui\Form\EntityDisplayFormBase::tablePreRender().
+   *
+   * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0.
    */
   public function reduceOrder($array, $a) {
-    $array = !isset($array) ? array() : $array;
-    if ($a['name']) {
-      $array[] = $a['name'];
-    }
-    if (!empty($a['children'])) {
-      uasort($a['children'], array('Drupal\Component\Utility\SortArray', 'sortByWeightElement'));
-      $array = array_merge($array, array_reduce($a['children'], array($this, 'reduceOrder')));
-    }
-    return $array;
+    return FieldUiTable::reduceOrder($array, $a);
   }
 
   /**
@@ -857,17 +731,25 @@ abstract class EntityDisplayFormBase extends EntityForm {
   abstract protected function getEntityDisplay($entity_type_id, $bundle, $mode);
 
   /**
-   * Returns the widget or formatter plugin for a field.
+   * Returns an array of applicable widget or formatter options for a field.
    *
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
-   *   The field.
-   * @param array $configuration
-   *   The plugin configuration
+   *   The field definition.
    *
-   * @return object
-   *   The corresponding plugin.
+   * @return array
+   *   An array of applicable widget or formatter options.
    */
-  abstract protected function getPlugin(FieldDefinitionInterface $field_definition, $configuration);
+  protected function getApplicablePluginOptions(FieldDefinitionInterface $field_definition) {
+    $options = $this->pluginManager->getOptions($field_definition->getType());
+    $applicable_options = array();
+    foreach ($options as $option => $label) {
+      $plugin_class = DefaultFactory::getPluginClass($option, $this->pluginManager->getDefinition($option));
+      if ($plugin_class::isApplicable($field_definition)) {
+        $applicable_options[$option] = $label;
+      }
+    }
+    return $applicable_options;
+  }
 
   /**
    * Returns an array of widget or formatter options for a field.
@@ -879,14 +761,7 @@ abstract class EntityDisplayFormBase extends EntityForm {
    *   An array of widget or formatter options.
    */
   protected function getPluginOptions(FieldDefinitionInterface $field_definition) {
-    $options = $this->pluginManager->getOptions($field_definition->getType());
-    $applicable_options = array();
-    foreach ($options as $option => $label) {
-      $plugin_class = DefaultFactory::getPluginClass($option, $this->pluginManager->getDefinition($option));
-      if ($plugin_class::isApplicable($field_definition)) {
-        $applicable_options[$option] = $label;
-      }
-    }
+    $applicable_options = $this->getApplicablePluginOptions($field_definition);
     return $applicable_options + array('hidden' => '- ' . $this->t('Hidden') . ' -');
   }
 
@@ -908,6 +783,22 @@ abstract class EntityDisplayFormBase extends EntityForm {
    *   An array of form or view mode info.
    */
   abstract protected function getDisplayModes();
+
+  /**
+   * Returns an array of form or view mode options.
+   *
+   * @return array
+   *   An array of form or view mode options.
+   */
+  abstract protected function getDisplayModeOptions();
+
+  /**
+   * Returns a link to the form or view mode admin page.
+   *
+   * @return array
+   *   An array of a form element to be rendered as a link.
+   */
+  abstract protected function getDisplayModesLink();
 
   /**
    * Returns the region to which a row in the display overview belongs.
@@ -985,8 +876,12 @@ abstract class EntityDisplayFormBase extends EntityForm {
   protected function saveDisplayStatuses($display_statuses) {
     $displays = $this->getDisplays();
     foreach ($displays as $display) {
-      $display->set('status', $display_statuses[$display->get('mode')]);
-      $display->save();
+      // Only update the display if the status is changing.
+      $new_status = $display_statuses[$display->get('mode')];
+      if ($new_status !== $display->status()) {
+        $display->set('status', $new_status);
+        $display->save();
+      }
     }
   }
 

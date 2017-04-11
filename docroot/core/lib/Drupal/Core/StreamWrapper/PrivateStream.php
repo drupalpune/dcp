@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\StreamWrapper\PrivateStream.
- */
-
 namespace Drupal\Core\StreamWrapper;
 
 use Drupal\Core\Routing\UrlGeneratorTrait;
@@ -58,6 +53,10 @@ class PrivateStream extends LocalStream {
 
   /**
    * Returns the base path for private://.
+   *
+   * Note that this static method is used by \Drupal\system\Form\FileSystemForm
+   * so you should alter that form or substitute a different form if you change
+   * the class providing the stream_wrapper.private service.
    *
    * @return string
    *   The base path for private://.

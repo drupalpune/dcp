@@ -6,7 +6,7 @@ node.settings:
   mapping:
     use_admin_theme:
       type: boolean
-      label: 'Use admin theme when editing or creating content'
+      label: 'Use administration theme when editing or creating content'
 
 node.type.*:
   type: config_entity
@@ -90,7 +90,7 @@ action.configuration.node_unpublish_by_keyword_action:
   type: mapping
   label: 'Unpublish content containing keyword(s) configuration'
   mapping:
-    keyword:
+    keywords:
       type: sequence
       label: 'Keywords'
       sequence:

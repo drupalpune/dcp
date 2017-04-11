@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\ItemStorageSchema.
- */
-
 namespace Drupal\aggregator;
 
-use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 

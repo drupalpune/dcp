@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\file\Plugin\Field\FieldWidget\FileWidget.
- */
-
 namespace Drupal\file\Plugin\Field\FieldWidget;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -17,9 +11,10 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\ElementInfoManagerInterface;
-use Drupal\Core\Url;
 use Drupal\file\Element\ManagedFile;
+use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * Plugin implementation of the 'file_generic' widget.
@@ -46,7 +41,7 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($plugin_id, $plugin_definition,$configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('element_info'));
+    return new static($plugin_id, $plugin_definition, $configuration['field_definition'], $configuration['settings'], $configuration['third_party_settings'], $container->get('element_info'));
   }
 
   /**
@@ -117,8 +112,8 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
         break;
     }
 
-    $title = SafeMarkup::checkPlain($this->fieldDefinition->getLabel());
-    $description = $this->fieldFilterXss($this->fieldDefinition->getDescription());
+    $title = $this->fieldDefinition->getLabel();
+    $description = $this->getFilteredDescription();
 
     $elements = array();
 
@@ -185,7 +180,6 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       $elements['#description'] = $description;
       $elements['#field_name'] = $field_name;
       $elements['#language'] = $items->getLangcode();
-      $elements['#display_field'] = (bool) $this->getFieldSetting('display_field');
       // The field settings include defaults for the field type. However, this
       // widget is a base class for other widgets (e.g., ImageWidget) that may
       // act on field types without these expected settings.
@@ -267,7 +261,7 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
         '#upload_validators' => $element['#upload_validators'],
         '#cardinality' => $cardinality,
       );
-      $element['#description'] = drupal_render($file_upload_help);
+      $element['#description'] = \Drupal::service('renderer')->renderPlain($file_upload_help);
       $element['#multiple'] = $cardinality != 1 ? TRUE : FALSE;
       if ($cardinality != 1 && $cardinality != -1) {
         $element['#element_validate'] = array(array(get_class($this), 'validateMultipleCount'));
@@ -295,6 +289,21 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     }
 
     return $new_values;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function extractFormValues(FieldItemListInterface $items, array $form, FormStateInterface $form_state) {
+    parent::extractFormValues($items, $form, $form_state);
+
+    // Update reference to 'items' stored during upload to take into account
+    // changes to values like 'alt' etc.
+    // @see \Drupal\file\Plugin\Field\FieldWidget\FileWidget::submit()
+    $field_name = $this->fieldDefinition->getName();
+    $field_state = static::getWidgetState($form['#parents'], $field_name, $form_state);
+    $field_state['items'] = $items->getValue();
+    static::setWidgetState($form['#parents'], $field_name, $form_state, $field_state);
   }
 
   /**
@@ -331,25 +340,30 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    * This validator is used only when cardinality not set to 1 or unlimited.
    */
   public static function validateMultipleCount($element, FormStateInterface $form_state, $form) {
-    $parents = $element['#parents'];
-    $values = NestedArray::getValue($form_state->getValues(), $parents);
+    $values = NestedArray::getValue($form_state->getValues(), $element['#parents']);
 
-    array_pop($parents);
-    $current = count(Element::children(NestedArray::getValue($form, $parents))) - 1;
+    $array_parents = $element['#array_parents'];
+    array_pop($array_parents);
+    $previously_uploaded_count = count(Element::children(NestedArray::getValue($form, $array_parents))) - 1;
 
     $field_storage_definitions = \Drupal::entityManager()->getFieldStorageDefinitions($element['#entity_type']);
     $field_storage = $field_storage_definitions[$element['#field_name']];
-    $uploaded = count($values['fids']);
-    $count = $uploaded + $current;
-    if ($count > $field_storage->getCardinality()) {
-      $keep = $uploaded - $count + $field_storage->getCardinality();
+    $newly_uploaded_count = count($values['fids']);
+    $total_uploaded_count = $newly_uploaded_count + $previously_uploaded_count;
+    if ($total_uploaded_count > $field_storage->getCardinality()) {
+      $keep = $newly_uploaded_count - $total_uploaded_count + $field_storage->getCardinality();
       $removed_files = array_slice($values['fids'], $keep);
       $removed_names = array();
       foreach ($removed_files as $fid) {
-        $file = file_load($fid);
+        $file = File::load($fid);
         $removed_names[] = $file->getFilename();
       }
-      $args = array('%field' => $field_storage->getFieldName(), '@max' => $field_storage->getCardinality(), '@count' => $keep, '%list' => implode(', ', $removed_names));
+      $args = [
+        '%field' => $field_storage->getName(),
+        '@max' => $field_storage->getCardinality(),
+        '@count' => $total_uploaded_count,
+        '%list' => implode(', ', $removed_names),
+      ];
       $message = t('Field %field can only hold @max values but there were @count uploaded. The following files have been omitted as a result: %list.', $args);
       drupal_set_message($message, 'warning');
       $values['fids'] = array_slice($values['fids'], 0, $keep);
@@ -369,8 +383,6 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $item = $element['#value'];
     $item['fids'] = $element['fids']['#value'];
 
-    $element['#theme'] = 'file_widget';
-
     // Add the display field if enabled.
     if ($element['#display_field']) {
       $element['display'] = array(
@@ -380,7 +392,8 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       );
       if (isset($item['display'])) {
         $element['display']['#value'] = $item['display'] ? '1' : '';
-      } else {
+      }
+      else {
         $element['display']['#value'] = $element['#display_default'];
       }
     }
@@ -407,18 +420,15 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     // file, the entire group of file fields is updated together.
     if ($element['#cardinality'] != 1) {
       $parents = array_slice($element['#array_parents'], 0, -1);
-      $new_url = Url::fromRoute('file.ajax_upload');
       $new_options = array(
         'query' => array(
           'element_parents' => implode('/', $parents),
-          'form_build_id' => $form['form_build_id']['#value'],
         ),
       );
       $field_element = NestedArray::getValue($form, $parents);
       $new_wrapper = $field_element['#id'] . '-ajax-wrapper';
       foreach (Element::children($element) as $key) {
         if (isset($element[$key]['#ajax'])) {
-          $element[$key]['#ajax']['url'] = $new_url->setOptions($new_options);
           $element[$key]['#ajax']['options'] = $new_options;
           $element[$key]['#ajax']['wrapper'] = $new_wrapper;
         }
@@ -450,6 +460,19 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
   public static function processMultiple($element, FormStateInterface $form_state, $form) {
     $element_children = Element::children($element, TRUE);
     $count = count($element_children);
+
+    // Count the number of already uploaded files, in order to display new
+    // items in \Drupal\file\Element\ManagedFile::uploadAjaxCallback().
+    if (!$form_state->isRebuilding()) {
+      $count_items_before = 0;
+      foreach ($element_children as $children) {
+        if (!empty($element[$children]['#default_value']['fids'])) {
+          $count_items_before++;
+        }
+      }
+
+      $form_state->set('file_upload_delta_initial', $count_items_before);
+    }
 
     foreach ($element_children as $delta => $key) {
       if ($key != $element['#file_upload_delta']) {
@@ -535,7 +558,7 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     }
 
     // If there are more files uploaded via the same widget, we have to separate
-    // them, as we display each file in it's own widget.
+    // them, as we display each file in its own widget.
     $new_values = array();
     foreach ($submitted_values as $delta => $submitted_value) {
       if (is_array($submitted_value['fids'])) {
@@ -560,6 +583,17 @@ class FileWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $field_state = static::getWidgetState($parents, $field_name, $form_state);
     $field_state['items'] = $submitted_values;
     static::setWidgetState($parents, $field_name, $form_state, $field_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function flagErrors(FieldItemListInterface $items, ConstraintViolationListInterface $violations, array $form, FormStateInterface $form_state) {
+    // Never flag validation errors for the remove button.
+    $clicked_button = end($form_state->getTriggeringElement()['#parents']);
+    if ($clicked_button !== 'remove_button') {
+      parent::flagErrors($items, $violations, $form, $form_state);
+    }
   }
 
 }

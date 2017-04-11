@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\taxonomy\TermForm.
- */
-
 namespace Drupal\taxonomy;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Base for controller for taxonomy term edit forms.
+ * Base for handler for taxonomy term edit forms.
  */
 class TermForm extends ContentEntityForm {
 
@@ -21,26 +16,28 @@ class TermForm extends ContentEntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $term = $this->entity;
     $vocab_storage = $this->entityManager->getStorage('taxonomy_vocabulary');
+    $taxonomy_storage = $this->entityManager->getStorage('taxonomy_term');
     $vocabulary = $vocab_storage->load($term->bundle());
 
-    $parent = array_keys(taxonomy_term_load_parents($term->id()));
+    $parent = array_keys($taxonomy_storage->loadParents($term->id()));
     $form_state->set(['taxonomy', 'parent'], $parent);
     $form_state->set(['taxonomy', 'vocabulary'], $vocabulary);
 
     $form['relations'] = array(
       '#type' => 'details',
       '#title' => $this->t('Relations'),
-      '#open' => $vocabulary->getHierarchy() == TAXONOMY_HIERARCHY_MULTIPLE,
+      '#open' => $vocabulary->getHierarchy() == VocabularyInterface::HIERARCHY_MULTIPLE,
       '#weight' => 10,
     );
 
-    // taxonomy_get_tree and taxonomy_term_load_parents may contain large
+    // \Drupal\taxonomy\TermStorageInterface::loadTree() and
+    // \Drupal\taxonomy\TermStorageInterface::loadParents() may contain large
     // numbers of items so we check for taxonomy.settings:override_selector
     // before loading the full vocabulary. Contrib modules can then intercept
     // before hook_form_alter to provide scalable alternatives.
     if (!$this->config('taxonomy.settings')->get('override_selector')) {
-      $parent = array_keys(taxonomy_term_load_parents($term->id()));
-      $children = taxonomy_get_tree($vocabulary->id(), $term->id());
+      $parent = array_keys($taxonomy_storage->loadParents($term->id()));
+      $children = $taxonomy_storage->loadTree($vocabulary->id(), $term->id());
 
       // A term can't be the child of itself, nor of its children.
       foreach ($children as $child) {
@@ -48,7 +45,7 @@ class TermForm extends ContentEntityForm {
       }
       $exclude[] = $term->id();
 
-      $tree = taxonomy_get_tree($vocabulary->id());
+      $tree = $taxonomy_storage->loadTree($vocabulary->id());
       $options = array('<' . $this->t('root') . '>');
       if (empty($parent)) {
         $parent = array(0);
@@ -94,8 +91,8 @@ class TermForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
-    parent::validate($form, $form_state);
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
 
     // Ensure numeric values.
     if ($form_state->hasValue('weight') && !is_numeric($form_state->getValue('weight'))) {
@@ -126,15 +123,16 @@ class TermForm extends ContentEntityForm {
 
     $result = $term->save();
 
-    $link = $term->link($this->t('Edit'), 'edit-form');
+    $edit_link = $term->link($this->t('Edit'), 'edit-form');
+    $view_link = $term->link($term->getName());
     switch ($result) {
       case SAVED_NEW:
-        drupal_set_message($this->t('Created new term %term.', array('%term' => $term->getName())));
-        $this->logger('taxonomy')->notice('Created new term %term.', array('%term' => $term->getName(), 'link' => $link));
+        drupal_set_message($this->t('Created new term %term.', array('%term' => $view_link)));
+        $this->logger('taxonomy')->notice('Created new term %term.', array('%term' => $term->getName(), 'link' => $edit_link));
         break;
       case SAVED_UPDATED:
-        drupal_set_message($this->t('Updated term %term.', array('%term' => $term->getName())));
-        $this->logger('taxonomy')->notice('Updated term %term.', array('%term' => $term->getName(), 'link' => $link));
+        drupal_set_message($this->t('Updated term %term.', array('%term' => $view_link)));
+        $this->logger('taxonomy')->notice('Updated term %term.', array('%term' => $term->getName(), 'link' => $edit_link));
         break;
     }
 
@@ -154,8 +152,8 @@ class TermForm extends ContentEntityForm {
     }
     // If we've increased the number of parents and this is a single or flat
     // hierarchy, update the vocabulary immediately.
-    elseif ($current_parent_count > $previous_parent_count && $vocabulary->getHierarchy() != TAXONOMY_HIERARCHY_MULTIPLE) {
-      $vocabulary->setHierarchy($current_parent_count == 1 ? TAXONOMY_HIERARCHY_SINGLE : TAXONOMY_HIERARCHY_MULTIPLE);
+    elseif ($current_parent_count > $previous_parent_count && $vocabulary->getHierarchy() != VocabularyInterface::HIERARCHY_MULTIPLE) {
+      $vocabulary->setHierarchy($current_parent_count == 1 ? VocabularyInterface::HIERARCHY_SINGLE : VocabularyInterface::HIERARCHY_MULTIPLE);
       $vocabulary->save();
     }
 

@@ -1,16 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Config\ConfigTest.
- */
-
 namespace Drupal\Tests\Core\Config;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\Core\Render\Markup;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\Config\Config;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Tests the Config.
@@ -58,7 +53,7 @@ class ConfigTest extends UnitTestCase {
    */
   protected $cacheTagsInvalidator;
 
-  public function setUp() {
+  protected function setUp() {
     $this->storage = $this->getMock('Drupal\Core\Config\StorageInterface');
     $this->eventDispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
     $this->typedConfig = $this->getMock('\Drupal\Core\Config\TypedConfigManagerInterface');
@@ -413,17 +408,12 @@ class ConfigTest extends UnitTestCase {
       // Name missing namespace (dot).
       array(
         'MissingNamespace',
-        SafeMarkup::format('Missing namespace in Config object name MissingNamespace.', array(
-          '@name' => 'MissingNamespace',
-        )),
+        'Missing namespace in Config object name MissingNamespace.',
       ),
       // Exceeds length (max length plus an extra dot).
       array(
         str_repeat('a', Config::MAX_NAME_LENGTH) . ".",
-        SafeMarkup::format('Config object name @name exceeds maximum allowed length of @length characters.', array(
-          '@name' => str_repeat('a', Config::MAX_NAME_LENGTH) . ".",
-          '@length' => Config::MAX_NAME_LENGTH,
-        )),
+        'Config object name ' . str_repeat('a', Config::MAX_NAME_LENGTH) . '. exceeds maximum allowed length of ' . Config::MAX_NAME_LENGTH . ' characters.',
       ),
     );
     // Name must not contain : ? * < > " ' / \
@@ -431,9 +421,7 @@ class ConfigTest extends UnitTestCase {
       $name = 'name.' . $char;
       $return[] = array(
         $name,
-        SafeMarkup::format('Invalid character in Config object name @name.', array(
-          '@name' => $name,
-        )),
+        "Invalid character in Config object name $name.",
       );
     }
     return $return;
@@ -533,6 +521,28 @@ class ConfigTest extends UnitTestCase {
       $config_value = $this->config->getOriginal($key, $apply_overrides);
       $this->assertEquals($value, $config_value);
     }
+  }
+
+  /**
+   * @covers ::setData
+   * @covers ::set
+   * @covers ::initWithData
+   */
+  public function testSafeStringHandling() {
+    // Safe strings are cast when using ::set().
+    $safe_string = Markup::create('bar');
+    $this->config->set('foo', $safe_string);
+    $this->assertSame('bar', $this->config->get('foo'));
+    $this->config->set('foo', ['bar' => $safe_string]);
+    $this->assertSame('bar', $this->config->get('foo.bar'));
+
+    // Safe strings are cast when using ::setData().
+    $this->config->setData(['bar' => $safe_string]);
+    $this->assertSame('bar', $this->config->get('bar'));
+
+    // Safe strings are not cast when using ::initWithData().
+    $this->config->initWithData(['bar' => $safe_string]);
+    $this->assertSame($safe_string, $this->config->get('bar'));
   }
 
 }

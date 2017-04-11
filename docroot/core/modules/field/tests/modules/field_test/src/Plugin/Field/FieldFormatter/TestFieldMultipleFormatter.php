@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_test\Plugin\field\formatter\TestFieldMultipleFormatter.
- */
-
 namespace Drupal\field_test\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FormatterBase;
@@ -63,7 +58,7 @@ class TestFieldMultipleFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = array();
 
     if (!empty($items)) {
@@ -76,4 +71,5 @@ class TestFieldMultipleFormatter extends FormatterBase {
 
     return $elements;
   }
+
 }

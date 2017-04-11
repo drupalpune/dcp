@@ -1,30 +1,42 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\devel\Controller\DevelController.
- */
-
 namespace Drupal\devel\Controller;
 
-use Drupal\Component\Serialization\Json;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Database\Database;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Session\UserSession;
 use Drupal\Core\Url;
+use Drupal\devel\DevelDumperManagerInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Returns responses for devel module routes.
  */
 class DevelController extends ControllerBase {
+
+  /**
+   * The dumper service.
+   *
+   * @var \Drupal\devel\DevelDumperManagerInterface
+   */
+  protected $dumper;
+
+  /**
+   * EntityDebugController constructor.
+   *
+   * @param \Drupal\devel\DevelDumperManagerInterface $dumper
+   *   The dumper service.
+   */
+  public function __construct(DevelDumperManagerInterface $dumper) {
+    $this->dumper = $dumper;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static($container->get('devel.dumper'));
+  }
 
   /**
    * Clears all caches, then redirects to the previous page.
@@ -35,15 +47,10 @@ class DevelController extends ControllerBase {
     return $this->redirect('<front>');
   }
 
-  public function menuItem() {
-    $item = menu_get_item(current_path());
-    return kdevel_print_object($item);
-  }
-
   public function themeRegistry() {
     $hooks = theme_get_registry();
     ksort($hooks);
-    return array('#markup' => kprint_r($hooks, TRUE));
+    return $this->dumper->exportAsRenderable($hooks);
   }
 
   /**
@@ -62,7 +69,7 @@ class DevelController extends ControllerBase {
 
     ksort($elements_info);
 
-    return array('#markup' => kdevel_print_object($elements_info));
+    return $this->dumper->exportAsRenderable($elements_info);
   }
 
   /**
@@ -74,27 +81,27 @@ class DevelController extends ControllerBase {
   public function fieldInfoPage() {
     $fields = FieldStorageConfig::loadMultiple();
     ksort($fields);
-    $output['fields'] = array('#markup' => kprint_r($fields, TRUE, $this->t('Fields')));
+    $output['fields'] = $this->dumper->exportAsRenderable($fields, $this->t('Fields'));
 
     $field_instances = FieldConfig::loadMultiple();
     ksort($field_instances);
-    $output['instances'] = array('#markup' => kprint_r($field_instances, TRUE, $this->t('Instances')));
+    $output['instances'] = $this->dumper->exportAsRenderable($field_instances, $this->t('Instances'));
 
-    $bundles = $this->entityManager()->getAllBundleInfo();
+    $bundles = \Drupal::service('entity_type.bundle.info')->getAllBundleInfo();
     ksort($bundles);
-    $output['bundles'] = array('#markup' => kprint_r($bundles, TRUE, $this->t('Bundles')));
+    $output['bundles'] = $this->dumper->exportAsRenderable($bundles, $this->t('Bundles'));
 
     $field_types = \Drupal::service('plugin.manager.field.field_type')->getUiDefinitions();
     ksort($field_types);
-    $output['field_types'] = array('#markup' => kprint_r($field_types, TRUE, $this->t('Field types')));
+    $output['field_types'] = $this->dumper->exportAsRenderable($field_types, $this->t('Field types'));
 
     $formatter_types = \Drupal::service('plugin.manager.field.formatter')->getDefinitions();
     ksort($formatter_types);
-    $output['formatter_types'] = array('#markup' => kprint_r($formatter_types, TRUE, $this->t('Formatter types')));
+    $output['formatter_types'] = $this->dumper->exportAsRenderable($formatter_types, $this->t('Formatter types'));
 
     $widget_types = \Drupal::service('plugin.manager.field.widget')->getDefinitions();
     ksort($widget_types);
-    $output['widget_types'] = array('#markup' => kprint_r($widget_types, TRUE, $this->t('Widget types')));
+    $output['widget_types'] = $this->dumper->exportAsRenderable($widget_types, $this->t('Widget types'));
 
     return $output;
   }
@@ -106,22 +113,9 @@ class DevelController extends ControllerBase {
    *   Array of page elements to render.
    */
   public function entityInfoPage() {
-    $types = $this->entityManager()->getEntityTypeLabels();
+    $types = $this->entityTypeManager()->getDefinitions();
     ksort($types);
-    $result = array();
-    foreach (array_keys($types) as $type) {
-      $definition = $this->entityManager()->getDefinition($type);
-      $reflected_definition = new \ReflectionClass($definition);
-      $props = array();
-      foreach ($reflected_definition->getProperties() as $property) {
-        $property->setAccessible(TRUE);
-        $value = $property->getValue($definition);
-        $props[$property->name] = $value;
-      }
-      $result[$type] = $props;
-    }
-
-    return array('#markup' => kprint_r($result, TRUE));
+    return $this->dumper->exportAsRenderable($types);
   }
 
   /**
@@ -131,38 +125,72 @@ class DevelController extends ControllerBase {
    *   Array of page elements to render.
    */
   public function stateSystemPage() {
+    $output['#attached']['library'][] = 'system/drupal.system.modules';
+
+    $output['filters'] = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array('table-filter', 'js-show'),
+      ),
+    );
+
+    $output['filters']['text'] = array(
+      '#type' => 'search',
+      '#title' => $this->t('Search'),
+      '#size' => 30,
+      '#placeholder' => $this->t('Enter state name'),
+      '#attributes' => array(
+        'class' => array('table-filter-text'),
+        'data-table' => '.devel-state-list',
+        'autocomplete' => 'off',
+        'title' => $this->t('Enter a part of the state name to filter by.'),
+      ),
+    );
+
+    $can_edit = $this->currentUser()->hasPermission('administer site configuration');
 
     $header = array(
-      'name' => array('data' => t('Name')),
-      'value' => array('data' => t('Value')),
-      'edit' => array('data' => t('Operations')),
+      'name' => $this->t('Name'),
+      'value' => $this->t('Value'),
     );
+
+    if ($can_edit) {
+      $header['edit'] = $this->t('Operations');
+    }
 
     $rows = array();
     // State class doesn't have getAll method so we get all states from the
-    // KeyValueStorage and put them in the table.
+    // KeyValueStorage.
     foreach ($this->keyValue('state')->getAll() as $state_name => $state) {
-      $operations['edit'] = array(
-        'title' => $this->t('Edit'),
-        'url' => Url::fromRoute('devel.system_state_edit', array('state_name' => $state_name)),
-      );
       $rows[$state_name] = array(
-        'name' => $state_name,
-        'value' => kprint_r($state, TRUE),
-        'edit' => array(
-          'data' => array(
-            '#type' => 'operations',
-            '#links' => $operations,
-          )
+        'name' => array(
+          'data' => $state_name,
+          'class' => 'table-filter-text-source',
+        ),
+        'value' => array(
+          'data' => $this->dumper->export($state),
         ),
       );
+
+      if ($can_edit) {
+        $operations['edit'] = array(
+          'title' => $this->t('Edit'),
+          'url' => Url::fromRoute('devel.system_state_edit', array('state_name' => $state_name)),
+        );
+        $rows[$state_name]['edit'] = array(
+          'data' => array('#type' => 'operations', '#links' => $operations),
+        );
+      }
     }
 
     $output['states'] = array(
       '#type' => 'table',
       '#header' => $header,
       '#rows' => $rows,
-      '#empty' => $this->t('No state variables.'),
+      '#empty' => $this->t('No state variables found.'),
+      '#attributes' => array(
+        'class' => array('devel-state-list'),
+      ),
     );
 
     return $output;
@@ -184,179 +212,9 @@ class DevelController extends ControllerBase {
       '#rows' => array(array(session_name(), session_id())),
       '#empty' => $this->t('No session available.'),
     );
-    $output['data'] = array(
-      '#markup' => kprint_r($_SESSION, TRUE),
-    );
+    $output['data'] = $this->dumper->exportAsRenderable($_SESSION);
 
     return $output;
-  }
-
-  /**
-   * Prints the loaded structure of the current entity.
-   *
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *    A RouteMatch object.
-   *
-   * @return array
-   *    Array of page elements to render.
-   */
-  public function entityLoad(RouteMatchInterface $route_match) {
-    $output = array();
-
-    $parameter_name = $route_match->getRouteObject()->getOption('_devel_entity_type_id');
-    $entity = $route_match->getParameter($parameter_name);
-
-    if ($entity && $entity instanceof EntityInterface) {
-      $output = array('#markup' => kdevel_print_object($entity));
-    }
-
-    return $output;
-  }
-
-  /**
-   * Prints the render structure of the current entity.
-   *
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *    A RouteMatch object.
-   *
-   * @return array
-   *    Array of page elements to render.
-   */
-  public function entityRender(RouteMatchInterface $route_match) {
-    $output = array();
-
-    $parameter_name = $route_match->getRouteObject()->getOption('_devel_entity_type_id');
-    $entity = $route_match->getParameter($parameter_name);
-
-    if ($entity && $entity instanceof EntityInterface) {
-      $entity_type_id = $entity->getEntityTypeId();
-      $view_hook = $entity_type_id . '_view';
-
-      $build = array();
-      // If module implements own {entity_type}_view
-      if (function_exists($view_hook)) {
-        $build = $view_hook($entity);
-      }
-      // If entity has view_builder handler
-      elseif ($this->entityManager()->hasHandler($entity_type_id, 'view_builder')) {
-        $build = $this->entityManager()->getViewBuilder($entity_type_id)->view($entity);
-      }
-
-      $output = array('#markup' => kdevel_print_object($build));
-    }
-
-    return $output;
-  }
-
-  /**
-   * Switches to a different user.
-   *
-   * We don't call session_save_session() because we really want to change users.
-   * Usually unsafe!
-   *
-   * @param string $name
-   *   The username to switch to, or NULL to log out.
-   *
-   * @return \Symfony\Component\HttpFoundation\RedirectResponse
-   */
-  public function switchUser($name = NULL) {
-    // global $user;
-
-    // $module_handler = $this->moduleHandler();
-    // $session_manager = \Drupal::service('session_manager');
-
-    if ($uid = $this->currentUser()->id()) {
-      // @todo Is this needed?
-      // user_logout();
-    }
-    if (isset($name) && $account = user_load_by_name($name)) {
-      // See https://www.drupal.org/node/218104
-      $accountSwitcher = Drupal::service('account_switcher');
-      $accountSwitcher->switchTo(new UserSession(array('uid' => $account->getId())));
-
-      // Send her on her way.
-      $destination = $this->getDestinationArray();
-      $url = $this->getUrlGenerator()
-        ->generateFromPath($destination['destination'], array('absolute' => TRUE));
-      return new RedirectResponse($url);
-    }
-  }
-
-  /**
-   * Explain query callback called by the AJAX link in the query log.
-   */
-  function queryLogExplain($request_id = NULL, $qid = NULL) {
-    if (!is_numeric($request_id)) {
-      throw new AccessDeniedHttpException();
-    }
-
-    $path = "temporary://devel_querylog/$request_id.txt";
-    $path = file_stream_wrapper_uri_normalize($path);
-
-    $header = $rows = array();
-
-    if (file_exists($path)) {
-      $queries = Json::decode(file_get_contents($path));
-
-      if ($queries !== FALSE && isset($queries[$qid])) {
-        $query = $queries[$qid];
-        $result = db_query('EXPLAIN ' . $query['query'], (array)$query['args'])->fetchAllAssoc('table');
-
-        $i = 1;
-        foreach ($result as $row) {
-          $row = (array)$row;
-          if ($i == 1) {
-            $header = array_keys($row);
-          }
-          $rows[] = array_values($row);
-          $i++;
-        }
-      }
-    }
-
-    $build['explain'] = array(
-      '#type' => 'table',
-      '#header' => $header,
-      '#rows' => $rows,
-      '#empty' => $this->t('No explain log found.'),
-    );
-
-    $GLOBALS['devel_shutdown'] = FALSE;
-
-    return new Response(drupal_render($build));
-  }
-
-  /**
-   * Show query arguments, called by the AJAX link in the query log.
-   */
-  function queryLogArguments($request_id = NULL, $qid = NULL) {
-    if (!is_numeric($request_id)) {
-      throw new AccessDeniedHttpException();
-    }
-
-    $path = "temporary://devel_querylog/$request_id.txt";
-    $path = file_stream_wrapper_uri_normalize($path);
-
-    $output = $this->t('No arguments log found.');
-
-    if (file_exists($path)) {
-      $queries = Json::decode(file_get_contents($path));
-
-      if ($queries !== FALSE && isset($queries[$qid])) {
-        $query = $queries[$qid];
-        $conn = Database::getConnection();
-
-        $quoted = array();
-        foreach ((array)$query['args'] as $key => $val) {
-          $quoted[$key] = is_null($val) ? 'NULL' : $conn->quote($val);
-        }
-        $output = strtr($query['query'], $quoted);
-      }
-    }
-
-    $GLOBALS['devel_shutdown'] = FALSE;
-
-    return new Response($output);
   }
 
 }

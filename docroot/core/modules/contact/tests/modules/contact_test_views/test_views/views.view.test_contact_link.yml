@@ -22,7 +22,7 @@ display:
       access:
         type: none
       cache:
-        type: none
+        type: tag
         options: {  }
       query:
         type: views_query
@@ -58,10 +58,10 @@ display:
             offset: false
             offset_label: Offset
           tags:
-            previous: '‹ previous'
-            next: 'next ›'
-            first: '« first'
-            last: 'last »'
+            previous: '‹ Previous'
+            next: 'Next ›'
+            first: '« First'
+            last: 'Last »'
           quantity: 9
       style:
         type: default
@@ -111,7 +111,7 @@ display:
           entity_type: user
       filters:
         status:
-          value: true
+          value: '1'
           table: users_field_data
           field: status
           id: status
@@ -133,7 +133,7 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
-      cacheable: false
+      max-age: 0
   page_1:
     display_plugin: page
     id: page_1
@@ -146,4 +146,4 @@ display:
       contexts:
         - 'languages:language_content'
         - 'languages:language_interface'
-      cacheable: false
+      max-age: 0

@@ -1,15 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Plugin\Action\AddRoleUser.
- */
-
 namespace Drupal\user\Plugin\Action;
-
-use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\user\Plugin\Action\ChangeUserRoleBase;
 
 /**
  * Adds a role to a user.

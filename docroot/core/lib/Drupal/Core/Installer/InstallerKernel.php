@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Installer\InstallerKernel.
- */
-
 namespace Drupal\Core\Installer;
 
 use Drupal\Core\DrupalKernel;
@@ -16,13 +11,11 @@ class InstallerKernel extends DrupalKernel {
 
   /**
    * {@inheritdoc}
-   *
-   * @param bool $rebuild
-   *   Force a container rebuild. Unlike the parent method, this defaults to
-   *   TRUE.
    */
-  protected function initializeContainer($rebuild = TRUE) {
-    $container = parent::initializeContainer($rebuild);
+  protected function initializeContainer() {
+    // Always force a container rebuild.
+    $this->containerNeedsRebuild = TRUE;
+    $container = parent::initializeContainer();
     return $container;
   }
 
@@ -34,17 +27,23 @@ class InstallerKernel extends DrupalKernel {
    * re-instantiated during a single install request. Most drivers will not
    * need this method.
    *
-   * @see \Drupal\Core\Database\Install\Tasks::runTasks().
+   * @see \Drupal\Core\Database\Install\Tasks::runTasks()
    */
   public function resetConfigStorage() {
     $this->configStorage = NULL;
   }
 
   /**
-   * {@inheritdoc}
+   * Returns the active configuration storage used during early install.
+   *
+   * This override changes the visibility so that the installer can access
+   * config storage before the container is properly built.
+   *
+   * @return \Drupal\Core\Config\StorageInterface
+   *   The config storage.
    */
-  protected function addServiceFiles($service_yamls) {
-    // In the beginning there is no settings.php and no service YAMLs.
-    return parent::addServiceFiles($service_yamls ?: []);
+  public function getConfigStorage() {
+    return parent::getConfigStorage();
   }
+
 }

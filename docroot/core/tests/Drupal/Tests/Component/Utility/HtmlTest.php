@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Component\Utility\HtmlTest.
- */
-
 namespace Drupal\Tests\Component\Utility;
 
 use Drupal\Component\Utility\Html;
@@ -79,7 +74,9 @@ class HtmlTest extends UnitTestCase {
       // replaced.
       array('__cssidentifier', '-1cssidentifier', array()),
       // Verify that an identifier starting with two hyphens is replaced.
-      array('__cssidentifier', '--cssidentifier', array())
+      array('__cssidentifier', '--cssidentifier', array()),
+      // Verify that passing double underscores as a filter is processed.
+      array('_cssidentifier', '__cssidentifier', array('__' => '_')),
     );
   }
 
@@ -143,19 +140,25 @@ class HtmlTest extends UnitTestCase {
    *   The expected result.
    * @param string $source
    *   The string being transformed to an ID.
-   * @param bool $reset
-   *   (optional) If TRUE, reset the list of seen IDs. Defaults to FALSE.
    *
    * @dataProvider providerTestHtmlGetUniqueIdWithAjaxIds
    *
    * @covers ::getUniqueId
    */
-  public function testHtmlGetUniqueIdWithAjaxIds($expected, $source, $reset = FALSE) {
-    if ($reset) {
-      Html::resetSeenIds();
+  public function testHtmlGetUniqueIdWithAjaxIds($expected, $source) {
+    Html::setIsAjax(TRUE);
+    $id = Html::getUniqueId($source);
+
+    // Note, we truncate two hyphens at the end.
+    // @see \Drupal\Component\Utility\Html::getId()
+    if (strpos($source, '--') !== FALSE) {
+      $random_suffix = substr($id, strlen($source) + 1);
     }
-    Html::setAjaxHtmlIds('test-unique-id1 test-unique-id2--3');
-    $this->assertSame($expected, Html::getUniqueId($source));
+    else {
+      $random_suffix = substr($id, strlen($source) + 2);
+    }
+    $expected = $expected . $random_suffix;
+    $this->assertSame($expected, $id);
   }
 
   /**
@@ -166,10 +169,11 @@ class HtmlTest extends UnitTestCase {
    */
   public function providerTestHtmlGetUniqueIdWithAjaxIds() {
     return array(
-      array('test-unique-id1--2', 'test-unique-id1', TRUE),
-      array('test-unique-id1--3', 'test-unique-id1'),
-      array('test-unique-id2--4', 'test-unique-id2', TRUE),
-      array('test-unique-id2--5', 'test-unique-id2'),
+      array('test-unique-id1--', 'test-unique-id1'),
+      // Note, we truncate two hyphens at the end.
+      // @see \Drupal\Component\Utility\Html::getId()
+      array('test-unique-id1---', 'test-unique-id1--'),
+      array('test-unique-id2--', 'test-unique-id2'),
     );
   }
 
@@ -186,6 +190,7 @@ class HtmlTest extends UnitTestCase {
    * @covers ::getId
    */
   public function testHtmlGetId($expected, $source) {
+    Html::setIsAjax(FALSE);
     $this->assertSame($expected, Html::getId($source));
   }
 
@@ -223,7 +228,7 @@ class HtmlTest extends UnitTestCase {
   /**
    * Data provider for testDecodeEntities().
    *
-   * @see testCheckPlain()
+   * @see testDecodeEntities()
    */
   public function providerDecodeEntities() {
     return array(
@@ -249,6 +254,139 @@ class HtmlTest extends UnitTestCase {
       array('&#10172;', '➼'),
       array('&euro;', '€'),
     );
+  }
+
+  /**
+   * Tests Html::escape().
+   *
+   * @dataProvider providerEscape
+   * @covers ::escape
+   */
+  public function testEscape($expected, $text) {
+    $this->assertEquals($expected, Html::escape($text));
+  }
+
+  /**
+   * Data provider for testEscape().
+   *
+   * @see testEscape()
+   */
+  public function providerEscape() {
+    return array(
+      array('Drupal', 'Drupal'),
+      array('&lt;script&gt;', '<script>'),
+      array('&amp;lt;script&amp;gt;', '&lt;script&gt;'),
+      array('&amp;#34;', '&#34;'),
+      array('&quot;', '"'),
+      array('&amp;quot;', '&quot;'),
+      array('&#039;', "'"),
+      array('&amp;#039;', '&#039;'),
+      array('©', '©'),
+      array('→', '→'),
+      array('➼', '➼'),
+      array('€', '€'),
+      array('Drup�al', "Drup\x80al"),
+    );
+  }
+
+  /**
+   * Tests relationship between escaping and decoding HTML entities.
+   *
+   * @covers ::decodeEntities
+   * @covers ::escape
+   */
+  public function testDecodeEntitiesAndEscape() {
+    $string = "<em>répét&eacute;</em>";
+    $escaped = Html::escape($string);
+    $this->assertSame('&lt;em&gt;répét&amp;eacute;&lt;/em&gt;', $escaped);
+    $decoded = Html::decodeEntities($escaped);
+    $this->assertSame('<em>répét&eacute;</em>', $decoded);
+    $decoded = Html::decodeEntities($decoded);
+    $this->assertSame('<em>répété</em>', $decoded);
+    $escaped = Html::escape($decoded);
+    $this->assertSame('&lt;em&gt;répété&lt;/em&gt;', $escaped);
+  }
+
+  /**
+   * Tests Html::serialize().
+   *
+   * Resolves an issue by where an empty DOMDocument object sent to serialization would
+   * cause errors in getElementsByTagName() in the serialization function.
+   *
+   * @covers ::serialize
+   */
+  public function testSerialize() {
+    $document = new \DOMDocument();
+    $result = Html::serialize($document);
+    $this->assertSame('', $result);
+  }
+
+  /**
+   * @covers ::transformRootRelativeUrlsToAbsolute
+   * @dataProvider providerTestTransformRootRelativeUrlsToAbsolute
+   */
+  public function testTransformRootRelativeUrlsToAbsolute($html, $scheme_and_host, $expected_html) {
+    $this->assertSame($expected_html ?: $html, Html::transformRootRelativeUrlsToAbsolute($html, $scheme_and_host));
+  }
+
+  /**
+   * @covers ::transformRootRelativeUrlsToAbsolute
+   * @dataProvider providerTestTransformRootRelativeUrlsToAbsoluteAssertion
+   * @expectedException \AssertionError
+   */
+  public function testTransformRootRelativeUrlsToAbsoluteAssertion($scheme_and_host) {
+    Html::transformRootRelativeUrlsToAbsolute('', $scheme_and_host);
+  }
+
+  /**
+   * Provides test data for testTransformRootRelativeUrlsToAbsolute().
+   *
+   * @return array
+   *   Test data.
+   */
+  public function providerTestTransformRootRelativeUrlsToAbsolute() {
+    $data = [];
+
+    // One random tag name.
+    $tag_name = strtolower($this->randomMachineName());
+
+    // A site installed either in the root of a domain or a subdirectory.
+    $base_paths = ['/', '/subdir/' . $this->randomMachineName() . '/'];
+
+    foreach ($base_paths as $base_path) {
+      // The only attribute that has more than just a URL as its value, is
+      // 'srcset', so special-case it.
+      $data += [
+        "$tag_name, srcset, $base_path: root-relative" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, {$base_path}root-relative 300w\">root-relative test</$tag_name>", 'http://example.com', "<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, http://example.com{$base_path}root-relative 300w\">root-relative test</$tag_name>"],
+        "$tag_name, srcset, $base_path: protocol-relative" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, //example.com{$base_path}protocol-relative 300w\">protocol-relative test</$tag_name>", 'http://example.com', FALSE],
+        "$tag_name, srcset, $base_path: absolute" => ["<$tag_name srcset=\"http://example.com{$base_path}already-absolute 200w, http://example.com{$base_path}absolute 300w\">absolute test</$tag_name>", 'http://example.com', FALSE],
+      ];
+
+      foreach (['href', 'poster', 'src', 'cite', 'data', 'action', 'formaction', 'about'] as $attribute) {
+        $data += [
+          "$tag_name, $attribute, $base_path: root-relative" => ["<$tag_name $attribute=\"{$base_path}root-relative\">root-relative test</$tag_name>", 'http://example.com', "<$tag_name $attribute=\"http://example.com{$base_path}root-relative\">root-relative test</$tag_name>"],
+          "$tag_name, $attribute, $base_path: protocol-relative" => ["<$tag_name $attribute=\"//example.com{$base_path}protocol-relative\">protocol-relative test</$tag_name>", 'http://example.com', FALSE],
+          "$tag_name, $attribute, $base_path: absolute" => ["<$tag_name $attribute=\"http://example.com{$base_path}absolute\">absolute test</$tag_name>", 'http://example.com', FALSE],
+        ];
+      }
+    }
+
+    return $data;
+  }
+
+  /**
+   * Provides test data for testTransformRootRelativeUrlsToAbsoluteAssertion().
+   *
+   * @return array
+   *   Test data.
+   */
+  public function providerTestTransformRootRelativeUrlsToAbsoluteAssertion() {
+    return [
+      'only relative path' => ['llama'],
+      'only root-relative path' => ['/llama'],
+      'host and path' => ['example.com/llama'],
+      'scheme, host and path' => ['http://example.com/llama'],
+    ];
   }
 
 }

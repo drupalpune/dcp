@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block_content\Plugin\views\area\ListingEmpty.
- */
-
 namespace Drupal\block_content\Plugin\views\area;
 
 use Drupal\Core\Access\AccessManagerInterface;
@@ -78,7 +73,7 @@ class ListingEmpty extends AreaPluginBase {
       /** @var \Drupal\Core\Access\AccessResultInterface|\Drupal\Core\Cache\CacheableDependencyInterface $access_result */
       $access_result = $this->accessManager->checkNamedRoute('block_content.add_page', array(), $this->currentUser, TRUE);
       $element = array(
-        '#markup' => $this->t('Add a <a href="!url">custom block</a>.', array('!url' => Url::fromRoute('block_content.add_page')->toString())),
+        '#markup' => $this->t('Add a <a href=":url">custom block</a>.', array(':url' => Url::fromRoute('block_content.add_page')->toString())),
         '#access' => $access_result->isAllowed(),
         '#cache' => [
           'contexts' => $access_result->getCacheContexts(),

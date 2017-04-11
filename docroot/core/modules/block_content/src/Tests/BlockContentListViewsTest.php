@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block_content\Tests\BlockContentListViewsTest.
- */
-
 namespace Drupal\block_content\Tests;
 
 /**
@@ -33,6 +28,10 @@ class BlockContentListViewsTest extends BlockContentTestBase {
     // Test for the page title.
     $this->assertTitle(t('Custom block library') . ' | Drupal');
 
+    // Test for the exposed filters.
+    $this->assertFieldByName('info');
+    $this->assertFieldByName('type');
+
     // Test for the table.
     $element = $this->xpath('//div[@class="layout-content"]//table');
     $this->assertTrue($element, 'Views table found.');
@@ -42,7 +41,7 @@ class BlockContentListViewsTest extends BlockContentTestBase {
     $this->assertEqual(count($elements), 4, 'Correct number of table header cells found.');
 
     // Test the contents of each th cell.
-    $expected_items = [t('Block description'), t('Block type'), t('Updated'), t('Operations')];
+    $expected_items = ['Block description', 'Block type', 'Updated', 'Operations'];
     foreach ($elements as $key => $element) {
       if ($element->xpath('a')) {
         $this->assertIdentical(trim((string) $element->xpath('a')[0]), $expected_items[$key]);

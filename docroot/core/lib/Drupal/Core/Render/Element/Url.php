@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Url.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Component\Utility\UrlHelper;
@@ -13,6 +8,22 @@ use Drupal\Core\Render\Element;
 
 /**
  * Provides a form element for input of a URL.
+ *
+ * Properties:
+ * - #default_value: A valid URL string.
+ * - #size: The size of the input element in characters.
+ *
+ * Usage example:
+ * @code
+ * $form['homepage'] = array(
+ *   '#type' => 'url',
+ *   '#title' => $this->t('Home Page'),
+ *   '#size' => 30,
+ *   ...
+ * );
+ * @endcode
+ *
+ * @see \Drupal\Core\Render\Element\Textfield
  *
  * @FormElement("url")
  */

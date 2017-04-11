@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\update\Form\UpdateManagerInstall.
- */
-
 namespace Drupal\update\Form;
 
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -13,6 +8,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Updater\Updater;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Configure update settings for this site.
@@ -27,23 +23,33 @@ class UpdateManagerInstall extends FormBase {
   protected $moduleHandler;
 
   /**
-   * The app root.
+   * The root location under which installed projects will be saved.
    *
    * @var string
    */
   protected $root;
 
   /**
+   * The site path.
+   *
+   * @var string
+   */
+  protected $sitePath;
+
+  /**
    * Constructs a new UpdateManagerInstall.
    *
    * @param string $root
-   *   The app root.
+   *   The root location under which installed projects will be saved.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
+   * @param string $site_path
+   *   The site path.
    */
-  public function __construct($root, ModuleHandlerInterface $module_handler) {
+  public function __construct($root, ModuleHandlerInterface $module_handler, $site_path) {
     $this->root = $root;
     $this->moduleHandler = $module_handler;
+    $this->sitePath = $site_path;
   }
 
   /**
@@ -58,8 +64,9 @@ class UpdateManagerInstall extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('app.root'),
-      $container->get('module_handler')
+      $container->get('update.root'),
+      $container->get('module_handler'),
+      $container->get('site.path')
     );
   }
 
@@ -74,10 +81,10 @@ class UpdateManagerInstall extends FormBase {
 
     $form['help_text'] = array(
       '#prefix' => '<p>',
-      '#markup' => $this->t('You can find <a href="@module_url">modules</a> and <a href="@theme_url">themes</a> on <a href="@drupal_org_url">drupal.org</a>. The following file extensions are supported: %extensions.', array(
-        '@module_url' => 'https://www.drupal.org/project/modules',
-        '@theme_url' => 'https://www.drupal.org/project/themes',
-        '@drupal_org_url' => 'https://www.drupal.org',
+      '#markup' => $this->t('You can find <a href=":module_url">modules</a> and <a href=":theme_url">themes</a> on <a href=":drupal_org_url">drupal.org</a>. The following file extensions are supported: %extensions.', array(
+        ':module_url' => 'https://www.drupal.org/project/modules',
+        ':theme_url' => 'https://www.drupal.org/project/themes',
+        ':drupal_org_url' => 'https://www.drupal.org',
         '%extensions' => archiver_get_extensions(),
       )),
       '#suffix' => '</p>',
@@ -115,8 +122,8 @@ class UpdateManagerInstall extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $uploaded_file = $this->getRequest()->files->get('files[project_upload]', NULL, TRUE);
-    if (!($form_state->getValue('project_url') XOR !empty($uploaded_file))) {
+    $all_files = $this->getRequest()->files->get('files', []);
+    if (!($form_state->getValue('project_url') xor !empty($all_files['project_upload']))) {
       $form_state->setErrorByName('project_url', $this->t('You must either provide a URL or upload an archive file to install.'));
     }
   }
@@ -181,7 +188,7 @@ class UpdateManagerInstall extends FormBase {
 
     $project_location = $directory . '/' . $project;
     try {
-      $updater = Updater::factory($project_location);
+      $updater = Updater::factory($project_location, $this->root);
     }
     catch (\Exception $e) {
       drupal_set_message($e->getMessage(), 'error');
@@ -212,22 +219,33 @@ class UpdateManagerInstall extends FormBase {
       'local_url' => $project_real_location,
     );
 
+    // This process is inherently difficult to test therefore use a state flag.
+    $test_authorize = FALSE;
+    if (drupal_valid_test_ua()) {
+      $test_authorize = \Drupal::state()->get('test_uploaders_via_prompt', FALSE);
+    }
     // If the owner of the directory we extracted is the same as the owner of
     // our configuration directory (e.g. sites/default) where we're trying to
     // install the code, there's no need to prompt for FTP/SSH credentials.
     // Instead, we instantiate a Drupal\Core\FileTransfer\Local and invoke
     // update_authorize_run_install() directly.
-    if (fileowner($project_real_location) == fileowner(conf_path())) {
+    if (fileowner($project_real_location) == fileowner($this->sitePath) && !$test_authorize) {
       $this->moduleHandler->loadInclude('update', 'inc', 'update.authorize');
       $filetransfer = new Local($this->root);
-      call_user_func_array('update_authorize_run_install', array_merge(array($filetransfer), $arguments));
+      $response = call_user_func_array('update_authorize_run_install', array_merge(array($filetransfer), $arguments));
+      if ($response instanceof Response) {
+        $form_state->setResponse($response);
+      }
     }
 
     // Otherwise, go through the regular workflow to prompt for FTP/SSH
     // credentials and invoke update_authorize_run_install() indirectly with
     // whatever FileTransfer object authorize.php creates for us.
     else {
-      system_authorized_init('update_authorize_run_install', drupal_get_path('module', 'update') . '/update.authorize.inc', $arguments, $this->t('Update manager'));
+      // The page title must be passed here to ensure it is initially used when
+      // authorize.php loads for the first time with the FTP/SSH credentials
+      // form.
+      system_authorized_init('update_authorize_run_install', __DIR__ . '/../../update.authorize.inc', $arguments, $this->t('Update manager'));
       $form_state->setRedirectUrl(system_authorized_get_url());
     }
   }

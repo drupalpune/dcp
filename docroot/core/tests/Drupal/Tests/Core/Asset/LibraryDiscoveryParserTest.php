@@ -10,20 +10,6 @@ namespace Drupal\Tests\Core\Asset;
 use Drupal\Core\Asset\LibraryDiscoveryParser;
 use Drupal\Tests\UnitTestCase;
 
-if (!defined('CSS_AGGREGATE_DEFAULT')) {
-  define('CSS_AGGREGATE_DEFAULT', 0);
-  define('CSS_AGGREGATE_THEME', 100);
-  define('CSS_BASE', -200);
-  define('CSS_LAYOUT', -100);
-  define('CSS_COMPONENT', 0);
-  define('CSS_STATE', 100);
-  define('CSS_THEME', 200);
-  define('JS_SETTING', -200);
-  define('JS_LIBRARY', -100);
-  define('JS_DEFAULT', 0);
-  define('JS_THEME', 100);
-}
-
 /**
  * @coversDefaultClass \Drupal\Core\Asset\LibraryDiscoveryParser
  * @group Asset
@@ -73,6 +59,15 @@ class LibraryDiscoveryParserTest extends UnitTestCase {
 
     $this->moduleHandler = $this->getMock('Drupal\Core\Extension\ModuleHandlerInterface');
     $this->themeManager = $this->getMock('Drupal\Core\Theme\ThemeManagerInterface');
+    $mock_active_theme = $this->getMockBuilder('Drupal\Core\Theme\ActiveTheme')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $mock_active_theme->expects($this->any())
+      ->method('getLibrariesOverride')
+      ->willReturn([]);
+    $this->themeManager->expects($this->any())
+      ->method('getActiveTheme')
+      ->willReturn($mock_active_theme);
     $this->libraryDiscoveryParser = new TestLibraryDiscoveryParser($this->root, $this->moduleHandler, $this->themeManager);
   }
 
@@ -91,7 +86,7 @@ class LibraryDiscoveryParserTest extends UnitTestCase {
     $path = substr($path, strlen($this->root) + 1);
     $this->libraryDiscoveryParser->setPaths('module', 'example_module', $path);
 
-    $libraries = $this->libraryDiscoveryParser->buildByExtension('example_module', 'example');
+    $libraries = $this->libraryDiscoveryParser->buildByExtension('example_module');
     $library = $libraries['example'];
 
     $this->assertCount(0, $library['js']);
@@ -216,34 +211,6 @@ class LibraryDiscoveryParserTest extends UnitTestCase {
     $this->assertEquals(\Drupal::VERSION, $libraries['core-versioned']['js'][0]['version']);
   }
 
-  /**
-   * Tests the version property with ISO dates.
-   *
-   * We want to make sure that versions defined in the YAML file are the same
-   * versions that are parsed.
-   *
-   * For example, ISO dates are converted into UNIX time by the YAML parser.
-   *
-   * @covers ::buildByExtension
-   */
-  public function testNonStringVersion() {
-    $this->moduleHandler->expects($this->atLeastOnce())
-      ->method('moduleExists')
-      ->with('versions')
-      ->will($this->returnValue(TRUE));
-
-    $path = __DIR__ . '/library_test_files';
-    $path = substr($path, strlen($this->root) + 1);
-    $this->libraryDiscoveryParser->setPaths('module', 'versions', $path);
-
-    $libraries = $this->libraryDiscoveryParser->buildByExtension('versions');
-
-    // As an example, we defined an ISO date in the YAML file and the YAML
-    // parser converts it into a UNIX timestamp.
-    $this->assertNotEquals('2014-12-13', $libraries['invalid-version']['version']);
-    // An example of an ISO date as a string which parses correctly.
-    $this->assertEquals('2014-12-13', $libraries['valid-version']['version']);
-  }
 
   /**
    * Tests that the version property of external libraries is handled.
@@ -362,7 +329,7 @@ class LibraryDiscoveryParserTest extends UnitTestCase {
    * @covers ::buildByExtension
    */
   public function testLibraryWithDependencies() {
-     $this->moduleHandler->expects($this->atLeastOnce())
+    $this->moduleHandler->expects($this->atLeastOnce())
       ->method('moduleExists')
       ->with('dependencies')
       ->will($this->returnValue(TRUE));
@@ -565,4 +532,38 @@ class TestLibraryDiscoveryParser extends LibraryDiscoveryParser {
     $this->validUris[$source] = $valid;
   }
 
+}
+
+if (!defined('CSS_AGGREGATE_DEFAULT')) {
+  define('CSS_AGGREGATE_DEFAULT', 0);
+}
+if (!defined('CSS_AGGREGATE_THEME')) {
+  define('CSS_AGGREGATE_THEME', 100);
+}
+if (!defined('CSS_BASE')) {
+  define('CSS_BASE', -200);
+}
+if (!defined('CSS_LAYOUT')) {
+  define('CSS_LAYOUT', -100);
+}
+if (!defined('CSS_COMPONENT')) {
+  define('CSS_COMPONENT', 0);
+}
+if (!defined('CSS_STATE')) {
+  define('CSS_STATE', 100);
+}
+if (!defined('CSS_THEME')) {
+  define('CSS_THEME', 200);
+}
+if (!defined('JS_SETTING')) {
+  define('JS_SETTING', -200);
+}
+if (!defined('JS_LIBRARY')) {
+  define('JS_LIBRARY', -100);
+}
+if (!defined('JS_DEFAULT')) {
+  define('JS_DEFAULT', 0);
+}
+if (!defined('JS_THEME')) {
+  define('JS_THEME', 100);
 }

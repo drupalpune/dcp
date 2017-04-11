@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Tests\Handler\ArgumentStringTest.
- */
-
 namespace Drupal\views\Tests\Handler;
 
 use Drupal\views\Views;

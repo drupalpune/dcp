@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Config\Entity\ConfigEntityInterface.
- */
-
 namespace Drupal\Core\Config\Entity;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -144,8 +139,7 @@ interface ConfigEntityInterface extends EntityInterface, ThirdPartySettingsInter
   /**
    * Calculates dependencies and stores them in the dependency property.
    *
-   * @return array
-   *   An array of dependencies grouped by type (module, theme, entity).
+   * @return $this
    *
    * @see \Drupal\Core\Config\Entity\ConfigDependencyManager
    */
@@ -168,9 +162,6 @@ interface ConfigEntityInterface extends EntityInterface, ThirdPartySettingsInter
    * @param array $dependencies
    *   An array of dependencies that will be deleted keyed by dependency type.
    *   Dependency types are, for example, entity, module and theme.
-   *
-   * @return bool
-   *   TRUE if the entity has changed, FALSE if not.
    *
    * @return bool
    *   TRUE if the entity has been changed as a result, FALSE if not.

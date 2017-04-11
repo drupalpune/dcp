@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\user\Plugin\views\filter\Name.
- */
-
 namespace Drupal\user\Plugin\views\filter;
 
-use Drupal\Component\Utility\Tags;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\Entity\User;
@@ -34,7 +28,7 @@ class Name extends InOperator {
       '#target_type' => 'user',
       '#tags' => TRUE,
       '#default_value' => $default_value,
-      '#process_default_value' => FALSE,
+      '#process_default_value' => $this->isExposed(),
     );
 
     $user_input = $form_state->getUserInput();
@@ -102,15 +96,20 @@ class Name extends InOperator {
     // prevent array filter from removing our anonymous user.
   }
 
-  // Override to do nothing.
-  public function getValueOptions() { }
+  /**
+   * {@inheritdoc}
+   */
+  public function getValueOptions() {
+    return $this->valueOptions;
+  }
 
   public function adminSummary() {
     // set up $this->valueOptions for the parent summary
     $this->valueOptions = array();
 
     if ($this->value) {
-      $result = entity_load_multiple_by_properties('user', array('uid' => $this->value));
+      $result = \Drupal::entityTypeManager()->getStorage('user')
+        ->loadByProperties(['uid' => $this->value]);
       foreach ($result as $account) {
         if ($account->id()) {
           $this->valueOptions[$account->id()] = $account->label();

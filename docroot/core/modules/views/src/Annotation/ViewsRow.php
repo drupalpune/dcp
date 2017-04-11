@@ -1,13 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Annotation\ViewsRow.
- */
-
 namespace Drupal\views\Annotation;
-
-use Drupal\views\Annotation\ViewsPluginAnnotationBase;
 
 /**
  * Defines a Plugin annotation object for views row plugins.

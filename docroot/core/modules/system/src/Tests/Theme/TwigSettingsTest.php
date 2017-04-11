@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Theme\TwigSettingsTest.
- */
-
 namespace Drupal\system\Tests\Theme;
 
 use Drupal\simpletest\WebTestBase;
@@ -114,8 +109,7 @@ class TwigSettingsTest extends WebTestBase {
     $this->rebuildContainer();
 
     // This should return false after rebuilding the service container.
-    $new_cache_filename = $this->container->get('twig')->getCacheFilename($template_filename);
-    $this->assertFalse($new_cache_filename, 'Twig environment does not return cache filename after caching is disabled.');
+    $this->assertFalse($this->container->get('twig')->getCache(), 'Twig environment has caching disabled.');
   }
 
   /**

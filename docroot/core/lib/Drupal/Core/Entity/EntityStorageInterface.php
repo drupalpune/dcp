@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityStorageInterface.
- */
-
 namespace Drupal\Core\Entity;
 
 /**
@@ -79,7 +74,7 @@ interface EntityStorageInterface {
   /**
    * Load a specific entity revision.
    *
-   * @param int $revision_id
+   * @param int|string $revision_id
    *   The revision id.
    *
    * @return \Drupal\Core\Entity\EntityInterface|null

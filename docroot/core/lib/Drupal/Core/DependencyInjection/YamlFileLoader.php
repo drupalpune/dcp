@@ -1,14 +1,10 @@
 <?php
-
-/**
- * @file
- * Contains \Drupal\Core\DependencyInjection\YamlFileLoader.
- */
+// @codingStandardsIgnoreFile
 
 namespace Drupal\Core\DependencyInjection;
 
 use Drupal\Component\FileCache\FileCacheFactory;
-use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Serialization\Yaml;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -56,13 +52,12 @@ class YamlFileLoader
     /**
      * Loads a Yaml file.
      *
-     * @param mixed  $file The resource
+     * @param mixed $file
+     *   The resource
      */
     public function load($file)
     {
         // Load from the file cache, fall back to loading the file.
-        // @todo Refactor this to cache parsed definition objects in
-        //   https://www.drupal.org/node/2464053
         $content = $this->fileCache->get($file);
         if (!$content) {
             $content = $this->loadFile($file);
@@ -83,6 +78,10 @@ class YamlFileLoader
 
         // parameters
         if (isset($content['parameters'])) {
+            if (!is_array($content['parameters'])) {
+                throw new InvalidArgumentException(sprintf('The "parameters" key should contain an array in %s. Check your YAML syntax.', $file));
+            }
+
             foreach ($content['parameters'] as $key => $value) {
                 $this->container->setParameter($key, $this->resolveServices($value));
             }
@@ -99,7 +98,7 @@ class YamlFileLoader
     /**
      * Parses definitions
      *
-     * @param array  $content
+     * @param array $content
      * @param string $file
      */
     private function parseDefinitions($content, $file)
@@ -108,7 +107,20 @@ class YamlFileLoader
             return;
         }
 
+        if (!is_array($content['services'])) {
+            throw new InvalidArgumentException(sprintf('The "services" key should contain an array in %s. Check your YAML syntax.', $file));
+        }
+
+        // Some extensions split up their dependencies into multiple files.
+        if (isset($content['_provider'])) {
+            $provider = $content['_provider'];
+        }
+        else {
+            $basename = basename($file);
+            list($provider, ) = explode('.', $basename, 2);
+        }
         foreach ($content['services'] as $id => $service) {
+            $service['tags'][] = ['name' => '_provider', 'provider' => $provider];
             $this->parseDefinition($id, $service, $file);
         }
     }
@@ -117,10 +129,11 @@ class YamlFileLoader
      * Parses a definition.
      *
      * @param string $id
-     * @param array  $service
+     * @param array $service
      * @param string $file
      *
-     * @throws InvalidArgumentException When tags are invalid
+     * @throws InvalidArgumentException
+     *   When tags are invalid.
      */
     private function parseDefinition($id, $service, $file)
     {
@@ -128,8 +141,14 @@ class YamlFileLoader
             $this->container->setAlias($id, substr($service, 1));
 
             return;
-        } elseif (isset($service['alias'])) {
-            $public = !array_key_exists('public', $service) || (Boolean) $service['public'];
+        }
+
+        if (!is_array($service)) {
+            throw new InvalidArgumentException(sprintf('A service definition must be an array or a string starting with "@" but %s found for service "%s" in %s. Check your YAML syntax.', gettype($service), $id, $file));
+        }
+
+        if (isset($service['alias'])) {
+            $public = !array_key_exists('public', $service) || (bool) $service['public'];
             $this->container->setAlias($id, new Alias($service['alias'], $public));
 
             return;
@@ -145,8 +164,15 @@ class YamlFileLoader
             $definition->setClass($service['class']);
         }
 
+        if (isset($service['shared'])) {
+            $definition->setShared($service['shared']);
+        }
+
         if (isset($service['scope'])) {
-            $definition->setScope($service['scope']);
+            if ('request' !== $id) {
+                @trigger_error(sprintf('The "scope" key of service "%s" in file "%s" is deprecated since version 2.8 and will be removed in 3.0.', $id, $file), E_USER_DEPRECATED);
+            }
+            $definition->setScope($service['scope'], false);
         }
 
         if (isset($service['synthetic'])) {
@@ -154,7 +180,7 @@ class YamlFileLoader
         }
 
         if (isset($service['synchronized'])) {
-            $definition->setSynchronized($service['synchronized']);
+            $definition->setSynchronized($service['synchronized'], 'request' !== $id);
         }
 
         if (isset($service['lazy'])) {
@@ -167,6 +193,23 @@ class YamlFileLoader
 
         if (isset($service['abstract'])) {
             $definition->setAbstract($service['abstract']);
+        }
+
+        if (array_key_exists('deprecated', $service)) {
+            $definition->setDeprecated(true, $service['deprecated']);
+        }
+
+        if (isset($service['factory'])) {
+            if (is_string($service['factory'])) {
+                if (strpos($service['factory'], ':') !== false && strpos($service['factory'], '::') === false) {
+                    $parts = explode(':', $service['factory']);
+                    $definition->setFactory(array($this->resolveServices('@'.$parts[0]), $parts[1]));
+                } else {
+                    $definition->setFactory($service['factory']);
+                }
+            } else {
+                $definition->setFactory(array($this->resolveServices($service['factory'][0]), $service['factory'][1]));
+            }
         }
 
         if (isset($service['factory_class'])) {
@@ -202,18 +245,33 @@ class YamlFileLoader
         }
 
         if (isset($service['calls'])) {
+            if (!is_array($service['calls'])) {
+                throw new InvalidArgumentException(sprintf('Parameter "calls" must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
+            }
+
             foreach ($service['calls'] as $call) {
-                $args = isset($call[1]) ? $this->resolveServices($call[1]) : array();
-                $definition->addMethodCall($call[0], $args);
+                if (isset($call['method'])) {
+                    $method = $call['method'];
+                    $args = isset($call['arguments']) ? $this->resolveServices($call['arguments']) : array();
+                } else {
+                    $method = $call[0];
+                    $args = isset($call[1]) ? $this->resolveServices($call[1]) : array();
+                }
+
+                $definition->addMethodCall($method, $args);
             }
         }
 
         if (isset($service['tags'])) {
             if (!is_array($service['tags'])) {
-                throw new InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s" in %s.', $id, $file));
+                throw new InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
             }
 
             foreach ($service['tags'] as $tag) {
+                if (!is_array($tag)) {
+                    throw new InvalidArgumentException(sprintf('A "tags" entry must be an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
+                }
+
                 if (!isset($tag['name'])) {
                     throw new InvalidArgumentException(sprintf('A "tags" entry is missing a "name" key for service "%s" in %s.', $id, $file));
                 }
@@ -223,11 +281,39 @@ class YamlFileLoader
 
                 foreach ($tag as $attribute => $value) {
                     if (!is_scalar($value) && null !== $value) {
-                        throw new InvalidArgumentException(sprintf('A "tags" attribute must be of a scalar-type for service "%s", tag "%s", attribute "%s" in %s.', $id, $name, $attribute, $file));
+                        throw new InvalidArgumentException(sprintf('A "tags" attribute must be of a scalar-type for service "%s", tag "%s", attribute "%s" in %s. Check your YAML syntax.', $id, $name, $attribute, $file));
                     }
                 }
 
                 $definition->addTag($name, $tag);
+            }
+        }
+
+        if (isset($service['decorates'])) {
+            $renameId = isset($service['decoration_inner_name']) ? $service['decoration_inner_name'] : null;
+            $priority = isset($service['decoration_priority']) ? $service['decoration_priority'] : 0;
+            $definition->setDecoratedService($service['decorates'], $renameId, $priority);
+        }
+
+        if (isset($service['autowire'])) {
+            $definition->setAutowired($service['autowire']);
+        }
+
+        if (isset($service['autowiring_types'])) {
+            if (is_string($service['autowiring_types'])) {
+                $definition->addAutowiringType($service['autowiring_types']);
+            } else {
+                if (!is_array($service['autowiring_types'])) {
+                    throw new InvalidArgumentException(sprintf('Parameter "autowiring_types" must be a string or an array for service "%s" in %s. Check your YAML syntax.', $id, $file));
+                }
+
+                foreach ($service['autowiring_types'] as $autowiringType) {
+                    if (!is_string($autowiringType)) {
+                        throw new InvalidArgumentException(sprintf('A "autowiring_types" attribute must be of type string for service "%s" in %s. Check your YAML syntax.', $id, $file));
+                    }
+
+                    $definition->addAutowiringType($autowiringType);
+                }
             }
         }
 
@@ -240,6 +326,9 @@ class YamlFileLoader
      * @param string $file
      *
      * @return array The file content
+     *
+     * @throws InvalidArgumentException
+     *   When the given file is not a local file or when it does not exist.
      */
     protected function loadFile($file)
     {
@@ -257,12 +346,13 @@ class YamlFileLoader
     /**
      * Validates a YAML file.
      *
-     * @param mixed  $content
+     * @param mixed $content
      * @param string $file
      *
      * @return array
      *
-     * @throws InvalidArgumentException When service file is not valid
+     * @throws InvalidArgumentException
+     *   When service file is not valid.
      */
     private function validate($content, $file)
     {
@@ -271,7 +361,7 @@ class YamlFileLoader
         }
 
         if (!is_array($content)) {
-            throw new InvalidArgumentException(sprintf('The service file "%s" is not valid: it is not an array.', $file));
+            throw new InvalidArgumentException(sprintf('The service file "%s" is not valid. It should contain an array. Check your YAML syntax.', $file));
         }
 
         if ($invalid_keys = array_diff_key($content, array('parameters' => 1, 'services' => 1))) {
@@ -284,9 +374,9 @@ class YamlFileLoader
     /**
      * Resolves services.
      *
-     * @param string $value
+     * @param string|array $value
      *
-     * @return Reference
+     * @return array|string|Reference
      */
     private function resolveServices($value)
     {

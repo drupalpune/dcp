@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Tests\NodeTitleTest.
- */
-
 namespace Drupal\node\Tests;
 
 use Drupal\comment\Tests\CommentTestTrait;
+use Drupal\Component\Utility\Html;
 
 /**
  * Tests node title.
@@ -45,7 +41,7 @@ class NodeTitleTest extends NodeTestBase {
   }
 
   /**
-   *  Creates one node and tests if the node title has the correct value.
+   * Creates one node and tests if the node title has the correct value.
    */
   function testNodeTitle() {
     // Create "Basic page" content with title.
@@ -60,7 +56,7 @@ class NodeTitleTest extends NodeTestBase {
     // Test <title> tag.
     $this->drupalGet('node/' . $node->id());
     $xpath = '//title';
-    $this->assertEqual(current($this->xpath($xpath)), $node->label() .' | Drupal', 'Page title is equal to node title.', 'Node');
+    $this->assertEqual(current($this->xpath($xpath)), $node->label() . ' | Drupal', 'Page title is equal to node title.', 'Node');
 
     // Test breadcrumb in comment preview.
     $this->drupalGet('comment/reply/node/' . $node->id() . '/comment');
@@ -85,5 +81,23 @@ class NodeTitleTest extends NodeTestBase {
     // Test that 0 appears in the template <h1>.
     $xpath = '//h1';
     $this->assertEqual(current($this->xpath($xpath)), 0, 'Node title is displayed as 0.', 'Node');
+
+    // Test edge case where node title contains special characters.
+    $edge_case_title = 'article\'s "title".';
+    $settings = array(
+      'title' => $edge_case_title,
+    );
+    $node = $this->drupalCreateNode($settings);
+    // Test that the title appears as <title>. The title will be escaped on the
+    // the page.
+    $edge_case_title_escaped = Html::escape($edge_case_title);
+    $this->drupalGet('node/' . $node->id());
+    $this->assertTitle($edge_case_title_escaped . ' | Drupal', 'Page title is equal to article\'s "title".', 'Node');
+
+    // Test that the title appears as <title> when reloading the node page.
+    $this->drupalGet('node/' . $node->id());
+    $this->assertTitle($edge_case_title_escaped . ' | Drupal', 'Page title is equal to article\'s "title".', 'Node');
+
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Color.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -13,6 +8,18 @@ use Drupal\Component\Utility\Color as ColorUtility;
 
 /**
  * Provides a form element for choosing a color.
+ *
+ * Properties:
+ * - #default_value: Default value, in a format like #ffffff.
+ *
+ * Example usage:
+ * @code
+ * $form['color'] = array(
+ *   '#type' => 'color',
+ *   '#title' => $this->t('Color'),
+ *   '#default_value' => '#ffffff',
+ * );
+ * @endcode
  *
  * @FormElement("color")
  */

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\devel_generate_example\Plugin\DevelGenerate\ExampleDevelGenerate.
- */
-
 namespace Drupal\devel_generate_example\Plugin\DevelGenerate;
 
 use Drupal\devel_generate\DevelGenerateBase;
@@ -79,7 +74,7 @@ class ExampleDevelGenerate extends DevelGenerateBase {
 
     $account->save();
 
-    $this->setMessage($this->t('!num_examples created.', array('!num_examples' => $this->formatPlural($num, '1 example', '@count examples'))));
+    $this->setMessage($this->t('@num_examples created.', array('@num_examples' => $this->formatPlural($num, '1 example', '@count examples'))));
   }
 
   public function validateDrushParams($args) {

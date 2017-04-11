@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Entity\User.
- */
-
 namespace Drupal\user\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
@@ -362,7 +357,21 @@ class User extends ContentEntityBase implements UserInterface {
    * {@inheritdoc}
    */
   public function getUsername() {
-    $name = $this->get('name')->value ?: \Drupal::config('user.settings')->get('anonymous');
+    return $this->getAccountName();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAccountName() {
+    return $this->get('name')->value ?: '';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDisplayName() {
+    $name = $this->getAccountName() ?: \Drupal::config('user.settings')->get('anonymous');
     \Drupal::moduleHandler()->alter('user_format_name', $name, $this);
     return $name;
   }
@@ -378,13 +387,6 @@ class User extends ContentEntityBase implements UserInterface {
   /**
    * {@inheritdoc}
    */
-  public function getChangedTime() {
-    return $this->get('changed')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function setExistingPassword($password) {
     $this->get('pass')->existing = $password;
   }
@@ -393,7 +395,7 @@ class User extends ContentEntityBase implements UserInterface {
    * {@inheritdoc}
    */
   public function checkExistingPassword(UserInterface $account_unchanged) {
-    return !empty($this->get('pass')->existing) && \Drupal::service('password')->check(trim($this->get('pass')->existing), $account_unchanged);
+    return strlen($this->get('pass')->existing) > 0 && \Drupal::service('password')->check(trim($this->get('pass')->existing), $account_unchanged->getPassword());
   }
 
   /**
@@ -411,7 +413,13 @@ class User extends ContentEntityBase implements UserInterface {
       $entity_type = $entity_manager->getDefinition('user');
       $class = $entity_type->getClass();
 
-      static::$anonymousUser = new $class(['uid' => [LanguageInterface::LANGCODE_DEFAULT => 0]], $entity_type->id());
+      static::$anonymousUser = new $class([
+        'uid' => [LanguageInterface::LANGCODE_DEFAULT => 0],
+        'name' => [LanguageInterface::LANGCODE_DEFAULT => ''],
+        // Explicitly set the langcode to ensure that field definitions do not
+        // need to be fetched to figure out a default.
+        'langcode' => [LanguageInterface::LANGCODE_DEFAULT => LanguageInterface::LANGCODE_NOT_SPECIFIED]
+      ], $entity_type->id());
     }
     return clone static::$anonymousUser;
   }
@@ -420,21 +428,17 @@ class User extends ContentEntityBase implements UserInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['uid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('User ID'))
-      ->setDescription(t('The user ID.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
+    /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
+    $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The user UUID.'))
-      ->setReadOnly(TRUE);
+    $fields['uid']->setLabel(t('User ID'))
+      ->setDescription(t('The user ID.'));
 
-    $fields['langcode'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language code'))
+    $fields['uuid']->setDescription(t('The user UUID.'));
+
+    $fields['langcode']->setLabel(t('Language code'))
       ->setDescription(t('The user language code.'))
-      ->setTranslatable(TRUE);
+      ->setDisplayOptions('form', ['type' => 'hidden']);
 
     $fields['preferred_langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Preferred language code'))
@@ -463,13 +467,14 @@ class User extends ContentEntityBase implements UserInterface {
     $fields['name'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
       ->setDescription(t('The name of this user.'))
-      ->setDefaultValue('')
+      ->setRequired(TRUE)
       ->setConstraints(array(
         // No Length constraint here because the UserName constraint also covers
         // that.
         'UserName' => array(),
         'UserNameUnique' => array(),
       ));
+    $fields['name']->getItemDefinition()->setClass('\Drupal\user\UserNameItem');
 
     $fields['pass'] = BaseFieldDefinition::create('password')
       ->setLabel(t('Password'))

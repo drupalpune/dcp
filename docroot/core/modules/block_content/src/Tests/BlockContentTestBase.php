@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block_content\Tests\BlockContentTestBase.
- */
-
 namespace Drupal\block_content\Tests;
 
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\block_content\Entity\BlockContent;
+use Drupal\block_content\Entity\BlockContentType;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -23,7 +19,7 @@ abstract class BlockContentTestBase extends WebTestBase {
   /**
    * Admin user
    *
-   * @var object
+   * @var \Drupal\user\UserInterface
    */
   protected $adminUser;
 
@@ -60,27 +56,31 @@ abstract class BlockContentTestBase extends WebTestBase {
     }
 
     $this->adminUser = $this->drupalCreateUser($this->permissions);
+    $this->drupalPlaceBlock('local_actions_block');
   }
 
   /**
    * Creates a custom block.
    *
-   * @param string $title
+   * @param bool|string $title
    *   (optional) Title of block. When no value is given uses a random name.
    *   Defaults to FALSE.
    * @param string $bundle
    *   (optional) Bundle name. Defaults to 'basic'.
+   * @param bool $save
+   *   (optional) Whether to save the block. Defaults to TRUE.
    *
    * @return \Drupal\block_content\Entity\BlockContent
    *   Created custom block.
    */
-  protected function createBlockContent($title = FALSE, $bundle = 'basic') {
-    $title = ($title ? : $this->randomMachineName());
-    if ($block_content = entity_create('block_content', array(
+  protected function createBlockContent($title = FALSE, $bundle = 'basic', $save = TRUE) {
+    $title = $title ?: $this->randomMachineName();
+    $block_content = BlockContent::create(array(
       'info' => $title,
       'type' => $bundle,
       'langcode' => 'en'
-    ))) {
+    ));
+    if ($block_content && $save === TRUE) {
       $block_content->save();
     }
     return $block_content;
@@ -98,7 +98,7 @@ abstract class BlockContentTestBase extends WebTestBase {
    *   Created custom block type.
    */
   protected function createBlockContentType($label, $create_body = FALSE) {
-    $bundle = entity_create('block_content_type', array(
+    $bundle = BlockContentType::create(array(
       'id' => $label,
       'label' => $label,
       'revision' => FALSE,

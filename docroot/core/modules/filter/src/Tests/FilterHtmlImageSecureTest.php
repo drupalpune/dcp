@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\filter\Tests\FilterHtmlImageSecureTest.
- */
-
 namespace Drupal\filter\Tests;
 
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Core\StreamWrapper\PublicStream;
 use Drupal\simpletest\WebTestBase;
+use Drupal\filter\Entity\FilterFormat;
 
 /**
  * Tests restriction of IMG tags in HTML input.
@@ -38,14 +34,14 @@ class FilterHtmlImageSecureTest extends WebTestBase {
     parent::setUp();
 
     // Setup Filtered HTML text format.
-    $filtered_html_format = entity_create('filter_format', array(
+    $filtered_html_format = FilterFormat::create(array(
       'format' => 'filtered_html',
       'name' => 'Filtered HTML',
       'filters' => array(
         'filter_html' => array(
           'status' => 1,
           'settings' => array(
-            'allowed_html' => '<img> <a>',
+            'allowed_html' => '<img src testattribute> <a>',
           ),
         ),
         'filter_autop' => array(
@@ -89,7 +85,7 @@ class FilterHtmlImageSecureTest extends WebTestBase {
     $csrf_path = $public_files_path . '/' . implode('/', array_fill(0, substr_count($public_files_path, '/') + 1, '..'));
 
     $druplicon = 'core/misc/druplicon.png';
-    $red_x_image = base_path() . 'core/misc/icons/ea2800/error.svg';
+    $red_x_image = base_path() . 'core/misc/icons/e32700/error.svg';
     $alt_text = t('Image removed.');
     $title_text = t('This image has been removed. For security reasons, only images from the local domain are allowed.');
 
@@ -158,4 +154,5 @@ class FilterHtmlImageSecureTest extends WebTestBase {
       $this->assertTrue($found, format_string('@image was found.', array('@image' => $image)));
     }
   }
+
 }

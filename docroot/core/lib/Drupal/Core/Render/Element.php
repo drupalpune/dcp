@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element.
- */
-
 namespace Drupal\Core\Render;
 
 use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Core\Access\AccessResultInterface;
 
 /**
  * Provides helper methods for Drupal render elements.
@@ -136,13 +132,8 @@ class Element {
     foreach (static::children($elements) as $key) {
       $child = $elements[$key];
 
-      // Skip un-accessible children.
-      if (isset($child['#access']) && !$child['#access']) {
-        continue;
-      }
-
       // Skip value and hidden elements, since they are not rendered.
-      if (isset($child['#type']) && in_array($child['#type'], array('value', 'hidden'))) {
+      if (!static::isVisibleElement($child)) {
         continue;
       }
 
@@ -150,6 +141,21 @@ class Element {
     }
 
     return array_keys($visible_children);
+  }
+
+  /**
+   * Determines if an element is visible.
+   *
+   * @param array $element
+   *   The element to check for visibility.
+   *
+   * @return bool
+   *   TRUE if the element is visible, otherwise FALSE.
+   */
+  public static function isVisibleElement($element) {
+    return (!isset($element['#type']) || !in_array($element['#type'], ['value', 'hidden', 'token']))
+      && (!isset($element['#access'])
+      || (($element['#access'] instanceof AccessResultInterface && $element['#access']->isAllowed()) || ($element['#access'] === TRUE)));
   }
 
   /**

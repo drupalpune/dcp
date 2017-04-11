@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config_translation\Plugin\Derivative\ConfigTranslationContextualLinks.
- */
-
 namespace Drupal\config_translation\Plugin\Derivative;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\config_translation\ConfigMapperManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;

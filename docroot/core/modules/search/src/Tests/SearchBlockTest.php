@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\search\Tests\SearchBlockTest.
- */
-
 namespace Drupal\search\Tests;
 
 /**
@@ -24,7 +19,7 @@ class SearchBlockTest extends SearchTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Create and login user.
+    // Create and log in user.
     $admin_user = $this->drupalCreateUser(array('administer blocks', 'search content'));
     $this->drupalLogin($admin_user);
   }
@@ -36,6 +31,7 @@ class SearchBlockTest extends SearchTestBase {
 
     // Test availability of the search block in the admin "Place blocks" list.
     $this->drupalGet('admin/structure/block');
+    $this->clickLinkPartialName('Place block');
     $this->assertLinkByHref('/admin/structure/block/add/search_form_block/classy', 0,
       'Did not find the search block in block candidate list.');
 
@@ -43,6 +39,11 @@ class SearchBlockTest extends SearchTestBase {
 
     $this->drupalGet('');
     $this->assertText($block->label(), 'Block title was found.');
+
+    // Check that name attribute is not empty.
+    $pattern = "//input[@type='submit' and @name='']";
+    $elements = $this->xpath($pattern);
+    $this->assertTrue(empty($elements), 'The search input field does not have empty name attribute.');
 
     // Test a normal search via the block form, from the front page.
     $terms = array('keys' => 'test');
@@ -72,7 +73,7 @@ class SearchBlockTest extends SearchTestBase {
     $this->assertEqual(
       $this->getUrl(),
       \Drupal::url('search.view_' . $entity_id, array(), array('query' => array('keys' => $terms['keys']), 'absolute' => TRUE)),
-      'Submitted to correct url.'
+      'Submitted to correct URL.'
     );
 
     // Test an empty search via the block form, from the front page.
@@ -86,22 +87,22 @@ class SearchBlockTest extends SearchTestBase {
     $this->assertEqual(
       $this->getUrl(),
       \Drupal::url('search.view_' . $entity_id, array(), array('query' => array('keys' => ''), 'absolute' => TRUE)),
-      'Redirected to correct url.'
+      'Redirected to correct URL.'
     );
 
     // Test that after entering a too-short keyword in the form, you can then
     // search again with a longer keyword. First test using the block form.
     $this->submitGetForm('node', array('keys' => $this->randomMachineName(1)), t('Search'));
-    $this->assertText('You must include at least one positive keyword', 'Keyword message is displayed when searching for short word');
+    $this->assertText('You must include at least one keyword to match in the content', 'Keyword message is displayed when searching for short word');
     $this->assertNoText(t('Please enter some keywords'), 'With short word entered, no keywords message is not displayed');
     $this->submitGetForm(NULL, array('keys' => $this->randomMachineName()), t('Search'), 'search-block-form');
-    $this->assertNoText('You must include at least one positive keyword', 'Keyword message is not displayed when searching for long word after short word search');
+    $this->assertNoText('You must include at least one keyword to match in the content', 'Keyword message is not displayed when searching for long word after short word search');
 
     // Same test again, using the search page form for the second search this
     // time.
     $this->submitGetForm('node', array('keys' => $this->randomMachineName(1)), t('Search'));
     $this->drupalPostForm(NULL, array('keys' => $this->randomMachineName()), t('Search'), array(), array(), 'search-form');
-    $this->assertNoText('You must include at least one positive keyword', 'Keyword message is not displayed when searching for long word after short word search');
+    $this->assertNoText('You must include at least one keyword to match in the content', 'Keyword message is not displayed when searching for long word after short word search');
 
   }
 

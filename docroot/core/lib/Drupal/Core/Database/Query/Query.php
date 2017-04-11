@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Database\Query\Query.
- */
-
 namespace Drupal\Core\Database\Query;
 
 use Drupal\Core\Database\Database;
@@ -178,27 +173,6 @@ abstract class Query implements PlaceholderInterface {
    */
   public function &getComments() {
     return $this->comments;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function conditionGroupFactory($conjunction = 'AND') {
-    return new Condition($conjunction);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function andConditionGroup() {
-    return $this->conditionGroupFactory('AND');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function orConditionGroup() {
-    return $this->conditionGroupFactory('OR');
   }
 
 }

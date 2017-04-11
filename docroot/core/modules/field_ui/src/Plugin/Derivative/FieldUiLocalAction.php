@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @fie
- * Contains \Drupal\field_ui\Plugin\Derivative\FieldUiLocalAction.
- */
-
 namespace Drupal\field_ui\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;

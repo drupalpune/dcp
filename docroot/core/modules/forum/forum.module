@@ -7,15 +7,12 @@
 
 use Drupal\comment\CommentInterface;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
-use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Url;
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Extension\Extension;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\taxonomy\Entity\Vocabulary;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Drupal\taxonomy\VocabularyInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -27,24 +24,24 @@ function forum_help($route_name, RouteMatchInterface $route_match) {
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
       $output .= '<p>' . t('The Forum module lets you create threaded discussion forums with functionality similar to other message board systems. In a forum, users post topics and threads in nested hierarchies, allowing discussions to be categorized and grouped.') . '</p>';
-      $output .= '<p>' . t('The Forum module adds and uses a content type called <em>Forum topic</em>. For background information on content types, see the <a href="!node_help">Node module help page</a>.', array('!node_help'=>\Drupal::url('help.page', array('name' => 'node')))) . '</p>';
+      $output .= '<p>' . t('The Forum module adds and uses a content type called <em>Forum topic</em>. For background information on content types, see the <a href=":node_help">Node module help page</a>.', array(':node_help' => \Drupal::url('help.page', array('name' => 'node')))) . '</p>';
       $output .= '<p>' . t('A forum is represented by a hierarchical structure, consisting of:');
       $output .= '<ul>';
       $output .= '<li>' . t('<em>Forums</em> (for example, <em>Recipes for cooking vegetables</em>)') . '</li>';
       $output .= '<li>' . t('<em>Forum topics</em> submitted by users (for example, <em>How to cook potatoes</em>), which start discussions.') . '</li>';
       $output .= '<li>' . t('Threaded <em>comments</em> submitted by users (for example, <em>You wash the potatoes first and then...</em>).') . '</li>';
-      $output .= '<li>' . t('Optional <em>containers</em>, used to group similar forums. Forums can be placed inside containers, and vice versa.').'</li>';
+      $output .= '<li>' . t('Optional <em>containers</em>, used to group similar forums. Forums can be placed inside containers, and vice versa.') . '</li>';
       $output .= '</ul>';
       $output .= '</p>';
-      $output .= '<p>' . t('For more information, see <a href="!forum">the online documentation for the Forum module</a>.', array('!forum' => 'https://www.drupal.org/documentation/modules/forum')) . '</p>';
+      $output .= '<p>' . t('For more information, see the <a href=":forum">online documentation for the Forum module</a>.', array(':forum' => 'https://www.drupal.org/documentation/modules/forum')) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Setting up the forum structure') . '</dt>';
-      $output .= '<dd>' . t('Visit the <a href="!forums">Forums page</a> to set up containers and forums to hold your discussion topics.', array('!forums' => \Drupal::url('forum.overview'))) . '</dd>';
+      $output .= '<dd>' . t('Visit the <a href=":forums">Forums page</a> to set up containers and forums to hold your discussion topics.', array(':forums' => \Drupal::url('forum.overview'))) . '</dd>';
       $output .= '<dt>' . t('Starting a discussion') . '</dt>';
-      $output .= '<dd>' . t('The <a href="!create-topic">Forum topic</a> link on the <a href="!content-add">Add content</a> page creates the first post of a new threaded discussion, or thread.', array('!create-topic' => \Drupal::url('node.add', array('node_type' => 'forum')), '!content-add' => \Drupal::url('node.add_page'))) . '</dd>';
+      $output .= '<dd>' . t('The <a href=":create-topic">Forum topic</a> link on the <a href=":content-add">Add content</a> page creates the first post of a new threaded discussion, or thread.', array(':create-topic' => \Drupal::url('node.add', array('node_type' => 'forum')), ':content-add' => \Drupal::url('node.add_page'))) . '</dd>';
       $output .= '<dt>' . t('Navigating in the forum') . '</dt>';
-      $output .= '<dd>' . t('Enabling the Forum module provides a default <em>Forums</em> menu item in the Tools menu that links to the <a href="!forums">Forums page</a>.', array('!forums' => \Drupal::url('forum.index'))) . '</dd>';
+      $output .= '<dd>' . t('Enabling the Forum module provides a default <em>Forums</em> menu item in the Tools menu that links to the <a href=":forums">Forums page</a>.', array(':forums' => \Drupal::url('forum.index'))) . '</dd>';
       $output .= '<dt>' . t('Moving forum topics') . '</dt>';
       $output .= '<dd>' . t('A forum topic (and all of its comments) may be moved between forums by selecting a different forum while editing a forum topic. When moving a forum topic between forums, the <em>Leave shadow copy</em> option creates a link in the original forum pointing to the new location.') . '</dd>';
       $output .= '<dt>' . t('Locking and disabling comments') . '</dt>';
@@ -64,12 +61,12 @@ function forum_help($route_name, RouteMatchInterface $route_match) {
       );
       $container = array(
         '#theme' => 'container',
-        '#children' => drupal_render($more_help_link),
+        '#children' => $more_help_link,
         '#attributes' => array(
           'class' => array('more-link'),
         ),
       );
-      $output .= drupal_render($container);
+      $output .= \Drupal::service('renderer')->renderPlain($container);
       return $output;
 
     case 'forum.add_container':
@@ -79,7 +76,7 @@ function forum_help($route_name, RouteMatchInterface $route_match) {
       return '<p>' . t('A forum holds related forum topics.') . '</p>';
 
     case 'forum.settings':
-      return '<p>' . t('Adjust the display of your forum topics. Organize the forums on the <a href="!forum-structure">forum structure page</a>.', array('!forum-structure' => \Drupal::url('forum.overview'))) . '</p>';
+      return '<p>' . t('Adjust the display of your forum topics. Organize the forums on the <a href=":forum-structure">forum structure page</a>.', array(':forum-structure' => \Drupal::url('forum.overview'))) . '</p>';
   }
 }
 
@@ -139,7 +136,7 @@ function forum_uri($forum) {
 /**
  * Implements hook_entity_bundle_field_info_alter().
  */
-function forum_entity_bundle_field_info_alter(&$fields, \Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle) {
+function forum_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
   if ($entity_type->id() == 'node'  && !empty($fields['taxonomy_forums'])) {
     $fields['taxonomy_forums']->addConstraint('ForumLeaf', []);
   }
@@ -286,7 +283,7 @@ function forum_comment_delete(CommentInterface $comment) {
 }
 
 /**
- * Implements hook_form_BASE_FORM_ID_alter().
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\taxonomy\VocabularyForm.
  */
 function forum_form_taxonomy_vocabulary_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $vid = \Drupal::config('forum.settings')->get('vocabulary');
@@ -299,7 +296,7 @@ function forum_form_taxonomy_vocabulary_form_alter(&$form, FormStateInterface $f
     // Forum's vocabulary always has single hierarchy. Forums and containers
     // have only one parent or no parent for root items. By default this value
     // is 0.
-    $form['hierarchy']['#value'] = TAXONOMY_HIERARCHY_SINGLE;
+    $form['hierarchy']['#value'] = VocabularyInterface::HIERARCHY_SINGLE;
     // Do not allow to delete forum's vocabulary.
     $form['actions']['delete']['#access'] = FALSE;
     // Do not allow to change a vid of forum's vocabulary.
@@ -308,7 +305,7 @@ function forum_form_taxonomy_vocabulary_form_alter(&$form, FormStateInterface $f
 }
 
 /**
- * Implements hook_form_FORM_ID_alter() for taxonomy_term_form().
+ * Implements hook_form_FORM_ID_alter() for \Drupal\taxonomy\TermForm.
  */
 function forum_form_taxonomy_term_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $vid = \Drupal::config('forum.settings')->get('vocabulary');
@@ -319,7 +316,7 @@ function forum_form_taxonomy_term_form_alter(&$form, FormStateInterface $form_st
 }
 
 /**
- * Implements hook_form_BASE_FORM_ID_alter() for node_form().
+ * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
  */
 function forum_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $node = $form_state->getFormObject()->getEntity();
@@ -450,7 +447,7 @@ function template_preprocess_forums(&$variables) {
         // them is a shadow copy.
         if ($variables['tid'] != $topic->forum_tid) {
           $variables['topics'][$id]->moved = TRUE;
-          $variables['topics'][$id]->title = SafeMarkup::checkPlain($topic->getTitle());
+          $variables['topics'][$id]->title = $topic->getTitle();
           $variables['topics'][$id]->message = \Drupal::l(t('This topic has been moved'), new Url('forum.page', ['taxonomy_term' => $topic->forum_tid]));
         }
         else {
@@ -460,7 +457,7 @@ function template_preprocess_forums(&$variables) {
         }
         $forum_submitted = array('#theme' => 'forum_submitted', '#topic' => (object) array(
           'uid' => $topic->getOwnerId(),
-          'name' => $topic->getOwner()->getUsername(),
+          'name' => $topic->getOwner()->getDisplayName(),
           'created' => $topic->getCreatedTime(),
         ));
         $variables['topics'][$id]->submitted = drupal_render($forum_submitted);
@@ -506,7 +503,12 @@ function template_preprocess_forums(&$variables) {
           }
 
           $row[] = array(
-            'data' => $topic->comment_count . $new_replies,
+            'data' => [
+              [
+                '#prefix' => $topic->comment_count,
+                '#markup' => $new_replies,
+              ],
+            ],
             'class' => array('forum__replies'),
           );
           $row[] = array(
@@ -543,9 +545,9 @@ function template_preprocess_forum_list(&$variables) {
   $row = 0;
   // Sanitize each forum so that the template can safely print the data.
   foreach ($variables['forums'] as $id => $forum) {
-    $variables['forums'][$id]->description = Xss::filterAdmin($forum->description->value);
+    $variables['forums'][$id]->description = array('#markup' => $forum->description->value);
     $variables['forums'][$id]->link = forum_uri($forum);
-    $variables['forums'][$id]->name = SafeMarkup::checkPlain($forum->label());
+    $variables['forums'][$id]->name = $forum->label();
     $variables['forums'][$id]->is_container = !empty($forum->forum_container->value);
     $variables['forums'][$id]->zebra = $row % 2 == 0 ? 'odd' : 'even';
     $row++;
@@ -636,65 +638,5 @@ function template_preprocess_forum_submitted(&$variables) {
     $username = array('#theme' => 'username', '#account' => User::load($variables['topic']->uid));
     $variables['author'] = drupal_render($username);
   }
-  $variables['time'] = isset($variables['topic']->created) ? \Drupal::service('date.formatter')->formatInterval(REQUEST_TIME - $variables['topic']->created) : '';
-}
-
-/**
- * Implements hook_system_info_alter().
- *
- * Prevents forum module from being uninstalled whilst any forum nodes exist
- * or there are any terms in the forum vocabulary.
- */
-function forum_system_info_alter(&$info, Extension $file, $type) {
-  // It is not safe use the entity query service during maintenance mode.
-  if ($type == 'module' && !defined('MAINTENANCE_MODE') && $file->getName() == 'forum') {
-    $factory = \Drupal::service('entity.query');
-    $nodes = $factory->get('node')
-      ->condition('type', 'forum')
-      ->accessCheck(FALSE)
-      ->range(0, 1)
-      ->execute();
-    if (!empty($nodes)) {
-      $info['required'] = TRUE;
-      $info['explanation'] = t('To uninstall Forum first delete all <em>Forum</em> content.');
-    }
-    $vid = \Drupal::config('forum.settings')->get('vocabulary');
-    $terms = $factory->get('taxonomy_term')
-      ->condition('vid', $vid)
-      ->accessCheck(FALSE)
-      ->range(0, 1)
-      ->execute();
-    if (!empty($terms)) {
-      $vocabulary = Vocabulary::load($vid);
-      $info['required'] = TRUE;
-      try {
-        if (!empty($info['explanation'])) {
-          if ($vocabulary->access('view')) {
-            $info['explanation'] = t('To uninstall Forum first delete all <em>Forum</em> content and <a href="!url">%vocabulary</a> terms.', [
-              '%vocabulary' => $vocabulary->label(),
-              '!url' => $vocabulary->url('overview-form'),
-            ]);
-          }
-          else {
-            $info['explanation'] = t('To uninstall Forum first delete all <em>Forum</em> content and %vocabulary terms.', [
-              '%vocabulary' => $vocabulary->label()
-            ]);
-          }
-        }
-        else {
-          $info['explanation'] = t('To uninstall Forum first delete all <a href="!url">%vocabulary</a> terms.', [
-            '%vocabulary' => $vocabulary->label(),
-            '!url' => $vocabulary->url('overview-form'),
-          ]);
-        }
-      }
-      catch (RouteNotFoundException $e) {
-        // Route rebuilding might not have occurred before this hook is fired.
-        // Just use an explanation without a link for the time being.
-        $info['explanation'] = t('To uninstall Forum first delete all <em>Forum</em> content and %vocabulary terms.', [
-          '%vocabulary' => $vocabulary->label()
-        ]);
-      }
-    }
-  }
+  $variables['time'] = isset($variables['topic']->created) ? \Drupal::service('date.formatter')->formatTimeDiffSince($variables['topic']->created) : '';
 }

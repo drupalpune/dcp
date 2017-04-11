@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\Routing\RouteMatchInterface.
- */
-
 namespace Drupal\Core\Routing;
 
 /**
@@ -19,6 +14,8 @@ namespace Drupal\Core\Routing;
  * The route match object contains useful information about the selected route
  * as well as the raw and upcast parameters derived from the incoming
  * request.
+ *
+ * @ingroup routing
  */
 interface RouteMatchInterface {
 

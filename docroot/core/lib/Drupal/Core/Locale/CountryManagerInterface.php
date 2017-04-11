@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of \Drupal\Core\Locale\CountryManagerInterface.
- */
-
 namespace Drupal\Core\Locale;
 
 /**

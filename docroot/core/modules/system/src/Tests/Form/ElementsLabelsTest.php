@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\Form\ElementsLabelsTest.
- */
-
 namespace Drupal\system\Tests\Form;
 
 use Drupal\simpletest\WebTestBase;
@@ -53,16 +48,16 @@ class ElementsLabelsTest extends WebTestBase {
 
     // Exercise various defaults for textboxes and modifications to ensure
     // appropriate override and correct behavior.
-    $elements = $this->xpath('//label[@for="edit-form-textfield-test-title-and-required" and @class="form-required"]/following-sibling::input[@id="edit-form-textfield-test-title-and-required"]');
+    $elements = $this->xpath('//label[@for="edit-form-textfield-test-title-and-required" and @class="js-form-required form-required"]/following-sibling::input[@id="edit-form-textfield-test-title-and-required"]');
     $this->assertTrue(isset($elements[0]), 'Label precedes textfield, with required marker inside label.');
 
-    $elements = $this->xpath('//input[@id="edit-form-textfield-test-no-title-required"]/preceding-sibling::label[@for="edit-form-textfield-test-no-title-required" and @class="form-required"]');
+    $elements = $this->xpath('//input[@id="edit-form-textfield-test-no-title-required"]/preceding-sibling::label[@for="edit-form-textfield-test-no-title-required" and @class="js-form-required form-required"]');
     $this->assertTrue(isset($elements[0]), 'Label tag with required marker precedes required textfield with no title.');
 
     $elements = $this->xpath('//input[@id="edit-form-textfield-test-title-invisible"]/preceding-sibling::label[@for="edit-form-textfield-test-title-invisible" and @class="visually-hidden"]');
     $this->assertTrue(isset($elements[0]), 'Label preceding field and label class is visually-hidden.');
 
-    $elements = $this->xpath('//input[@id="edit-form-textfield-test-title"]/preceding-sibling::span[@class="form-required"]');
+    $elements = $this->xpath('//input[@id="edit-form-textfield-test-title"]/preceding-sibling::span[@class="js-form-required form-required"]');
     $this->assertFalse(isset($elements[0]), 'No required marker on non-required field.');
 
     $elements = $this->xpath('//input[@id="edit-form-textfield-test-title-after"]/following-sibling::label[@for="edit-form-textfield-test-title-after" and @class="option"]');
@@ -71,7 +66,7 @@ class ElementsLabelsTest extends WebTestBase {
     $elements = $this->xpath('//label[@for="edit-form-textfield-test-title-no-show"]');
     $this->assertFalse(isset($elements[0]), 'No label tag when title set not to display.');
 
-    $elements = $this->xpath('//div[contains(@class, "form-item-form-textfield-test-title-invisible") and contains(@class, "form-no-label")]');
+    $elements = $this->xpath('//div[contains(@class, "js-form-item-form-textfield-test-title-invisible") and contains(@class, "form-no-label")]');
     $this->assertTrue(isset($elements[0]), 'Field class is form-no-label when there is no label.');
 
     // Check #field_prefix and #field_suffix placement.
@@ -82,10 +77,10 @@ class ElementsLabelsTest extends WebTestBase {
     $this->assertTrue(isset($elements[0]), 'Properly places the #field_suffix element immediately after the form field.');
 
     // Check #prefix and #suffix placement.
-    $elements = $this->xpath('//div[@id="form-test-textfield-title-prefix"]/following-sibling::div[contains(@class, \'form-item-form-textfield-test-title\')]');
+    $elements = $this->xpath('//div[@id="form-test-textfield-title-prefix"]/following-sibling::div[contains(@class, \'js-form-item-form-textfield-test-title\')]');
     $this->assertTrue(isset($elements[0]), 'Properly places the #prefix element before the form item.');
 
-    $elements = $this->xpath('//div[@id="form-test-textfield-title-suffix"]/preceding-sibling::div[contains(@class, \'form-item-form-textfield-test-title\')]');
+    $elements = $this->xpath('//div[@id="form-test-textfield-title-suffix"]/preceding-sibling::div[contains(@class, \'js-form-item-form-textfield-test-title\')]');
     $this->assertTrue(isset($elements[0]), 'Properly places the #suffix element before the form item.');
 
     // Check title attribute for radios and checkboxes.
@@ -93,6 +88,12 @@ class ElementsLabelsTest extends WebTestBase {
     $this->assertEqual($elements[0]['title'], 'Checkboxes test' . ' (' . t('Required') . ')', 'Title attribute found.');
     $elements = $this->xpath('//div[@id="edit-form-radios-title-attribute"]');
     $this->assertEqual($elements[0]['title'], 'Radios test' . ' (' . t('Required') . ')', 'Title attribute found.');
+
+    $elements = $this->xpath('//fieldset[@id="edit-form-checkboxes-title-invisible--wrapper"]/legend/span[contains(@class, "visually-hidden")]');
+    $this->assertTrue(!empty($elements), "Title/Label not displayed when 'visually-hidden' attribute is set in checkboxes.");
+
+    $elements = $this->xpath('//fieldset[@id="edit-form-radios-title-invisible--wrapper"]/legend/span[contains(@class, "visually-hidden")]');
+    $this->assertTrue(!empty($elements), "Title/Label not displayed when 'visually-hidden' attribute is set in radios.");
   }
 
   /**
@@ -120,6 +121,30 @@ class ElementsLabelsTest extends WebTestBase {
     $description_id = $field_id . '--description';
     $elements = $this->xpath('//input[@id="' . $field_id . '" and @aria-describedby="' . $description_id . '"]/following-sibling::div[contains(@class, "visually-hidden")]');
     $this->assertTrue(isset($elements[0]), t('Properly renders the #description element visually-hidden.'));
+  }
+
+  /**
+   * Test forms in theme-less environments.
+   */
+  function testFormsInThemeLessEnvironments() {
+    $form = $this->getFormWithLimitedProperties();
+    $render_service = $this->container->get('renderer');
+    // This should not throw any notices.
+    $render_service->renderPlain($form);
+  }
+
+  /**
+   * Return a form with element with not all properties defined.
+   */
+  protected function getFormWithLimitedProperties() {
+    $form = array();
+
+    $form['fieldset'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Fieldset',
+    );
+
+    return $form;
   }
 
 }

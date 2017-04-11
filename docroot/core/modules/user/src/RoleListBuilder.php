@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\RoleListBuilder.
- */
-
 namespace Drupal\user;
 
 use Drupal\Core\Config\Entity\DraggableListBuilder;
@@ -37,7 +32,7 @@ class RoleListBuilder extends DraggableListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['label'] = $this->getLabel($entity);
+    $row['label'] = $entity->label();
     return $row + parent::buildRow($entity);
   }
 

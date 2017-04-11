@@ -1,17 +1,32 @@
-/* -------------- Password Field  ------------- */
+/**
+ * @file
+ * Visual styles for Bartik's forms.
+ */
 
+/* Password field. */
 .password-field {
   margin: 0;
 }
 
-/* -------------- Form Elements   ------------- */
-
+/* Form elements. */
 form {
   margin: 0;
   padding: 0;
 }
 fieldset {
   margin: 1em 0;
+  min-width: 0;
+}
+/**
+ * We've temporarily added this Firefox specific rule here to fix fieldset
+ * widths.
+ * @todo remove once this Mozilla bug is fixed.
+ * See https://bugzilla.mozilla.org/show_bug.cgi?id=504622
+ */
+@-moz-document url-prefix() {
+  fieldset {
+    display: table-cell;
+  }
 }
 details,
 fieldset,
@@ -79,7 +94,7 @@ textarea {
 @media screen and (max-width: 60em) { /* 920px */
   input,
   textarea {
-    font-size: 1.142857143em;
+    font-size: 16px;
   }
 }
 textarea {
@@ -113,8 +128,12 @@ input.form-submit:focus {
   margin-right: 1.2em;
   margin-left: 0;
 }
-.form-item label {
+.form-item label,
+.form-wrapper .label {
   font-size: 0.929em;
+}
+.form-wrapper .field-multiple-table .label {
+  font-size: inherit;
 }
 .form-type-radio label,
 .form-type-checkbox label {
@@ -137,13 +156,18 @@ input.form-submit:focus {
 .form-actions {
   padding-top: 10px;
 }
+
 /* Node Form */
 #edit-body {
   margin-bottom: 2em;
 }
 .node-form label,
-.node-form .description {
+.node-form .description,
+.node-form .form-wrapper .label {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.node-form .form-wrapper .field-multiple-table .label {
+  font-family: inherit;
 }
 .node-form .form-wrapper {
   margin-bottom: 2em;
@@ -237,9 +261,6 @@ input.form-submit:focus {
   line-height: 1.2;
   margin-left: 120px; /* LTR */
 }
-#content h2.comment-form {
-  margin-bottom: 0.5em;
-}
 .comment-form .form-textarea {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
@@ -268,4 +289,35 @@ input.form-submit:focus {
 [dir="rtl"] #edit-actions input {
   margin-left: 0.6em;
   margin-right: 0;
+}
+
+/* Form error styles. */
+.form-item textarea.error + .cke {
+  border: 2px solid red;
+}
+
+/* Form error message styles. */
+.form-item--error-message {
+  color: #e32700;
+}
+
+/**
+ * Improve form element usability on narrow devices.
+ */
+@media all and (max-width: 600px) {
+  .form-actions .button {
+    float: none;
+    margin: 10px 0 0;
+    padding-bottom: 6px;
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+  }
+
+  .js .dropbutton .dropbutton-action > input, .js .dropbutton .dropbutton-action > a, .js .dropbutton .dropbutton-action > button {
+    text-align: center;
+    padding-left: 3em;
+  }
 }

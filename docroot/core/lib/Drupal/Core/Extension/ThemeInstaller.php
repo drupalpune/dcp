@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Extension\ThemeInstaller.
- */
-
 namespace Drupal\Core\Extension;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Asset\AssetCollectionOptimizerInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -113,9 +107,7 @@ class ThemeInstaller implements ThemeInstallerInterface {
 
       if ($missing = array_diff_key($theme_list, $theme_data)) {
         // One or more of the given themes doesn't exist.
-        throw new \InvalidArgumentException(SafeMarkup::format('Unknown themes: !themes.', array(
-          '!themes' => implode(', ', $missing),
-        )));
+        throw new \InvalidArgumentException('Unknown themes: ' . implode(', ', $missing) . '.');
       }
 
       // Only process themes that are not installed currently.
@@ -164,10 +156,7 @@ class ThemeInstaller implements ThemeInstallerInterface {
 
       // Throw an exception if the theme name is too long.
       if (strlen($key) > DRUPAL_EXTENSION_NAME_MAX_LENGTH) {
-        throw new ExtensionNameLengthException(SafeMarkup::format('Theme name %name is over the maximum allowed length of @max characters.', array(
-          '%name' => $key,
-          '@max' => DRUPAL_EXTENSION_NAME_MAX_LENGTH,
-        )));
+        throw new ExtensionNameLengthException("Theme name $key is over the maximum allowed length of " . DRUPAL_EXTENSION_NAME_MAX_LENGTH . ' characters.');
       }
 
       // Validate default configuration of the theme. If there is existing
@@ -234,7 +223,7 @@ class ThemeInstaller implements ThemeInstallerInterface {
         throw new \InvalidArgumentException("The current default theme $key cannot be uninstalled.");
       }
       if ($key === $theme_config->get('admin')) {
-        throw new \InvalidArgumentException("The current admin theme $key cannot be uninstalled.");
+        throw new \InvalidArgumentException("The current administration theme $key cannot be uninstalled.");
       }
       // Base themes cannot be uninstalled if sub themes are installed, and if
       // they are not uninstalled at the same time.

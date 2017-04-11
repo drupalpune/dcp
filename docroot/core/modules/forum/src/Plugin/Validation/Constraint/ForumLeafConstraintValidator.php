@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\forum\Plugin\Validation\Constraint\ForumLeafConstraintValidator.
- */
-
 namespace Drupal\forum\Plugin\Validation\Constraint;
 
-use Drupal\Component\Utility\Unicode;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 

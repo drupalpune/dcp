@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\image_module_test\Plugin\ImageEffect\NullTestImageEffect.
- */
-
 namespace Drupal\image_module_test\Plugin\ImageEffect;
 
 use Drupal\Core\Image\ImageInterface;
@@ -23,7 +18,7 @@ class NullTestImageEffect extends ImageEffectBase {
   /**
    * {@inheritdoc}
    */
-  public function transformDimensions(array &$dimensions) {
+  public function transformDimensions(array &$dimensions, $uri) {
     // Unset image dimensions.
     $dimensions['width'] = $dimensions['height'] = NULL;
   }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Config\Entity\EntityDisplayModeBaseUnitTest.
- */
-
 namespace Drupal\Tests\Core\Config\Entity;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -98,7 +93,7 @@ class EntityDisplayModeBaseUnitTest extends UnitTestCase {
       ->setMethods(array('getFilterFormat'))
       ->getMock();
 
-    $dependencies = $this->entity->calculateDependencies();
+    $dependencies = $this->entity->calculateDependencies()->getDependencies();
     $this->assertContains('test_module', $dependencies['module']);
   }
 

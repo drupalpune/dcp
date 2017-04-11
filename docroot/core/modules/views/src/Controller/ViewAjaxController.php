@@ -1,18 +1,17 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Controller\ViewAjaxController.
- */
-
 namespace Drupal\views\Controller;
 
 use Drupal\Component\Utility\UrlHelper;
-use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\EventSubscriber\AjaxResponseSubscriber;
+use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
+use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Path\CurrentPathStack;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\RedirectDestinationInterface;
 use Drupal\views\Ajax\ScrollTopCommand;
@@ -102,10 +101,10 @@ class ViewAjaxController implements ContainerInjectionInterface {
    * Loads and renders a view via AJAX.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
-   *  The current request object.
+   *   The current request object.
    *
    * @return \Drupal\views\Ajax\ViewAjaxResponse
-   *  The view response as ajax response.
+   *   The view response as ajax response.
    *
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    *   Thrown when the view was not found.
@@ -133,7 +132,7 @@ class ViewAjaxController implements ContainerInjectionInterface {
 
       // Remove all of this stuff from the query of the request so it doesn't
       // end up in pagers and tablesort URLs.
-      foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids') as $key) {
+      foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', AjaxResponseSubscriber::AJAX_REQUEST_PARAMETER) as $key) {
         $request->query->remove($key);
         $request->request->remove($key);
       }
@@ -159,7 +158,15 @@ class ViewAjaxController implements ContainerInjectionInterface {
         // Overwrite the destination.
         // @see the redirect.destination service.
         $origin_destination = $path;
-        $query = UrlHelper::buildQuery($request->query->all());
+
+        // Remove some special parameters you never want to have part of the
+        // destination query.
+        $used_query_parameters = $request->query->all();
+        // @todo Remove this parsing once these are removed from the request in
+        //   https://www.drupal.org/node/2504709.
+        unset($used_query_parameters[FormBuilderInterface::AJAX_FORM_REQUEST], $used_query_parameters[MainContentViewSubscriber::WRAPPER_FORMAT], $used_query_parameters['ajax_page_state']);
+
+        $query = UrlHelper::buildQuery($used_query_parameters);
         if ($query != '') {
           $origin_destination .= '?' . $query;
         }
@@ -173,10 +180,18 @@ class ViewAjaxController implements ContainerInjectionInterface {
         // Reuse the same DOM id so it matches that in drupalSettings.
         $view->dom_id = $dom_id;
 
-        if ($preview = $view->preview($display_id, $args)) {
-          $response->addCommand(new ReplaceCommand(".js-view-dom-id-$dom_id", $this->renderer->render($preview)));
-          $response->setAttachments($preview['#attached']);
+        $context = new RenderContext();
+        $preview = $this->renderer->executeInRenderContext($context, function() use ($view, $display_id, $args) {
+          return $view->preview($display_id, $args);
+        });
+        if (!$context->isEmpty()) {
+          $bubbleable_metadata = $context->pop();
+          BubbleableMetadata::createFromRenderArray($preview)
+            ->merge($bubbleable_metadata)
+            ->applyTo($preview);
         }
+        $response->addCommand(new ReplaceCommand(".js-view-dom-id-$dom_id", $preview));
+
         return $response;
       }
       else {

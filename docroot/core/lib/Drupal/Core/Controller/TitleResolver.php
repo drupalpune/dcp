@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Controller\TitleResolver.
- */
-
 namespace Drupal\Core\Controller;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -60,7 +55,6 @@ class TitleResolver implements TitleResolverInterface {
       if (($raw_parameters = $request->attributes->get('_raw_variables'))) {
         foreach ($raw_parameters->all() as $key => $value) {
           $args['@' . $key] = $value;
-          $args['!' . $key] = $value;
           $args['%' . $key] = $value;
         }
       }

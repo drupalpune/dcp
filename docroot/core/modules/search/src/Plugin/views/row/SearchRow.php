@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\search\Plugin\views\row\SearchRow.
- */
-
 namespace Drupal\search\Plugin\views\row;
 
 use Drupal\Core\Form\FormStateInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\Plugin\Action\DeleteNode.
- */
-
 namespace Drupal\node\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
@@ -77,7 +72,13 @@ class DeleteNode extends ActionBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function executeMultiple(array $entities) {
-    $this->tempStore->set($this->currentUser->id(), $entities);
+    $info = [];
+    /** @var \Drupal\node\NodeInterface $node */
+    foreach ($entities as $node) {
+      $langcode = $node->language()->getId();
+      $info[$node->id()][$langcode] = $langcode;
+    }
+    $this->tempStore->set($this->currentUser->id(), $info);
   }
 
   /**

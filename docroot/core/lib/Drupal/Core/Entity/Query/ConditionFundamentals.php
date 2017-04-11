@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Query\ConditionFundamentals.
- */
-
 namespace Drupal\Core\Entity\Query;
 
 /**
@@ -37,32 +32,44 @@ abstract class ConditionFundamentals {
   protected $query;
 
   /**
+   * List of potential namespaces of the classes belonging to this condition.
+   *
+   * @var array
+   */
+  protected $namespaces = array();
+
+  /**
    * Constructs a Condition object.
    *
    * @param string $conjunction
    *   The operator to use to combine conditions: 'AND' or 'OR'.
+   * @param QueryInterface $query
+   *   The entity query this condition belongs to.
+   * @param array $namespaces
+   *   List of potential namespaces of the classes belonging to this condition.
    */
-  public function __construct($conjunction, QueryInterface $query) {
+  public function __construct($conjunction, QueryInterface $query, $namespaces = []) {
     $this->conjunction = $conjunction;
     $this->query = $query;
+    $this->namespaces = $namespaces;
   }
 
   /**
-   * Implements \Drupal\Core\Entity\Query\ConditionInterface::getConjunction().
+   * {@inheritdoc}
    */
   public function getConjunction() {
     return $this->conjunction;
   }
 
   /**
-   * Implements \Countable::count().
+   * {@inheritdoc}
    */
   public function count() {
     return count($this->conditions) - 1;
   }
 
   /**
-   * Implements \Drupal\Core\Entity\Query\ConditionInterface::conditions().
+   * {@inheritdoc}
    */
   public function &conditions() {
     return $this->conditions;
@@ -75,7 +82,7 @@ abstract class ConditionFundamentals {
    */
   public function __clone() {
     foreach ($this->conditions as $key => $condition) {
-      if ($condition['field'] instanceOf ConditionInterface) {
+      if ($condition['field'] instanceof ConditionInterface) {
         $this->conditions[$key]['field'] = clone($condition['field']);
       }
     }

@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\Core\Database\ConnectionTest.
- */
-
 namespace Drupal\Tests\Core\Database;
 
 use Drupal\Tests\Core\Database\Stub\StubConnection;
-use Drupal\Tests\Core\Database\Stub\StubPDO;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -156,19 +150,16 @@ class ConnectionTest extends UnitTestCase {
     return array(
       array(
         'nonexistent_class',
-        'stub',
         '\\',
         'nonexistent_class',
       ),
       array(
-        'Drupal\\Core\\Database\\Driver\\mysql\\Select',
-        'mysql',
+        'Drupal\Tests\Core\Database\Stub\Select',
         NULL,
         'Select',
       ),
       array(
         'Drupal\\Tests\\Core\\Database\\Stub\\Driver\\Schema',
-        'stub',
         'Drupal\\Tests\\Core\\Database\\Stub\\Driver',
         'Schema',
       ),
@@ -180,11 +171,10 @@ class ConnectionTest extends UnitTestCase {
    *
    * @dataProvider providerGetDriverClass
    */
-  public function testGetDriverClass($expected, $driver, $namespace, $class) {
+  public function testGetDriverClass($expected, $namespace, $class) {
     $mock_pdo = $this->getMock('Drupal\Tests\Core\Database\Stub\StubPDO');
     $connection = new StubConnection($mock_pdo, array('namespace' => $namespace));
     // Set the driver using our stub class' public property.
-    $connection->driver = $driver;
     $this->assertEquals($expected, $connection->getDriverClass($class));
   }
 
@@ -254,12 +244,12 @@ class ConnectionTest extends UnitTestCase {
         array(''),
       ),
       array(
-        '/* Exploit * / DROP TABLE node; -- */ ',
+        '/* Exploit  *  / DROP TABLE node. -- */ ',
         array('Exploit * / DROP TABLE node; --'),
       ),
       array(
-        '/* Exploit DROP TABLE node; --; another comment */ ',
-        array('Exploit */ DROP TABLE node; --', 'another comment'),
+        '/* Exploit  *  / DROP TABLE node. --. another comment */ ',
+        array('Exploit * / DROP TABLE node; --', 'another comment'),
       ),
     );
   }
@@ -286,8 +276,8 @@ class ConnectionTest extends UnitTestCase {
   public function providerFilterComments() {
     return array(
       array('', ''),
-      array('Exploit * / DROP TABLE node; --', 'Exploit * / DROP TABLE node; --'),
-      array('Exploit DROP TABLE node; --', 'Exploit */ DROP TABLE node; --'),
+      array('Exploit  *  / DROP TABLE node. --', 'Exploit * / DROP TABLE node; --'),
+      array('Exploit  * / DROP TABLE node. --', 'Exploit */ DROP TABLE node; --'),
     );
   }
 

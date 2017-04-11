@@ -1,17 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\migrate\Plugin\MigrateDestinationPluginManager.
- */
-
-
 namespace Drupal\migrate\Plugin;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\migrate\Entity\MigrationInterface;
 
 /**
  * Plugin manager for migrate destination plugins.
@@ -26,21 +19,30 @@ use Drupal\migrate\Entity\MigrationInterface;
 class MigrateDestinationPluginManager extends MigratePluginManager {
 
   /**
-   * The theme handler
+   * The entity manager.
    *
-   * @var \Drupal\Core\Extension\ThemeHandlerInterface
+   * @var \Drupal\Core\Entity\EntityManagerInterface
    */
-  protected $themeHandler;
+  protected $entityManager;
 
   /**
-   * An associative array where the keys are the enabled modules and themes.
+   * Constructs a MigrateDestinationPluginManager object.
    *
-   * @var array
-   */
-  protected $providers;
-
-  /**
-   * {@inheritdoc}
+   * @param string $type
+   *   The type of the plugin: row, source, process, destination, entity_field,
+   *   id_map.
+   * @param \Traversable $namespaces
+   *   An object that implements \Traversable which contains the root paths
+   *   keyed by the corresponding namespace to look for plugin implementations.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
+   *   Cache backend instance to use.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler to invoke the alter hook with.
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param string $annotation
+   *   (optional) The annotation class name. Defaults to
+   *   'Drupal\migrate\Annotation\MigrateDestination'.
    */
   public function __construct($type, \Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler, EntityManagerInterface $entity_manager, $annotation = 'Drupal\migrate\Annotation\MigrateDestination') {
     parent::__construct($type, $namespaces, $cache_backend, $module_handler, $annotation);

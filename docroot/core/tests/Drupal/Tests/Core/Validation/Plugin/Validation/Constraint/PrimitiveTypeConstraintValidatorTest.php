@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Validation\Plugin\Validation\Constraint\PrimitiveTypeConstraintValidatorTest.
- */
-
 namespace Drupal\Tests\Core\Validation\Plugin\Validation\Constraint;
 
 use Drupal\Core\TypedData\DataDefinition;
@@ -16,10 +11,11 @@ use Drupal\Core\TypedData\Plugin\DataType\Uri;
 use Drupal\Core\TypedData\PrimitiveInterface;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\PrimitiveTypeConstraint;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\PrimitiveTypeConstraintValidator;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * @coversDefaultClass Drupal\Core\Validation\Plugin\Validation\Constraint\PrimitiveTypeConstraintValidator
+ * @coversDefaultClass \Drupal\Core\Validation\Plugin\Validation\Constraint\PrimitiveTypeConstraintValidator
  * @group validation
  */
 class PrimitiveTypeConstraintValidatorTest extends UnitTestCase {
@@ -63,6 +59,7 @@ class PrimitiveTypeConstraintValidatorTest extends UnitTestCase {
     $data[] = [new IntegerData(DataDefinition::create('integer')), 1.5, FALSE];
     $data[] = [new IntegerData(DataDefinition::create('integer')), 'test', FALSE];
     $data[] = [new StringData(DataDefinition::create('string')), 'test', TRUE];
+    $data[] = [new StringData(DataDefinition::create('string')), new TranslatableMarkup('test'), TRUE];
     // It is odd that 1 is a valid string.
     // $data[] = [$this->getMock('Drupal\Core\TypedData\Type\StringInterface'), 1, FALSE];
     $data[] = [new StringData(DataDefinition::create('string')), [], FALSE];

@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\content_translation\Plugin\Derivative\ContentTranslationContextualLinks.
- */
-
 namespace Drupal\content_translation\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
-use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\content_translation\ContentTranslationManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityChangedTrait.
- */
-
 namespace Drupal\Core\Entity;
 
 /**
@@ -26,6 +21,29 @@ trait EntityChangedTrait {
       $changed = max($translation_changed, $changed);
     }
     return $changed;
+  }
+
+  /**
+   * Gets the timestamp of the last entity change for the current translation.
+   *
+   * @return int
+   *   The timestamp of the last entity save operation.
+   */
+  public function getChangedTime() {
+    return $this->get('changed')->value;
+  }
+
+  /**
+   * Sets the timestamp of the last entity change for the current translation.
+   *
+   * @param int $timestamp
+   *   The timestamp of the last entity save operation.
+   *
+   * @return $this
+   */
+  public function setChangedTime($timestamp) {
+    $this->set('changed', $timestamp);
+    return $this;
   }
 
 }

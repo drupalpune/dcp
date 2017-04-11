@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\FieldItemBase.
- */
-
 namespace Drupal\Core\Field;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -70,7 +65,7 @@ abstract class FieldItemBase extends Map implements FieldItemInterface {
    * {@inheritdoc}
    */
   public function getLangcode() {
-    return $this->parent->getLangcode();
+    return $this->getParent()->getLangcode();
   }
 
   /**
@@ -201,12 +196,7 @@ abstract class FieldItemBase extends Map implements FieldItemInterface {
   /**
    * {@inheritdoc}
    */
-  public function insert() { }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function update() { }
+  public function postSave($update) { }
 
   /**
    * {@inheritdoc}
@@ -270,6 +260,13 @@ abstract class FieldItemBase extends Map implements FieldItemInterface {
    */
   public static function calculateDependencies(FieldDefinitionInterface $field_definition) {
     return array();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function calculateStorageDependencies(FieldStorageDefinitionInterface $field_definition) {
+    return [];
   }
 
   /**

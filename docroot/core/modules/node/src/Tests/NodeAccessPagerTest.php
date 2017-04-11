@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Tests\NodeAccessPagerTest.
- */
-
 namespace Drupal\node\Tests;
 
 use Drupal\comment\CommentInterface;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\simpletest\WebTestBase;
+use Drupal\comment\Entity\Comment;
 
 /**
  * Tests access controlled node views have the right amount of comment pages.
@@ -45,7 +41,7 @@ class NodeAccessPagerTest extends WebTestBase {
 
     // Create 60 comments.
     for ($i = 0; $i < 60; $i++) {
-      $comment = entity_create('comment', array(
+      $comment = Comment::create(array(
         'entity_id' => $node->id(),
         'entity_type' => 'node',
         'field_name' => 'comment',
@@ -78,7 +74,7 @@ class NodeAccessPagerTest extends WebTestBase {
     $this->assertTrue($vid, 'Forum navigation vocabulary ID is set.');
 
     // Look up the general discussion term.
-    $tree = taxonomy_get_tree($vid, 0, 1);
+    $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vid, 0, 1);
     $tid = reset($tree)->tid;
     $this->assertTrue($tid, 'General discussion term is found in the forum vocabulary.');
 
@@ -100,4 +96,5 @@ class NodeAccessPagerTest extends WebTestBase {
     $this->assertRaw('page=1');
     $this->assertNoRaw('page=2');
   }
+
 }

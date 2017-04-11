@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\search\Tests\SearchSetLocaleTest.
- */
-
 namespace Drupal\search\Tests;
 
 /**
@@ -52,4 +47,5 @@ class SearchSetLocaleTest extends SearchTestBase {
     // necessary here.
     $this->nodeSearchPlugin->execute();
   }
+
 }

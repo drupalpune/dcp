@@ -1,0 +1,72 @@
+/*------------------------------------*\
+    * @file
+    * Login.
+\*------------------------------------*/
+
+.path-user {
+    .form-item .description {
+        font-size: 18px;
+    }
+    label {
+        font-size: 24px;
+    }
+    .main-content {
+        width: $container-width;
+        margin: 0 auto;
+        padding: 50px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .region-content {
+        border: 1px solid #34495e;
+        -webkit-appearance: none;
+        background-color: rgba(7, 6, 11, 0.63);
+        color: #fff;
+    }
+    ul.tabs {
+        color: #fff;
+        background-color: #34495e;
+        height: 60px;
+        a {
+            padding: 0 3em;
+            color: #fff;
+            line-height: 60px;
+        }
+        a.is-active {
+            background: #e74c3c;
+        }
+        a:hover {
+            background: none;
+        }
+    }
+}
+
+.path-user .content {
+    background: url(http://i.imgur.com/M5SuNj8.jpg) no-repeat 0px 0px;
+    background-size: cover;
+    #block-internship2017-content {
+        padding: 10px;
+        .js-form-item {
+            margin: 30px 0 30px 0;
+            input[type=text],
+            input[type=password],
+            input[type=email] {
+                border-radius: 10px;
+                line-height: 30px;
+                color: black;
+                font-size: 18px;
+            }
+            input[type=text]:focus,
+            input[type=password]:focus {
+                outline: none;
+            }
+        }
+        input[type=submit] {
+            background-color: #e74c3c;
+            color: #fff;
+            padding: 10px 30px;
+            border: none;
+        }
+    }
+}

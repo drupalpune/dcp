@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Form\BreakLockForm.
- */
-
 namespace Drupal\views_ui\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
@@ -79,7 +74,7 @@ class BreakLockForm extends EntityConfirmFormBase {
       '#theme' => 'username',
       '#account' => $account,
     );
-    return $this->t('By breaking this lock, any unsaved changes made by !user will be lost.', array('!user' => drupal_render($username)));
+    return $this->t('By breaking this lock, any unsaved changes made by @user will be lost.', array('@user' => drupal_render($username)));
   }
 
   /**

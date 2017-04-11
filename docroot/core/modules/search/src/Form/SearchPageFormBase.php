@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\search\Form\SearchPageFormBase.
- */
-
 namespace Drupal\search\Form;
 
 use Drupal\Core\Entity\EntityForm;
@@ -112,6 +107,7 @@ abstract class SearchPageFormBase extends EntityForm {
       '#field_prefix' => 'search/',
       '#default_value' => $this->entity->getPath(),
       '#maxlength' => '255',
+      '#required' => TRUE,
     );
     $form['plugin'] = array(
       '#type' => 'value',
@@ -144,8 +140,8 @@ abstract class SearchPageFormBase extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
-    parent::validate($form, $form_state);
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
 
     // Ensure each path is unique.
     $path = $this->entityQuery->get('search_page')

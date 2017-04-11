@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\TypedData\TranslatableInterface.
- */
-
 namespace Drupal\Core\TypedData;
 
 /**
@@ -29,6 +24,14 @@ interface TranslatableInterface {
   public function isDefaultTranslation();
 
   /**
+   * Checks whether the translation is new.
+   *
+   * @return bool
+   *   TRUE if the translation is new, FALSE otherwise.
+   */
+  public function isNewTranslation();
+
+  /**
    * Returns the languages the data is translated to.
    *
    * @param bool $include_default
@@ -44,8 +47,7 @@ interface TranslatableInterface {
    * Gets a translation of the data.
    *
    * The returned translation has to be of the same type than this typed data
-   * object. If the specified translation does not exist, a new one will be
-   * instantiated.
+   * object.
    *
    * @param $langcode
    *   The language code of the translation to get or
@@ -54,6 +56,9 @@ interface TranslatableInterface {
    *
    * @return $this
    *   A typed data object for the translated data.
+   *
+   * @throws \InvalidArgumentException
+   *   If an invalid or non-existing translation language is specified.
    */
   public function getTranslation($langcode);
 
@@ -86,6 +91,9 @@ interface TranslatableInterface {
    *   fields. Defaults to none.
    *
    * @return $this
+   *
+   * @throws \InvalidArgumentException
+   *   If an invalid or existing translation language is specified.
    */
   public function addTranslation($langcode, array $values = array());
 

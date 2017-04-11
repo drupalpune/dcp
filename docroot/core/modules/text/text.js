@@ -1,9 +1,19 @@
-(function ($) {
+/**
+ * @file
+ * Text behaviors.
+ */
 
-  "use strict";
+(function ($, Drupal) {
+
+  'use strict';
 
   /**
    * Auto-hide summary textarea if empty and show hide and unhide links.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches auto-hide behavior on `text-summary` events.
    */
   Drupal.behaviors.textSummary = {
     attach: function (context, settings) {
@@ -12,7 +22,7 @@
 
         var $summary = $widget.find('.js-text-summary-wrapper');
         var $summaryLabel = $summary.find('label').eq(0);
-        var $full = $widget.find('.js-text-full').closest('.form-item');
+        var $full = $widget.find('.js-text-full').closest('.js-form-item');
         var $fullLabel = $full.find('label').eq(0);
 
         // Create a placeholder label when the field cardinality is greater
@@ -48,4 +58,4 @@
     }
   };
 
-})(jQuery);
+})(jQuery, Drupal);

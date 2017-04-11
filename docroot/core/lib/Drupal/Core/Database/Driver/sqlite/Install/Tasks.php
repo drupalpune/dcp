@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Driver\sqlite\Install\Tasks
- */
-
 namespace Drupal\Core\Database\Driver\sqlite\Install;
 
 use Drupal\Core\Database\Database;
@@ -33,7 +28,7 @@ class Tasks extends InstallTasks {
    * {@inheritdoc}
    */
   public function minimumVersion() {
-    return '3.6.8';
+    return '3.7.11';
   }
 
   /**
@@ -48,7 +43,7 @@ class Tasks extends InstallTasks {
     // Make the text more accurate for SQLite.
     $form['database']['#title'] = t('Database file');
     $form['database']['#description'] = t('The absolute path to the file where @drupal data will be stored. This must be writable by the web server and should exist outside of the web root.', array('@drupal' => drupal_install_profile_distribution_name()));
-    $default_database = conf_path(FALSE) . '/files/.ht.sqlite';
+    $default_database = \Drupal::service('site.path') . '/files/.ht.sqlite';
     $form['database']['#default_value'] = empty($database['database']) ? $default_database : $database['database'];
     return $form;
   }
@@ -108,4 +103,5 @@ class Tasks extends InstallTasks {
     }
     return TRUE;
   }
+
 }

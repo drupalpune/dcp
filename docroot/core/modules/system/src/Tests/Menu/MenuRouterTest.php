@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\Menu\MenuRouterTest.
- */
-
 namespace Drupal\system\Tests\Menu;
 
 use Drupal\Core\Url;
@@ -43,6 +38,8 @@ class MenuRouterTest extends WebTestBase {
     parent::setUp();
 
     $this->drupalPlaceBlock('system_menu_block:tools');
+    $this->drupalPlaceBlock('local_tasks_block');
+    $this->drupalPlaceBlock('page_title_block');
   }
 
   /**
@@ -72,6 +69,8 @@ class MenuRouterTest extends WebTestBase {
     // Confirm local task links are displayed.
     $this->assertLink('Local task A');
     $this->assertLink('Local task B');
+    $this->assertNoLink('Local task C');
+    $this->assertEscaped("<script>alert('Welcome to the jungle!')</script>", ENT_QUOTES, 'UTF-8');
     // Confirm correct local task href.
     $this->assertLinkByHref(Url::fromRoute('menu_test.router_test1', ['bar' => $machine_name])->toString());
     $this->assertLinkByHref(Url::fromRoute('menu_test.router_test2', ['bar' => $machine_name])->toString());
@@ -200,12 +199,13 @@ class MenuRouterTest extends WebTestBase {
       "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
     $this->drupalGet($path);
     $this->assertRaw('This is the menuTestCallback content.');
+    $this->assertNoText(t('The website encountered an unexpected error. Please try again later.'));
   }
 
   /**
    * Make sure the maintenance mode can be bypassed using an EventSubscriber.
    *
-   * @see \Drupal\menu_test\EventSubscriber\MaintenanceModeSubscriber::onKernelRequestMaintenance().
+   * @see \Drupal\menu_test\EventSubscriber\MaintenanceModeSubscriber::onKernelRequestMaintenance()
    */
   public function testMaintenanceModeLoginPaths() {
     $this->container->get('state')->set('system.maintenance_mode', TRUE);
@@ -296,19 +296,19 @@ class MenuRouterTest extends WebTestBase {
    */
   protected function doTestThemeCallbackOptionalTheme() {
     // Request a theme that is not installed.
-    $this->drupalGet('menu-test/theme-callback/use-stark-theme');
+    $this->drupalGet('menu-test/theme-callback/use-test-theme');
     $this->assertText('Active theme: bartik. Actual theme: bartik.', 'The theme negotiation system falls back on the default theme when a theme that is not installed is requested.');
     $this->assertRaw('bartik/css/base/elements.css', "The default theme's CSS appears on the page.");
 
     // Now install the theme and request it again.
     $theme_handler = $this->container->get('theme_handler');
-    $theme_handler->install(array('stark'));
+    $theme_handler->install(array('test_theme'));
 
-    $this->drupalGet('menu-test/theme-callback/use-stark-theme');
-    $this->assertText('Active theme: stark. Actual theme: stark.', 'The theme negotiation system uses an optional theme once it has been installed.');
-    $this->assertRaw('stark/css/layout.css', "The optional theme's CSS appears on the page.");
+    $this->drupalGet('menu-test/theme-callback/use-test-theme');
+    $this->assertText('Active theme: test_theme. Actual theme: test_theme.', 'The theme negotiation system uses an optional theme once it has been installed.');
+    $this->assertRaw('test_theme/kitten.css', "The optional theme's CSS appears on the page.");
 
-    $theme_handler->uninstall(array('stark'));
+    $theme_handler->uninstall(array('test_theme'));
   }
 
   /**

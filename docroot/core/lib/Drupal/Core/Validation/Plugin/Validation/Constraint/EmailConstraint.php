@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Validation\Plugin\Validation\Constraint\EmailConstraint.
- */
-
 namespace Drupal\Core\Validation\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraints\Email;
@@ -14,7 +9,7 @@ use Symfony\Component\Validator\Constraints\Email;
  *
  * Overrides the symfony constraint to use the strict setting.
  *
- * @Plugin(
+ * @Constraint(
  *   id = "Email",
  *   label = @Translation("Email", context = "Validation")
  * )
@@ -29,4 +24,5 @@ class EmailConstraint extends Email {
   public function validatedBy() {
     return '\Symfony\Component\Validator\Constraints\EmailValidator';
   }
+
 }

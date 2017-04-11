@@ -1,14 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\views\Tests\Handler\FieldGroupRowsTest.
- */
-
 namespace Drupal\views\Tests\Handler;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Render\RenderContext;
+use Drupal\field\Entity\FieldConfig;
 use Drupal\views\Views;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests the "Display all values in the same row" setting.
@@ -47,7 +45,7 @@ class FieldGroupRowsTest extends HandlerTestBase {
     $node_type = $this->drupalCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
 
     // Create the unlimited text field.
-    $field_storage = entity_create('field_storage_config', array(
+    $field_storage = FieldStorageConfig::create(array(
         'field_name' => $this->fieldName,
         'entity_type' => 'node',
         'type' => 'text',
@@ -60,13 +58,16 @@ class FieldGroupRowsTest extends HandlerTestBase {
       'field_storage' => $field_storage,
       'bundle' => $node_type->id(),
     );
-    entity_create('field_config', $field)->save();
+    FieldConfig::create($field)->save();
   }
 
   /**
    * Testing the "Grouped rows" functionality.
    */
   public function testGroupRows() {
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+
     $edit = array(
       'title' => $this->randomMachineName(),
       $this->fieldName => array('a', 'b', 'c'),
@@ -77,7 +78,10 @@ class FieldGroupRowsTest extends HandlerTestBase {
 
     // Test grouped rows.
     $this->executeView($view);
-    $this->assertEqual($view->field[$this->fieldName]->advancedRender($view->result[0]), 'a, b, c');
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($view) {
+      return $view->field[$this->fieldName]->advancedRender($view->result[0]);
+    });
+    $this->assertEqual($output, 'a, b, c');
 
     // Change the group_rows checkbox to false.
     $view = Views::getView('test_group_rows');
@@ -88,11 +92,20 @@ class FieldGroupRowsTest extends HandlerTestBase {
     $view->render();
 
     $view->row_index = 0;
-    $this->assertEqual($view->field[$this->fieldName]->advancedRender($view->result[0]), 'a');
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($view) {
+      return $view->field[$this->fieldName]->advancedRender($view->result[0]);
+    });
+    $this->assertEqual($output, 'a');
     $view->row_index = 1;
-    $this->assertEqual($view->field[$this->fieldName]->advancedRender($view->result[1]), 'b');
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($view) {
+      return $view->field[$this->fieldName]->advancedRender($view->result[1]);
+    });
+    $this->assertEqual($output, 'b');
     $view->row_index = 2;
-    $this->assertEqual($view->field[$this->fieldName]->advancedRender($view->result[2]), 'c');
+    $output = $renderer->executeInRenderContext(new RenderContext(), function () use ($view) {
+      return $view->field[$this->fieldName]->advancedRender($view->result[2]);
+    });
+    $this->assertEqual($output, 'c');
   }
 
 }

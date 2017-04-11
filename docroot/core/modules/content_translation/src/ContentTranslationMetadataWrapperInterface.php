@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\content_translation\ContentTranslationMetadataInterface.
- */
-
 namespace Drupal\content_translation;
 
 use Drupal\user\UserInterface;
@@ -64,6 +59,8 @@ interface ContentTranslationMetadataWrapperInterface {
   /**
    * Sets the translation author.
    *
+   * The metadata field will be updated, only if it's translatable.
+   *
    * @param \Drupal\user\UserInterface $account
    *   The translation author user entity.
    *
@@ -81,6 +78,8 @@ interface ContentTranslationMetadataWrapperInterface {
 
   /**
    * Sets the translation published status.
+   *
+   * The metadata field will be updated, only if it's translatable.
    *
    * @param bool $published
    *   TRUE if the translation is published, FALSE otherwise.
@@ -100,6 +99,8 @@ interface ContentTranslationMetadataWrapperInterface {
   /**
    * Sets the translation creation timestamp.
    *
+   * The metadata field will be updated, only if it's translatable.
+   *
    * @param int $timestamp
    *   The UNIX timestamp of when the translation was created.
    *
@@ -117,6 +118,8 @@ interface ContentTranslationMetadataWrapperInterface {
 
   /**
    * Sets the translation modification timestamp.
+   *
+   * The metadata field will be updated, only if it's translatable.
    *
    * @param int $timestamp
    *   The UNIX timestamp of when the translation was last modified.

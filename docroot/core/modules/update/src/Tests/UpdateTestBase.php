@@ -1,8 +1,13 @@
 <?php
 
+namespace Drupal\update\Tests;
+
+use Drupal\Core\DrupalKernel;
+use Drupal\Core\Url;
+use Drupal\simpletest\WebTestBase;
+
 /**
- * @file
- * Definition of Drupal\update\Tests\UpdateTestBase.
+ * Defines some shared functions used by all update tests.
  *
  * The overarching methodology of these tests is we need to compare a given
  * state of installed modules and themes (e.g., version, project grouping,
@@ -18,16 +23,30 @@
  * assertions that the report matches our expectations given the specific
  * initial state and availability scenario.
  */
-
-namespace Drupal\update\Tests;
-
-use Drupal\Core\Url;
-use Drupal\simpletest\WebTestBase;
-
-/**
- * Defines some shared functions used by all update tests.
- */
 abstract class UpdateTestBase extends WebTestBase {
+
+  protected function setUp() {
+    parent::setUp();
+
+    // Change the root path which Update Manager uses to install and update
+    // projects to be inside the testing site directory. See
+    // \Drupal\update\UpdateRootFactory::get() for equivalent changes to the
+    // test child site.
+    $request = \Drupal::request();
+    $update_root = $this->container->get('update.root') . '/' . DrupalKernel::findSitePath($request);
+    $this->container->set('update.root', $update_root);
+    \Drupal::setContainer($this->container);
+
+    // Create the directories within the root path within which the Update
+    // Manager will install projects.
+    foreach (drupal_get_updaters() as $updater_info) {
+      $updater = $updater_info['class'];
+      $install_directory = $update_root . '/' . $updater::getRootDirectoryRelativePath();
+      if (!is_dir($install_directory)) {
+        mkdir($install_directory);
+      }
+    }
+  }
 
   /**
    * Refreshes the update status based on the desired available update scenario.
@@ -48,7 +67,8 @@ abstract class UpdateTestBase extends WebTestBase {
     // Save the map for UpdateTestController::updateTest() to use.
     $this->config('update_test.settings')->set('xml_map', $xml_map)->save();
     // Manually check the update status.
-    $this->drupalGet('admin/reports/updates/check');
+    $this->drupalGet('admin/reports/updates');
+    $this->clickLink(t('Check manually'));
   }
 
   /**
@@ -59,4 +79,5 @@ abstract class UpdateTestBase extends WebTestBase {
     $this->assertRaw(\Drupal::l(t('Drupal'), Url::fromUri('http://example.com/project/drupal')), 'Link to the Drupal project appears.');
     $this->assertNoText(t('No available releases found'));
   }
+
 }

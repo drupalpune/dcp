@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\filter\FilterFormatFormBase.
- */
-
 namespace Drupal\filter;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
@@ -79,7 +73,7 @@ abstract class FilterFormatFormBase extends EntityForm {
     $form['roles'] = array(
       '#type' => 'checkboxes',
       '#title' => $this->t('Roles'),
-      '#options' => array_map('\Drupal\Component\Utility\SafeMarkup::checkPlain', user_role_names()),
+      '#options' => array_map('\Drupal\Component\Utility\Html::escape', user_role_names()),
       '#disabled' => $is_fallback,
       '#weight' => -10,
     );
@@ -204,8 +198,8 @@ abstract class FilterFormatFormBase extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
-    parent::validate($form, $form_state);
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
 
     // @todo Move trimming upstream.
     $format_format = trim($form_state->getValue('format'));

@@ -1,17 +1,18 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Tests\PagePreviewTest.
- */
-
 namespace Drupal\node\Tests;
 
+use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\entity_reference\Tests\EntityReferenceTestTrait;
+use Drupal\Core\Url;
+use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\NodeType;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\taxonomy\Entity\Vocabulary;
 
 /**
  * Tests the node entity preview functionality.
@@ -21,13 +22,14 @@ use Drupal\node\Entity\NodeType;
 class PagePreviewTest extends NodeTestBase {
 
   use EntityReferenceTestTrait;
+  use CommentTestTrait;
 
   /**
-   * Enable the node and taxonomy modules to test both on the preview.
+   * Enable the comment, node and taxonomy modules to test on the preview.
    *
    * @var array
    */
-  public static $modules = array('node', 'taxonomy');
+  public static $modules = array('node', 'taxonomy', 'comment', 'image', 'file', 'text', 'node_test', 'menu_ui');
 
   /**
    * The name of the created field.
@@ -38,32 +40,52 @@ class PagePreviewTest extends NodeTestBase {
 
   protected function setUp() {
     parent::setUp();
+    $this->addDefaultCommentField('node', 'page');
 
-    $web_user = $this->drupalCreateUser(array('edit own page content', 'create page content'));
+    $web_user = $this->drupalCreateUser(array('edit own page content', 'create page content', 'administer menu'));
     $this->drupalLogin($web_user);
 
     // Add a vocabulary so we can test different view modes.
-    $vocabulary = entity_create('taxonomy_vocabulary', array(
+    $vocabulary = Vocabulary::create([
       'name' => $this->randomMachineName(),
       'description' => $this->randomMachineName(),
       'vid' => $this->randomMachineName(),
       'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
       'help' => '',
-    ));
+    ]);
     $vocabulary->save();
 
     $this->vocabulary = $vocabulary;
 
     // Add a term to the vocabulary.
-    $term = entity_create('taxonomy_term', array(
+    $term = Term::create([
       'name' => $this->randomMachineName(),
       'description' => $this->randomMachineName(),
       'vid' => $this->vocabulary->id(),
       'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
-    ));
+    ]);
     $term->save();
 
     $this->term = $term;
+
+    // Create an image field.
+    FieldStorageConfig::create([
+      'field_name' => 'field_image',
+      'entity_type' => 'node',
+      'type' => 'image',
+      'settings' => [],
+      'cardinality' => FieldStorageConfig::CARDINALITY_UNLIMITED,
+    ])->save();
+
+    $field_config = FieldConfig::create([
+      'field_name' => 'field_image',
+      'label' => 'Images',
+      'entity_type' => 'node',
+      'bundle' => 'page',
+      'required' => FALSE,
+      'settings' => [],
+    ]);
+    $field_config->save();
 
     // Create a field.
     $this->fieldName = Unicode::strtolower($this->randomMachineName());
@@ -92,6 +114,45 @@ class PagePreviewTest extends NodeTestBase {
         'type' => 'entity_reference_label',
       ))
       ->save();
+
+    entity_get_form_display('node', 'page', 'default')
+      ->setComponent('field_image', array(
+        'type' => 'image_image',
+        'settings' => [],
+      ))
+      ->save();
+
+    entity_get_display('node', 'page', 'default')
+      ->setComponent('field_image')
+      ->save();
+
+    // Create a multi-value text field.
+    $field_storage = FieldStorageConfig::create([
+      'field_name' => 'field_test_multi',
+      'entity_type' => 'node',
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
+      'type' => 'text',
+      'settings' => [
+        'max_length' => 50,
+      ]
+    ]);
+    $field_storage->save();
+    FieldConfig::create([
+      'field_storage' => $field_storage,
+      'bundle' => 'page',
+    ])->save();
+
+    entity_get_form_display('node', 'page', 'default')
+      ->setComponent('field_test_multi', array(
+        'type' => 'text_textfield',
+      ))
+      ->save();
+
+    entity_get_display('node', 'page', 'default')
+      ->setComponent('field_test_multi', array(
+        'type' => 'string',
+      ))
+      ->save();
   }
 
   /**
@@ -104,14 +165,21 @@ class PagePreviewTest extends NodeTestBase {
 
     // Fill in node creation form and preview node.
     $edit = array();
-    $edit[$title_key] = $this->randomMachineName(8);
+    $edit[$title_key] = '<em>' . $this->randomMachineName(8) . '</em>';
     $edit[$body_key] = $this->randomMachineName(16);
     $edit[$term_key] = $this->term->getName();
-    $this->drupalPostForm('node/add/page', $edit, t('Preview'));
+
+    // Upload an image.
+    $test_image = current($this->drupalGetTestFiles('image', 39325));
+    $edit['files[field_image_0][]'] = drupal_realpath($test_image->uri);
+    $this->drupalPostForm('node/add/page', $edit, t('Upload'));
+
+    // Add an alt tag and preview the node.
+    $this->drupalPostForm(NULL, ['field_image[0][alt]' => 'Picture of llamas'], t('Preview'));
 
     // Check that the preview is displaying the title, body and term.
     $this->assertTitle(t('@title | Drupal', array('@title' => $edit[$title_key])), 'Basic page title is preview.');
-    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertEscaped($edit[$title_key], 'Title displayed and escaped.');
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$term_key], 'Term displayed.');
     $this->assertLink(t('Back to content editing'));
@@ -128,7 +196,7 @@ class PagePreviewTest extends NodeTestBase {
       ->save();
 
     $view_mode_edit = array('view_mode' => 'teaser');
-    $this->drupalPostForm('node/preview/' . $uuid . '/default', $view_mode_edit, t('Switch'));
+    $this->drupalPostForm('node/preview/' . $uuid . '/full', $view_mode_edit, t('Switch'));
     $this->assertRaw('view-mode-teaser', 'View mode teaser class found.');
     $this->assertNoText($edit[$body_key], 'Body not displayed.');
 
@@ -137,16 +205,29 @@ class PagePreviewTest extends NodeTestBase {
     $this->clickLink(t('Back to content editing'));
     $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
     $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
-    $this->assertFieldByName($term_key, $edit[$term_key] . ' (' . $this->term->id() . ')', 'Term field displayed.');
+    $this->assertFieldByName($term_key, $edit[$term_key], 'Term field displayed.');
+    $this->assertFieldByName('field_image[0][alt]', 'Picture of llamas');
+    $this->drupalPostAjaxForm(NULL, array(), array('field_test_multi_add_more' => t('Add another item')), NULL, array(), array(), 'node-page-form');
+    $this->assertFieldByName('field_test_multi[0][value]');
+    $this->assertFieldByName('field_test_multi[1][value]');
+
+    // Return to page preview to check everything is as expected.
+    $this->drupalPostForm(NULL, array(), t('Preview'));
+    $this->assertTitle(t('@title | Drupal', array('@title' => $edit[$title_key])), 'Basic page title is preview.');
+    $this->assertEscaped($edit[$title_key], 'Title displayed and escaped.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$term_key], 'Term displayed.');
+    $this->assertLink(t('Back to content editing'));
 
     // Assert the content is kept when reloading the page.
     $this->drupalGet('node/add/page', array('query' => array('uuid' => $uuid)));
     $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
     $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
-    $this->assertFieldByName($term_key, $edit[$term_key] . ' (' . $this->term->id() . ')', 'Term field displayed.');
+    $this->assertFieldByName($term_key, $edit[$term_key], 'Term field displayed.');
 
-    // Save the node.
-    $this->drupalPostForm('node/add/page', $edit, t('Save'));
+    // Save the node - this is a new POST, so we need to upload the image.
+    $this->drupalPostForm('node/add/page', $edit, t('Upload'));
+    $this->drupalPostForm(NULL, ['field_image[0][alt]' => 'Picture of llamas'], t('Save'));
     $node = $this->drupalGetNodeByTitle($edit[$title_key]);
 
     // Check the term was displayed on the saved node.
@@ -211,6 +292,103 @@ class PagePreviewTest extends NodeTestBase {
     $this->drupalPostForm('node/add/page', array($title_key => 'Preview'), t('Preview'));
     $this->clickLink(t('Back to content editing'));
     $this->assertRaw('edit-submit');
+
+    // Check that destination is remembered when clicking on preview. When going
+    // back to the edit form and clicking save, we should go back to the
+    // original destination, if set.
+    $destination = 'node';
+    $this->drupalPostForm($node->toUrl('edit-form'), [], t('Preview'), ['query' => ['destination' => $destination]]);
+    $parameters = ['node_preview' => $node->uuid(), 'view_mode_id' => 'full'];
+    $options = ['absolute' => TRUE, 'query' => ['destination' => $destination]];
+    $this->assertUrl(Url::fromRoute('entity.node.preview', $parameters, $options));
+    $this->drupalPostForm(NULL, ['view_mode' => 'teaser'], t('Switch'));
+    $this->clickLink(t('Back to content editing'));
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertUrl($destination);
+
+    // Check that preview page works as expected without a destination set.
+    $this->drupalPostForm($node->toUrl('edit-form'), [], t('Preview'));
+    $parameters = ['node_preview' => $node->uuid(), 'view_mode_id' => 'full'];
+    $this->assertUrl(Url::fromRoute('entity.node.preview', $parameters, ['absolute' => TRUE]));
+    $this->drupalPostForm(NULL, ['view_mode' => 'teaser'], t('Switch'));
+    $this->clickLink(t('Back to content editing'));
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertUrl($node->toUrl());
+    $this->assertResponse(200);
+
+    // Assert multiple items can be added and are not lost when previewing.
+    $test_image_1 = current($this->drupalGetTestFiles('image', 39325));
+    $edit_image_1['files[field_image_0][]'] = drupal_realpath($test_image_1->uri);
+    $test_image_2 = current($this->drupalGetTestFiles('image', 39325));
+    $edit_image_2['files[field_image_1][]'] = drupal_realpath($test_image_2->uri);
+    $edit['field_image[0][alt]'] = 'Alt 1';
+
+    $this->drupalPostForm('node/add/page', $edit_image_1, t('Upload'));
+    $this->drupalPostForm(NULL, $edit, t('Preview'));
+    $this->clickLink(t('Back to content editing'));
+    $this->assertFieldByName('files[field_image_1][]');
+    $this->drupalPostForm(NULL, $edit_image_2, t('Upload'));
+    $this->assertNoFieldByName('files[field_image_1][]');
+
+    $title = 'node_test_title';
+    $example_text_1 = 'example_text_preview_1';
+    $example_text_2 = 'example_text_preview_2';
+    $example_text_3 = 'example_text_preview_3';
+    $this->drupalGet('node/add/page');
+    $edit = [
+      'title[0][value]' => $title,
+      'field_test_multi[0][value]' => $example_text_1,
+    ];
+    $this->assertRaw('Storage is not set');
+    $this->drupalPostForm(NULL, $edit, t('Preview'));
+    $this->clickLink(t('Back to content editing'));
+    $this->assertRaw('Storage is set');
+    $this->assertFieldByName('field_test_multi[0][value]');
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertText('Basic page ' . $title . ' has been created.');
+    $node = $this->drupalGetNodeByTitle($title);
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    $this->drupalPostAjaxForm(NULL, [], array('field_test_multi_add_more' => t('Add another item')));
+    $this->drupalPostAjaxForm(NULL, [], array('field_test_multi_add_more' => t('Add another item')));
+    $edit = [
+      'field_test_multi[1][value]' => $example_text_2,
+      'field_test_multi[2][value]' => $example_text_3,
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Preview'));
+    $this->clickLink(t('Back to content editing'));
+    $this->drupalPostForm(NULL, $edit, t('Preview'));
+    $this->clickLink(t('Back to content editing'));
+    $this->assertFieldByName('field_test_multi[0][value]', $example_text_1);
+    $this->assertFieldByName('field_test_multi[1][value]', $example_text_2);
+    $this->assertFieldByName('field_test_multi[2][value]', $example_text_3);
+
+    // Now save the node and make sure all values got saved.
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->assertText($example_text_1);
+    $this->assertText($example_text_2);
+    $this->assertText($example_text_3);
+
+    // Edit again, change the menu_ui settings and click on preview.
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    $edit = [
+      'menu[enabled]' => TRUE,
+      'menu[title]' => 'Changed title',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Preview'));
+    $this->clickLink(t('Back to content editing'));
+    $this->assertFieldChecked('edit-menu-enabled', 'Menu option is still checked');
+    $this->assertFieldByName('menu[title]', 'Changed title', 'Menu link title is correct after preview');
+
+    // Save, change the title while saving and make sure that it is correctly
+    // saved.
+    $edit = [
+      'menu[enabled]' => TRUE,
+      'menu[title]' => 'Second title change',
+    ];
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->drupalGet('node/' . $node->id() . '/edit');
+    $this->assertFieldByName('menu[title]', 'Second title change', 'Menu link title is correct after saving');
+
   }
 
   /**
@@ -247,6 +425,24 @@ class PagePreviewTest extends NodeTestBase {
 
     // Check that the revision log field has the correct value.
     $this->assertFieldByName('revision_log[0][value]', $edit['revision_log[0][value]'], 'Revision log field displayed.');
+
+    // Save the node after coming back from the preview page so we can create a
+    // forward revision for it.
+    $this->drupalPostForm(NULL, [], t('Save'));
+    $node = $this->drupalGetNodeByTitle($edit[$title_key]);
+
+    // Check that previewing a forward revision of a node works. This can not be
+    // accomplished through the UI so we have to use API calls.
+    // @todo Change this test to use the UI when we will be able to create
+    // forward revisions in core.
+    // @see https://www.drupal.org/node/2725533
+    $node->setNewRevision(TRUE);
+    $node->isDefaultRevision(FALSE);
+
+    /** @var \Drupal\Core\Controller\ControllerResolverInterface $controller_resolver */
+    $controller_resolver = \Drupal::service('controller_resolver');
+    $node_preview_controller = $controller_resolver->getControllerFromDefinition('\Drupal\node\Controller\NodePreviewController::view');
+    $node_preview_controller($node, 'full');
   }
 
   /**
@@ -267,7 +463,7 @@ class PagePreviewTest extends NodeTestBase {
 
     $edit2 = array($title_key => 'Another page title');
     $this->drupalPostForm('node/' . $node->id() . '/edit', $edit2, t('Preview'));
-    $this->assertUrl(\Drupal::url('entity.node.preview', ['node_preview' => $node->uuid(), 'view_mode_id' => 'default'], ['absolute' => TRUE]));
+    $this->assertUrl(\Drupal::url('entity.node.preview', ['node_preview' => $node->uuid(), 'view_mode_id' => 'full'], ['absolute' => TRUE]));
     $this->assertText($edit2[$title_key]);
   }
 

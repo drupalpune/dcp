@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\access\None.
- */
-
 namespace Drupal\views\Plugin\views\access;
 
 use Drupal\Core\Session\AccountInterface;

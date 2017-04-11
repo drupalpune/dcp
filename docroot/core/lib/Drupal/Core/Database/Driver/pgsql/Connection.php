@@ -1,24 +1,19 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Driver\pgsql\Connection
- */
-
 namespace Drupal\Core\Database\Driver\pgsql;
 
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Connection as DatabaseConnection;
 use Drupal\Core\Database\DatabaseNotFoundException;
-use Drupal\Core\Database\StatementInterface;
-use Drupal\Core\Database\IntegrityConstraintViolationException;
-use Drupal\Core\Database\DatabaseExceptionWrapper;
 
 /**
  * @addtogroup database
  * @{
  */
 
+/**
+ * PostgreSQL implementation of \Drupal\Core\Database\Connection.
+ */
 class Connection extends DatabaseConnection {
 
   /**
@@ -30,6 +25,27 @@ class Connection extends DatabaseConnection {
    * Error code for "Unknown database" error.
    */
   const DATABASE_NOT_FOUND = 7;
+
+  /**
+   * The list of PostgreSQL reserved key words.
+   *
+   * @see http://www.postgresql.org/docs/9.4/static/sql-keywords-appendix.html
+   */
+  protected $postgresqlReservedKeyWords = ['all', 'analyse', 'analyze', 'and',
+  'any', 'array', 'as', 'asc', 'asymmetric', 'authorization', 'binary', 'both',
+  'case', 'cast', 'check', 'collate', 'collation', 'column', 'concurrently',
+  'constraint', 'create', 'cross', 'current_catalog', 'current_date',
+  'current_role', 'current_schema', 'current_time', 'current_timestamp',
+  'current_user', 'default', 'deferrable', 'desc', 'distinct', 'do', 'else',
+  'end', 'except', 'false', 'fetch', 'for', 'foreign', 'freeze', 'from', 'full',
+  'grant', 'group', 'having', 'ilike', 'in', 'initially', 'inner', 'intersect',
+  'into', 'is', 'isnull', 'join', 'lateral', 'leading', 'left', 'like', 'limit',
+  'localtime', 'localtimestamp', 'natural', 'not', 'notnull', 'null', 'offset',
+  'on', 'only', 'or', 'order', 'outer', 'over', 'overlaps', 'placing',
+  'primary', 'references', 'returning', 'right', 'select', 'session_user',
+  'similar', 'some', 'symmetric', 'table', 'then', 'to', 'trailing', 'true',
+  'union', 'unique', 'user', 'using', 'variadic', 'verbose', 'when', 'where',
+  'window', 'with'];
 
   /**
    * Constructs a connection object.
@@ -117,7 +133,38 @@ class Connection extends DatabaseConnection {
       }
     }
 
-    return parent::query($query, $args, $options);
+    // We need to wrap queries with a savepoint if:
+    // - Currently in a transaction.
+    // - A 'mimic_implicit_commit' does not exist already.
+    // - The query is not a savepoint query.
+    $wrap_with_savepoint = $this->inTransaction() &&
+      !isset($this->transactionLayers['mimic_implicit_commit']) &&
+      !(is_string($query) && (
+        stripos($query, 'ROLLBACK TO SAVEPOINT ') === 0 ||
+        stripos($query, 'RELEASE SAVEPOINT ') === 0 ||
+        stripos($query, 'SAVEPOINT ') === 0
+      )
+    );
+    if ($wrap_with_savepoint) {
+      // Create a savepoint so we can rollback a failed query. This is so we can
+      // mimic MySQL and SQLite transactions which don't fail if a single query
+      // fails. This is important for tables that are created on demand. For
+      // example, \Drupal\Core\Cache\DatabaseBackend.
+      $this->addSavepoint();
+      try {
+        $return = parent::query($query, $args, $options);
+        $this->releaseSavepoint();
+      }
+      catch (\Exception $e) {
+        $this->rollbackSavepoint();
+        throw $e;
+      }
+    }
+    else {
+      $return = parent::query($query, $args, $options);
+    }
+
+    return $return;
   }
 
   public function prepareQuery($query) {
@@ -163,9 +210,8 @@ class Connection extends DatabaseConnection {
       // need to be escaped.
       $escaped = $this->escapeTable($table) . '.' . $this->escapeAlias($column);
     }
-    elseif (preg_match('/[A-Z]/', $escaped)) {
-      // Quote the field name for case-sensitivity.
-      $escaped = '"' . $escaped . '"';
+    else {
+      $escaped = $this->doEscape($escaped);
     }
 
     return $escaped;
@@ -176,12 +222,7 @@ class Connection extends DatabaseConnection {
    */
   public function escapeAlias($field) {
     $escaped = preg_replace('/[^A-Za-z0-9_]+/', '', $field);
-
-    // Escape the alias in quotes for case-sensitivity.
-    if (preg_match('/[A-Z]/', $escaped)) {
-      $escaped = '"' . $escaped . '"';
-    }
-
+    $escaped = $this->doEscape($escaped);
     return $escaped;
   }
 
@@ -191,12 +232,33 @@ class Connection extends DatabaseConnection {
   public function escapeTable($table) {
     $escaped = parent::escapeTable($table);
 
-    // Quote identifier to make it case-sensitive.
-    if (preg_match('/[A-Z]/', $escaped)) {
-      $escaped = '"' . $escaped . '"';
-    }
+    // Ensure that each part (database, schema and table) of the table name is
+    // properly and independently escaped.
+    $parts = explode('.', $escaped);
+    $parts = array_map([$this, 'doEscape'], $parts);
+    $escaped = implode('.', $parts);
 
     return $escaped;
+  }
+
+  /**
+   * Escape a string if needed.
+   *
+   * @param $string
+   *   The string to escape.
+   * @return string
+   *   The escaped string.
+   */
+  protected function doEscape($string) {
+    // Quote identifier to make it case-sensitive.
+    if (preg_match('/[A-Z]/', $string)) {
+      $string = '"' . $string . '"';
+    }
+    elseif (in_array(strtolower($string), $this->postgresqlReservedKeyWords)) {
+      // Quote the string for PostgreSQL reserved key words.
+      $string = '"' . $string . '"';
+    }
+    return $string;
   }
 
   public function driver() {
@@ -315,7 +377,7 @@ class Connection extends DatabaseConnection {
    *   A string representing the savepoint name. By default,
    *   "mimic_implicit_commit" is used.
    *
-   * @see Drupal\Core\Database\Connection::pushTransaction().
+   * @see Drupal\Core\Database\Connection::pushTransaction()
    */
   public function addSavepoint($savepoint_name = 'mimic_implicit_commit') {
     if ($this->inTransaction()) {
@@ -330,7 +392,7 @@ class Connection extends DatabaseConnection {
    *   A string representing the savepoint name. By default,
    *   "mimic_implicit_commit" is used.
    *
-   * @see Drupal\Core\Database\Connection::popTransaction().
+   * @see Drupal\Core\Database\Connection::popTransaction()
    */
   public function releaseSavepoint($savepoint_name = 'mimic_implicit_commit') {
     if (isset($this->transactionLayers[$savepoint_name])) {
@@ -350,6 +412,22 @@ class Connection extends DatabaseConnection {
       $this->rollback($savepoint_name);
     }
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function upsert($table, array $options = array()) {
+    // Use the (faster) native Upsert implementation for PostgreSQL >= 9.5.
+    if (version_compare($this->version(), '9.5', '>=')) {
+      $class = $this->getDriverClass('NativeUpsert');
+    }
+    else {
+      $class = $this->getDriverClass('Upsert');
+    }
+
+    return new $class($this, $table, $options);
+  }
+
 }
 
 /**

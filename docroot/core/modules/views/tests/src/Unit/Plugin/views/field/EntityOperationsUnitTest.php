@@ -1,11 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\views\Unit\Plugin\views\field\EntityOperationsUnitTest.
- */
-
-namespace Drupal\Tests\views\Unit\Plugin\views\field {
+namespace Drupal\Tests\views\Unit\Plugin\views\field;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\views\Plugin\views\field\EntityOperations;
@@ -25,6 +20,13 @@ class EntityOperationsUnitTest extends UnitTestCase {
   protected $entityManager;
 
   /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $languageManager;
+
+  /**
    * The plugin under test.
    *
    * @var \Drupal\views\Plugin\views\field\EntityOperations
@@ -36,15 +38,16 @@ class EntityOperationsUnitTest extends UnitTestCase {
    *
    * @covers ::__construct
    */
-  public function setUp() {
+  protected function setUp() {
     $this->entityManager = $this->getMock('\Drupal\Core\Entity\EntityManagerInterface');
+    $this->languageManager = $this->getMock('\Drupal\Core\Language\LanguageManagerInterface');
 
     $configuration = array();
     $plugin_id = $this->randomMachineName();
     $plugin_definition = array(
       'title' => $this->randomMachineName(),
     );
-    $this->plugin = new EntityOperations($configuration, $plugin_id, $plugin_definition, $this->entityManager);
+    $this->plugin = new EntityOperations($configuration, $plugin_id, $plugin_definition, $this->entityManager, $this->languageManager);
 
     $redirect_service = $this->getMock('Drupal\Core\Routing\RedirectDestinationInterface');
     $redirect_service->expects($this->any())
@@ -160,6 +163,5 @@ class EntityOperationsUnitTest extends UnitTestCase {
     $build = $this->plugin->render($result);
     $this->assertSame($expected_build, $build);
   }
-}
 
 }

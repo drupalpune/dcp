@@ -1,16 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\language\Unit\LanguageNegotiationUrlTest.
- */
-
-namespace Drupal\Tests\language\Unit {
+namespace Drupal\Tests\language\Unit;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Session\UserSession;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Tests\UnitTestCase;
 use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationUrl;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -57,9 +51,10 @@ class LanguageNegotiationUrlTest extends UnitTestCase {
     $this->user = $this->getMockBuilder('Drupal\Core\Session\AccountInterface')
       ->getMock();
 
-    $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\CacheContextsManager')
+    $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\Context\CacheContextsManager')
       ->disableOriginalConstructor()
       ->getMock();
+    $cache_contexts_manager->method('assertValidTokens')->willReturn(TRUE);
     $container = new ContainerBuilder();
     $container->set('cache_contexts_manager', $cache_contexts_manager);
     \Drupal::setContainer($container);
@@ -91,10 +86,10 @@ class LanguageNegotiationUrlTest extends UnitTestCase {
     $method->setCurrentUser($this->user);
     $this->assertEquals($expected_langcode, $method->getLangcode($request));
 
-    $cacheability = new CacheableMetadata();
+    $cacheability = new BubbleableMetadata();
     $options = [];
     $method->processOutbound('foo', $options, $request, $cacheability);
-    $expected_cacheability = new CacheableMetadata();
+    $expected_cacheability = new BubbleableMetadata();
     if ($expected_langcode) {
       $this->assertSame($prefix . '/', $options['prefix']);
       $expected_cacheability->setCacheContexts(['languages:' . LanguageInterface::TYPE_URL]);
@@ -180,10 +175,10 @@ class LanguageNegotiationUrlTest extends UnitTestCase {
     $method->setCurrentUser($this->user);
     $this->assertEquals($expected_langcode, $method->getLangcode($request));
 
-    $cacheability = new CacheableMetadata();
+    $cacheability = new BubbleableMetadata();
     $options = [];
     $this->assertSame('foo', $method->processOutbound('foo', $options, $request, $cacheability));
-    $expected_cacheability = new CacheableMetadata();
+    $expected_cacheability = new BubbleableMetadata();
     if ($expected_langcode !== FALSE && count($domains) > 1) {
       $expected_cacheability->setCacheMaxAge(Cache::PERMANENT)->setCacheContexts(['languages:' . LanguageInterface::TYPE_URL, 'url.site']);
     }
@@ -254,15 +249,14 @@ class LanguageNegotiationUrlTest extends UnitTestCase {
     );
     return $domain_configuration;
   }
-}
 
 }
 
 // @todo Remove as part of https://www.drupal.org/node/2481833.
-namespace {
-  if (!function_exists('base_path')) {
-    function base_path() {
-      return '/';
-    }
+namespace Drupal\language\Plugin\LanguageNegotiation;
+
+if (!function_exists('base_path')) {
+  function base_path() {
+    return '/';
   }
 }

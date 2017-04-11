@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Plugin\Validation\Constraint\ProtectedUserFieldConstraint.
- */
-
 namespace Drupal\user\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
@@ -12,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * Checks if the plain text password is provided for editing a protected field.
  *
- * @Plugin(
+ * @Constraint(
  *   id = "ProtectedUserField",
  *   label = @Translation("Password required for protected field change", context = "Validation")
  * )

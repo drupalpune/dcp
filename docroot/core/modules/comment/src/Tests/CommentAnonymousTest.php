@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\comment\Tests\CommentAnonymousTest.
- */
-
 namespace Drupal\comment\Tests;
 
 use Drupal\user\RoleInterface;
@@ -40,9 +35,45 @@ class CommentAnonymousTest extends CommentTestBase {
     $this->setCommentAnonymous(COMMENT_ANONYMOUS_MAYNOT_CONTACT);
     $this->drupalLogout();
 
+    // Preview comments (with `skip comment approval` permission).
+    $edit = [];
+    $title = 'comment title with skip comment approval';
+    $body = 'comment body with skip comment approval';
+    $edit['subject[0][value]'] = $title;
+    $edit['comment_body[0][value]'] = $body;
+    $this->drupalPostForm($this->node->urlInfo(), $edit, t('Preview'));
+    // Cannot use assertRaw here since both title and body are in the form.
+    $preview = (string) $this->cssSelect('.preview')[0]->asXML();
+    $this->assertTrue(strpos($preview, $title) !== FALSE, 'Anonymous user can preview comment title.');
+    $this->assertTrue(strpos($preview, $body) !== FALSE, 'Anonymous user can preview comment body.');
+
+    // Preview comments (without `skip comment approval` permission).
+    user_role_revoke_permissions(RoleInterface::ANONYMOUS_ID, ['skip comment approval']);
+    $edit = [];
+    $title = 'comment title without skip comment approval';
+    $body = 'comment body without skip comment approval';
+    $edit['subject[0][value]'] = $title;
+    $edit['comment_body[0][value]'] = $body;
+    $this->drupalPostForm($this->node->urlInfo(), $edit, t('Preview'));
+    // Cannot use assertRaw here since both title and body are in the form.
+    $preview = (string) $this->cssSelect('.preview')[0]->asXML();
+    $this->assertTrue(strpos($preview, $title) !== FALSE, 'Anonymous user can preview comment title.');
+    $this->assertTrue(strpos($preview, $body) !== FALSE, 'Anonymous user can preview comment body.');
+    user_role_grant_permissions(RoleInterface::ANONYMOUS_ID, ['skip comment approval']);
+
     // Post anonymous comment without contact info.
     $anonymous_comment1 = $this->postComment($this->node, $this->randomMachineName(), $this->randomMachineName());
     $this->assertTrue($this->commentExists($anonymous_comment1), 'Anonymous comment without contact info found.');
+
+    // Ensure anonymous users cannot post in the name of registered users.
+    $edit = array(
+      'name' => $this->adminUser->getUsername(),
+      'comment_body[0][value]' => $this->randomMachineName(),
+    );
+    $this->drupalPostForm('comment/reply/node/' . $this->node->id() . '/comment', $edit, t('Save'));
+    $this->assertRaw(t('The name you used (%name) belongs to a registered user.', [
+      '%name' => $this->adminUser->getUsername(),
+    ]));
 
     // Allow contact info.
     $this->drupalLogin($this->adminUser);
@@ -101,6 +132,7 @@ class CommentAnonymousTest extends CommentTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('comment/' . $anonymous_comment3->id() . '/edit');
     $this->assertRaw($author_name, "The anonymous user's name is correct when editing the comment.");
+    $this->assertFieldByName('uid', '', 'The author field is empty (i.e. anonymous) when editing the comment.');
     $this->assertRaw($author_mail, "The anonymous user's email address is correct when editing the comment.");
 
     // Unpublish comment.
@@ -151,7 +183,7 @@ class CommentAnonymousTest extends CommentTestBase {
     ));
     $this->drupalGet('node/' . $this->node->id());
     $this->assertPattern('@<h2[^>]*>Comments</h2>@', 'Comments were displayed.');
-    $this->assertLink('Log in', 1, 'Link to log in was found.');
+    $this->assertLink('Log in', 1, 'Link to login was found.');
     $this->assertLink('register', 1, 'Link to register was found.');
 
     user_role_change_permissions(RoleInterface::ANONYMOUS_ID, array(
@@ -167,4 +199,5 @@ class CommentAnonymousTest extends CommentTestBase {
     $this->drupalGet('comment/reply/node/' . $this->node->id() . '/comment/' . $anonymous_comment2->id());
     $this->assertResponse(403);
   }
+
 }

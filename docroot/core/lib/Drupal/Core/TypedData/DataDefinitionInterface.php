@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\TypedData\DataDefinitionInterface.
- */
-
 namespace Drupal\Core\TypedData;
 
 /**
@@ -43,13 +38,13 @@ interface DataDefinitionInterface {
    * @param string $data_type
    *   The data type, for which a data definition should be created.
    *
+   * @return static
+   *
    * @throws \InvalidArgumentException
    *   If an unsupported data type gets passed to the class; e.g., 'string' to a
    *   definition class handling 'entity:* data types.
-   *
-   * @return static
    */
-   public static function createFromDataType($data_type);
+  public static function createFromDataType($data_type);
 
   /**
    * Returns the data type of the data.
@@ -62,8 +57,9 @@ interface DataDefinitionInterface {
   /**
    * Returns a human readable label.
    *
-   * @return string
-   *   The label.
+   * @return string|\Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The label. A string or an instance of TranslatableMarkup will be returned
+   *   based on the way the label translation is handled.
    */
   public function getLabel();
 

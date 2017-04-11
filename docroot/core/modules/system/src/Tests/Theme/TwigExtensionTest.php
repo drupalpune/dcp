@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Theme\TwigExtensionTest.
- */
-
 namespace Drupal\system\Tests\Theme;
 
 use Drupal\simpletest\WebTestBase;
@@ -47,6 +42,8 @@ class TwigExtensionTest extends WebTestBase {
 
     $this->drupalGet('twig-extension-test/filter');
     $this->assertText('Every plant is not a mineral.', 'Success: String filtered.');
+    // Test safe_join filter.
+    $this->assertRaw('&lt;em&gt;will be escaped&lt;/em&gt;<br/><em>will be markup</em><br/><strong>will be rendered</strong>');
   }
 
   /**

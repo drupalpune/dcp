@@ -1,12 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\Path\AliasManagerInterface.
- */
-
 namespace Drupal\Core\Path;
 
+/**
+ * Find an alias for a path and vice versa.
+ *
+ * @see \Drupal\Core\Path\AliasStorageInterface
+ */
 interface AliasManagerInterface {
 
   /**
@@ -19,6 +19,9 @@ interface AliasManagerInterface {
    *
    * @return string
    *   The path represented by alias, or the alias if no path was found.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the path does not start with a slash.
    */
   public function getPathByAlias($alias, $langcode = NULL);
 
@@ -32,6 +35,9 @@ interface AliasManagerInterface {
    *
    * @return string
    *   An alias that represents the path, or path if no alias was found.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown when the path does not start with a slash.
    */
   public function getAliasByPath($path, $langcode = NULL);
 
@@ -43,4 +49,5 @@ interface AliasManagerInterface {
    *   if entire cache needs to be flushed.
    */
   public function cacheClear($source = NULL);
+
 }

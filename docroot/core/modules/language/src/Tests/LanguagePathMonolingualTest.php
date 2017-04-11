@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\language\Tests\LanguagePathMonolingualTest.
- */
-
 namespace Drupal\language\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -21,12 +16,12 @@ class LanguagePathMonolingualTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('language', 'path');
+  public static $modules = ['block', 'language', 'path'];
 
   protected function setUp() {
     parent::setUp();
 
-    // Create and login user.
+    // Create and log in user.
     $web_user = $this->drupalCreateUser(array('administer languages', 'access administration pages', 'administer site configuration'));
     $this->drupalLogin($web_user);
 
@@ -56,6 +51,7 @@ class LanguagePathMonolingualTest extends WebTestBase {
     // Set language detection to URL.
     $edit = array('language_interface[enabled][language-url]' => TRUE);
     $this->drupalPostForm('admin/config/regional/language/detection', $edit, t('Save settings'));
+    $this->drupalPlaceBlock('local_actions_block');
   }
 
   /**
@@ -73,4 +69,5 @@ class LanguagePathMonolingualTest extends WebTestBase {
     $this->assertResponse(200, 'Clicked link results in a valid page');
     $this->assertText(t('Add language'), 'Page contains the add language text');
   }
+
 }

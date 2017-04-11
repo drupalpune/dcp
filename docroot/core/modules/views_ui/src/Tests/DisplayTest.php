@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Tests\DisplayTest.
- */
-
 namespace Drupal\views_ui\Tests;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\SafeMarkup;
-
-use Drupal\views\Views;
 use Drupal\Core\Template\Attribute;
+use Drupal\views\Entity\View;
+use Drupal\views\Views;
 
 /**
  * Tests the display UI.
@@ -33,6 +28,26 @@ class DisplayTest extends UITestBase {
    * @var array
    */
   public static $modules = array('contextual');
+
+  /**
+   * Tests adding a display.
+   */
+  public function testAddDisplay() {
+    $view = $this->randomView();
+    $this->assertNoText('Block');
+    $this->assertNoText('Block 2');
+
+    $this->drupalPostForm(NULL, [], t('Add @display', ['@display' => 'Block']));
+    $this->assertText('Block');
+    $this->assertNoText('Block 2');
+
+    // Views has special form handling in views_ui_form_button_was_clicked()
+    // to be able to change the submit button text via JS, this simulates what
+    // the JS is doing.
+    $this->drupalPostForm(NULL, [], NULL, [], [], NULL, '&op=Block');
+    $this->assertText('Block');
+    $this->assertText('Block 2');
+  }
 
   /**
    * Tests reordering of displays.
@@ -74,7 +89,7 @@ class DisplayTest extends UITestBase {
    */
   public function testDisableDisplay() {
     $view = $this->randomView();
-    $path_prefix = 'admin/structure/views/view/' . $view['id'] .'/edit';
+    $path_prefix = 'admin/structure/views/view/' . $view['id'] . '/edit';
 
     $this->drupalGet($path_prefix);
     $this->assertFalse($this->xpath('//div[contains(@class, :class)]', array(':class' => 'views-display-disabled')), 'Make sure the disabled display css class does not appear after initial adding of a view.');
@@ -162,7 +177,7 @@ class DisplayTest extends UITestBase {
     // The form redirects to the master display.
     $this->drupalGet($path);
 
-    $this->assertLink(t('Custom URL'), 0, 'The link option has custom url as summary.');
+    $this->assertLink(t('Custom URL'), 0, 'The link option has custom URL as summary.');
 
     // Test the default link_url value for new display
     $this->drupalPostForm(NULL, array(), t('Add Block'));
@@ -176,10 +191,12 @@ class DisplayTest extends UITestBase {
    */
   public function testPageContextualLinks() {
     $this->drupalLogin($this->drupalCreateUser(array('administer views', 'access contextual links')));
-    $view = entity_load('view', 'test_display');
+    $view = View::load('test_display');
     $view->enable()->save();
     $this->container->get('router.builder')->rebuildIfNeeded();
 
+    // When no "main content" block is placed, we find a contextual link
+    // placeholder for editing just the view.
     $this->drupalGet('test-display');
     $id = 'entity.view.edit_form:view=test_display:location=page&name=test_display&display_id=page_1&langcode=en';
     // @see \Drupal\contextual\Tests\ContextualDynamicContextTest:assertContextualLinkPlaceHolder()
@@ -188,10 +205,19 @@ class DisplayTest extends UITestBase {
     // Get server-rendered contextual links.
     // @see \Drupal\contextual\Tests\ContextualDynamicContextTest:renderContextualLinks()
     $post = array('ids[0]' => $id);
-    $response = $this->drupalPost('contextual/render', 'application/json', $post, array('query' => array('destination' => 'test-display')));
+    $response = $this->drupalPostWithFormat('contextual/render', 'json', $post, array('query' => array('destination' => 'test-display')));
     $this->assertResponse(200);
     $json = Json::decode($response);
     $this->assertIdentical($json[$id], '<ul class="contextual-links"><li class="entityviewedit-form"><a href="' . base_path() . 'admin/structure/views/view/test_display/edit/page_1">Edit view</a></li></ul>');
+
+    // When a "main content" is placed, we still find a contextual link
+    // placeholder for editing just the view (not the main content block).
+    // @see system_block_view_system_main_block_alter()
+    $this->drupalPlaceBlock('system_main_block', ['id' => 'main_content']);
+    $this->drupalGet('test-display');
+    $id = 'entity.view.edit_form:view=test_display:location=page&name=test_display&display_id=page_1&langcode=en';
+    // @see \Drupal\contextual\Tests\ContextualDynamicContextTest:assertContextualLinkPlaceHolder()
+    $this->assertRaw('<div' . new Attribute(array('data-contextual-id' => $id)) . '></div>', format_string('Contextual link placeholder with id @id exists.', array('@id' => $id)));
   }
 
   /**
@@ -215,6 +241,35 @@ class DisplayTest extends UITestBase {
   }
 
   /**
+   * Ensures that no XSS is possible for buttons.
+   */
+  public function testDisplayTitleInButtonsXss() {
+    $xss_markup = '"><script>alert(123)</script>';
+    $view = $this->randomView();
+    $view = View::load($view['id']);
+    \Drupal::configFactory()->getEditable('views.settings')->set('ui.show.master_display', TRUE)->save();
+
+    foreach ([$xss_markup, '&quot;><script>alert(123)</script>'] as $input) {
+      $display =& $view->getDisplay('page_1');
+      $display['display_title'] = $input;
+      $view->save();
+
+      $this->drupalGet("admin/structure/views/view/{$view->id()}");
+      $escaped = views_ui_truncate($input, 25);
+      $this->assertEscaped($escaped);
+      $this->assertNoRaw($xss_markup);
+
+      $this->drupalGet("admin/structure/views/view/{$view->id()}/edit/page_1");
+      $this->assertEscaped("View $escaped");
+      $this->assertNoRaw("View $xss_markup");
+      $this->assertEscaped("Duplicate $escaped");
+      $this->assertNoRaw("Duplicate $xss_markup");
+      $this->assertEscaped("Delete $escaped");
+      $this->assertNoRaw("Delete $xss_markup");
+    }
+  }
+
+  /**
    * Tests the action links on the edit display UI.
    */
   public function testActionLinks() {
@@ -225,16 +280,52 @@ class DisplayTest extends UITestBase {
     $display_title_path = 'admin/structure/views/nojs/display/test_display/block_1/display_title';
     $this->drupalPostForm($display_title_path, array('display_title' => $display_title), t('Apply'));
 
-    $placeholder = array('!display_title' => $display_title);
+    // Ensure that the title is escaped as expected.
+    $this->assertEscaped($display_title);
+    $this->assertNoRaw($display_title);
+
     // Ensure that the dropdown buttons are displayed correctly.
-    $this->assertFieldByXpath('//input[@type="submit"]', t('Duplicate !display_title', $placeholder));
-    $this->assertFieldByXpath('//input[@type="submit"]', t('Delete !display_title', $placeholder));
-    $this->assertFieldByXpath('//input[@type="submit"]', t('Disable !display_title', $placeholder));
-    $this->assertNoFieldByXpath('//input[@type="submit"]', t('Enable !display_title', $placeholder));
+    $this->assertFieldByXpath('//input[@type="submit"]', 'Duplicate ' . $display_title);
+    $this->assertFieldByXpath('//input[@type="submit"]', 'Delete ' . $display_title);
+    $this->assertFieldByXpath('//input[@type="submit"]', 'Disable ' . $display_title);
+    $this->assertNoFieldByXpath('//input[@type="submit"]', 'Enable ' . $display_title);
 
     // Disable the display so we can test the rendering of the "Enable" button.
-    $this->drupalPostForm(NULL, NULL, t('Disable !display_title', $placeholder));
-    $this->assertFieldByXpath('//input[@type="submit"]', t('Enable !display_title', $placeholder));
-    $this->assertNoFieldByXpath('//input[@type="submit"]', t('Disable !display_title', $placeholder));
+    $this->drupalPostForm(NULL, NULL, 'Disable ' . $display_title);
+    $this->assertFieldByXpath('//input[@type="submit"]', 'Enable ' . $display_title);
+    $this->assertNoFieldByXpath('//input[@type="submit"]', 'Disable ' . $display_title);
+
+    // Ensure that the title is escaped as expected.
+    $this->assertEscaped($display_title);
+    $this->assertNoRaw($display_title);
   }
+
+  /**
+   * Tests that the override option is hidden when it's not needed.
+   */
+  public function testHideDisplayOverride() {
+    // Test that the override option appears with two displays.
+    $this->drupalGet('admin/structure/views/nojs/handler/test_display/page_1/field/title');
+    $this->assertText('All displays');
+
+    // Remove a display and test if the override option is hidden.
+    $this->drupalPostForm('admin/structure/views/view/test_display/edit/block_1', [], t('Delete @display', ['@display' => 'Block']));
+    $this->drupalPostForm(NULL, [], t('Save'));
+
+    $this->drupalGet('admin/structure/views/nojs/handler/test_display/page_1/field/title');
+    $this->assertNoText('All displays');
+
+    // Test that the override option is shown when display master is on.
+    \Drupal::configFactory()->getEditable('views.settings')->set('ui.show.master_display', TRUE)->save();
+    $this->drupalGet('admin/structure/views/nojs/handler/test_display/page_1/field/title');
+    $this->assertText('All displays');
+
+    // Test that the override option is shown if the current display is
+    // overridden so that the option to revert is available.
+    $this->drupalPostForm(NULL, ['override[dropdown]' => 'page_1'], t('Apply'));
+    \Drupal::configFactory()->getEditable('views.settings')->set('ui.show.master_display', FALSE)->save();
+    $this->drupalGet('admin/structure/views/nojs/handler/test_display/page_1/field/title');
+    $this->assertText('Revert to default');
+  }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\menu_link_content\Tests\MenuLinkContentTranslationUITest.
- */
-
 namespace Drupal\menu_link_content\Tests;
 
 use Drupal\content_translation\Tests\ContentTranslationUITestBase;
@@ -16,6 +11,11 @@ use Drupal\menu_link_content\Entity\MenuLinkContent;
  * @group Menu
  */
 class MenuLinkContentTranslationUITest extends ContentTranslationUITestBase {
+
+  /**
+   * {inheritdoc}
+   */
+  protected $defaultCacheContexts = ['languages:language_interface', 'session', 'theme', 'url.path', 'url.query_args', 'user.permissions', 'user.roles:authenticated'];
 
   /**
    * Modules to enable.
@@ -98,7 +98,10 @@ class MenuLinkContentTranslationUITest extends ContentTranslationUITestBase {
    * {@inheritdoc}
    */
   protected function doTestTranslationEdit() {
-    $entity = entity_load($this->entityTypeId, $this->entityId, TRUE);
+    $storage = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityTypeId);
+    $storage->resetCache([$this->entityId]);
+    $entity = $storage->load($this->entityId);
     $languages = $this->container->get('language_manager')->getLanguages();
 
     foreach ($this->langcodes as $langcode) {

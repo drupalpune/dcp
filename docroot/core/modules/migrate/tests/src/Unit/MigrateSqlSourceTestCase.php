@@ -1,14 +1,18 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\migrate\Unit\MigrateSqlSourceTestCase.
- */
-
 namespace Drupal\Tests\migrate\Unit;
+
+use Drupal\Core\Database\Query\SelectInterface;
+use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\Core\DependencyInjection\ContainerNotInitializedException;
+use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
+use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
 
 /**
  * Base class for Migrate module source unit tests.
+ *
+ * @deprecated in Drupal 8.2.0, will be removed before Drupal 9.0.0. Use
+ * \Drupal\Tests\migrate\Kernel\MigrateSqlSourceTestBase instead.
  */
 abstract class MigrateSqlSourceTestCase extends MigrateTestCase {
 
@@ -47,9 +51,9 @@ abstract class MigrateSqlSourceTestCase extends MigrateTestCase {
    * Once the migration is run, we save a mark of the migrated sources, so the
    * migration can run again and update only new sources or changed sources.
    *
-   * @var string
+   * @var mixed
    */
-  const ORIGINAL_HIGH_WATER = '';
+  const ORIGINAL_HIGH_WATER = NULL;
 
   /**
    * Expected results after the source parsing.
@@ -57,6 +61,13 @@ abstract class MigrateSqlSourceTestCase extends MigrateTestCase {
    * @var array
    */
   protected $expectedResults = array();
+
+  /**
+   * Expected count of source rows.
+   *
+   * @var int
+   */
+  protected $expectedCount = 0;
 
   /**
    * The source plugin instance under test.
@@ -70,34 +81,92 @@ abstract class MigrateSqlSourceTestCase extends MigrateTestCase {
    */
   protected function setUp() {
     $module_handler = $this->getMock('Drupal\Core\Extension\ModuleHandlerInterface');
+    $state = $this->getMock('Drupal\Core\State\StateInterface');
+    $entity_manager = $this->getMock('Drupal\Core\Entity\EntityManagerInterface');
+
+    // Mock a key-value store to return high-water values.
+    $key_value = $this->getMock(KeyValueStoreInterface::class);
+
+    // SourcePluginBase does not yet support full dependency injection so we
+    // need to make sure that \Drupal::keyValue() works as expected by mocking
+    // the keyvalue service.
+    $key_value_factory = $this->getMock(KeyValueFactoryInterface::class);
+    $key_value_factory
+      ->method('get')
+      ->with('migrate:high_water')
+      ->willReturn($key_value);
+
+    try {
+      $container = \Drupal::getContainer();
+    }
+    catch (ContainerNotInitializedException $e) {
+      $container = new ContainerBuilder();
+    }
+    $container->set('keyvalue', $key_value_factory);
+    \Drupal::setContainer($container);
 
     $migration = $this->getMigration();
     $migration->expects($this->any())
       ->method('getHighWater')
       ->will($this->returnValue(static::ORIGINAL_HIGH_WATER));
-    // Need the test class, not the original because we need a setDatabase method. This is not pretty :/
-    $plugin_class  = preg_replace('/^Drupal\\\\(\w+)\\\\Plugin\\\\migrate(\\\\source(\\\\.+)?\\\\)([^\\\\]+)$/', 'Drupal\\Tests\\\$1\\Unit$2Test$4', static::PLUGIN_CLASS);
-    $plugin = new $plugin_class($this->migrationConfiguration['source'], $this->migrationConfiguration['source']['plugin'], array(), $migration);
-    $plugin->setDatabase($this->getDatabase($this->databaseContents + array('test_map' => array())));
-    $plugin->setModuleHandler($module_handler);
+
+    // Setup the plugin.
+    $plugin_class = static::PLUGIN_CLASS;
+    $plugin = new $plugin_class($this->migrationConfiguration['source'], $this->migrationConfiguration['source']['plugin'], array(), $migration, $state, $entity_manager);
+
+    // Do some reflection to set the database and moduleHandler.
+    $plugin_reflection = new \ReflectionClass($plugin);
+    $database_property = $plugin_reflection->getProperty('database');
+    $database_property->setAccessible(TRUE);
+    $module_handler_property = $plugin_reflection->getProperty('moduleHandler');
+    $module_handler_property->setAccessible(TRUE);
+
+    // Set the database and the module handler onto our plugin.
+    $database_property->setValue($plugin, $this->getDatabase($this->databaseContents + array('test_map' => array())));
+    $module_handler_property->setValue($plugin, $module_handler);
+
     $plugin->setStringTranslation($this->getStringTranslationStub());
     $migration->expects($this->any())
       ->method('getSourcePlugin')
       ->will($this->returnValue($plugin));
     $this->source = $plugin;
+    $this->expectedCount = count($this->expectedResults);
   }
 
   /**
-   * Test the source returns the same rows as expected.
+   * Tests that the source returns the same rows as expected.
    */
   public function testRetrieval() {
+    $this->assertInstanceOf(SelectInterface::class, $this->source->query());
     $this->queryResultTest($this->source, $this->expectedResults);
   }
 
   /**
+   * Tests that the source returns the row count expected.
+   */
+  public function testSourceCount() {
+    $count = $this->source->count();
+    $this->assertTrue(is_numeric($count));
+    $this->assertEquals($this->expectedCount, $count);
+  }
+
+  /**
+   * Tests the source defines a valid ID.
+   */
+  public function testSourceId() {
+    $this->assertNotEmpty($this->source->getIds());
+  }
+
+  /**
+   * Gets the value on a row for a given key.
+   *
    * @param \Drupal\migrate\Row $row
+   *   The row identifier.
    * @param string $key
+   *   The key identifier.
+   *
    * @return mixed
+   *   The value on a row for a given key.
    */
   protected function getValue($row, $key) {
     return $row->getSourceProperty($key);

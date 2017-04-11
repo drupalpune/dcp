@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\image\Plugin\field\formatter\ImageFormatterBase.
- */
-
 namespace Drupal\image\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
@@ -19,7 +14,7 @@ abstract class ImageFormatterBase extends FileFormatterBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEntitiesToView(EntityReferenceFieldItemListInterface $items) {
+  protected function getEntitiesToView(EntityReferenceFieldItemListInterface $items, $langcode) {
     // Add the default image if needed.
     if ($items->isEmpty()) {
       $default_image = $this->getFieldSetting('default_image');
@@ -28,7 +23,6 @@ abstract class ImageFormatterBase extends FileFormatterBase {
       if (empty($default_image['uuid']) && $this->fieldDefinition instanceof FieldConfigInterface) {
         $default_image = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('default_image');
       }
-
       if (!empty($default_image['uuid']) && $file = \Drupal::entityManager()->loadEntityByUuid('file', $default_image['uuid'])) {
         // Clone the FieldItemList into a runtime-only object for the formatter,
         // so that the fallback image can be rendered without affecting the
@@ -48,7 +42,7 @@ abstract class ImageFormatterBase extends FileFormatterBase {
       }
     }
 
-    return parent::getEntitiesToView($items);
+    return parent::getEntitiesToView($items, $langcode);
   }
 
 }

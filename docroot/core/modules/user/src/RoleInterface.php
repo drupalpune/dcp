@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Entity\RoleInterface.
- */
-
 namespace Drupal\user;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
@@ -78,9 +73,9 @@ interface RoleInterface extends ConfigEntityInterface {
    * Sets the role to be an admin role.
    *
    * @param bool $is_admin
-   *   TRUE, if the role should be an admin role.
+   *   TRUE if the role should be an admin role.
    *
-   * return $this
+   * @return $this
    */
   public function setIsAdmin($is_admin);
 

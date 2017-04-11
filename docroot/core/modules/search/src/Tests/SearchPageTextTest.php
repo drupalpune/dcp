@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\search\Tests\SearchPageTextTest.
- */
-
 namespace Drupal\search\Tests;
 
 use Drupal\Component\Utility\Html;
@@ -23,11 +18,39 @@ class SearchPageTextTest extends SearchTestBase {
    */
   protected $searchingUser;
 
+  /**
+   * Modules to enable.
+   *
+   * @var string[]
+   */
+  public static $modules = ['block'];
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
     // Create user.
     $this->searchingUser = $this->drupalCreateUser(array('search content', 'access user profiles', 'use advanced search'));
+    $this->drupalPlaceBlock('local_tasks_block');
+    $this->drupalPlaceBlock('page_title_block');
+  }
+
+  /**
+   * Tests for XSS in search module local task.
+   *
+   * This is a regression test for https://www.drupal.org/node/2338081
+   */
+  function testSearchLabelXSS() {
+    $this->drupalLogin($this->drupalCreateUser(array('administer search')));
+
+    $keys['label'] = '<script>alert("Dont Panic");</script>';
+    $this->drupalPostForm('admin/config/search/pages/manage/node_search', $keys, t('Save search page'));
+
+    $this->drupalLogin($this->searchingUser);
+    $this->drupalGet('search/node');
+    $this->assertEscaped($keys['label']);
   }
 
   /**
@@ -119,10 +142,10 @@ class SearchPageTextTest extends SearchTestBase {
     // message, and that if after that you search for a longer keyword, you
     // do not still see the message.
     $this->drupalPostForm('search/node', array('keys' => $this->randomMachineName(1)), t('Search'));
-    $this->assertText('You must include at least one positive keyword', 'Keyword message is displayed when searching for short word');
+    $this->assertText('You must include at least one keyword', 'Keyword message is displayed when searching for short word');
     $this->assertNoText(t('Please enter some keywords'), 'With short word entered, no keywords message is not displayed');
     $this->drupalPostForm(NULL, array('keys' => $this->randomMachineName()), t('Search'));
-    $this->assertNoText('You must include at least one positive keyword', 'Keyword message is not displayed when searching for long word after short word search');
+    $this->assertNoText('You must include at least one keyword', 'Keyword message is not displayed when searching for long word after short word search');
 
     // Test that if you search for a URL with .. in it, you still end up at
     // the search page. See issue https://www.drupal.org/node/890058.
@@ -135,6 +158,6 @@ class SearchPageTextTest extends SearchTestBase {
     $this->drupalPostForm('search/node', array('keys' => '.something'), t('Search'));
     $this->assertResponse(200, 'Searching for .something does not lead to a 403 error');
     $this->assertText('no results', 'Searching for .something gives you a no search results page');
-
   }
+
 }

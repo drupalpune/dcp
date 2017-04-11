@@ -10,26 +10,48 @@
  * JavaScript would use:
  *  - Drupal.editors.magical.attachInlineEditor()
  */
-(function ($, Drupal, drupalSettings) {
 
-  "use strict";
+(function ($, Drupal, drupalSettings, _) {
 
-  Drupal.quickedit.editors.editor = Drupal.quickedit.EditorView.extend({
+  'use strict';
 
-    // The text format for this field.
+  Drupal.quickedit.editors.editor = Drupal.quickedit.EditorView.extend(/** @lends Drupal.quickedit.editors.editor# */{
+
+    /**
+     * The text format for this field.
+     *
+     * @type {string}
+     */
     textFormat: null,
 
-    // Indicates whether this text format has transformations.
+    /**
+     * Indicates whether this text format has transformations.
+     *
+     * @type {bool}
+     */
     textFormatHasTransformations: null,
 
-    // Stores a reference to the text editor object for this field.
+    /**
+     * Stores a reference to the text editor object for this field.
+     *
+     * @type {Drupal.quickedit.EditorModel}
+     */
     textEditor: null,
 
-    // Stores the textual DOM element that is being in-place edited.
+    /**
+     * Stores the textual DOM element that is being in-place edited.
+     *
+     * @type {jQuery}
+     */
     $textElement: null,
 
     /**
-     * {@inheritdoc}
+     * @constructs
+     *
+     * @augments Drupal.quickedit.EditorView
+     *
+     * @param {object} options
+     *   Options for the editor view.
      */
     initialize: function (options) {
       Drupal.quickedit.EditorView.prototype.initialize.call(this, options);
@@ -41,19 +63,33 @@
 
       // Store the actual value of this field. We'll need this to restore the
       // original value when the user discards his modifications.
-      this.$textElement = this.$el.find('.field-item').eq(0);
+      var $fieldItems = this.$el.find('.quickedit-field');
+      if ($fieldItems.length) {
+        this.$textElement = $fieldItems.eq(0);
+      }
+      else {
+        this.$textElement = this.$el;
+      }
       this.model.set('originalValue', this.$textElement.html());
     },
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
+     *
+     * @return {jQuery}
+     *   The text element edited.
      */
     getEditedElement: function () {
       return this.$textElement;
     },
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
+     *
+     * @param {object} fieldModel
+     *   The field model.
+     * @param {string} state
+     *   The current state.
      */
     stateChange: function (fieldModel, state) {
       var editorModel = this.model;
@@ -86,9 +122,9 @@
           break;
 
         case 'activating':
-          // When transformation filters have been been applied to the formatted
-          // text of this field, then we'll need to load a re-formatted version
-          // of it without the transformation filters.
+          // When transformation filters have been applied to the formatted text
+          // of this field, then we'll need to load a re-formatted version of it
+          // without the transformation filters.
           if (this.textFormatHasTransformations) {
             var $textElement = this.$textElement;
             this._getUntransformedText(function (untransformedText) {
@@ -143,14 +179,17 @@
     },
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
+     *
+     * @return {object}
+     *   The sttings for the quick edit UI.
      */
     getQuickEditUISettings: function () {
       return {padding: true, unifiedToolbar: true, fullWidthToolbar: true, popup: false};
     },
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     revert: function () {
       this.$textElement.html(this.model.get('originalValue'));
@@ -162,7 +201,7 @@
      * More accurately: it re-filters formatted text to exclude transformation
      * filters used by the text format.
      *
-     * @param Function callback
+     * @param {function} callback
      *   A callback function that will receive the untransformed text.
      *
      * @see \Drupal\editor\Ajax\GetUntransformedTextCommand
@@ -189,4 +228,4 @@
 
   });
 
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal, drupalSettings, _);

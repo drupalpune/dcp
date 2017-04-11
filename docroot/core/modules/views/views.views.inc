@@ -8,6 +8,7 @@
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
+use Drupal\Core\Render\Markup;
 use Drupal\field\FieldConfigInterface;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\system\ActionConfigEntityInterface;
@@ -113,7 +114,7 @@ function views_views_data() {
 
   $data['views']['combine'] = array(
    'title' => t('Combine fields filter'),
-    'help' => t('Combine two fields together and search by them.'),
+    'help' => t('Combine multiple fields together and search by them.'),
     'filter' => array(
       'id' => 'combine',
     ),
@@ -262,7 +263,14 @@ function views_entity_field_label($entity_type, $field_name) {
     return array($field_name, $all_labels);
   }
   // Sort the field labels by it most used label and return the most used one.
-  arsort($label_counter);
+  // If the counts are equal, sort by the label to ensure the result is
+  // deterministic.
+  uksort($label_counter, function($a, $b) use ($label_counter) {
+    if ($label_counter[$a] === $label_counter[$b]) {
+      return strcmp($a, $b);
+    }
+    return $label_counter[$a] > $label_counter[$b] ? -1 : 1;
+  });
   $label_counter = array_keys($label_counter);
   return array($label_counter[0], $all_labels);
 }
@@ -287,6 +295,12 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
   if (!$field_storage->getBundles()) {
     return $data;
   }
+
+  // Ignore custom storage too.
+  if ($field_storage->hasCustomStorage()) {
+    return $data;
+  }
+
   // Check whether the entity type storage is supported.
   $storage = _views_field_get_entity_type_storage($field_storage);
   if (!$storage) {
@@ -343,6 +357,7 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
   if ($data_table) {
     // Tell Views how to join to the base table, via the data table.
     $data[$table_alias]['table']['join'][$data_table] = array(
+      'table' => $table_mapping->getDedicatedDataTableName($field_storage),
       'left_field' => $entity_type->getKey('id'),
       'field' => 'entity_id',
       'extra' => array(
@@ -354,6 +369,7 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
   else {
     // If there is no data table, just join directly.
     $data[$table_alias]['table']['join'][$base_table] = array(
+      'table' => $table_mapping->getDedicatedDataTableName($field_storage),
       'left_field' => $entity_type->getKey('id'),
       'field' => 'entity_id',
       'extra' => array(
@@ -367,6 +383,7 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
     if ($entity_revision_data_table) {
       // Tell Views how to join to the revision table, via the data table.
       $data[$table_alias]['table']['join'][$entity_revision_data_table] = array(
+        'table' => $table_mapping->getDedicatedRevisionTableName($field_storage),
         'left_field' => $entity_type->getKey('revision'),
         'field' => 'revision_id',
         'extra' => array(
@@ -378,6 +395,7 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
     else {
       // If there is no data table, just join directly.
       $data[$table_alias]['table']['join'][$entity_revision_table] = array(
+        'table' => $table_mapping->getDedicatedRevisionTableName($field_storage),
         'left_field' => $entity_type->getKey('revision'),
         'field' => 'revision_id',
         'extra' => array(
@@ -418,7 +436,7 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
       'group' => $group,
       'title' => $label,
       'title short' => $label,
-      'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
+      'help' => t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
     );
 
     // Go through and create a list of aliases for all possible combinations of
@@ -449,7 +467,16 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
     }
     if ($aliases) {
       $data[$table_alias][$field_alias]['aliases'] = $aliases;
-      $data[$table_alias][$field_alias]['help'] .= ' ' . t('Also known as: !also.', array('!also' => implode(', ', $also_known)));
+      // The $also_known variable contains markup that is HTML escaped and that
+      // loses safeness when imploded. The help text is used in #description
+      // and therefore XSS admin filtered by default. Escaped HTML is not
+      // altered by XSS filtering, therefore it is safe to just concatenate the
+      // strings. Afterwards we mark the entire string as safe, so it won't be
+      // escaped, no matter where it is used.
+      // Considering the dual use of this help data (both as metadata and as
+      // help text), other patterns such as use of #markup would not be correct
+      // here.
+      $data[$table_alias][$field_alias]['help'] = Markup::create($data[$table_alias][$field_alias]['help'] . ' ' . t('Also known as:') . ' ' . implode(', ', $also_known));
     }
 
     $keys = array_keys($field_columns);
@@ -484,6 +511,9 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
         $filter = 'numeric';
         $argument = 'numeric';
         $sort = 'standard';
+        if ($field_storage->getType() == 'boolean') {
+          $filter = 'boolean';
+        }
         break;
       case 'text':
       case 'blob':
@@ -497,12 +527,12 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
     }
 
     if (count($field_columns) == 1 || $column == 'value') {
-      $title = t('@label (!name)', array('@label' => $label, '!name' => $field_name));
+      $title = t('@label (@name)', array('@label' => $label, '@name' => $field_name));
       $title_short = $label;
     }
     else {
-      $title = t('@label (!name:!column)', array('@label' => $label, '!name' => $field_name, '!column' => $column));
-      $title_short = t('@label:!column', array('@label' => $label, '!column' => $column));
+      $title = t('@label (@name:@column)', array('@label' => $label, '@name' => $field_name, '@column' => $column));
+      $title_short = t('@label:@column', array('@label' => $label, '@column' => $column));
     }
 
     // Expose data for the property.
@@ -525,7 +555,7 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
         'group' => $group,
         'title' => $title,
         'title short' => $title_short,
-        'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
+        'help' => t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
       );
 
       // Go through and create a list of aliases for all possible combinations of
@@ -535,10 +565,10 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
       foreach ($all_labels as $label_name => $true) {
         if ($label != $label_name) {
           if (count($field_columns) == 1 || $column == 'value') {
-            $alias_title = t('@label (!name)', array('@label' => $label_name, '!name' => $field_name));
+            $alias_title = t('@label (@name)', array('@label' => $label_name, '@name' => $field_name));
           }
           else {
-            $alias_title = t('@label (!name:!column)', array('@label' => $label_name, '!name' => $field_name, '!column' => $column));
+            $alias_title = t('@label (@name:@column)', array('@label' => $label_name, '@name' => $field_name, '@column' => $column));
           }
           $aliases[] = array(
             'group' => $group_name,
@@ -550,7 +580,16 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
       }
       if ($aliases) {
         $data[$table_alias][$column_real_name]['aliases'] = $aliases;
-        $data[$table_alias][$column_real_name]['help'] .= ' ' . t('Also known as: !also.', array('!also' => implode(', ', $also_known)));
+        // The $also_known variable contains markup that is HTML escaped and
+        // that loses safeness when imploded. The help text is used in
+        // #description and therefore XSS admin filtered by default. Escaped
+        // HTML is not altered by XSS filtering, therefore it is safe to just
+        // concatenate the strings. Afterwards we mark the entire string as
+        // safe, so it won't be escaped, no matter where it is used.
+        // Considering the dual use of this help data (both as metadata and as
+        // help text), other patterns such as use of #markup would not be
+        // correct here.
+        $data[$table_alias][$column_real_name]['help'] = Markup::create($data[$table_alias][$column_real_name]['help'] . ' ' . t('Also known as:') . ' ' . implode(', ', $also_known));
       }
 
       $data[$table_alias][$column_real_name]['argument'] = array(
@@ -589,7 +628,7 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
 
       // Expose additional delta column for multiple value fields.
       if ($field_storage->isMultiple()) {
-        $title_delta = t('@label (!name:delta)', array('@label' => $label, '!name' => $field_name));
+        $title_delta = t('@label (@name:delta)', array('@label' => $label, '@name' => $field_name));
         $title_short_delta = t('@label:delta', array('@label' => $label));
 
         $data[$table_alias]['delta'] = array(
@@ -629,6 +668,83 @@ function views_field_default_views_data(FieldStorageConfigInterface $field_stora
         );
       }
     }
+  }
+
+  return $data;
+}
+
+/**
+ * Implements hook_field_views_data().
+ *
+ * The function implements the hook in behalf of 'core' because it adds a
+ * relationship and a reverse relationship to entity_reference field type, which
+ * is provided by core.
+ */
+function core_field_views_data(FieldStorageConfigInterface $field_storage) {
+  $data = views_field_default_views_data($field_storage);
+
+  // The code below only deals with the Entity reference field type.
+  if ($field_storage->getType() != 'entity_reference') {
+    return $data;
+  }
+
+  $entity_manager = \Drupal::entityManager();
+  $entity_type_id = $field_storage->getTargetEntityTypeId();
+  /** @var \Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
+  $table_mapping = $entity_manager->getStorage($entity_type_id)->getTableMapping();
+
+  foreach ($data as $table_name => $table_data) {
+    // Add a relationship to the target entity type.
+    $target_entity_type_id = $field_storage->getSetting('target_type');
+    $target_entity_type = $entity_manager->getDefinition($target_entity_type_id);
+    $entity_type_id = $field_storage->getTargetEntityTypeId();
+    $entity_type = $entity_manager->getDefinition($entity_type_id);
+    $target_base_table = $target_entity_type->getDataTable() ?: $target_entity_type->getBaseTable();
+    $field_name = $field_storage->getName();
+
+    // Provide a relationship for the entity type with the entity reference
+    // field.
+    $args = array(
+      '@label' => $target_entity_type->getLabel(),
+      '@field_name' => $field_name,
+    );
+    $data[$table_name][$field_name]['relationship'] = array(
+      'title' => t('@label referenced from @field_name', $args),
+      'label' => t('@field_name: @label', $args),
+      'group' => $entity_type->getLabel(),
+      'help' => t('Appears in: @bundles.', array('@bundles' => implode(', ', $field_storage->getBundles()))),
+      'id' => 'standard',
+      'base' => $target_base_table,
+      'entity type' => $target_entity_type_id,
+      'base field' => $target_entity_type->getKey('id'),
+      'relationship field' => $field_name . '_target_id',
+    );
+
+    // Provide a reverse relationship for the entity type that is referenced by
+    // the field.
+    $args['@entity'] = $entity_type->getLabel();
+    $args['@label'] = $target_entity_type->getLowercaseLabel();
+    $pseudo_field_name = 'reverse__' . $entity_type_id . '__' . $field_name;
+    $data[$target_base_table][$pseudo_field_name]['relationship'] = array(
+      'title' => t('@entity using @field_name', $args),
+      'label' => t('@field_name', array('@field_name' => $field_name)),
+      'group' => $target_entity_type->getLabel(),
+      'help' => t('Relate each @entity with a @field_name set to the @label.', $args),
+      'id' => 'entity_reverse',
+      'base' => $entity_type->getDataTable() ?: $entity_type->getBaseTable(),
+      'entity_type' => $entity_type_id,
+      'base field' => $entity_type->getKey('id'),
+      'field_name' => $field_name,
+      'field table' => $table_mapping->getDedicatedDataTableName($field_storage),
+      'field field' => $field_name . '_target_id',
+      'join_extra' => array(
+        array(
+          'field' => 'deleted',
+          'value' => 0,
+          'numeric' => TRUE,
+        ),
+      ),
+    );
   }
 
   return $data;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\quickedit\QuickEditController.
- */
-
 namespace Drupal\quickedit;
 
 use Drupal\Core\Controller\ControllerBase;
@@ -255,7 +250,7 @@ class QuickEditController extends ControllerBase {
    *   The view mode the field should be rerendered in. Either an Entity Display
    *   view mode ID, or a custom one. See hook_quickedit_render_field().
    *
-   * @return string
+   * @return \Drupal\Component\Render\MarkupInterface
    *   Rendered HTML.
    *
    * @see hook_quickedit_render_field()

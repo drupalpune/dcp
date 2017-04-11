@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Query\Merge
- */
-
 namespace Drupal\Core\Database\Query;
 
 use Drupal\Core\Database\Database;
@@ -49,6 +44,9 @@ use Drupal\Core\Database\IntegrityConstraintViolationException;
  * fields() and updateFields().
  */
 class Merge extends Query implements ConditionInterface {
+
+  use QueryConditionTrait;
+
   /**
    * Returned by execute() if an INSERT query has been executed.
    */
@@ -340,82 +338,6 @@ class Merge extends Query implements ConditionInterface {
   }
 
   /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::condition().
-   */
-  public function condition($field, $value = NULL, $operator = '=') {
-    $this->condition->condition($field, $value, $operator);
-    return $this;
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::isNull().
-   */
-  public function isNull($field) {
-    $this->condition->isNull($field);
-    return $this;
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::isNotNull().
-   */
-  public function isNotNull($field) {
-    $this->condition->isNotNull($field);
-    return $this;
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::exists().
-   */
-  public function exists(SelectInterface $select) {
-    $this->condition->exists($select);
-    return $this;
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::notExists().
-   */
-  public function notExists(SelectInterface $select) {
-    $this->condition->notExists($select);
-    return $this;
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::conditions().
-   */
-  public function &conditions() {
-    return $this->condition->conditions();
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::arguments().
-   */
-  public function arguments() {
-    return $this->condition->arguments();
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::where().
-   */
-  public function where($snippet, $args = array()) {
-    $this->condition->where($snippet, $args);
-    return $this;
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::compile().
-   */
-  public function compile(Connection $connection, PlaceholderInterface $queryPlaceholder) {
-    return $this->condition->compile($connection, $queryPlaceholder);
-  }
-
-  /**
-   * Implements Drupal\Core\Database\Query\ConditionInterface::compiled().
-   */
-  public function compiled() {
-    return $this->condition->compiled();
-  }
-
-  /**
    * Implements PHP magic __toString method to convert the query to a string.
    *
    * In the degenerate case, there is no string-able query as this operation
@@ -481,4 +403,5 @@ class Merge extends Query implements ConditionInterface {
       }
     }
   }
+
 }

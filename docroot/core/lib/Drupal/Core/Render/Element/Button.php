@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Button.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -15,6 +10,23 @@ use Drupal\Core\Render\Element;
  *
  * When the button is pressed, the form will be submitted to Drupal, where it is
  * validated and rebuilt. The submit handler is not invoked.
+ *
+ * Properties:
+ * - #limit_validation_errors: An array of form element keys that will block
+ *   form submission when validation for these elements or any child elements
+ *   fails. Specify an empty array to suppress all form validation errors.
+ * - #value: The text to be shown on the button.
+ *
+ *
+ * Usage Example:
+ * @code
+ * $form['actions']['preview'] = array(
+ *   '#type' => 'button',
+ *   '#value' => $this->t('Preview'),
+ * );
+ * @endcode
+ *
+ * @see \Drupal\Core\Render\Element\Submit
  *
  * @FormElement("button")
  */
@@ -60,10 +72,9 @@ class Button extends FormElement {
    *
    * @param array $element
    *   An associative array containing the properties of the element.
-   *   Properties used: #attributes, #button_type, #name, #value.
-   *
-   * The #button_type property accepts any value, though core themes have CSS that
-   * styles the following button_types appropriately: 'primary', 'danger'.
+   *   Properties used: #attributes, #button_type, #name, #value. The
+   *   #button_type property accepts any value, though core themes have CSS that
+   *   styles the following button_types appropriately: 'primary', 'danger'.
    *
    * @return array
    *   The $element with prepared variables ready for input.html.twig.

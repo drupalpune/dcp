@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\comment\Plugin\views\filter\UserUid.
- */
-
 namespace Drupal\comment\Plugin\views\filter;
 
 use Drupal\views\Plugin\views\filter\FilterPluginBase;

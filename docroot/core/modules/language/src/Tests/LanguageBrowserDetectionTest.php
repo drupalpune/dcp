@@ -1,16 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\language\Tests\LanguageBrowserDetectionTest.
- */
-
 namespace Drupal\language\Tests;
 
-use Drupal\Component\Utility\UserAgent;
-use Drupal\Core\Language\Language;
 use Drupal\simpletest\WebTestBase;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests browser language detection.
@@ -94,4 +86,5 @@ class LanguageBrowserDetectionTest extends WebTestBase {
     $this->assertField('edit-mappings-xx-browser-langcode', 'xx', 'Browser language code found.');
     $this->assertField('edit-mappings-xx-drupal-langcode', 'zh-hans', 'Drupal language code found.');
   }
+
 }

@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\contextual\Tests\ContextualDynamicContextTest.
- */
-
 namespace Drupal\contextual\Tests;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\simpletest\WebTestBase;
 use Drupal\Core\Template\Attribute;
@@ -46,7 +42,7 @@ class ContextualDynamicContextTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('contextual', 'node', 'views', 'views_ui', 'language');
+  public static $modules = array('contextual', 'node', 'views', 'views_ui', 'language', 'menu_test');
 
   protected function setUp() {
     parent::setUp();
@@ -104,6 +100,12 @@ class ContextualDynamicContextTest extends WebTestBase {
     $this->assertIdentical($json[$ids[2]], '<ul class="contextual-links"><li class="entitynodeedit-form"><a href="' . base_path() . 'node/3/edit">Edit</a></li></ul>');
     $this->assertIdentical($json[$ids[3]], '');
 
+    // Verify that link language is properly handled.
+    $node3->addTranslation('it')->set('title', $this->randomString())->save();
+    $id = 'node:node=' . $node3->id() . ':changed=' . $node3->getChangedTime() . '&langcode=it';
+    $this->drupalGet('node', ['language' => ConfigurableLanguage::createFromLangcode('it')]);
+    $this->assertContextualLinkPlaceHolder($id);
+
     // Authenticated user: can access contextual links, cannot edit articles.
     $this->drupalLogin($this->authenticatedUser);
     $this->drupalGet('node');
@@ -125,18 +127,17 @@ class ContextualDynamicContextTest extends WebTestBase {
     $this->drupalLogin($this->anonymousUser);
     $this->drupalGet('node');
     for ($i = 0; $i < count($ids); $i++) {
-      $this->assertContextualLinkPlaceHolder($ids[$i]);
+      $this->assertNoContextualLinkPlaceHolder($ids[$i]);
     }
     $this->renderContextualLinks(array(), 'node');
     $this->assertResponse(403);
     $this->renderContextualLinks($ids, 'node');
     $this->assertResponse(403);
 
-    // Verify that link language is properly handled.
-    $node3->addTranslation('it')->save();
-    $id = 'node:node=' . $node3->id() . ':changed=' . $node3->getChangedTime() . '&langcode=it';
-    $this->drupalGet('node', ['language' => ConfigurableLanguage::createFromLangcode('it')]);
-    $this->assertContextualLinkPlaceHolder($id);
+    // Get a page where contextual links are directly rendered.
+    $this->drupalGet(Url::fromRoute('menu_test.contextual_test'));
+    $this->assertEscaped("<script>alert('Welcome to the jungle!')</script>");
+    $this->assertLink('Edit menu - contextual');
   }
 
   /**
@@ -181,6 +182,7 @@ class ContextualDynamicContextTest extends WebTestBase {
     for ($i = 0; $i < count($ids); $i++) {
       $post['ids[' . $i . ']'] = $ids[$i];
     }
-    return $this->drupalPost('contextual/render', 'application/json', $post, array('query' => array('destination' => $current_path)));
+    return $this->drupalPostWithFormat('contextual/render', 'json', $post, array('query' => array('destination' => $current_path)));
   }
+
 }

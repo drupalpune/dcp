@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget.
- */
-
 namespace Drupal\Core\Field\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
@@ -18,6 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   id = "options_select",
  *   label = @Translation("Select list"),
  *   field_types = {
+ *     "entity_reference",
  *     "list_integer",
  *     "list_float",
  *     "list_string"
@@ -36,7 +32,7 @@ class OptionsSelectWidget extends OptionsWidgetBase {
     $element += array(
       '#type' => 'select',
       '#options' => $this->getOptions($items->getEntity()),
-      '#default_value' => $this->getSelectedOptions($items, $delta),
+      '#default_value' => $this->getSelectedOptions($items),
       // Do not display a 'multiple' select box if there is only one option.
       '#multiple' => $this->multiple && count($this->options) > 1,
     );

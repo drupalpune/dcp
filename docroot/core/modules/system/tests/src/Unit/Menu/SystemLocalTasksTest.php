@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\system\Unit\Menu\SystemLocalTasksTest.
- */
-
 namespace Drupal\Tests\system\Unit\Menu;
 
 use Drupal\Core\Extension\Extension;
@@ -44,6 +39,10 @@ class SystemLocalTasksTest extends LocalTaskIntegrationTestBase {
       ->will($this->returnValue(array(
         'bartik' => $theme,
       )));
+    $this->themeHandler->expects($this->any())
+      ->method('hasUi')
+      ->with('bartik')
+      ->willReturn(TRUE);
     $this->container->set('theme_handler', $this->themeHandler);
   }
 

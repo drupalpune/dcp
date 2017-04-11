@@ -1,16 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\FileTransfer\Form\FileTransferAuthorizeForm.
- */
-
 namespace Drupal\Core\FileTransfer\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Provides the file transfer authorization form.
@@ -62,15 +58,14 @@ class FileTransferAuthorizeForm extends FormBase {
     if (!$this->getRequest()->isSecure()) {
       $form['information']['https_warning'] = array(
         '#prefix' => '<div class="messages messages--error">',
-        '#markup' => $this->t('WARNING: You are not using an encrypted connection, so your password will be sent in plain text. <a href="@https-link">Learn more</a>.', array('@https-link' => 'https://www.drupal.org/https-information')),
+        '#markup' => $this->t('WARNING: You are not using an encrypted connection, so your password will be sent in plain text. <a href=":https-link">Learn more</a>.', array(':https-link' => 'https://www.drupal.org/https-information')),
         '#suffix' => '</div>',
       );
     }
 
     // Decide on a default backend.
-    if ($authorize_filetransfer_default = $form_state->getValue(array('connection_settings', 'authorize_filetransfer_default')));
-    elseif ($authorize_filetransfer_default = $this->config('system.authorize')->get('filetransfer_default'));
-    else {
+    $authorize_filetransfer_default = $form_state->getValue(array('connection_settings', 'authorize_filetransfer_default'));
+    if (!$authorize_filetransfer_default) {
       $authorize_filetransfer_default = key($available_backends);
     }
 
@@ -178,9 +173,9 @@ class FileTransferAuthorizeForm extends FormBase {
       catch (\Exception $e) {
         // The format of this error message is similar to that used on the
         // database connection form in the installer.
-        $form_state->setErrorByName('connection_settings', $this->t('Failed to connect to the server. The server reports the following message: !message For more help installing or updating code on your server, see the <a href="@handbook_url">handbook</a>.', array(
-          '!message' => '<p class="error">' . $e->getMessage()  . '</p>',
-          '@handbook_url' => 'https://www.drupal.org/documentation/install/modules-themes',
+        $form_state->setErrorByName('connection_settings', $this->t('Failed to connect to the server. The server reports the following message: <p class="error">@message</p> For more help installing or updating code on your server, see the <a href=":handbook_url">handbook</a>.', array(
+          '@message' => $e->getMessage(),
+          ':handbook_url' => 'https://www.drupal.org/documentation/install/modules-themes',
         )));
       }
     }
@@ -202,31 +197,13 @@ class FileTransferAuthorizeForm extends FormBase {
         // likely) be called during the installation process, before the
         // database is set up.
         try {
-          $connection_settings = array();
-          foreach ($form_connection_settings[$filetransfer_backend] as $key => $value) {
-            // We do *not* want to store passwords in the database, unless the
-            // backend explicitly says so via the magic #filetransfer_save form
-            // property. Otherwise, we store everything that's not explicitly
-            // marked with #filetransfer_save set to FALSE.
-            if (!isset($form['connection_settings'][$filetransfer_backend][$key]['#filetransfer_save'])) {
-              if ($form['connection_settings'][$filetransfer_backend][$key]['#type'] != 'password') {
-                $connection_settings[$key] = $value;
-              }
-            }
-            // The attribute is defined, so only save if set to TRUE.
-            elseif ($form['connection_settings'][$filetransfer_backend][$key]['#filetransfer_save']) {
-              $connection_settings[$key] = $value;
-            }
-          }
-          // Set this one as the default authorize method.
-          $this->config('system.authorize')->set('filetransfer_default', $filetransfer_backend);
-          // Save the connection settings minus the password.
-          $this->config('system.authorize')->set('filetransfer_connection_settings_' . $filetransfer_backend, $connection_settings);
-
           $filetransfer = $this->getFiletransfer($filetransfer_backend, $form_connection_settings[$filetransfer_backend]);
 
           // Now run the operation.
-          $this->runOperation($filetransfer);
+          $response = $this->runOperation($filetransfer);
+          if ($response instanceof Response) {
+            $form_state->setResponse($response);
+          }
         }
         catch (\Exception $e) {
           // If there is no database available, we don't care and just skip
@@ -281,8 +258,7 @@ class FileTransferAuthorizeForm extends FormBase {
    * @see hook_filetransfer_backends()
    */
   protected function addConnectionSettings($backend) {
-    $auth_connection_config = $this->config('system.authorize')->get('filetransfer_connection_settings_' . $backend);
-    $defaults = $auth_connection_config ? $auth_connection_config : array();
+    $defaults = array();
     $form = array();
 
     // Create an instance of the file transfer class to get its settings form.
@@ -333,13 +309,18 @@ class FileTransferAuthorizeForm extends FormBase {
    *
    * @param $filetransfer
    *   The FileTransfer object to use for running the operation.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response|null
+   *   The result of running the operation. If this is an instance of
+   *   \Symfony\Component\HttpFoundation\Response the calling code should use
+   *   that response for the current page request.
    */
   protected function runOperation($filetransfer) {
     $operation = $_SESSION['authorize_operation'];
     unset($_SESSION['authorize_operation']);
 
-    require_once $this->root . '/' . $operation['file'];
-    call_user_func_array($operation['callback'], array_merge(array($filetransfer), $operation['arguments']));
+    require_once $operation['file'];
+    return call_user_func_array($operation['callback'], array_merge(array($filetransfer), $operation['arguments']));
   }
 
 }

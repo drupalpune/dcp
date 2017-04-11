@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\DisplayPluginCollection.
- */
-
 namespace Drupal\views;
 
 use Drupal\Component\Plugin\Exception\PluginException;
@@ -31,7 +26,7 @@ class DisplayPluginCollection extends DefaultLazyPluginCollection {
   /**
    * Constructs a DisplayPluginCollection object.
    *
-   * @param \Drupal\views\ViewExecutable
+   * @param \Drupal\views\ViewExecutable $view
    *   The view which has this displays attached.
    * @param \Drupal\Component\Plugin\PluginManagerInterface $manager
    *   The manager to be used for instantiating plugins.
@@ -60,7 +55,7 @@ class DisplayPluginCollection extends DefaultLazyPluginCollection {
   }
 
   /**
-   * Overrides \Drupal\Component\Plugin\LazyPluginCollection::clear().
+   * {@inheritdoc}
    */
   public function clear() {
     foreach (array_filter($this->pluginInstances) as $display) {
@@ -102,13 +97,12 @@ class DisplayPluginCollection extends DefaultLazyPluginCollection {
   }
 
   /**
-   * Overrides \Drupal\Component\Plugin\LazyPluginCollection::remove().
+   * {@inheritdoc}
    */
   public function remove($instance_id) {
     $this->get($instance_id)->remove();
 
     parent::remove($instance_id);
   }
-
 
 }

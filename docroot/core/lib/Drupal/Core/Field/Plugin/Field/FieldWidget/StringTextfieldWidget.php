@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\Plugin\Field\FieldWidget\StringTextfieldWidget.
- */
-
 namespace Drupal\Core\Field\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -60,7 +55,7 @@ class StringTextfieldWidget extends WidgetBase {
   public function settingsSummary() {
     $summary = array();
 
-    $summary[] = t('Textfield size: !size', array('!size' => $this->getSetting('size')));
+    $summary[] = t('Textfield size: @size', array('@size' => $this->getSetting('size')));
     $placeholder = $this->getSetting('placeholder');
     if (!empty($placeholder)) {
       $summary[] = t('Placeholder: @placeholder', array('@placeholder' => $placeholder));

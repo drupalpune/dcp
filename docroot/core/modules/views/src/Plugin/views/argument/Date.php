@@ -1,22 +1,15 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\argument\Date.
- */
-
 namespace Drupal\views\Plugin\views\argument;
 
-use Drupal\Core\Database\Database;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Abstract argument handler for dates.
+ * Argument handler for dates.
  *
  * Adds an option to set a default argument based on the current date.
  *
@@ -47,7 +40,7 @@ class Date extends Formula implements ContainerFactoryPluginInterface {
    */
   protected $argFormat = 'Y-m-d';
 
-  var $option_name = 'default_argument_date';
+  public $option_name = 'default_argument_date';
 
   /**
    * The route match.
@@ -130,7 +123,7 @@ class Date extends Formula implements ContainerFactoryPluginInterface {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\argument\Formula::getFormula().
+   * {@inheritdoc}
    */
   public function getFormula() {
     $this->formula = $this->getDateFormat($this->argFormat);

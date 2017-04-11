@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\comment\Tests\CommentTranslationUITest.
- */
-
 namespace Drupal\comment\Tests;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
@@ -33,6 +28,20 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   protected $adminUser;
 
   /**
+   * {inheritdoc}
+   */
+  protected $defaultCacheContexts = [
+    'languages:language_interface',
+    'session',
+    'theme',
+    'timezone',
+    'url.query_args:_wrapper_format',
+    'url.query_args.pagers:0',
+    'user.permissions',
+    'user.roles',
+  ];
+
+  /**
    * Modules to install.
    *
    * @var array
@@ -49,7 +58,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   }
 
   /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITestBase::setupBundle().
+   * {@inheritdoc}
    */
   function setupBundle() {
     parent::setupBundle();
@@ -66,14 +75,14 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   }
 
   /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITestBase::getTranslatorPermission().
+   * {@inheritdoc}
    */
   protected function getTranslatorPermissions() {
     return array_merge(parent::getTranslatorPermissions(), array('post comments', 'administer comments', 'access comments'));
   }
 
   /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITestBase::createEntity().
+   * {@inheritdoc}
    */
   protected function createEntity($values, $langcode, $comment_type = 'comment_article') {
     if ($comment_type == 'comment_article') {
@@ -100,7 +109,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   }
 
   /**
-   * Overrides \Drupal\content_translation\Tests\ContentTranslationUITestBase::getNewEntityValues().
+   * {@inheritdoc}
    */
   protected function getNewEntityValues($langcode) {
     // Comment subject is not translatable hence we use a fixed value.
@@ -137,27 +146,31 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
    * {@inheritdoc}
    */
   protected function doTestAuthoringInfo() {
-    $entity = entity_load($this->entityTypeId, $this->entityId, TRUE);
-    $path = $entity->getSystemPath('edit-form');
+    $storage = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityTypeId);
+    $storage->resetCache([$this->entityId]);
+    $entity = $storage->load($this->entityId);
     $languages = $this->container->get('language_manager')->getLanguages();
     $values = array();
 
     // Post different authoring information for each translation.
     foreach ($this->langcodes as $langcode) {
+      $url = $entity->urlInfo('edit-form', ['language' => $languages[$langcode]]);
       $user = $this->drupalCreateUser();
       $values[$langcode] = array(
         'uid' => $user->id(),
         'created' => REQUEST_TIME - mt_rand(0, 1000),
       );
       $edit = array(
-        'name' => $user->getUsername(),
+        'uid' => $user->getUsername() . ' (' . $user->id() . ')',
         'date[date]' => format_date($values[$langcode]['created'], 'custom', 'Y-m-d'),
         'date[time]' => format_date($values[$langcode]['created'], 'custom', 'H:i:s'),
       );
-      $this->drupalPostForm($path, $edit, $this->getFormSubmitAction($entity, $langcode), array('language' => $languages[$langcode]));
+      $this->drupalPostForm($url, $edit, $this->getFormSubmitAction($entity, $langcode));
     }
 
-    $entity = entity_load($this->entityTypeId, $this->entityId, TRUE);
+    $storage->resetCache([$this->entityId]);
+    $entity = $storage->load($this->entityId);
     foreach ($this->langcodes as $langcode) {
       $metadata = $this->manager->getTranslationMetadata($entity->getTranslation($langcode));
       $this->assertEqual($metadata->getAuthor()->id(), $values[$langcode]['uid'], 'Translation author correctly stored.');
@@ -186,7 +199,10 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
    * {@inheritdoc}
    */
   protected function doTestTranslationEdit() {
-    $entity = entity_load($this->entityTypeId, $this->entityId, TRUE);
+    $storage = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityTypeId);
+    $storage->resetCache([$this->entityId]);
+    $entity = $storage->load($this->entityId);
     $languages = $this->container->get('language_manager')->getLanguages();
 
     foreach ($this->langcodes as $langcode) {

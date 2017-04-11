@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\TypedData\Plugin\DataType\Language.
- */
-
 namespace Drupal\Core\TypedData\Plugin\DataType;
 
 use Drupal\Core\TypedData\TypedData;
@@ -73,7 +68,7 @@ class Language extends TypedData {
   }
 
   /**
-   * Overrides TypedData::getString().
+   * {@inheritdoc}
    */
   public function getString() {
     $language = $this->getValue();

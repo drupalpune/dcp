@@ -1,13 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Route\RoleAccessCheckTest.
- */
-
 namespace Drupal\Tests\Core\Route;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Context\CacheContextsManager;
+use Drupal\Core\DependencyInjection\Container;
 use Drupal\Core\Session\UserSession;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\Access\RoleAccessCheck;
@@ -143,6 +140,13 @@ class RoleAccessCheckTest extends UnitTestCase {
    * @dataProvider roleAccessProvider
    */
   public function testRoleAccess($path, $grant_accounts, $deny_accounts) {
+    $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
+    $cache_contexts_manager->assertValidTokens()->willReturn(TRUE);
+    $cache_contexts_manager->reveal();
+    $container = new Container();
+    $container->set('cache_contexts_manager', $cache_contexts_manager);
+    \Drupal::setContainer($container);
+
     $role_access_check = new RoleAccessCheck();
     $collection = $this->getTestRouteCollection();
 

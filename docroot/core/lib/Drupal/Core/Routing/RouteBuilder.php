@@ -1,15 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Routing\RouteBuilder.
- */
-
 namespace Drupal\Core\Routing;
 
-use Drupal\Component\Discovery\YamlDiscovery;
 use Drupal\Core\Access\CheckProviderInterface;
 use Drupal\Core\Controller\ControllerResolverInterface;
+use Drupal\Core\Discovery\YamlDiscovery;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\Core\DestructableInterface;
@@ -168,9 +163,13 @@ class RouteBuilder implements RouteBuilderInterface, DestructableInterface {
           'defaults' => array(),
           'requirements' => array(),
           'options' => array(),
+          'host' => NULL,
+          'schemes' => array(),
+          'methods' => array(),
+          'condition' => '',
         );
 
-        $route = new Route($route_info['path'], $route_info['defaults'], $route_info['requirements'], $route_info['options']);
+        $route = new Route($route_info['path'], $route_info['defaults'], $route_info['requirements'], $route_info['options'], $route_info['host'], $route_info['schemes'], $route_info['methods'], $route_info['condition']);
         $collection->add($name, $route);
       }
     }

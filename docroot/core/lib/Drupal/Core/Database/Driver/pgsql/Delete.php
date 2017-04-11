@@ -1,14 +1,12 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Driver\pgsql\Delete
- */
-
 namespace Drupal\Core\Database\Driver\pgsql;
 
 use Drupal\Core\Database\Query\Delete as QueryDelete;
 
+/**
+ * PostgreSQL implementation of \Drupal\Core\Database\Query\Delete.
+ */
 class Delete extends QueryDelete {
 
   /**

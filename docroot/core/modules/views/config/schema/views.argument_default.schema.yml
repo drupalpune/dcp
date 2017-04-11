@@ -1,5 +1,9 @@
 # Schema for the views default arguments.
 
+views.argument_default.*:
+  type: mapping
+  label: 'Base default argument'
+
 views.argument_default.fixed:
   type: mapping
   label: 'Fixed'
@@ -7,14 +11,6 @@ views.argument_default.fixed:
     argument:
       type: string
       label: 'Fixed value'
-
-views.argument_default.php:
-  type: mapping
-  label: 'PHP Code'
-  mapping:
-    code:
-      type: string
-      label: 'PHP contextual filter code'
 
 views.argument_default.raw:
   type: mapping
@@ -26,3 +22,17 @@ views.argument_default.raw:
     use_alias:
       type: boolean
       label: 'Use path alias'
+
+views.argument_default.query_parameter:
+  type: mapping
+  label: 'Query parameter'
+  mapping:
+    query_param:
+      type: string
+      label: 'Parameter'
+    fallback:
+      type: string
+      label: 'Fallback value'
+    multiple:
+      type: string
+      label: 'Multiple values'

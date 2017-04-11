@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Access\CsrfTokenGenerator.
- */
-
 namespace Drupal\Core\Access;
 
 use Drupal\Component\Utility\Crypt;
@@ -63,7 +58,7 @@ class CsrfTokenGenerator {
    *   'drupal_private_key' configuration variable.
    *
    * @see \Drupal\Core\Site\Settings::getHashSalt()
-   * @see \Drupal\Core\Session\SessionManager::start()
+   * @see \Symfony\Component\HttpFoundation\Session\SessionInterface::start()
    */
   public function get($value = '') {
     $seed = $this->sessionMetadata->getCsrfTokenSeed();
@@ -92,7 +87,7 @@ class CsrfTokenGenerator {
       return FALSE;
     }
 
-    return $token === $this->computeToken($seed, $value);
+    return Crypt::hashEquals($this->computeToken($seed, $value), $token);
   }
 
   /**

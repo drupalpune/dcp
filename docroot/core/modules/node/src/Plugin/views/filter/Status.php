@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Plugins\views\filter\Status.
- */
-
 namespace Drupal\node\Plugin\views\filter;
 
 use Drupal\Core\Form\FormStateInterface;

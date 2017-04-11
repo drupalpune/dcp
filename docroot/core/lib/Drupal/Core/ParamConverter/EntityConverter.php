@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\ParamConverter\EntityConverter.
- */
-
 namespace Drupal\Core\ParamConverter;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -101,11 +96,11 @@ class EntityConverter implements ParamConverterInterface {
    * @param array $defaults
    *   The route defaults array.
    *
-   * @throws \Drupal\Core\ParamConverter\ParamNotConvertedException
-   *   Thrown when the dynamic entity type is not found in the route defaults.
-   *
    * @return string
    *   The entity type ID.
+   *
+   * @throws \Drupal\Core\ParamConverter\ParamNotConvertedException
+   *   Thrown when the dynamic entity type is not found in the route defaults.
    */
   protected function getEntityTypeFromDefaults($definition, $name, array $defaults) {
     $entity_type_id = substr($definition['type'], strlen('entity:'));

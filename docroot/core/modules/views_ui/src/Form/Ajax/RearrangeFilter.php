@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Form\Ajax\RearrangeFilter.
- */
-
 namespace Drupal\views_ui\Form\Ajax;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ViewExecutable;
 
@@ -52,7 +47,7 @@ class RearrangeFilter extends ViewsFormBase {
       return $form;
     }
     $display = $executable->displayHandlers->get($display_id);
-    $form['#title'] = SafeMarkup::checkPlain($display->display['display_title']) . ': ';
+    $form['#title'] = Html::escape($display->display['display_title']) . ': ';
     $form['#title'] .= $this->t('Rearrange @type', array('@type' => $types[$type]['ltitle']));
     $form['#section'] = $display_id . 'rearrange-item';
 
@@ -215,6 +210,9 @@ class RearrangeFilter extends ViewsFormBase {
       '#value' => $this->t('Create new filter group'),
       '#id' => 'views-add-group',
       '#group' => 'add',
+      '#attributes' => array(
+        'class' => array('views-add-group'),
+      ),
       '#ajax' => ['url' => NULL],
     );
 
@@ -334,7 +332,7 @@ class RearrangeFilter extends ViewsFormBase {
    *
    * For example array(0 => 'foo') would be array(1 => 'foo').
    *
-   * @param array
+   * @param array $array
    *   The array to increment keys on.
    *
    * @return array
@@ -355,4 +353,3 @@ class RearrangeFilter extends ViewsFormBase {
   }
 
 }
-

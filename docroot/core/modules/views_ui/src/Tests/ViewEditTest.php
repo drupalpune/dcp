@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Tests\ViewEditTest.
- */
-
 namespace Drupal\views_ui\Tests;
 
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\views\Entity\View;
-use Drupal\views\Views;
 
 /**
  * Tests some general functionality of editing views, like deleting a view.
@@ -45,12 +39,17 @@ class ViewEditTest extends UITestBase {
   }
 
   /**
-   * Tests the machine name form.
+   * Tests the machine name and administrative comment forms.
    */
-  public function testMachineNameOption() {
+  public function testOtherOptions() {
     $this->drupalGet('admin/structure/views/view/test_view');
     // Add a new attachment display.
     $this->drupalPostForm(NULL, array(), 'Add Attachment');
+
+    // Test that a long administrative comment is truncated.
+    $edit = array('display_comment' => 'one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen');
+    $this->drupalPostForm('admin/structure/views/nojs/display/test_view/attachment_1/display_comment', $edit, 'Apply');
+    $this->assertText('one two three four five six seven eight nine ten eleven twelve thirteen fourteen...');
 
     // Change the machine name for the display from page_1 to test_1.
     $edit = array('display_id' => 'test_1');
@@ -89,6 +88,19 @@ class ViewEditTest extends UITestBase {
     // Test that the display ID has not been changed.
     $this->drupalGet('admin/structure/views/view/test_view/edit/test_1');
     $this->assertLink(t('test_1'));
+
+    // Test that validation does not run on cancel.
+    $this->drupalGet('admin/structure/views/view/test_view');
+    // Delete the field to cause an error on save.
+    $fields = [];
+    $fields['fields[age][removed]'] = 1;
+    $fields['fields[id][removed]'] = 1;
+    $fields['fields[name][removed]'] = 1;
+    $this->drupalPostForm('admin/structure/views/nojs/rearrange/test_view/default/field', $fields, t('Apply'));
+    $this->drupalPostForm(NULL, array(), 'Save');
+    $this->drupalPostForm(NULL, array(), t('Cancel'));
+    $this->assertNoFieldByXpath('//div[contains(@class, "error")]', FALSE, 'No error message is displayed.');
+    $this->assertUrl('admin/structure/views', array(), 'Redirected back to the view listing page..');
   }
 
   /**
@@ -105,7 +117,7 @@ class ViewEditTest extends UITestBase {
       $this->assertResponse(200);
       $langcode_url = 'admin/structure/views/nojs/display/' . $view_name . '/' . $display . '/rendering_language';
       $this->assertNoLinkByHref($langcode_url);
-      $this->assertNoLink(t('!type language selected for page', array('!type' => t('Content'))));
+      $this->assertNoLink(t('@type language selected for page', array('@type' => t('Content'))));
       $this->assertNoLink(t('Content language of view row'));
     }
 
@@ -122,12 +134,12 @@ class ViewEditTest extends UITestBase {
       $langcode_url = 'admin/structure/views/nojs/display/' . $view_name . '/' . $display . '/rendering_language';
       if ($view_name == 'test_view') {
         $this->assertNoLinkByHref($langcode_url);
-        $this->assertNoLink(t('!type language selected for page', array('!type' => t('Content'))));
+        $this->assertNoLink(t('@type language selected for page', array('@type' => t('Content'))));
         $this->assertNoLink(t('Content language of view row'));
       }
       else {
         $this->assertLinkByHref($langcode_url);
-        $this->assertNoLink(t('!type language selected for page', array('!type' => t('Content'))));
+        $this->assertNoLink(t('@type language selected for page', array('@type' => t('Content'))));
         $this->assertLink(t('Content language of view row'));
       }
 
@@ -139,7 +151,7 @@ class ViewEditTest extends UITestBase {
       else {
         $this->assertFieldByName('rendering_language', '***LANGUAGE_entity_translation***');
         // Test that the order of the language list is similar to other language
-        // lists, such as in Views UI.
+        // lists, such as in the content translation settings.
         $expected_elements = array(
           '***LANGUAGE_entity_translation***',
           '***LANGUAGE_entity_default***',

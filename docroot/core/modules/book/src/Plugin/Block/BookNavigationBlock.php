@@ -1,14 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\book\Plugin\Block\BookNavigationBlock.
- */
-
 namespace Drupal\book\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\book\BookManagerInterface;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -160,9 +156,12 @@ class BookNavigationBlock extends BlockBase implements ContainerFactoryPluginInt
       }
     }
     elseif ($current_bid) {
-      // Only display this block when the user is browsing a book.
-      $query = \Drupal::entityQuery('node');
-      $nid = $query->condition('nid', $node->book['bid'], '=')->execute();
+      // Only display this block when the user is browsing a book and do
+      // not show unpublished books.
+      $nid = \Drupal::entityQuery('node')
+        ->condition('nid', $node->book['bid'], '=')
+        ->condition('status', NODE_PUBLISHED)
+        ->execute();
 
       // Only show the block if the user has view access for the top-level node.
       if ($nid) {
@@ -182,12 +181,7 @@ class BookNavigationBlock extends BlockBase implements ContainerFactoryPluginInt
    * {@inheritdoc}
    */
   public function getCacheContexts() {
-    // The "Book navigation" block must be cached per role and book navigation
-    // context.
-    return [
-      'user.roles',
-      'route.book_navigation',
-    ];
+    return Cache::mergeContexts(parent::getCacheContexts(), ['route.book_navigation']);
   }
 
   /**

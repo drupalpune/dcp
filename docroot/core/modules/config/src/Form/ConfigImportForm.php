@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config\Form\ConfigImportForm.
- */
-
 namespace Drupal\config\Form;
 
 use Drupal\Core\Archiver\ArchiveTar;
@@ -40,7 +35,7 @@ class ConfigImportForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('config.storage.staging')
+      $container->get('config.storage.sync')
     );
   }
 
@@ -55,18 +50,21 @@ class ConfigImportForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['description'] = array(
-      '#markup' => '<p>' . $this->t('Use the upload button below.') . '</p>',
-    );
+    $directory = config_get_config_directory(CONFIG_SYNC_DIRECTORY);
+    $directory_is_writable = is_writable($directory);
+    if (!$directory_is_writable) {
+      drupal_set_message($this->t('The directory %directory is not writable.', ['%directory' => $directory]), 'error');
+    }
     $form['import_tarball'] = array(
       '#type' => 'file',
-      '#title' => $this->t('Select your configuration export file'),
-      '#description' => $this->t('This form will redirect you to the import configuration screen.'),
+      '#title' => $this->t('Configuration archive'),
+      '#description' => $this->t('Allowed types: @extensions.', array('@extensions' => 'tar.gz tgz tar.bz2')),
     );
 
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Upload'),
+      '#disabled' => !$directory_is_writable,
     );
     return $form;
   }
@@ -75,13 +73,16 @@ class ConfigImportForm extends FormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $file_upload = $this->getRequest()->files->get('files[import_tarball]', NULL, TRUE);
-    if ($file_upload && $file_upload->isValid()) {
-      $form_state->setValue('import_tarball', $file_upload->getRealPath());
+    $all_files = $this->getRequest()->files->get('files', []);
+    if (!empty($all_files['import_tarball'])) {
+      $file_upload = $all_files['import_tarball'];
+      if ($file_upload->isValid()) {
+        $form_state->setValue('import_tarball', $file_upload->getRealPath());
+        return;
+      }
     }
-    else {
-      $form_state->setErrorByName('import_tarball', $this->t('The import tarball could not be uploaded.'));
-    }
+
+    $form_state->setErrorByName('import_tarball', $this->t('The file could not be uploaded.'));
   }
 
   /**
@@ -96,8 +97,8 @@ class ConfigImportForm extends FormBase {
         foreach ($archiver->listContent() as $file) {
           $files[] = $file['filename'];
         }
-        $archiver->extractList($files, config_get_config_directory(CONFIG_STAGING_DIRECTORY));
-        drupal_set_message($this->t('Your configuration files were successfully uploaded, ready for import.'));
+        $archiver->extractList($files, config_get_config_directory(CONFIG_SYNC_DIRECTORY));
+        drupal_set_message($this->t('Your configuration files were successfully uploaded and are ready for import.'));
         $form_state->setRedirect('config.sync');
       }
       catch (\Exception $e) {
@@ -108,4 +109,3 @@ class ConfigImportForm extends FormBase {
   }
 
 }
-

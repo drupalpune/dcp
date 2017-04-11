@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\Mail\Plugin\Mail\PhpMail.
- */
-
 namespace Drupal\Core\Mail\Plugin\Mail;
 
 use Drupal\Component\Utility\Unicode;
@@ -35,6 +30,7 @@ class PhpMail implements MailInterface {
   public function format(array $message) {
     // Join the body array into one string.
     $message['body'] = implode("\n\n", $message['body']);
+
     // Convert any HTML to plain-text.
     $message['body'] = MailFormatHelper::htmlToText($message['body']);
     // Wrap the mail body for sending.
@@ -52,7 +48,7 @@ class PhpMail implements MailInterface {
    * @return bool
    *   TRUE if the mail was successfully accepted, otherwise FALSE.
    *
-   * @see http://php.net/manual/en/function.mail.php
+   * @see http://php.net/manual/function.mail.php
    * @see \Drupal\Core\Mail\MailManagerInterface::mail()
    */
   public function mail(array $message) {
@@ -115,4 +111,5 @@ class PhpMail implements MailInterface {
 
     return $mail_result;
   }
+
 }

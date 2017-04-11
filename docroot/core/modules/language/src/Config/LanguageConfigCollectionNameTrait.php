@@ -1,13 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\language\Config\LanguageConfigCollectionNameTrait.
- */
-
 namespace Drupal\language\Config;
-
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Provides a common trait for working with language override collection names.
@@ -45,7 +38,7 @@ trait LanguageConfigCollectionNameTrait {
   protected function getLangcodeFromCollectionName($collection) {
     preg_match('/^language\.(.*)$/', $collection, $matches);
     if (!isset($matches[1])) {
-      throw new \InvalidArgumentException(SafeMarkup::format('!collection is not a valid language override collection', array('!collection' => $collection)));
+      throw new \InvalidArgumentException("'$collection' is not a valid language override collection");
     }
     return $matches[1];
   }

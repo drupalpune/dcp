@@ -1,14 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\search\Form\SearchBlockForm.
- */
-
 namespace Drupal\search\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\search\SearchPageRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -25,13 +22,33 @@ class SearchBlockForm extends FormBase {
   protected $searchPageRepository;
 
   /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * Constructs a new SearchBlockForm.
    *
    * @param \Drupal\search\SearchPageRepositoryInterface $search_page_repository
    *   The search page repository.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
    */
-  public function __construct(SearchPageRepositoryInterface $search_page_repository) {
+  public function __construct(SearchPageRepositoryInterface $search_page_repository, ConfigFactoryInterface $config_factory, RendererInterface $renderer) {
     $this->searchPageRepository = $search_page_repository;
+    $this->configFactory = $config_factory;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -39,7 +56,9 @@ class SearchBlockForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('search.search_page_repository')
+      $container->get('search.search_page_repository'),
+      $container->get('config.factory'),
+      $container->get('renderer')
     );
   }
 
@@ -56,6 +75,16 @@ class SearchBlockForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     // Set up the form to submit using GET to the correct search page.
     $entity_id = $this->searchPageRepository->getDefaultSearchPage();
+
+    $form = [];
+
+    // SearchPageRepository::getDefaultSearchPage() depends on search.settings.
+    // The dependency needs to be added before the conditional return, otherwise
+    // the block would get cached without the necessary cacheablity metadata in
+    // case there is no default search page and would not be invalidated if that
+    // changes.
+    $this->renderer->addCacheableDependency($form, $this->configFactory->get('search.settings'));
+
     if (!$entity_id) {
       $form['message'] = array(
         '#markup' => $this->t('Search is currently disabled'),
@@ -65,7 +94,6 @@ class SearchBlockForm extends FormBase {
 
     $route = 'search.view_' . $entity_id;
     $form['#action'] = $this->url($route);
-    $form['#token'] = FALSE;
     $form['#method'] = 'get';
 
     $form['keys'] = array(
@@ -94,4 +122,5 @@ class SearchBlockForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // This form submits to the search page, so processing happens there.
   }
+
 }

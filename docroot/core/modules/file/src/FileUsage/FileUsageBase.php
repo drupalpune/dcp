@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\file\FileUsage\FileUsageBase.
- */
-
 namespace Drupal\file\FileUsage;
 
 use Drupal\file\FileInterface;
@@ -15,7 +10,7 @@ use Drupal\file\FileInterface;
 abstract class FileUsageBase implements FileUsageInterface {
 
   /**
-   * Implements Drupal\file\FileUsage\FileUsageInterface::add().
+   * {@inheritdoc}
    */
   public function add(FileInterface $file, $module, $type, $id, $count = 1) {
     // Make sure that a used file is permanent.
@@ -26,7 +21,7 @@ abstract class FileUsageBase implements FileUsageInterface {
   }
 
   /**
-   * Implements Drupal\file\FileUsage\FileUsageInterface::delete().
+   * {@inheritdoc}
    */
   public function delete(FileInterface $file, $module, $type = NULL, $id = NULL, $count = 1) {
     // If there are no more remaining usages of this file, mark it as temporary,
@@ -37,4 +32,5 @@ abstract class FileUsageBase implements FileUsageInterface {
       $file->save();
     }
   }
+
 }

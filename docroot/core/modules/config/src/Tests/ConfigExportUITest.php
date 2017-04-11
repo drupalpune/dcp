@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config\Tests\ConfigExportUITest.
- */
-
 namespace Drupal\config\Tests;
 
-use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Archiver\Tar;
+use Drupal\Core\Serialization\Yaml;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -23,13 +18,20 @@ class ConfigExportUITest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('config', 'config_test', 'config_export_test');
+  public static $modules = array('config', 'config_test');
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
+
+    // Set up an override.
+    $settings['config']['system.maintenance']['message'] = (object) array(
+      'value' => 'Foo',
+      'required' => TRUE,
+    );
+    $this->writeSettings($settings);
 
     $this->drupalLogin($this->drupalCreateUser(array('export configuration')));
   }
@@ -45,6 +47,13 @@ class ConfigExportUITest extends WebTestBase {
     // Submit the export form and verify response.
     $this->drupalPostForm('admin/config/development/configuration/full/export', array(), t('Export'));
     $this->assertResponse(200, 'User can access the download callback.');
+
+    // Test if header contains file name with hostname and timestamp.
+    $request = \Drupal::request();
+    $hostname = str_replace('.', '-', $request->getHttpHost());
+    $header_content_disposition = $this->drupalGetHeader('content-disposition');
+    $header_match = (boolean) preg_match('/attachment; filename="config-' . preg_quote($hostname) . '-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}\.tar\.gz"/', $header_content_disposition);
+    $this->assertTrue($header_match, "Header with filename matches the expected format.");
 
     // Get the archived binary file provided to user for download.
     $archive_data = $this->getRawContent();
@@ -75,6 +84,16 @@ class ConfigExportUITest extends WebTestBase {
     $file_contents = file_get_contents(file_directory_temp() . '/' . 'system.maintenance.yml');
     $exported = Yaml::decode($file_contents);
     $this->assertNotIdentical($exported['message'], 'Foo');
+
+    // Check the single export form doesn't have "form-required" elements.
+    $this->drupalGet('admin/config/development/configuration/single/export');
+    $this->assertNoRaw('js-form-required form-required', 'No form required fields are found.');
+
+    // Ensure the temporary file is not available to users without the
+    // permission.
+    $this->drupalLogout();
+    $this->drupalGet('system/temporary', ['query' => ['file' => 'config.tar.gz']]);
+    $this->assertResponse(403);
   }
 
 }

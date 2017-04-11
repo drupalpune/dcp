@@ -1,16 +1,10 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\taxonomy\Plugin\views\argument\Taxonomy.
- */
-
 namespace Drupal\taxonomy\Plugin\views\argument;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\views\Plugin\views\argument\NumericArgument;
-use Drupal\Component\Utility\SafeMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -56,7 +50,7 @@ class Taxonomy extends NumericArgument implements ContainerFactoryPluginInterfac
     if ($this->argument) {
       $term = $this->termStorage->load($this->argument);
       if (!empty($term)) {
-        return SafeMarkup::checkPlain($term->getName());
+        return $term->getName();
       }
     }
     // TODO review text

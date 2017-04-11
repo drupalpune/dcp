@@ -5,7 +5,6 @@
  * Miscellaneous functions.
  */
 
-use Drupal\Component\Utility\Variable;
 use Drupal\Core\PhpStorage\PhpStorageFactory;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\DrupalKernel;
@@ -29,13 +28,17 @@ function drupal_rebuild(ClassLoader $class_loader, Request $request) {
   restore_error_handler();
   restore_exception_handler();
 
-  // Force kernel to rebuild container.
-  PhpStorageFactory::get('service_container')->deleteAll();
+  // Force kernel to rebuild php cache.
   PhpStorageFactory::get('twig')->deleteAll();
 
   // Bootstrap up to where caches exist and clear them.
   $kernel = new DrupalKernel('prod', $class_loader);
   $kernel->setSitePath(DrupalKernel::findSitePath($request));
+
+  // Invalidate the container.
+  $kernel->invalidateContainer();
+
+  // Prepare a NULL request.
   $kernel->prepareLegacyRequest($request);
 
   foreach (Cache::getBins() as $bin) {

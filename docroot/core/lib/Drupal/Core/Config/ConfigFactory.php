@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\ConfigFactory.
- */
-
 namespace Drupal\Core\Config;
 
 use Drupal\Component\Utility\NestedArray;
@@ -111,22 +106,26 @@ class ConfigFactory implements ConfigFactoryInterface, EventSubscriberInterface 
     }
     else {
       // If the configuration object does not exist in the configuration
-      // storage, create a new object and add it to the static cache.
-      $cache_key = $this->getConfigCacheKey($name, $immutable);
-      $this->cache[$cache_key] = $this->createConfigObject($name, $immutable);
+      // storage, create a new object.
+      $config = $this->createConfigObject($name, $immutable);
 
       if ($immutable) {
         // Get and apply any overrides.
         $overrides = $this->loadOverrides(array($name));
         if (isset($overrides[$name])) {
-          $this->cache[$cache_key]->setModuleOverride($overrides[$name]);
+          $config->setModuleOverride($overrides[$name]);
         }
         // Apply any settings.php overrides.
         if (isset($GLOBALS['config'][$name])) {
-          $this->cache[$cache_key]->setSettingsOverride($GLOBALS['config'][$name]);
+          $config->setSettingsOverride($GLOBALS['config'][$name]);
         }
       }
-      return $this->cache[$cache_key];
+
+      foreach ($this->configFactoryOverrides as $override) {
+        $config->addCacheableDependency($override->getCacheableMetadata($name));
+      }
+
+      return $config;
     }
   }
 
@@ -183,6 +182,9 @@ class ConfigFactory implements ConfigFactoryInterface, EventSubscriberInterface 
             $this->cache[$cache_key]->setSettingsOverride($GLOBALS['config'][$name]);
           }
         }
+
+        $this->propagateConfigOverrideCacheability($cache_key, $name);
+
         $list[$name] = $this->cache[$cache_key];
       }
     }
@@ -207,6 +209,20 @@ class ConfigFactory implements ConfigFactoryInterface, EventSubscriberInterface 
       $overrides = NestedArray::mergeDeepArray(array($override->loadOverrides($names), $overrides), TRUE);
     }
     return $overrides;
+  }
+
+  /**
+   * Propagates cacheability of config overrides to cached config objects.
+   *
+   * @param string $cache_key
+   *   The key of the cached config object to update.
+   * @param string $name
+   *   The name of the configuration object to construct.
+   */
+  protected function propagateConfigOverrideCacheability($cache_key, $name) {
+    foreach ($this->configFactoryOverrides as $override) {
+      $this->cache[$cache_key]->addCacheableDependency($override->getCacheableMetadata($name));
+    }
   }
 
   /**
@@ -255,8 +271,8 @@ class ConfigFactory implements ConfigFactoryInterface, EventSubscriberInterface 
     // Because get() adds overrides both from $GLOBALS and from
     // $this->configFactoryOverrides, add cache keys for each.
     $keys[] = 'global_overrides';
-    foreach($this->configFactoryOverrides as $override) {
-      $keys[] =  $override->getCacheSuffix();
+    foreach ($this->configFactoryOverrides as $override) {
+      $keys[] = $override->getCacheSuffix();
     }
     return $keys;
   }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\search\ViewsSearchQuery.
- */
-
 namespace Drupal\search;
 
 use Drupal\Core\Database\Query\Condition;
@@ -69,8 +64,10 @@ class ViewsSearchQuery extends SearchQuery {
    *   The searched value.
    * @param string $replace
    *   The value which replaces the search value.
-   * @param \Drupal\Core\Database\Query\Condition $condition
-   *   The query condition in which the string is replaced.
+   * @param array $condition
+   *   The query conditions array in which the string is replaced. This is an
+   *   item from a \Drupal\Core\Database\Query\Condition::conditions array,
+   *   which must have a 'field' element.
    */
   function conditionReplaceString($search, $replace, &$condition) {
     if ($condition['field'] instanceof Condition) {

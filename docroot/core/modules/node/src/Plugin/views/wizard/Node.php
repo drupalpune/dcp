@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Plugin\views\wizard\Node.
- */
-
 namespace Drupal\node\Plugin\views\wizard;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -54,12 +49,12 @@ class Node extends WizardPluginBase {
   public function getAvailableSorts() {
     // You can't execute functions in properties, so override the method
     return array(
-      'node_field_data-title:DESC' => $this->t('Title')
+      'node_field_data-title:ASC' => $this->t('Title')
     );
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\wizard\WizardPluginBase::rowStyleOptions().
+   * {@inheritdoc}
    */
   protected function rowStyleOptions() {
     $options = array();
@@ -72,7 +67,7 @@ class Node extends WizardPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\wizard\WizardPluginBase::defaultDisplayOptions().
+   * {@inheritdoc}
    */
   protected function defaultDisplayOptions() {
     $display_options = parent::defaultDisplayOptions();
@@ -110,7 +105,7 @@ class Node extends WizardPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\wizard\WizardPluginBase::defaultDisplayFiltersUser().
+   * {@inheritdoc}
    */
   protected function defaultDisplayFiltersUser(array $form, FormStateInterface $form_state) {
     $filters = parent::defaultDisplayFiltersUser($form, $form_state);
@@ -199,7 +194,9 @@ class Node extends WizardPluginBase {
   protected function buildFilters(&$form, FormStateInterface $form_state) {
     parent::buildFilters($form, $form_state);
 
-    $selected_bundle = static::getSelected($form_state, array('show', 'type'), 'all', $form['displays']['show']['type']);
+    if (isset($form['displays']['show']['type'])) {
+      $selected_bundle = static::getSelected($form_state, array('show', 'type'), 'all', $form['displays']['show']['type']);
+    }
 
     // Add the "tagged with" filter to the view.
 
@@ -220,7 +217,7 @@ class Node extends WizardPluginBase {
     // entities. If a particular entity type (i.e., bundle) has been
     // selected above, then we only search for taxonomy fields associated
     // with that bundle. Otherwise, we use all bundles.
-    $bundles = array_keys(entity_get_bundles($this->entityTypeId));
+    $bundles = array_keys($this->bundleInfoService->getBundleInfo($this->entityTypeId));
     // Double check that this is a real bundle before using it (since above
     // we added a dummy option 'all' to the bundle list on the form).
     if (isset($selected_bundle) && in_array($selected_bundle, $bundles)) {

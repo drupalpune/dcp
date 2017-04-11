@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\telephone\Plugin\field\formatter\TelephoneLinkFormatter.
- */
-
 namespace Drupal\telephone\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FormatterBase;
@@ -67,7 +62,7 @@ class TelephoneLinkFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $element = array();
     $title_setting = $this->getSetting('title');
 
@@ -94,4 +89,5 @@ class TelephoneLinkFormatter extends FormatterBase {
 
     return $element;
   }
+
 }

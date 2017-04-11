@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\StorableConfigBase.
- */
-
 namespace Drupal\Core\Config;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Config\Schema\Ignore;
 use Drupal\Core\TypedData\PrimitiveInterface;
 use Drupal\Core\TypedData\Type\FloatInterface;
@@ -66,12 +60,12 @@ abstract class StorableConfigBase extends ConfigBase {
   /**
    * Saves the configuration object.
    *
+   * Must invalidate the cache tags associated with the configuration object.
+   *
    * @param bool $has_trusted_data
    *   Set to TRUE if the configuration data has already been checked to ensure
    *   it conforms to schema. Generally this is only used during module and
    *   theme installation.
-   *
-   * Must invalidate the cache tags associated with the configuration object.
    *
    * @return $this
    *
@@ -99,7 +93,7 @@ abstract class StorableConfigBase extends ConfigBase {
    */
   public function initWithData(array $data) {
     $this->isNew = FALSE;
-    $this->setData($data, FALSE);
+    $this->data = $data;
     $this->originalData = $this->data;
     return $this;
   }
@@ -163,10 +157,7 @@ abstract class StorableConfigBase extends ConfigBase {
       }
     }
     elseif ($value !== NULL && !is_scalar($value)) {
-      throw new UnsupportedDataTypeConfigException(SafeMarkup::format('Invalid data type for config element @name:@key', array(
-        '@name' => $this->getName(),
-        '@key' => $key,
-      )));
+      throw new UnsupportedDataTypeConfigException("Invalid data type for config element {$this->getName()}:$key");
     }
   }
 
@@ -200,7 +191,7 @@ abstract class StorableConfigBase extends ConfigBase {
         // we have to special case the meaning of an empty string for numeric
         // types. In PHP this would be casted to a 0 but for the purposes of
         // configuration we need to treat this as a NULL.
-        $empty_value =  $value === '' && ($element instanceof IntegerInterface || $element instanceof FloatInterface);
+        $empty_value = $value === '' && ($element instanceof IntegerInterface || $element instanceof FloatInterface);
 
         if ($value === NULL || $empty_value) {
           $value = NULL;
@@ -213,10 +204,7 @@ abstract class StorableConfigBase extends ConfigBase {
     else {
       // Throw exception on any non-scalar or non-array value.
       if (!is_array($value)) {
-        throw new UnsupportedDataTypeConfigException(SafeMarkup::format('Invalid data type for config element @name:@key', array(
-          '@name' => $this->getName(),
-          '@key' => $key,
-        )));
+        throw new UnsupportedDataTypeConfigException("Invalid data type for config element {$this->getName()}:$key");
       }
       // Recurse into any nested keys.
       foreach ($value as $nested_value_key => $nested_value) {

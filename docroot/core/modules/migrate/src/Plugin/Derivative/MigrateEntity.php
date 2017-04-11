@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\migrate\Plugin\Derivative\MigrateEntity.
- */
-
 namespace Drupal\migrate\Plugin\Derivative;
 
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
@@ -68,6 +63,7 @@ class MigrateEntity implements ContainerDeriverInterface {
         'id' => "entity:$entity_type",
         'class' => $class,
         'requirements_met' => 1,
+        'provider' => $entity_info->getProvider(),
       );
     }
     return $this->derivatives;

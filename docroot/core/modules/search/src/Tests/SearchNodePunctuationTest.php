@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\search\Tests\SearchNodePunctuationTest.
- */
-
 namespace Drupal\search\Tests;
 
 /**
@@ -57,11 +52,12 @@ class SearchNodePunctuationTest extends SearchTestBase {
     $edit = array('keys' => '&');
     $this->drupalPostForm('search/node', $edit, t('Search'));
     $this->assertNoRaw('<strong>&</strong>amp;');
-    $this->assertText('You must include at least one positive keyword');
+    $this->assertText('You must include at least one keyword');
 
     $edit = array('keys' => '&amp;');
     $this->drupalPostForm('search/node', $edit, t('Search'));
     $this->assertNoRaw('<strong>&</strong>amp;');
-    $this->assertText('You must include at least one positive keyword');
+    $this->assertText('You must include at least one keyword');
   }
+
 }

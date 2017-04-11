@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\plugin_test\Plugin\TestPluginManager.
- */
-
 namespace Drupal\plugin_test\Plugin;
 
 use Drupal\Component\Plugin\PluginManagerBase;
@@ -40,4 +35,5 @@ class TestPluginManager extends PluginManagerBase {
     // so we provide it the discovery object.
     $this->factory = new DefaultFactory($this->discovery);
   }
+
 }

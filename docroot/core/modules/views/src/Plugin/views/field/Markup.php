@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\field\Markup.
- */
-
 namespace Drupal\views\Plugin\views\field;
 
 use Drupal\views\Plugin\views\display\DisplayPluginBase;

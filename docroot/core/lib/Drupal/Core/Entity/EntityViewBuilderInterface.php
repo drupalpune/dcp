@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityViewBuilderInterface.
- */
-
 namespace Drupal\Core\Entity;
 
 use Drupal\Core\Field\FieldItemInterface;
@@ -29,11 +24,8 @@ interface EntityViewBuilderInterface {
    *   configured for the entity components, keyed by bundle name.
    * @param string $view_mode
    *   The view mode in which the entity is being viewed.
-   * @param string $langcode
-   *   (optional) For which language the entity should be build, defaults to
-   *   the current content language.
    */
-  public function buildComponents(array &$build, array $entities, array $displays, $view_mode, $langcode = NULL);
+  public function buildComponents(array &$build, array $entities, array $displays, $view_mode);
 
   /**
    * Builds the render array for the provided entity.
@@ -107,7 +99,7 @@ interface EntityViewBuilderInterface {
    * @param \Drupal\Core\Field\FieldItemListInterface $items
    *   FieldItemList containing the values to be displayed.
    * @param string|array $display_options
-   *  Can be either:
+   *   Can be either:
    *   - The name of a view mode. The field will be displayed according to the
    *     display settings specified for this view mode in the $field
    *     definition for the field in the entity's bundle. If no display settings

@@ -14,11 +14,14 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Tests\UnitTestCase;
-use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @coversDefaultClass \Drupal\Core\Controller\ControllerResolver
@@ -41,6 +44,13 @@ class ControllerResolverTest extends UnitTestCase {
   protected $container;
 
   /**
+   * The PSR-7 converter.
+   *
+   * @var \Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface
+   */
+  protected $httpMessageFactory;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -49,7 +59,8 @@ class ControllerResolverTest extends UnitTestCase {
     $this->container = new ContainerBuilder();
     $class_resolver = new ClassResolver();
     $class_resolver->setContainer($this->container);
-    $this->controllerResolver = new ControllerResolver($class_resolver);
+    $this->httpMessageFactory = new DiactorosFactory();
+    $this->controllerResolver = new ControllerResolver($this->httpMessageFactory, $class_resolver);
   }
 
   /**
@@ -61,7 +72,7 @@ class ControllerResolverTest extends UnitTestCase {
    * @see \Drupal\Core\Controller\ControllerResolver::doGetArguments()
    */
   public function testGetArguments() {
-    $controller = function(EntityInterface $entity, $user, RouteMatchInterface $route_match) {
+    $controller = function(EntityInterface $entity, $user, RouteMatchInterface $route_match, ServerRequestInterface $psr_7) {
     };
     $mock_entity = $this->getMockBuilder('Drupal\Core\Entity\Entity')
       ->disableOriginalConstructor()
@@ -71,12 +82,13 @@ class ControllerResolverTest extends UnitTestCase {
       'entity' => $mock_entity,
       'user' => $mock_account,
       '_raw_variables' => new ParameterBag(array('entity' => 1, 'user' => 1)),
-    ));
+    ), array(), array(), array('HTTP_HOST' => 'drupal.org'));
     $arguments = $this->controllerResolver->getArguments($request, $controller);
 
     $this->assertEquals($mock_entity, $arguments[0]);
     $this->assertEquals($mock_account, $arguments[1]);
     $this->assertEquals(RouteMatch::createFromRequest($request), $arguments[2], 'Ensure that the route match object is passed along as well');
+    $this->assertInstanceOf(ServerRequestInterface::class, $arguments[3], 'Ensure that the PSR-7 object is passed along as well');
   }
 
   /**
@@ -219,6 +231,20 @@ class ControllerResolverTest extends UnitTestCase {
     $this->assertEquals([RouteMatch::createFromRequest($request), $request], $arguments);
   }
 
+  /**
+   * Tests getArguments with a route match and a PSR-7 request.
+   *
+   * @covers ::getArguments
+   * @covers ::doGetArguments
+   */
+  public function testGetArgumentsWithRouteMatchAndPsr7Request() {
+    $request = Request::create('/test');
+    $mock_controller = new MockControllerPsr7();
+    $arguments = $this->controllerResolver->getArguments($request, [$mock_controller, 'getControllerWithRequestAndRouteMatch']);
+    $this->assertEquals(RouteMatch::createFromRequest($request), $arguments[0], 'Ensure that the route match object is passed along as well');
+    $this->assertInstanceOf('Psr\Http\Message\ServerRequestInterface', $arguments[1], 'Ensure that the PSR-7 object is passed along as well');
+  }
+
 }
 
 class MockController {
@@ -231,6 +257,17 @@ class MockController {
   }
 
 }
+class MockControllerPsr7 {
+  public function getResult() {
+    return ['#markup' => 'This is a regular controller'];
+  }
+
+  public function getControllerWithRequestAndRouteMatch(RouteMatchInterface $route_match, ServerRequestInterface $request) {
+    return ['#markup' => 'this is another example controller'];
+  }
+
+}
+
 class MockContainerInjection implements ContainerInjectionInterface {
   protected $result;
   public function __construct($result) {
@@ -242,14 +279,18 @@ class MockContainerInjection implements ContainerInjectionInterface {
   public function getResult() {
     return $this->result;
   }
+
 }
-class MockContainerAware extends ContainerAware {
+class MockContainerAware implements ContainerAwareInterface {
+  use ContainerAwareTrait;
   public function getResult() {
     return 'This is container aware.';
   }
+
 }
 class MockInvokeController {
   public function __invoke() {
     return 'This used __invoke().';
   }
+
 }

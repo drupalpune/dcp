@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\migrate_drupal\Unit\source\VariableMultiRowTestBase.
- */
-
 namespace Drupal\Tests\migrate_drupal\Unit\source;
 
 use Drupal\Tests\migrate\Unit\MigrateSqlSourceTestCase;
@@ -21,7 +16,6 @@ abstract class VariableMultiRowTestBase extends MigrateSqlSourceTestCase {
   // The fake Migration configuration entity.
   protected $migrationConfiguration = array(
     'id' => 'test',
-    'idlist' => array(),
     'source' => array(
       'plugin' => 'd6_variable_multirow',
       'variables' => array(
@@ -43,18 +37,4 @@ abstract class VariableMultiRowTestBase extends MigrateSqlSourceTestCase {
     ),
   );
 
-}
-
-namespace Drupal\Tests\migrate_drupal\Unit\source;
-
-use Drupal\Core\Database\Connection;
-use Drupal\Core\Extension\ModuleHandlerInterface;
-
-class TestVariableMultiRow extends \Drupal\migrate_drupal\Plugin\migrate\source\VariableMultiRow {
-  public function setDatabase(Connection $database) {
-    $this->database = $database;
-  }
-  public function setModuleHandler(ModuleHandlerInterface $module_handler) {
-    $this->moduleHandler = $module_handler;
-  }
 }

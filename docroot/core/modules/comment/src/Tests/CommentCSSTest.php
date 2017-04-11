@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\comment\Tests\CommentCSSTest.
- */
-
 namespace Drupal\comment\Tests;
 
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\comment\CommentInterface;
 use Drupal\user\RoleInterface;
+use Drupal\comment\Entity\Comment;
 
 /**
  * Tests CSS classes on comments.
@@ -47,7 +43,7 @@ class CommentCSSTest extends CommentTestBase {
 
       // Add a comment.
       /** @var \Drupal\comment\CommentInterface $comment */
-      $comment = entity_create('comment', array(
+      $comment = Comment::create(array(
         'entity_id' => $node->id(),
         'entity_type' => 'node',
         'field_name' => 'comment',
@@ -130,7 +126,7 @@ class CommentCSSTest extends CommentTestBase {
       if ($case['comment_status'] == CommentInterface::PUBLISHED || $case['user'] == 'admin') {
         $this->assertIdentical(1, count($this->xpath('//*[contains(@class, "comment")]/*[@data-comment-timestamp="' . $comment->getChangedTime() . '"]')), 'data-comment-timestamp attribute is set on comment');
         $expectedJS = ($case['user'] !== 'anonymous');
-        $this->assertIdentical($expectedJS, isset($settings['ajaxPageState']) && in_array('comment/drupal.comment-new-indicator', explode(',', $settings['ajaxPageState']['libraries'])), 'drupal.comment-new-indicator library is present.');
+        $this->assertIdentical($expectedJS, isset($settings['ajaxPageState']['libraries']) && in_array('comment/drupal.comment-new-indicator', explode(',', $settings['ajaxPageState']['libraries'])), 'drupal.comment-new-indicator library is present.');
       }
     }
   }

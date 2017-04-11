@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Controller\EntityListController.
- */
-
 namespace Drupal\Core\Entity\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a generic controller to list entities.
@@ -29,4 +23,3 @@ class EntityListController extends ControllerBase {
   }
 
 }
-

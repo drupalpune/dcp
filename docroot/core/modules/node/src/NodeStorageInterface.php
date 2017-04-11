@@ -1,25 +1,20 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\NodeStorageControllerInterface.
- */
-
 namespace Drupal\node;
 
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\ContentEntityStorageInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines an interface for node entity storage classes.
  */
-interface NodeStorageInterface extends EntityStorageInterface {
+interface NodeStorageInterface extends ContentEntityStorageInterface {
 
   /**
    * Gets a list of node revision IDs for a specific node.
    *
-   * @param \Drupal\node\NodeInterface
+   * @param \Drupal\node\NodeInterface $node
    *   The node entity.
    *
    * @return int[]
@@ -41,7 +36,7 @@ interface NodeStorageInterface extends EntityStorageInterface {
   /**
    * Counts the number of revisions in the default language.
    *
-   * @param \Drupal\node\NodeInterface
+   * @param \Drupal\node\NodeInterface $node
    *   The node entity.
    *
    * @return int
@@ -66,7 +61,8 @@ interface NodeStorageInterface extends EntityStorageInterface {
    * Unsets the language for all nodes with the given language.
    *
    * @param \Drupal\Core\Language\LanguageInterface $language
-   *  The language object.
+   *   The language object.
    */
   public function clearRevisionsLanguage(LanguageInterface $language);
+
 }

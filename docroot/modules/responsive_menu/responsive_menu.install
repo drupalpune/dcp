@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Contains install and update functions.
+ */
+
+/**
+ * Add new config for the breakpoint css file path.
+ */
+function responsive_menu_update_8001() {
+  \Drupal::configFactory()
+    ->getEditable('responsive_menu.settings')
+    ->set('breakpoint_css_filepath', 'public://css')
+    ->save(TRUE);
+}
+
+/**
+ * Add new config to determine whether to use the breakpoint.
+ */
+function responsive_menu_update_8002() {
+  \Drupal::configFactory()
+    ->getEditable('responsive_menu.settings')
+    ->set('use_breakpoint', TRUE)
+    ->save(TRUE);
+}

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of \Drupal\Core\Batch\BatchStorageInterface.
- */
-
 namespace Drupal\Core\Batch;
 
 /**

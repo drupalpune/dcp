@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\aggregator\Tests\AggregatorRenderingTest.
- */
-
 namespace Drupal\aggregator\Tests;
 
 use Drupal\Component\Utility\SafeMarkup;
+use Drupal\views\Entity\View;
 
 /**
  * Tests display of aggregator items on the page.
@@ -22,6 +18,12 @@ class AggregatorRenderingTest extends AggregatorTestBase {
    * @var array
    */
   public static $modules = array('block', 'test_page_test');
+
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('page_title_block');
+  }
 
   /**
    * Adds a feed block to the page and checks its links.
@@ -89,7 +91,7 @@ class AggregatorRenderingTest extends AggregatorTestBase {
   public function testFeedPage() {
     // Increase the number of items published in the rss.xml feed so we have
     // enough articles to test paging.
-    $view = entity_load('view', 'frontpage');
+    $view = View::load('frontpage');
     $display = &$view->getDisplay('feed_1');
     $display['display_options']['pager']['options']['items_per_page'] = 30;
     $view->save();

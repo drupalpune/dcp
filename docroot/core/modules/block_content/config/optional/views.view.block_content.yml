@@ -8,7 +8,7 @@ id: block_content
 label: 'Custom block library'
 module: views
 description: 'Find and manage custom blocks.'
-tag: ''
+tag: default
 base_table: block_content_field_data
 base_field: id
 core: 8.x
@@ -24,7 +24,7 @@ display:
         options:
           perm: 'administer blocks'
       cache:
-        type: none
+        type: tag
         options: {  }
       query:
         type: views_query
@@ -52,8 +52,8 @@ display:
           id: 0
           total_pages: null
           tags:
-            previous: '‹ previous'
-            next: 'next ›'
+            previous: '‹ Previous'
+            next: 'Next ›'
           expose:
             items_per_page: false
             items_per_page_label: 'Items per page'
@@ -290,12 +290,14 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          date_format: short
-          custom_date_format: ''
-          timezone: ''
           entity_type: block_content
           entity_field: changed
-          plugin_id: date
+          type: timestamp
+          settings:
+            date_format: short
+            custom_date_format: ''
+            timezone: ''
+          plugin_id: field
         operations:
           id: operations
           table: block_content
@@ -390,7 +392,7 @@ display:
           plugin_id: string
         type:
           id: type
-          table: block_content
+          table: block_content_field_data
           field: type
           relationship: none
           group_type: group
@@ -464,7 +466,10 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
-      cacheable: false
+        - url.query_args
+        - user.permissions
+      max-age: 0
+      tags: {  }
   page_1:
     display_plugin: page
     id: page_1
@@ -486,4 +491,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - url
-      cacheable: false
+        - url.query_args
+        - user.permissions
+      max-age: 0
+      tags: {  }

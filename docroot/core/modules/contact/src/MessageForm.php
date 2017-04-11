@@ -1,19 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\contact\MessageForm.
- */
-
 namespace Drupal\contact;
 
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Datetime\DateFormatter;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Flood\FloodInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -53,7 +46,7 @@ class MessageForm extends ContentEntityForm {
   /**
    * The date formatter service.
    *
-   * @var \Drupal\Core\Datetime\DateFormatter
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected $dateFormatter;
 
@@ -68,10 +61,10 @@ class MessageForm extends ContentEntityForm {
    *   The language manager service.
    * @param \Drupal\contact\MailHandlerInterface $mail_handler
    *   The contact mail handler service.
-   * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date service.
    */
-  public function __construct(EntityManagerInterface $entity_manager, FloodInterface $flood, LanguageManagerInterface $language_manager, MailHandlerInterface $mail_handler, DateFormatter $date_formatter) {
+  public function __construct(EntityManagerInterface $entity_manager, FloodInterface $flood, LanguageManagerInterface $language_manager, MailHandlerInterface $mail_handler, DateFormatterInterface $date_formatter) {
     parent::__construct($entity_manager);
     $this->flood = $flood;
     $this->languageManager = $language_manager;
@@ -128,14 +121,14 @@ class MessageForm extends ContentEntityForm {
     // prevent the impersonation of other users.
     else {
       $form['name']['#type'] = 'item';
-      $form['name']['#value'] = $user->getUsername();
+      $form['name']['#value'] = $user->getDisplayName();
       $form['name']['#required'] = FALSE;
-      $form['name']['#markup'] = SafeMarkup::checkPlain($user->getUsername());
+      $form['name']['#plain_text'] = $user->getDisplayName();
 
       $form['mail']['#type'] = 'item';
       $form['mail']['#value'] = $user->getEmail();
       $form['mail']['#required'] = FALSE;
-      $form['mail']['#markup'] = SafeMarkup::checkPlain($user->getEmail());
+      $form['mail']['#plain_text'] = $user->getEmail();
     }
 
     // The user contact form has a preset recipient.
@@ -168,8 +161,8 @@ class MessageForm extends ContentEntityForm {
     $elements = parent::actions($form, $form_state);
     $elements['submit']['#value'] = $this->t('Send message');
     $elements['preview'] = array(
+      '#type' => 'submit',
       '#value' => $this->t('Preview'),
-      '#validate' => array('::validate'),
       '#submit' => array('::submitForm', '::preview'),
     );
     return $elements;
@@ -187,10 +180,8 @@ class MessageForm extends ContentEntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
-    parent::validate($form, $form_state);
-
-    $message = $this->entity;
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $message = parent::validateForm($form, $form_state);
 
     // Check if flood control has been activated for sending emails.
     if (!$this->currentUser()->hasPermission('administer contact forms') && (!$message->isPersonal() || !$this->currentUser()->hasPermission('administer users'))) {
@@ -204,6 +195,8 @@ class MessageForm extends ContentEntityForm {
         )));
       }
     }
+
+    return $message;
   }
 
   /**
@@ -213,9 +206,12 @@ class MessageForm extends ContentEntityForm {
     $message = $this->entity;
     $user = $this->currentUser();
     $this->mailHandler->sendMailMessages($message, $user);
+    $contact_form = $message->getContactForm();
 
     $this->flood->register('contact', $this->config('contact.settings')->get('flood.interval'));
-    drupal_set_message($this->t('Your message has been sent.'));
+    if ($submission_message = $contact_form->getMessage()) {
+      drupal_set_message($submission_message);
+    }
 
     // To avoid false error messages caused by flood control, redirect away from
     // the contact form; either to the contacted user account or the front page.
@@ -223,28 +219,12 @@ class MessageForm extends ContentEntityForm {
       $form_state->setRedirectUrl($message->getPersonalRecipient()->urlInfo());
     }
     else {
-      $form_state->setRedirect('<front>');
+      $form_state->setRedirectUrl($contact_form->getRedirectUrl());
     }
     // Save the message. In core this is a no-op but should contrib wish to
     // implement message storage, this will make the task of swapping in a real
     // storage controller straight-forward.
     $message->save();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function init(FormStateInterface $form_state) {
-    $message = $this->entity;
-
-    // Make the message inherit the current content language unless specifically
-    // set.
-    if ($message->isNew() && !$message->langcode->value) {
-      $language_content = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT);
-      $message->langcode->value = $language_content->getId();
-    }
-
-    parent::init($form_state);
   }
 
 }

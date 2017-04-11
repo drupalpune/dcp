@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\user\Tests\UserRoleAdminTest.
- */
-
 namespace Drupal\user\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -25,9 +20,20 @@ class UserRoleAdminTest extends WebTestBase {
    */
   protected $adminUser;
 
+  /**
+   * Modules to enable.
+   *
+   * @var string[]
+   */
+  public static $modules = ['block'];
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
     $this->adminUser = $this->drupalCreateUser(array('administer permissions', 'administer users'));
+    $this->drupalPlaceBlock('local_tasks_block');
   }
 
   /**
@@ -107,7 +113,7 @@ class UserRoleAdminTest extends WebTestBase {
       $saved_rids[] = $role->id();
       $weight--;
     }
-    $this->drupalPostForm('admin/people/roles', $edit, t('Save order'));
+    $this->drupalPostForm('admin/people/roles', $edit, t('Save'));
     $this->assertText(t('The role settings have been updated.'), 'The role settings form submitted successfully.');
 
     // Load up the user roles with the new weights.
@@ -122,4 +128,5 @@ class UserRoleAdminTest extends WebTestBase {
     // The order of the roles should be reversed.
     $this->assertIdentical($rids, array_reverse($saved_rids));
   }
+
 }

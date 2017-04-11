@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\FieldStorageDefinitionEvent.
- */
-
 namespace Drupal\Core\Field;
 
 /**

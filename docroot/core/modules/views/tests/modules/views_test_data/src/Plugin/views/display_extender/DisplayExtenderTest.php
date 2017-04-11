@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views_test_data\Plugin\views\display_extender\DisplayExtenderTest.
- */
-
 namespace Drupal\views_test_data\Plugin\views\display_extender;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -39,7 +34,7 @@ class DisplayExtenderTest extends DisplayExtenderPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\display\DisplayPluginBase::optionsSummary().
+   * {@inheritdoc}
    */
   public function optionsSummary(&$categories, &$options) {
     parent::optionsSummary($categories, $options);
@@ -60,7 +55,7 @@ class DisplayExtenderTest extends DisplayExtenderPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     switch ($form_state->get('section')) {
@@ -76,7 +71,7 @@ class DisplayExtenderTest extends DisplayExtenderPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\display\DisplayExtenderPluginBase::submitOptionsForm().
+   * {@inheritdoc}
    */
   public function submitOptionsForm(&$form, FormStateInterface $form_state) {
     parent::submitOptionsForm($form, $form_state);
@@ -88,21 +83,21 @@ class DisplayExtenderTest extends DisplayExtenderPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\display\DisplayExtenderPluginBase::defaultableSections().
+   * {@inheritdoc}
    */
   public function defaultableSections(&$sections, $section = NULL) {
     $sections['test_extender_test_option'] = array('test_extender_test_option');
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\display\DisplayExtenderPluginBase::query().
+   * {@inheritdoc}
    */
   public function query() {
     $this->testState['query'] = TRUE;
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\display\DisplayExtenderPluginBase::preExecute().
+   * {@inheritdoc}
    */
   public function preExecute() {
     $this->testState['preExecute'] = TRUE;

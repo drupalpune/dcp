@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\options\Tests\OptionsDynamicValuesValidationTest.
- */
-
 namespace Drupal\options\Tests;
 
 /**

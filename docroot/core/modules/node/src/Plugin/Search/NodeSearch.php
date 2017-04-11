@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\Plugin\Search\NodeSearch.
- */
-
 namespace Drupal\node\Plugin\Search;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\SelectExtender;
@@ -97,7 +92,7 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
   /**
    * The list of options and info for advanced search filters.
    *
-   * Each entry in the array has the option as the key and and for its value, an
+   * Each entry in the array has the option as the key and for its value, an
    * array that determines how the value is matched in the database query. The
    * possible keys in that array are:
    * - column: (required) Name of the database column to match against.
@@ -113,6 +108,11 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
     'author' => array('column' => 'n.uid'),
     'term' => array('column' => 'ti.tid', 'join' => array('table' => 'taxonomy_index', 'alias' => 'ti', 'condition' => 'n.nid = ti.nid')),
   );
+
+  /**
+   * A constant for setting and checking the query string.
+   */
+  const ADVANCED_FORM = 'advanced-form';
 
   /**
    * {@inheritdoc}
@@ -151,6 +151,8 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
    *   A config object for 'search.settings'.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The $account object to use for checking for access to advanced search.
    */
@@ -163,6 +165,8 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
     $this->renderer = $renderer;
     $this->account = $account;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+    $this->addCacheTags(['node_list']);
   }
 
   /**
@@ -224,7 +228,7 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
       ->select('search_index', 'i', array('target' => 'replica'))
       ->extend('Drupal\search\SearchQuery')
       ->extend('Drupal\Core\Database\Query\PagerSelectExtender');
-    $query->join('node_field_data', 'n', 'n.nid = i.sid');
+    $query->join('node_field_data', 'n', 'n.nid = i.sid AND n.langcode = i.langcode');
     $query->condition('n.status', 1)
       ->addTag('node_access')
       ->searchExpression($keys, $this->getPluginId());
@@ -293,7 +297,7 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
     }
 
     if ($status & SearchQuery::NO_POSITIVE_KEYWORDS) {
-      drupal_set_message($this->formatPlural($this->searchSettings->get('index.minimum_word_size'), 'You must include at least one positive keyword with 1 character or more.', 'You must include at least one positive keyword with @count characters or more.'), 'warning');
+      drupal_set_message($this->formatPlural($this->searchSettings->get('index.minimum_word_size'), 'You must include at least one keyword to match in the content, and punctuation is ignored.', 'You must include at least one keyword to match in the content. Keywords must be at least @count characters, and punctuation is ignored.'), 'warning');
     }
 
     return $find;
@@ -327,13 +331,12 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
       unset($build['#theme']);
       $build['#pre_render'][] = array($this, 'removeSubmittedInfo');
 
-      // Fetch comment count for snippet.
-      $rendered = SafeMarkup::set(
-        $this->renderer->render($build) . ' ' .
-        SafeMarkup::escape($this->moduleHandler->invoke('comment', 'node_update_index', array($node, $item->langcode)))
-      );
+      // Fetch comments for snippet.
+      $rendered = $this->renderer->renderPlain($build);
+      $this->addCacheableDependency(CacheableMetadata::createFromRenderArray($build));
+      $rendered .= ' ' . $this->moduleHandler->invoke('comment', 'node_update_index', [$node]);
 
-      $extra = $this->moduleHandler->invokeAll('node_search_result', array($node, $item->langcode));
+      $extra = $this->moduleHandler->invokeAll('node_search_result', [$node]);
 
       $language = $this->languageManager->getLanguage($item->langcode);
       $username = array(
@@ -343,7 +346,7 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
 
       $result = array(
         'link' => $node->url('canonical', array('absolute' => TRUE, 'language' => $language)),
-        'type' => SafeMarkup::checkPlain($type->label()),
+        'type' => $type->label(),
         'title' => $node->label(),
         'node' => $node,
         'extra' => $extra,
@@ -352,9 +355,17 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
         'langcode' => $node->language()->getId(),
       );
 
+      $this->addCacheableDependency($node);
+
+      // We have to separately add the node owner's cache tags because search
+      // module doesn't use the rendering system, it does its own rendering
+      // without taking cacheability metadata into account. So we have to do it
+      // explicitly here.
+      $this->addCacheableDependency($node->getOwner());
+
       if ($type->displaySubmitted()) {
         $result += array(
-          'user' => $this->renderer->render($username),
+          'user' => $this->renderer->renderPlain($username),
           'date' => $node->getChangedTime(),
         );
       }
@@ -415,8 +426,23 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
     // per cron run.
     $limit = (int) $this->searchSettings->get('index.cron_limit');
 
-    $result = $this->database->queryRange("SELECT n.nid, MAX(sd.reindex) FROM {node} n LEFT JOIN {search_dataset} sd ON sd.sid = n.nid AND sd.type = :type WHERE sd.sid IS NULL OR sd.reindex <> 0 GROUP BY n.nid ORDER BY MAX(sd.reindex) is null DESC, MAX(sd.reindex) ASC, n.nid ASC", 0, $limit, array(':type' => $this->getPluginId()), array('target' => 'replica'));
-    $nids = $result->fetchCol();
+    $query = db_select('node', 'n', array('target' => 'replica'));
+    $query->addField('n', 'nid');
+    $query->leftJoin('search_dataset', 'sd', 'sd.sid = n.nid AND sd.type = :type', array(':type' => $this->getPluginId()));
+    $query->addExpression('CASE MAX(sd.reindex) WHEN NULL THEN 0 ELSE 1 END', 'ex');
+    $query->addExpression('MAX(sd.reindex)', 'ex2');
+    $query->condition(
+        $query->orConditionGroup()
+        ->where('sd.sid IS NULL')
+        ->condition('sd.reindex', 0, '<>')
+      );
+    $query->orderBy('ex', 'DESC')
+      ->orderBy('ex2')
+      ->orderBy('n.nid')
+      ->groupBy('n.nid')
+      ->range(0, $limit);
+
+    $nids = $query->execute()->fetchCol();
     if (!$nids) {
       return;
     }
@@ -443,12 +469,18 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
       $build = $node_render->view($node, 'search_index', $language->getId());
 
       unset($build['#theme']);
-      $rendered = $this->renderer->render($build);
 
-      $text = '<h1>' . SafeMarkup::checkPlain($node->label($language->getId())) . '</h1>' . $rendered;
+      // Add the title to text so it is searchable.
+      $build['search_title'] = [
+        '#prefix' => '<h1>',
+        '#plain_text' => $node->label(),
+        '#suffix' => '</h1>',
+        '#weight' => -1000
+      ];
+      $text = $this->renderer->renderPlain($build);
 
       // Fetch extra data normally not visible.
-      $extra = $this->moduleHandler->invokeAll('node_update_index', array($node, $language->getId()));
+      $extra = $this->moduleHandler->invokeAll('node_update_index', [$node]);
       foreach ($extra as $t) {
         $text .= $t;
       }
@@ -490,42 +522,63 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
    * {@inheritdoc}
    */
   public function searchFormAlter(array &$form, FormStateInterface $form_state) {
+    $parameters = $this->getParameters();
+    $keys = $this->getKeywords();
+    $used_advanced = !empty($parameters[self::ADVANCED_FORM]);
+    if ($used_advanced) {
+      $f = isset($parameters['f']) ? (array) $parameters['f'] : array();
+      $defaults = $this->parseAdvancedDefaults($f, $keys);
+    }
+    else {
+      $defaults = array('keys' => $keys);
+    }
+
+    $form['basic']['keys']['#default_value'] = $defaults['keys'];
+
     // Add advanced search keyword-related boxes.
     $form['advanced'] = array(
       '#type' => 'details',
       '#title' => t('Advanced search'),
       '#attributes' => array('class' => array('search-advanced')),
       '#access' => $this->account && $this->account->hasPermission('use advanced search'),
+      '#open' => $used_advanced,
     );
     $form['advanced']['keywords-fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => t('Keywords'),
     );
+
     $form['advanced']['keywords'] = array(
       '#prefix' => '<div class="criterion">',
       '#suffix' => '</div>',
     );
+
     $form['advanced']['keywords-fieldset']['keywords']['or'] = array(
       '#type' => 'textfield',
       '#title' => t('Containing any of the words'),
       '#size' => 30,
       '#maxlength' => 255,
+      '#default_value' => isset($defaults['or']) ? $defaults['or'] : '',
     );
+
     $form['advanced']['keywords-fieldset']['keywords']['phrase'] = array(
       '#type' => 'textfield',
       '#title' => t('Containing the phrase'),
       '#size' => 30,
       '#maxlength' => 255,
+      '#default_value' => isset($defaults['phrase']) ? $defaults['phrase'] : '',
     );
+
     $form['advanced']['keywords-fieldset']['keywords']['negative'] = array(
       '#type' => 'textfield',
       '#title' => t('Containing none of the words'),
       '#size' => 30,
       '#maxlength' => 255,
+      '#default_value' => isset($defaults['negative']) ? $defaults['negative'] : '',
     );
 
     // Add node types.
-    $types = array_map(array('\Drupal\Component\Utility\SafeMarkup', 'checkPlain'), node_type_get_names());
+    $types = array_map(array('\Drupal\Component\Utility\Html', 'escape'), node_type_get_names());
     $form['advanced']['types-fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => t('Types'),
@@ -536,7 +589,9 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
       '#prefix' => '<div class="criterion">',
       '#suffix' => '</div>',
       '#options' => $types,
+      '#default_value' => isset($defaults['type']) ? $defaults['type'] : array(),
     );
+
     $form['advanced']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Advanced search'),
@@ -563,17 +618,19 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
         '#prefix' => '<div class="criterion">',
         '#suffix' => '</div>',
         '#options' => $language_options,
+        '#default_value' => isset($defaults['language']) ? $defaults['language'] : array(),
       );
     }
   }
 
-  /*
+  /**
    * {@inheritdoc}
    */
   public function buildSearchUrlQuery(FormStateInterface $form_state) {
     // Read keyword and advanced search information from the form values,
     // and put these into the GET parameters.
     $keys = trim($form_state->getValue('keys'));
+    $advanced = FALSE;
 
     // Collect extra filters.
     $filters = array();
@@ -582,6 +639,7 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
       // checkboxes to 0.
       foreach ($form_state->getValue('type') as $type) {
         if ($type) {
+          $advanced = TRUE;
           $filters[] = 'type:' . $type;
         }
       }
@@ -590,11 +648,13 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
     if ($form_state->hasValue('term') && is_array($form_state->getValue('term'))) {
       foreach ($form_state->getValue('term') as $term) {
         $filters[] = 'term:' . $term;
+        $advanced = TRUE;
       }
     }
     if ($form_state->hasValue('language') && is_array($form_state->getValue('language'))) {
       foreach ($form_state->getValue('language') as $language) {
         if ($language) {
+          $advanced = TRUE;
           $filters[] = 'language:' . $language;
         }
       }
@@ -602,15 +662,18 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
     if ($form_state->getValue('or') != '') {
       if (preg_match_all('/ ("[^"]+"|[^" ]+)/i', ' ' . $form_state->getValue('or'), $matches)) {
         $keys .= ' ' . implode(' OR ', $matches[1]);
+        $advanced = TRUE;
       }
     }
     if ($form_state->getValue('negative') != '') {
       if (preg_match_all('/ ("[^"]+"|[^" ]+)/i', ' ' . $form_state->getValue('negative'), $matches)) {
         $keys .= ' -' . implode(' -', $matches[1]);
+        $advanced = TRUE;
       }
     }
     if ($form_state->getValue('phrase') != '') {
       $keys .= ' "' . str_replace('"', ' ', $form_state->getValue('phrase')) . '"';
+      $advanced = TRUE;
     }
     $keys = trim($keys);
 
@@ -621,8 +684,67 @@ class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInter
     if ($filters) {
       $query['f'] = $filters;
     }
+    // Record that the person used the advanced search form, if they did.
+    if ($advanced) {
+      $query[self::ADVANCED_FORM] = '1';
+    }
 
     return $query;
+  }
+
+  /**
+   * Parses the advanced search form default values.
+   *
+   * @param array $f
+   *   The 'f' query parameter set up in self::buildUrlSearchQuery(), which
+   *   contains the advanced query values.
+   * @param string $keys
+   *   The search keywords string, which contains some information from the
+   *   advanced search form.
+   *
+   * @return array
+   *   Array of default form values for the advanced search form, including
+   *   a modified 'keys' element for the bare search keywords.
+   */
+  protected function parseAdvancedDefaults($f, $keys) {
+    $defaults = array();
+
+    // Split out the advanced search parameters.
+    foreach ($f as $advanced) {
+      list($key, $value) = explode(':', $advanced, 2);
+      if (!isset($defaults[$key])) {
+        $defaults[$key] = array();
+      }
+      $defaults[$key][] = $value;
+    }
+
+    // Split out the negative, phrase, and OR parts of keywords.
+
+    // For phrases, the form only supports one phrase.
+    $matches = array();
+    $keys = ' ' . $keys . ' ';
+    if (preg_match('/ "([^"]+)" /', $keys, $matches)) {
+      $keys = str_replace($matches[0], ' ', $keys);
+      $defaults['phrase'] = $matches[1];
+    }
+
+    // Negative keywords: pull all of them out.
+    if (preg_match_all('/ -([^ ]+)/', $keys, $matches)) {
+      $keys = str_replace($matches[0], ' ', $keys);
+      $defaults['negative'] = implode(' ', $matches[1]);
+    }
+
+    // OR keywords: pull up to one set of them out of the query.
+    if (preg_match('/ [^ ]+( OR [^ ]+)+ /', $keys, $matches)) {
+      $keys = str_replace($matches[0], ' ', $keys);
+      $words = explode(' OR ', trim($matches[0]));
+      $defaults['or'] = implode(' ', $words);
+    }
+
+    // Put remaining keywords string back into keywords.
+    $defaults['keys'] = trim($keys);
+
+    return $defaults;
   }
 
   /**

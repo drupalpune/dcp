@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\shortcut\Entity\Shortcut.
- */
-
 namespace Drupal\shortcut\Entity;
 
 use Drupal\Core\Cache\Cache;
@@ -102,7 +97,7 @@ class Shortcut extends ContentEntityBase implements ShortcutInterface {
     // newly created shortcut is *also* added to a shortcut set, so we must
     // invalidate the associated shortcut set's cache tag.
     if (!$update) {
-      Cache::invalidateTags($this->getCacheTags());
+      Cache::invalidateTags($this->getCacheTagsToInvalidate());
     }
   }
 
@@ -110,29 +105,23 @@ class Shortcut extends ContentEntityBase implements ShortcutInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('ID'))
-      ->setDescription(t('The ID of the shortcut.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
+    /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
+    $fields = parent::baseFieldDefinitions($entity_type);
 
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The UUID of the shortcut.'))
-      ->setReadOnly(TRUE);
+    $fields['id']->setDescription(t('The ID of the shortcut.'));
 
-    $fields['shortcut_set'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel(t('Shortcut set'))
-      ->setDescription(t('The bundle of the shortcut.'))
-      ->setSetting('target_type', 'shortcut_set')
-      ->setRequired(TRUE);
+    $fields['uuid']->setDescription(t('The UUID of the shortcut.'));
+
+    $fields['shortcut_set']->setLabel(t('Shortcut set'))
+      ->setDescription(t('The bundle of the shortcut.'));
+
+    $fields['langcode']->setDescription(t('The language code of the shortcut.'));
 
     $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Name'))
       ->setDescription(t('The name of the shortcut.'))
       ->setRequired(TRUE)
       ->setTranslatable(TRUE)
-      ->setDefaultValue('')
       ->setSetting('max_length', 255)
       ->setDisplayOptions('form', array(
         'type' => 'string_textfield',
@@ -160,25 +149,13 @@ class Shortcut extends ContentEntityBase implements ShortcutInterface {
       ))
       ->setDisplayConfigurable('form', TRUE);
 
-    $fields['langcode'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language'))
-      ->setDescription(t('The language code of the shortcut.'))
-      ->setTranslatable(TRUE)
-      ->setDisplayOptions('view', array(
-        'type' => 'hidden',
-      ))
-      ->setDisplayOptions('form', array(
-        'type' => 'language_select',
-        'weight' => 2,
-      ));
-
     return $fields;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getCacheTags() {
+  public function getCacheTagsToInvalidate() {
     return $this->shortcut_set->entity->getCacheTags();
   }
 

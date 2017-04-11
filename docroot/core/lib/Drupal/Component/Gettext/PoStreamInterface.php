@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Component\Gettext\PoStreamInterface.
- */
-
 namespace Drupal\Component\Gettext;
 
 /**

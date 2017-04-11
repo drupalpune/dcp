@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Template\Loader\StringLoader.
- */
-
 namespace Drupal\Core\Template\Loader;
 
 /**
@@ -25,7 +20,7 @@ namespace Drupal\Core\Template\Loader;
  * @see \Drupal\Core\Render\Element\InlineTemplate
  * @see twig_render_template()
  */
-class StringLoader extends \Twig_Loader_String {
+class StringLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterface {
 
   /**
    * {@inheritdoc}
@@ -37,6 +32,27 @@ class StringLoader extends \Twig_Loader_String {
     else {
       return FALSE;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSource($name) {
+    return $name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheKey($name) {
+    return $name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isFresh($name, $time) {
+    return TRUE;
   }
 
 }

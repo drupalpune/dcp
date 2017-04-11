@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\Database\SelectTableSortDefaultTest.
- */
-
 namespace Drupal\system\Tests\Database;
 
 /**

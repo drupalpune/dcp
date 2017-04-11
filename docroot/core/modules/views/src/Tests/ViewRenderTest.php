@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Tests\ViewRenderTest.
- */
-
 namespace Drupal\views\Tests;
 
-use Drupal\views\Tests\ViewTestBase;
 use Drupal\views\Views;
 
 /**
@@ -40,7 +34,7 @@ class ViewRenderTest extends ViewTestBase {
     // Make sure that the rendering just calls the preprocess function once.
     $view = Views::getView('test_view_render');
     $output = $view->preview();
-    drupal_render($output);
+    $this->container->get('renderer')->renderRoot($output);
 
     $this->assertEqual(\Drupal::state()->get('views_render.test'), 1);
   }

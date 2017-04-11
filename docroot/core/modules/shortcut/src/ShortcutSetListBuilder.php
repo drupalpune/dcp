@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\shortcut\ShortcutSetListBuilder.
- */
-
 namespace Drupal\shortcut;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
@@ -46,7 +41,7 @@ class ShortcutSetListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildRow(EntityInterface $entity) {
-    $row['name'] = $this->getLabel($entity);
+    $row['name'] = $entity->label();
     return $row + parent::buildRow($entity);
   }
 

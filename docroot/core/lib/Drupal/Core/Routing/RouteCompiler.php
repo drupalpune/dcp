@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Routing\RouteCompiler.
- */
-
 namespace Drupal\Core\Routing;
 
 use Symfony\Component\Routing\RouteCompilerInterface;
@@ -43,7 +38,9 @@ class RouteCompiler extends SymfonyRouteCompiler implements RouteCompilerInterfa
     $stripped_path = static::getPathWithoutDefaults($route);
     $fit = static::getFit($stripped_path);
     $pattern_outline = static::getPatternOutline($stripped_path);
-    $num_parts = count(explode('/', trim($pattern_outline, '/')));
+    // We count the number of parts including any optional trailing parts. This
+    // allows the RouteProvider to filter candidate routes more efficiently.
+    $num_parts = count(explode('/', trim($route->getPath(), '/')));
 
     return new CompiledRoute(
       $fit,
@@ -99,7 +96,7 @@ class RouteCompiler extends SymfonyRouteCompiler implements RouteCompilerInterfa
     $fit = 0;
     foreach ($parts as $k => $part) {
       if (strpos($part, '{') === FALSE) {
-        $fit |=  1 << ($slashes - $k);
+        $fit |= 1 << ($slashes - $k);
       }
     }
 

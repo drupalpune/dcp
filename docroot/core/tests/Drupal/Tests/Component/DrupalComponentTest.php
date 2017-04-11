@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Component\DrupalComponentTest.
- */
-
 namespace Drupal\Tests\Component;
 
 use Drupal\Tests\UnitTestCase;
@@ -68,15 +63,12 @@ class DrupalComponentTest extends UnitTestCase {
    */
   protected function assertNoCoreUsage($class_path) {
     $contents = file_get_contents($class_path);
-    if (preg_match_all('/^.*Drupal\\\Core.*$/m', $contents, $matches)) {
-      foreach ($matches[0] as $line) {
-        if ((strpos($line, '@see ') === FALSE)) {
-          $this->fail(
-            "Illegal reference to 'Drupal\\Core' namespace in $class_path"
-          );
-        }
-      }
-    }
+    preg_match_all('/^.*Drupal\\\Core.*$/m', $contents, $matches);
+    $matches = array_filter($matches[0], function($line) {
+      // Filter references to @see as they don't really matter.
+      return strpos($line, '@see') === FALSE;
+    });
+    $this->assertEmpty($matches, "Checking for illegal reference to 'Drupal\\Core' namespace in $class_path");
   }
 
   /**
@@ -121,11 +113,11 @@ class DrupalComponentTest extends UnitTestCase {
     $file_uri = vfsStream::url('root/Test.php');
 
     try {
-      $pass = true;
+      $pass = TRUE;
       $this->assertNoCoreUsage($file_uri);
     }
     catch (\PHPUnit_Framework_AssertionFailedError $e) {
-      $pass = false;
+      $pass = FALSE;
     }
     $this->assertEquals($expected_pass, $pass, $expected_pass ?
       'Test caused a false positive' :

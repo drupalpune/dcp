@@ -1,0 +1,31 @@
+/*------------------------------------*\
+    * @file
+    * Layouts.
+\*------------------------------------*/
+
+body,
+html {
+    width: 100%;
+    height: 100%;
+}
+
+body p {
+    line-height: 20px;
+}
+
+.page-wrapper {
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+.header {
+    width: 100%;
+    background-color: #fff;
+}
+
+.header-wrapper {
+    padding: 0px;
+    border-bottom: 1px solid grey;
+    box-shadow: 0 1px 0 grey;
+}

@@ -1,17 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\views\Unit\Controller\ViewAjaxControllerTest.
- */
+namespace Drupal\Tests\views\Unit\Controller;
 
-namespace Drupal\Tests\views\Unit\Controller {
-
+use Drupal\Core\Render\RenderContext;
 use Drupal\Tests\UnitTestCase;
 use Drupal\views\Ajax\ViewAjaxResponse;
 use Drupal\views\Controller\ViewAjaxController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * @coversDefaultClass \Drupal\views\Controller\ViewAjaxController
@@ -76,6 +73,11 @@ class ViewAjaxControllerTest extends UnitTestCase {
         $elements['#attached'] = [];
         return isset($elements['#markup']) ? $elements['#markup'] : '';
       }));
+    $this->renderer->expects($this->any())
+      ->method('executeInRenderContext')
+      ->willReturnCallback(function (RenderContext $context, callable $callable) {
+        return $callable();
+      });
     $this->currentPath = $this->getMockBuilder('Drupal\Core\Path\CurrentPathStack')
       ->disableOriginalConstructor()
       ->getMock();
@@ -83,8 +85,25 @@ class ViewAjaxControllerTest extends UnitTestCase {
 
     $this->viewAjaxController = new ViewAjaxController($this->viewStorage, $this->executableFactory, $this->renderer, $this->currentPath, $this->redirectDestination);
 
+    $element_info_manager = $this->getMock('\Drupal\Core\Render\ElementInfoManagerInterface');
+    $request_stack = new RequestStack();
+    $request_stack->push(new Request());
+    $args = [
+      $this->getMock('\Drupal\Core\Controller\ControllerResolverInterface'),
+      $this->getMock('\Drupal\Core\Theme\ThemeManagerInterface'),
+      $element_info_manager,
+      $this->getMock('\Drupal\Core\Render\PlaceholderGeneratorInterface'),
+      $this->getMock('\Drupal\Core\Render\RenderCacheInterface'),
+      $request_stack,
+      [
+        'required_cache_contexts' => [
+          'languages:language_interface',
+          'theme',
+        ],
+      ],
+    ];
     $this->renderer = $this->getMockBuilder('Drupal\Core\Render\Renderer')
-      ->disableOriginalConstructor()
+      ->setConstructorArgs($args)
       ->setMethods(NULL)
       ->getMock();
     $container = new ContainerBuilder();
@@ -161,6 +180,10 @@ class ViewAjaxControllerTest extends UnitTestCase {
     $request = new Request();
     $request->request->set('view_name', 'test_view');
     $request->request->set('view_display_id', 'page_1');
+    $request->request->set('view_path', '/test-page');
+    $request->request->set('_wrapper_format', 'ajax');
+    $request->request->set('ajax_page_state', 'drupal.settings[]');
+    $request->request->set('type', 'article');
 
     list($view, $executable) = $this->setupValidMocks();
 
@@ -180,6 +203,10 @@ class ViewAjaxControllerTest extends UnitTestCase {
       ->will($this->returnValue($display_handler));
 
     $executable->displayHandlers = $display_collection;
+
+    $this->redirectDestination->expects($this->atLeastOnce())
+      ->method('set')
+      ->with('/test-page?type=article');
 
     $response = $this->viewAjaxController->ajaxView($request);
     $this->assertTrue($response instanceof ViewAjaxResponse);
@@ -331,6 +358,3 @@ class ViewAjaxControllerTest extends UnitTestCase {
   }
 
 }
-
-}
-

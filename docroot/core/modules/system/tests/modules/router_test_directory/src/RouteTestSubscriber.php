@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Definition of \Drupal\router_test\RouteTestSubscriber.
- */
-
 namespace Drupal\router_test;
 
 use Drupal\Core\Routing\RouteSubscriberBase;

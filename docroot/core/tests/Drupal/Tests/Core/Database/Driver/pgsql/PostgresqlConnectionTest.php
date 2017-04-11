@@ -1,13 +1,8 @@
 <?php
-/**
- * @file
- * Contains Drupal\Tests\Core\Database\Driver\pgsql\PostgresqlConnectionTest
- */
 
 namespace Drupal\Tests\Core\Database\Driver\pgsql;
 
 use Drupal\Core\Database\Driver\pgsql\Connection;
-use Drupal\Tests\Core\Database\Stub\StubPDO;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -45,6 +40,11 @@ class PostgresqlConnectionTest extends UnitTestCase {
       array('"camelCase"', 'camelCase'),
       array('"camelCase"', '"camelCase"'),
       array('"camelCase"', 'camel/Case'),
+      // Sometimes, table names are following the pattern database.schema.table.
+      array('"camelCase".nocase.nocase', 'camelCase.nocase.nocase'),
+      array('nocase."camelCase".nocase', 'nocase.camelCase.nocase'),
+      array('nocase.nocase."camelCase"', 'nocase.nocase.camelCase'),
+      array('"camelCase"."camelCase"."camelCase"', 'camelCase.camelCase.camelCase'),
     );
   }
 

@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config\Tests\ConfigEntityStatusUITest.
- */
-
 namespace Drupal\config\Tests;
 
-use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\simpletest\WebTestBase;
 
 /**

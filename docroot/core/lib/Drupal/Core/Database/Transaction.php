@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Transaction
- */
-
 namespace Drupal\Core\Database;
 
 /**
@@ -98,4 +93,5 @@ class Transaction {
     $this->rolledBack = TRUE;
     $this->connection->rollback($this->name);
   }
+
 }

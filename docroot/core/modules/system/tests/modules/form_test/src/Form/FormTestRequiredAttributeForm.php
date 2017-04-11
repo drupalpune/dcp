@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\form_test\Form\FormTestRequiredAttributeForm.
- */
-
 namespace Drupal\form_test\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -33,7 +28,10 @@ class FormTestRequiredAttributeForm extends FormBase {
         '#title' => $type,
       );
     }
-
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+    );
     return $form;
   }
 

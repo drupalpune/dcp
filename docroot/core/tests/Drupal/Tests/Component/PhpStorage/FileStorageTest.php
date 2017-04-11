@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Component\PhpStorage\FileStorageTest.
- */
-
 namespace Drupal\Tests\Component\PhpStorage;
 
 use Drupal\Component\PhpStorage\FileStorage;
@@ -86,6 +81,7 @@ class FileStorageTest extends PhpStorageTestBase {
 
     // Should still return TRUE if directory has already been deleted.
     $this->assertTrue($php->deleteAll(), 'Delete all succeeds with nothing to delete');
+    unset($GLOBALS[$random]);
   }
 
 }

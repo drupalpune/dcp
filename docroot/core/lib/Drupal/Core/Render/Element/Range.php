@@ -1,17 +1,29 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Range.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 
 /**
- * Provides a form element for input of a number within a specific range.
+ * Provides a slider for input of a number within a specific range.
+ *
+ * Provides an HTML5 input element with type of "range".
+ *
+ * Properties:
+ * - #min: Minimum value (defaults to 0).
+ * - #max: Maximum value (defaults to 100).
+ * Refer to \Drupal\Core\Render\Element\Number for additional properties.
+ *
+ * Usage example:
+ * @code
+ * $form['quantity'] = array(
+ *   '#type' => 'range',
+ *   '#title' => $this->t('Quantity'),
+ * );
+ * @endcode
+ *
+ * @see \Drupal\Core\Render\Element\Number
  *
  * @FormElement("range")
  */

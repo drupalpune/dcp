@@ -89,8 +89,8 @@ class UrlTest extends UnitTestCase {
       array('non-existent', NULL, FALSE, 'non-existent'),
     );
 
-    // $this->map has $collect_cacheability_metadata = FALSE; also generate the
-    // $collect_cacheability_metadata = TRUE case for ::generateFromRoute().
+    // $this->map has $collect_bubbleable_metadata = FALSE; also generate the
+    // $collect_bubbleable_metadata = TRUE case for ::generateFromRoute().
     $generate_from_route_map = [];
     foreach ($this->map as $values) {
       $generate_from_route_map[] = $values;
@@ -154,7 +154,7 @@ class UrlTest extends UnitTestCase {
     return $urls;
   }
 
-   /**
+  /**
    * This constraint checks whether a Request object has the right path.
    *
    * @param string $path
@@ -336,6 +336,18 @@ class UrlTest extends UnitTestCase {
   }
 
   /**
+   * Tests the getUri() and isExternal() methods for protocol-relative URLs.
+   *
+   * @covers ::getUri
+   * @covers ::isExternal
+   */
+  public function testGetUriForProtocolRelativeUrl() {
+    $url = Url::fromUri('//example.com/test');
+    $this->assertEquals('//example.com/test', $url->getUri());
+    $this->assertTrue($url->isExternal());
+  }
+
+  /**
    * Tests the getInternalPath method().
    *
    * @param \Drupal\Core\Url[] $urls
@@ -382,7 +394,7 @@ class UrlTest extends UnitTestCase {
       $this->assertSame($path, $url->toString());
       $generated_url = $url->toString(TRUE);
       $this->assertSame($path, $generated_url->getGeneratedUrl());
-      $this->assertInstanceOf('\Drupal\Core\Cache\CacheableMetadata', $generated_url);
+      $this->assertInstanceOf('\Drupal\Core\Render\BubbleableMetadata', $generated_url);
     }
   }
 
@@ -512,7 +524,7 @@ class UrlTest extends UnitTestCase {
     $route_match = new RouteMatch('test_route', $route, ['foo' => (object) [1]], ['foo' => 1]);
     $url = Url::fromRouteMatch($route_match);
     $this->assertSame('test_route', $url->getRouteName());
-    $this->assertEquals(['foo' => '1'] , $url->getRouteParameters());
+    $this->assertEquals(['foo' => '1'], $url->getRouteParameters());
   }
 
   /**
@@ -729,21 +741,33 @@ class UrlTest extends UnitTestCase {
   public function providerFromInvalidInternalUri() {
     return [
       // Normal paths without a leading slash.
-      ['kittens'],
-      ['kittens/bengal'],
+      'normal_path0' => ['kittens'],
+      'normal_path1' => ['kittens/bengal'],
       // Path without a leading slash containing a fragment.
-      ['kittens#feeding'],
-      // Path without a leading slash containing a query string.
-      ['kittens?page=1000'],
+      'fragment' => ['kittens#feeding'],
+       // Path without a leading slash containing a query string.
+      'without_leading_slash_query' => ['kittens?page=1000'],
       // Paths with various token formats but no leading slash.
-      ['[duckies]'],
-      ['%bunnies'],
-      ['{{ puppies }}'],
+      'path_with_tokens0' => ['[duckies]'],
+      'path_with_tokens1' => ['%bunnies'],
+      'path_with_tokens2' => ['{{ puppies }}'],
       // Disallowed characters in the authority (host name) that are valid
       // elsewhere in the path.
-      ['(:;2&+h^'],
-      ['AKI@&hO@'],
+      'disallowed_hostname_chars0' => ['(:;2&+h^'],
+      'disallowed_hostname_chars1' => ['AKI@&hO@'],
+      // Leading slash with a domain.
+      'leading_slash_with_domain' => ['/http://example.com'],
     ];
+  }
+
+  /**
+   * Tests the fromUri() method with a base: URI starting with a number.
+   *
+   * @covers ::fromUri
+   */
+  public function testFromUriNumber() {
+    $url = Url::fromUri('base:2015/10/06');
+    $this->assertSame($url->toUriString(), 'base:/2015/10/06');
   }
 
   /**
@@ -777,7 +801,7 @@ class UrlTest extends UnitTestCase {
 
   /**
    * @expectedException \InvalidArgumentException
-   * @expectedExceptionMessage The route URI "route:" is invalid.
+   * @expectedExceptionMessage The route URI 'route:' is invalid.
    */
   public function testFromRouteUriWithMissingRouteName() {
     Url::fromUri('route:');
@@ -787,7 +811,7 @@ class UrlTest extends UnitTestCase {
    * Creates a mock access manager for the access tests.
    *
    * @param bool $access
-   * @param \Drupal\Core\Session\AccountInterface|NULL $account
+   * @param \Drupal\Core\Session\AccountInterface|null $account
    *
    * @return \Drupal\Core\Access\AccessManagerInterface|\PHPUnit_Framework_MockObject_MockObject
    */
@@ -822,6 +846,5 @@ class TestUrl extends Url {
   public function setAccessManager(AccessManagerInterface $access_manager) {
     $this->accessManager = $access_manager;
   }
-
 
 }

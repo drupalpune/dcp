@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Session\UserSession.
- */
-
 namespace Drupal\Core\Session;
 
 /**
@@ -42,7 +37,7 @@ class UserSession implements AccountInterface {
    *
    * @var string
    */
-  public $name;
+  public $name = '';
 
   /**
    * The preferred language code of the account.
@@ -160,6 +155,20 @@ class UserSession implements AccountInterface {
    * {@inheritdoc}
    */
   public function getUsername() {
+    return $this->getAccountName();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAccountName() {
+    return $this->name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDisplayName() {
     $name = $this->name ?: \Drupal::config('user.settings')->get('anonymous');
     \Drupal::moduleHandler()->alter('user_format_name', $name, $this);
     return $name;

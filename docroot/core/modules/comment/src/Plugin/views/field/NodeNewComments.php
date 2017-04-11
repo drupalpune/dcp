@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\comment\Plugin\views\field\NodeNewComments.
- */
-
 namespace Drupal\comment\Plugin\views\field;
 
 use Drupal\Core\Database\Connection;
 use Drupal\comment\CommentInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\Entity\Node;
 use Drupal\views\Plugin\views\field\NumericField;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ResultRow;
@@ -141,7 +137,7 @@ class NodeNewComments extends NumericField {
         ':timestamp2' => HISTORY_READ_LIMIT,
       ));
       foreach ($result as $node) {
-        foreach ($ids[$node->id()] as $id) {
+        foreach ($ids[$node->nid] as $id) {
           $values[$id]->{$this->field_alias} = $node->num_comments;
         }
       }
@@ -161,12 +157,28 @@ class NodeNewComments extends NumericField {
    */
   protected function renderLink($data, ResultRow $values) {
     if (!empty($this->options['link_to_comment']) && $data !== NULL && $data !== '') {
-      $node = entity_create('node', array(
+      $node_type = $this->getValue($values, 'type');
+      $node = Node::create([
         'nid' => $this->getValue($values, 'nid'),
-        'type' => $this->getValue($values, 'type'),
-      ));
-      $page_number = \Drupal::entityManager()->getStorage('comment')
-        ->getNewCommentPageNumber($this->getValue($values, 'comment_count'), $this->getValue($values), $node);
+        'type' => $node_type,
+      ]);
+      // Because there is no support for selecting a specific comment field to
+      // reference, we arbitrarily use the first such field name we find.
+      // @todo Provide a means for selecting the comment field.
+      //   https://www.drupal.org/node/2594201
+      $entity_manager = \Drupal::entityManager();
+      $field_map = $entity_manager->getFieldMapByFieldType('comment');
+      $comment_field_name = 'comment';
+      foreach ($field_map['node'] as $field_name => $field_data) {
+        foreach ($field_data['bundles'] as $bundle_name) {
+          if ($node_type == $bundle_name) {
+            $comment_field_name = $field_name;
+            break 2;
+          }
+        }
+      }
+      $page_number = $entity_manager->getStorage('comment')
+        ->getNewCommentPageNumber($this->getValue($values, 'comment_count'), $this->getValue($values), $node, $comment_field_name);
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['url'] = $node->urlInfo();
       $this->options['alter']['query'] = $page_number ? array('page' => $page_number) : NULL;

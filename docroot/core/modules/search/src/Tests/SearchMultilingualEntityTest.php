@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\search\Tests\SearchMultilingualEntityTest.
- */
-
 namespace Drupal\search\Tests;
 
 use Drupal\field\Entity\FieldStorageConfig;
@@ -40,9 +35,6 @@ class SearchMultilingualEntityTest extends SearchTestBase {
     // report, and administer cron. Log in.
     $user = $this->drupalCreateUser(array('administer search', 'search content', 'use advanced search', 'access content', 'access site reports', 'administer site configuration'));
     $this->drupalLogin($user);
-
-    // Make sure that auto-cron is disabled.
-    $this->config('system.cron')->set('threshold.autorun', 0)->save();
 
     // Set up the search plugin.
     $this->plugin = $this->container->get('plugin.manager.search')->createInstance('node_search');
@@ -190,7 +182,7 @@ class SearchMultilingualEntityTest extends SearchTestBase {
     $this->assertEqual(count($search_result), 2, 'The search found 2 results');
 
     // Test to check for the language of result items.
-    foreach($search_result as $result) {
+    foreach ($search_result as $result) {
       $this->assertEqual($result['langcode'], 'hu', 'The search found the correct Hungarian result');
     }
 
@@ -326,4 +318,5 @@ class SearchMultilingualEntityTest extends SearchTestBase {
     $this->assertEqual($count_foo, count($results), 'Foo count was ' . $count_foo . ' for ' . $message);
 
   }
+
 }

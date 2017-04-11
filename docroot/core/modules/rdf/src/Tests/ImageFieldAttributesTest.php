@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\rdf\Tests\ImageFieldAttributesTest.
- */
-
 namespace Drupal\rdf\Tests;
 
 use Drupal\image\Entity\ImageStyle;
 use Drupal\image\Tests\ImageFieldTestBase;
 use Drupal\node\Entity\Node;
+use Drupal\file\Entity\File;
 
 /**
  * Tests the RDFa markup of imagefields.
@@ -69,7 +65,7 @@ class ImageFieldAttributesTest extends ImageFieldTestBase {
     // Save a node with the image.
     $nid = $this->uploadNodeImage($image, $this->fieldName, 'article', $this->randomMachineName());
     $this->node = Node::load($nid);
-    $this->file = file_load($this->node->{$this->fieldName}->target_id);
+    $this->file = File::load($this->node->{$this->fieldName}->target_id);
   }
 
   /**
@@ -87,7 +83,7 @@ class ImageFieldAttributesTest extends ImageFieldTestBase {
 
     // Render the teaser.
     $node_render_array = node_view($this->node, 'teaser');
-    $html = drupal_render($node_render_array);
+    $html = \Drupal::service('renderer')->renderRoot($node_render_array);
 
     // Parse the teaser.
     $parser = new \EasyRdf_Parser_Rdfa();

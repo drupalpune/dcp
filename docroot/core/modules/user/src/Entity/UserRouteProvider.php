@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Entity\UserRouteProvider.
- */
-
 namespace Drupal\user\Entity;
 
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -27,6 +22,7 @@ class UserRouteProvider implements EntityRouteProviderInterface {
         '_entity_view' => 'user.full',
         '_title_callback' => 'Drupal\user\Controller\UserController::userTitle',
       ])
+      ->setRequirement('user', '\d+')
       ->setRequirement('_entity_access', 'user.view');
     $route_collection->add('entity.user.canonical', $route);
 
@@ -36,6 +32,7 @@ class UserRouteProvider implements EntityRouteProviderInterface {
         '_title_callback' => 'Drupal\user\Controller\UserController::userTitle',
       ])
       ->setOption('_admin_route', TRUE)
+      ->setRequirement('user', '\d+')
       ->setRequirement('_entity_access', 'user.update');
     $route_collection->add('entity.user.edit_form', $route);
 
@@ -45,6 +42,7 @@ class UserRouteProvider implements EntityRouteProviderInterface {
         '_entity_form' => 'user.cancel',
       ])
       ->setOption('_admin_route', TRUE)
+      ->setRequirement('user', '\d+')
       ->setRequirement('_entity_access', 'user.delete');
     $route_collection->add('entity.user.cancel_form', $route);
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Entity\BaseFieldDefinitionTest.
- */
-
 namespace Drupal\Tests\Core\Entity;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -196,7 +191,7 @@ class BaseFieldDefinitionTest extends UnitTestCase {
 
     // Set default value with NULL.
     $definition->setDefaultValue(NULL);
-    $this->assertEquals(NULL, $definition->getDefaultValue($entity));
+    $this->assertEquals([], $definition->getDefaultValue($entity));
   }
 
   /**

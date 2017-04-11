@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\entity_test\Plugin\Validation\Constraint\EntityTestCompositeConstraint.
- */
-
 namespace Drupal\entity_test\Plugin\Validation\Constraint;
 
 use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;
@@ -12,7 +7,7 @@ use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;
 /**
  * Constraint with multiple fields.
  *
- * @Plugin(
+ * @Constraint(
  *   id = "EntityTestComposite",
  *   label = @Translation("Constraint with multiple fields."),
  *   type = "entity"

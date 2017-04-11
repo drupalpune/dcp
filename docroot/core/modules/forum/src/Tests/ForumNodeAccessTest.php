@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\forum\Tests\ForumNodeAccessTest.
- */
-
 namespace Drupal\forum\Tests;
 
 use Drupal\simpletest\WebTestBase;

@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\simpletest\Unit\TestBaseTest.
- */
-
 namespace Drupal\Tests\simpletest\Unit;
 
 use Drupal\Tests\UnitTestCase;
 
 /**
+ * @requires extension curl
  * @coversDefaultClass \Drupal\simpletest\TestBase
  * @group simpletest
  */
@@ -73,7 +69,7 @@ class TestBaseTest extends UnitTestCase {
       array(FALSE, 'curry   paste'),
       array(TRUE, 'curry paste'),
       array(TRUE, 'thai green curry paste'),
-      array(FALSE, '@startswithat'),
+      array(TRUE, '@startswithat'),
       array(TRUE, 'contains@at'),
     );
   }
@@ -115,10 +111,11 @@ class TestBaseTest extends UnitTestCase {
     $mock_test_base = $this->getMockForAbstractClass('Drupal\simpletest\TestBase');
     $string = $mock_test_base->randomString($length);
     $this->assertEquals($length, strlen($string));
-    // randomString() should always include an ampersand ('&') if $length is
-    // greater than 2.
-    if ($length > 2) {
+    // randomString() should always include an ampersand ('&')  and a
+    // greater than ('>') if $length is greater than 3.
+    if ($length > 4) {
       $this->assertContains('&', $string);
+      $this->assertContains('>', $string);
     }
   }
 

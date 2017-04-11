@@ -2,9 +2,10 @@
  * @file
  * Adds default classes to buttons for styling purposes.
  */
+
 (function ($) {
 
-  "use strict";
+  'use strict';
 
   $.widget('ui.dialog', $.ui.dialog, {
     options: {

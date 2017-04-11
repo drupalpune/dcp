@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Plugin\CategorizingPluginManagerTrait.
- */
-
 namespace Drupal\Core\Plugin;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -76,7 +71,7 @@ trait CategorizingPluginManagerTrait {
   }
 
   /**
-   * Implements \Drupal\Component\Plugin\CategorizingPluginManagerInterface::getCategories().
+   * {@inheritdoc}
    */
   public function getCategories() {
     /** @var \Drupal\Core\Plugin\CategorizingPluginManagerTrait|\Drupal\Component\Plugin\PluginManagerInterface $this */
@@ -89,7 +84,7 @@ trait CategorizingPluginManagerTrait {
   }
 
   /**
-   * Implements \Drupal\Component\Plugin\CategorizingPluginManagerInterface::getSortedDefinitions().
+   * {@inheritdoc}
    */
   public function getSortedDefinitions(array $definitions = NULL, $label_key = 'label') {
     // Sort the plugins first by category, then by label.
@@ -105,7 +100,7 @@ trait CategorizingPluginManagerTrait {
   }
 
   /**
-   * Implements \Drupal\Component\Plugin\CategorizingPluginManagerInterface::getGroupedDefinitions().
+   * {@inheritdoc}
    */
   public function getGroupedDefinitions(array $definitions = NULL, $label_key = 'label') {
     /** @var \Drupal\Core\Plugin\CategorizingPluginManagerTrait|\Drupal\Component\Plugin\PluginManagerInterface $this */

@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\user\PrivateTempStore.
- */
-
 namespace Drupal\user;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\KeyValueStore\KeyValueStoreExpirableInterface;
 use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -78,16 +72,18 @@ class PrivateTempStore {
    *   The key/value storage object used for this data. Each storage object
    *   represents a particular collection of data and will contain any number
    *   of key/value pairs.
-   * @param \Drupal\Core\Lock\LockBackendInterface $lockBackend
+   * @param \Drupal\Core\Lock\LockBackendInterface $lock_backend
    *   The lock object used for this data.
-   * @param mixed $owner
-   *   The owner key to store along with the data (e.g. a user or session ID).
+   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   *   The current user account.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+   *   The request stack.
    * @param int $expire
    *   The time to live for items, in seconds.
    */
-  public function __construct(KeyValueStoreExpirableInterface $storage, LockBackendInterface $lockBackend, AccountProxyInterface $current_user, RequestStack $request_stack, $expire = 604800) {
+  public function __construct(KeyValueStoreExpirableInterface $storage, LockBackendInterface $lock_backend, AccountProxyInterface $current_user, RequestStack $request_stack, $expire = 604800) {
     $this->storage = $storage;
-    $this->lockBackend = $lockBackend;
+    $this->lockBackend = $lock_backend;
     $this->currentUser = $current_user;
     $this->requestStack = $request_stack;
     $this->expire = $expire;
@@ -122,10 +118,7 @@ class PrivateTempStore {
     if (!$this->lockBackend->acquire($key)) {
       $this->lockBackend->wait($key);
       if (!$this->lockBackend->acquire($key)) {
-        throw new TempStoreException(SafeMarkup::format("Couldn't acquire lock to update item %key in %collection temporary storage.", array(
-          '%key' => $key,
-          '%collection' => $this->storage->getCollectionName(),
-        )));
+        throw new TempStoreException("Couldn't acquire lock to update item '$key' in '{$this->storage->getCollectionName()}' temporary storage.");
       }
     }
 
@@ -180,10 +173,7 @@ class PrivateTempStore {
     if (!$this->lockBackend->acquire($key)) {
       $this->lockBackend->wait($key);
       if (!$this->lockBackend->acquire($key)) {
-        throw new TempStoreException(SafeMarkup::format("Couldn't acquire lock to delete item %key from %collection temporary storage.", array(
-          '%key' => $key,
-          '%collection' => $this->storage->getCollectionName(),
-        )));
+        throw new TempStoreException("Couldn't acquire lock to delete item '$key' from '{$this->storage->getCollectionName()}' temporary storage.");
       }
     }
     $this->storage->delete($key);
@@ -213,4 +203,5 @@ class PrivateTempStore {
   protected function getOwner() {
     return $this->currentUser->id() ?: $this->requestStack->getCurrentRequest()->getSession()->getId();
   }
+
 }

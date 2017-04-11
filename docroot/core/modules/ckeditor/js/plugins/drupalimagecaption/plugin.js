@@ -5,11 +5,14 @@
  * This alters the existing CKEditor image2 widget plugin, which is already
  * altered by the Drupal Image plugin, to:
  * - allow for the data-caption and data-align attributes to be set
- * - mimic the upcasting behavior of the caption_filter filter
+ * - mimic the upcasting behavior of the caption_filter filter.
+ *
+ * @ignore
  */
+
 (function (CKEDITOR) {
 
-  "use strict";
+  'use strict';
 
   CKEDITOR.plugins.add('drupalimagecaption', {
     requires: 'drupalimage',
@@ -47,9 +50,16 @@
           }
         }, true);
 
-        // Override requiredContent & allowedContent.
-        widgetDefinition.requiredContent = 'img[alt,src,width,height,data-entity-type,data-entity-uuid,data-align,data-caption]';
-        widgetDefinition.allowedContent.img.attributes += ',data-align,data-caption';
+        // Extend requiredContent & allowedContent.
+        // CKEDITOR.style is an immutable object: we cannot modify its
+        // definition to extend requiredContent. Hence we get the definition,
+        // modify it, and pass it to a new CKEDITOR.style instance.
+        var requiredContent = widgetDefinition.requiredContent.getDefinition();
+        requiredContent.attributes['data-align'] = '';
+        requiredContent.attributes['data-caption'] = '';
+        widgetDefinition.requiredContent = new CKEDITOR.style(requiredContent);
+        widgetDefinition.allowedContent.img.attributes['!data-align'] = true;
+        widgetDefinition.allowedContent.img.attributes['!data-caption'] = true;
 
         // Override allowedContent setting for the 'caption' nested editable.
         // This must match what caption_filter enforces.
@@ -60,9 +70,11 @@
         // Override downcast(): ensure we *only* output <img>, but also ensure
         // we include the data-entity-type, data-entity-uuid, data-align and
         // data-caption attributes.
+        var originalDowncast = widgetDefinition.downcast;
         widgetDefinition.downcast = function (element) {
-          // Find an image element in the one being downcasted (can be itself).
           var img = findElementByName(element, 'img');
+          originalDowncast.call(this, img);
+
           var caption = this.editables.caption;
           var captionHtml = caption && caption.getData();
           var attrs = img.attributes;
@@ -79,10 +91,14 @@
               attrs['data-align'] = this.data.align;
             }
           }
-          attrs['data-entity-type'] = this.data['data-entity-type'];
-          attrs['data-entity-uuid'] = this.data['data-entity-uuid'];
 
-          return img;
+          // If img is wrapped with a link, we want to return that link.
+          if (img.parent.name === 'a') {
+            return img.parent;
+          }
+          else {
+            return img;
+          }
         };
 
         // We want to upcast <img> elements to a DOM structure required by the
@@ -91,6 +107,7 @@
         //   - <img> tag in a paragraph (non-captioned, centered image),
         //   - <figure> tag (captioned image).
         // We take the same attributes into account as downcast() does.
+        var originalUpcast = widgetDefinition.upcast;
         widgetDefinition.upcast = function (element, data) {
           if (element.name !== 'img' || !element.attributes['data-entity-type'] || !element.attributes['data-entity-uuid']) {
             return;
@@ -100,7 +117,13 @@
             return;
           }
 
+          element = originalUpcast.call(this, element, data);
           var attrs = element.attributes;
+
+          if (element.parent.name === 'a') {
+            element = element.parent;
+          }
+
           var retElement = element;
           var caption;
 
@@ -207,10 +230,41 @@
             // upcasting existing elements (see widgetDefinition.upcast).
             if (dialogReturnValues.attributes.hasCaption) {
               actualWidget.editables.caption.setAttribute('data-placeholder', placeholderText);
+
+              // Some browsers will add a <br> tag to a newly created DOM
+              // element with no content. Remove this <br> if it is the only
+              // thing in the caption. Our placeholder support requires the
+              // element be entirely empty. See filter-caption.css.
+              var captionElement = actualWidget.editables.caption.$;
+              if (captionElement.childNodes.length === 1 && captionElement.childNodes.item(0).nodeName === 'BR') {
+                captionElement.removeChild(captionElement.childNodes.item(0));
+              }
             }
           };
         };
-      }, null, null, 20); // Low priority to ensure drupalimage's event handler runs first.
+      // Low priority to ensure drupalimage's event handler runs first.
+      }, null, null, 20);
+    },
+
+    afterInit: function (editor) {
+      var disableButtonIfOnWidget = function (evt) {
+        var widget = editor.widgets.focused;
+        if (widget && widget.name === 'image') {
+          this.setState(CKEDITOR.TRISTATE_DISABLED);
+          evt.cancel();
+        }
+      };
+
+      // Disable alignment buttons if the align filter is not enabled.
+      if (editor.plugins.justify && !editor.config.drupalImageCaption_alignFilterEnabled) {
+        var cmd;
+        var commands = ['justifyleft', 'justifycenter', 'justifyright', 'justifyblock'];
+        for (var n = 0; n < commands.length; n++) {
+          cmd = editor.getCommand(commands[n]);
+          cmd.contextSensitive = 1;
+          cmd.on('refresh', disableButtonIfOnWidget, null, null, 4);
+        }
+      }
     }
   });
 
@@ -220,9 +274,13 @@
    * Function will check first the passed element itself and then all its
    * children in DFS order.
    *
-   * @param CKEDITOR.htmlParser.element element
-   * @param String name
-   * @return CKEDITOR.htmlParser.element
+   * @param {CKEDITOR.htmlParser.element} element
+   *   The element to search.
+   * @param {string} name
+   *   The element name to search for.
+   *
+   * @return {?CKEDITOR.htmlParser.element}
+   *   The found element, or null.
    */
   function findElementByName(element, name) {
     if (element.name === name) {
@@ -233,7 +291,8 @@
     element.forEach(function (el) {
       if (el.name === name) {
         found = el;
-        return false; // Stop here.
+        // Stop here.
+        return false;
       }
     }, CKEDITOR.NODE_ELEMENT);
     return found;

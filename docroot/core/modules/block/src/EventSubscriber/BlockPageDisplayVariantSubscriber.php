@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block\EventSubscriber\BlockPageDisplayVariantSubscriber.
- */
-
 namespace Drupal\block\EventSubscriber;
 
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Render\PageDisplayVariantSelectionEvent;
 use Drupal\Core\Render\RenderEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Cache\ApcuBackendFactory.
- */
-
 namespace Drupal\Core\Cache;
 
 use Drupal\Core\Site\Settings;
@@ -26,16 +21,31 @@ class ApcuBackendFactory implements CacheFactoryInterface {
   protected $checksumProvider;
 
   /**
+   * The APCU backend class to use.
+   *
+   * @var string
+   */
+  protected $backendClass;
+
+  /**
    * Constructs an ApcuBackendFactory object.
    *
    * @param string $root
    *   The app root.
+   * @param string $site_path
+   *   The site path.
    * @param \Drupal\Core\Cache\CacheTagsChecksumInterface $checksum_provider
    *   The cache tags checksum provider.
    */
-  public function __construct($root, CacheTagsChecksumInterface $checksum_provider) {
-    $this->sitePrefix = Settings::getApcuPrefix('apcu_backend', $root, conf_path());
+  public function __construct($root, $site_path, CacheTagsChecksumInterface $checksum_provider) {
+    $this->sitePrefix = Settings::getApcuPrefix('apcu_backend', $root, $site_path);
     $this->checksumProvider = $checksum_provider;
+    if (version_compare(phpversion('apcu'), '5.0.0', '>=')) {
+      $this->backendClass = 'Drupal\Core\Cache\ApcuBackend';
+    }
+    else {
+      $this->backendClass = 'Drupal\Core\Cache\Apcu4Backend';
+    }
   }
 
   /**
@@ -48,7 +58,7 @@ class ApcuBackendFactory implements CacheFactoryInterface {
    *   The cache backend object for the specified cache bin.
    */
   public function get($bin) {
-    return new ApcuBackend($bin, $this->sitePrefix, $this->checksumProvider);
+    return new $this->backendClass($bin, $this->sitePrefix, $this->checksumProvider);
   }
 
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\Plugin\views\row\RssPluginBase.
- */
-
 namespace Drupal\views\Plugin\views\row;
 
 use Drupal\Core\Entity\EntityManagerInterface;

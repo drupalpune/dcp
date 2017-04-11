@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\KeyValueStore\DatabaseStorageExpirable.
- */
-
 namespace Drupal\Core\KeyValueStore;
 
 use Drupal\Component\Serialization\SerializationInterface;
@@ -47,7 +42,7 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
   }
 
   /**
-   * Implements Drupal\Core\KeyValueStore\KeyValueStoreInterface::getMultiple().
+   * {@inheritdoc}
    */
   public function getMultiple(array $keys) {
     $values = $this->connection->query(
@@ -61,7 +56,7 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
   }
 
   /**
-   * Implements Drupal\Core\KeyValueStore\KeyValueStoreInterface::getAll().
+   * {@inheritdoc}
    */
   public function getAll() {
     $values = $this->connection->query(
@@ -90,7 +85,7 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
   }
 
   /**
-   * Implements Drupal\Core\KeyValueStore\KeyValueStoreExpirableInterface::setWithExpireIfNotExists().
+   * {@inheritdoc}
    */
   function setWithExpireIfNotExists($key, $value, $expire) {
     $result = $this->connection->merge($this->table)
@@ -116,11 +111,10 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
   }
 
   /**
-   * Implements Drupal\Core\KeyValueStore\KeyValueStoreInterface::deleteMultiple().
+   * {@inheritdoc}
    */
   public function deleteMultiple(array $keys) {
     parent::deleteMultiple($keys);
   }
-
 
 }

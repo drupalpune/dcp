@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\system\Unit\Menu\MenuLinkTreeTest.
- */
-
 namespace Drupal\Tests\system\Unit\Menu;
 
 use Drupal\Core\Access\AccessResult;
@@ -44,9 +39,10 @@ class MenuLinkTreeTest extends UnitTestCase {
       $this->getMock('\Drupal\Core\Controller\ControllerResolverInterface')
     );
 
-    $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\CacheContextsManager')
+    $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\Context\CacheContextsManager')
       ->disableOriginalConstructor()
       ->getMock();
+    $cache_contexts_manager->method('assertValidTokens')->willReturn(TRUE);
     $container = new ContainerBuilder();
     $container->set('cache_contexts_manager', $cache_contexts_manager);
     \Drupal::setContainer($container);
@@ -100,7 +96,10 @@ class MenuLinkTreeTest extends UnitTestCase {
    *
    * @dataProvider providerTestBuildCacheability
    */
-  public function testBuildCacheability($description, $tree, $expected_build) {
+  public function testBuildCacheability($description, $tree, $expected_build, $access, array $access_cache_contexts = []) {
+    if ($access !== NULL) {
+      $access->addCacheContexts($access_cache_contexts);
+    }
     $build = $this->menuLinkTree->build($tree);
     sort($expected_build['#cache']['contexts']);
     $this->assertEquals($expected_build, $build, $description);
@@ -131,20 +130,36 @@ class MenuLinkTreeTest extends UnitTestCase {
         'max-age' => Cache::PERMANENT,
       ],
       '#sorted' => TRUE,
+      '#menu_name' => 'mock',
       '#theme' => 'menu__mock',
       '#items' => [
         // To be filled when generating test cases, using $get_built_element().
       ]
     ];
 
-    $get_built_element = function(MenuLinkTreeElement $element, array $classes) {
-      return [
-        'attributes' => new Attribute(['class' => array_merge(['menu-item'], $classes)]),
+    $get_built_element = function(MenuLinkTreeElement $element) {
+      $return = [
+        'attributes' => new Attribute(),
         'title' => $element->link->getTitle(),
         'url' => new Url($element->link->getRouteName(), $element->link->getRouteParameters(), ['set_active_class' => TRUE]),
         'below' => [],
         'original_link' => $element->link,
+        'is_expanded' => FALSE,
+        'is_collapsed' => FALSE,
+        'in_active_trail' => FALSE,
       ];
+
+      if ($element->hasChildren && !empty($element->subtree)) {
+        $return['is_expanded'] = TRUE;
+      }
+      elseif ($element->hasChildren) {
+        $return['is_collapsed'] = TRUE;
+      }
+      if ($element->inActiveTrail) {
+        $return['in_active_trail'] = TRUE;
+      }
+
+      return $return;
     };
 
     // The three access scenarios described in this method's documentation.
@@ -175,13 +190,12 @@ class MenuLinkTreeTest extends UnitTestCase {
       'description' => 'Empty tree.',
       'tree' => [],
       'expected_build' => $base_expected_build_empty,
+      'access' => NULL,
+      'access_cache_contexts' => [],
     ];
 
     for ($i = 0; $i < count($access_scenarios); $i++) {
       list($access, $access_cache_contexts) = $access_scenarios[$i];
-      if ($access !== NULL) {
-        $access->addCacheContexts($access_cache_contexts);
-      }
 
       for ($j = 0; $j < count($links_scenarios); $j++) {
         $links = $links_scenarios[$j];
@@ -193,7 +207,7 @@ class MenuLinkTreeTest extends UnitTestCase {
         $tree[0]->access = $access;
         if ($access === NULL || $access->isAllowed()) {
           $expected_build = $base_expected_build;
-          $expected_build['#items']['test.example1'] = $get_built_element($tree[0], []);
+          $expected_build['#items']['test.example1'] = $get_built_element($tree[0]);
         }
         else {
           $expected_build = $base_expected_build_empty;
@@ -203,6 +217,8 @@ class MenuLinkTreeTest extends UnitTestCase {
           'description' => "Single-item tree; access=$i; link=$j.",
           'tree' => $tree,
           'expected_build' => $expected_build,
+          'access' => $access,
+          'access_cache_contexts' => $access_cache_contexts,
         ];
 
         // Single-level tree.
@@ -213,14 +229,16 @@ class MenuLinkTreeTest extends UnitTestCase {
         $tree[0]->access = $access;
         $expected_build = $base_expected_build;
         if ($access === NULL || $access->isAllowed()) {
-          $expected_build['#items']['test.example1'] = $get_built_element($tree[0], []);
+          $expected_build['#items']['test.example1'] = $get_built_element($tree[0]);
         }
-        $expected_build['#items']['test.example2'] = $get_built_element($tree[1], []);
+        $expected_build['#items']['test.example2'] = $get_built_element($tree[1]);
         $expected_build['#cache']['contexts'] = array_merge($expected_build['#cache']['contexts'], $access_cache_contexts, $links[0]->getCacheContexts(), $links[1]->getCacheContexts());
         $data[] = [
           'description' => "Single-level tree; access=$i; link=$j.",
           'tree' => $tree,
           'expected_build' => $expected_build,
+          'access' => $access,
+          'access_cache_contexts' => $access_cache_contexts,
         ];
 
         // Multi-level tree.
@@ -239,18 +257,20 @@ class MenuLinkTreeTest extends UnitTestCase {
         ];
         $tree[0]->subtree[0]->subtree[0]->access = $access;
         $expected_build = $base_expected_build;
-        $expected_build['#items']['test.roota'] = $get_built_element($tree[0], ['menu-item--expanded']);
-        $expected_build['#items']['test.roota']['below']['test.parentc'] = $get_built_element($tree[0]->subtree[0], ['menu-item--expanded']);
+        $expected_build['#items']['test.roota'] = $get_built_element($tree[0]);
+        $expected_build['#items']['test.roota']['below']['test.parentc'] = $get_built_element($tree[0]->subtree[0]);
         if ($access === NULL || $access->isAllowed()) {
-          $expected_build['#items']['test.roota']['below']['test.parentc']['below']['test.example1'] = $get_built_element($tree[0]->subtree[0]->subtree[0], []);
+          $expected_build['#items']['test.roota']['below']['test.parentc']['below']['test.example1'] = $get_built_element($tree[0]->subtree[0]->subtree[0]);
         }
-        $expected_build['#items']['test.rootb'] = $get_built_element($tree[1], ['menu-item--expanded']);
-        $expected_build['#items']['test.rootb']['below']['test.example2'] = $get_built_element($tree[1]->subtree[0], []);
+        $expected_build['#items']['test.rootb'] = $get_built_element($tree[1]);
+        $expected_build['#items']['test.rootb']['below']['test.example2'] = $get_built_element($tree[1]->subtree[0]);
         $expected_build['#cache']['contexts'] = array_merge($expected_build['#cache']['contexts'], $access_cache_contexts, $links[0]->getCacheContexts(), $links[1]->getCacheContexts());
         $data[] = [
           'description' => "Multi-level tree; access=$i; link=$j.",
           'tree' => $tree,
           'expected_build' => $expected_build,
+          'access' => $access,
+          'access_cache_contexts' => $access_cache_contexts,
         ];
       }
     }

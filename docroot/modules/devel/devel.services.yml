@@ -1,23 +1,32 @@
 services:
-  devel.event_subscriber:
-    class: Drupal\devel\EventSubscriber\DevelEventSubscriber
-    arguments: ['@config.factory', '@current_user', '@module_handler', '@url_generator']
+  devel.error_subscriber:
+    class: Drupal\devel\EventSubscriber\ErrorHandlerSubscriber
+    arguments: ['@current_user']
+    tags:
+      - { name: event_subscriber }
+
+  devel.theme_rebuild_subscriber:
+    class: Drupal\devel\EventSubscriber\ThemeInfoRebuildSubscriber
+    arguments: ['@config.factory', '@current_user', '@theme_handler']
     tags:
       - { name: event_subscriber }
 
   devel.route_subscriber:
     class: Drupal\devel\Routing\RouteSubscriber
-    arguments: ['@entity.manager']
+    arguments: ['@entity_type.manager']
     tags:
       - { name: event_subscriber }
 
-  devel.http_middleware:
-    class: Drupal\devel\StackMiddleware\DevelMiddleware
-    tags:
-      - { name: http_middleware, priority: 350 }
+  plugin.manager.devel_dumper:
+    class: Drupal\devel\DevelDumperPluginManager
+    parent: default_plugin_manager
 
-  access_check.switch_user:
-    class: Drupal\devel\Access\SwitchAccess
-    arguments: ['@csrf_token']
+  devel.dumper:
+    class: Drupal\devel\DevelDumperManager
+    arguments: ['@config.factory', '@current_user', '@plugin.manager.devel_dumper']
+
+  devel.twig.debug_extension:
+    class: Drupal\devel\Twig\Extension\Debug
+    arguments: ['@devel.dumper']
     tags:
-      - { name: access_check }
+      - { name: twig.extension }

@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\entity_test\Plugin\Validation\Constraint\FieldWidgetConstraint.
- */
 
 namespace Drupal\entity_test\Plugin\Validation\Constraint;
 
@@ -11,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * Supports validating widget constraints.
  *
- * @Plugin(
+ * @Constraint(
  *   id = "FieldWidgetConstraint",
  *   label = @Translation("Field widget constraint.")
  * )

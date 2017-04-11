@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\language\Form\LanguageEditForm.
- */
-
 namespace Drupal\language\Form;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\language\Form\LanguageFormBase;
 
 /**
  * Controller for language edit forms.

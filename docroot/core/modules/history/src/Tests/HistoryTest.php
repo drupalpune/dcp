@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\history\Tests\HistoryTest.
- */
-
 namespace Drupal\history\Tests;
 
 use Drupal\Component\Serialization\Json;
@@ -117,6 +112,7 @@ class HistoryTest extends WebTestBase {
 
     // View the node.
     $this->drupalGet('node/' . $nid);
+    $this->assertCacheContext('user.roles:authenticated');
     // JavaScript present to record the node read.
     $settings = $this->getDrupalSettings();
     $libraries = explode(',', $settings['ajaxPageState']['libraries']);
@@ -148,4 +144,5 @@ class HistoryTest extends WebTestBase {
     $this->markNodeAsRead($nid);
     $this->assertResponse(403);
   }
+
 }

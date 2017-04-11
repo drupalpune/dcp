@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\Module\ModuleTestBase.
- */
-
 namespace Drupal\system\Tests\Module;
 
 use Drupal\Core\Config\InstallStorage;
@@ -59,7 +54,7 @@ abstract class ModuleTestBase extends WebTestBase {
    *   The name of the module.
    */
   function assertModuleTablesExist($module) {
-    $tables = array_keys(drupal_get_schema_unprocessed($module));
+    $tables = array_keys(drupal_get_module_schema($module));
     $tables_exist = TRUE;
     foreach ($tables as $table) {
       if (!db_table_exists($table)) {
@@ -76,7 +71,7 @@ abstract class ModuleTestBase extends WebTestBase {
    *   The name of the module.
    */
   function assertModuleTablesDoNotExist($module) {
-    $tables = array_keys(drupal_get_schema_unprocessed($module));
+    $tables = array_keys(drupal_get_module_schema($module));
     $tables_exist = FALSE;
     foreach ($tables as $table) {
       if (db_table_exists($table)) {
@@ -96,7 +91,7 @@ abstract class ModuleTestBase extends WebTestBase {
    *   TRUE if configuration has been installed, FALSE otherwise.
    */
   function assertModuleConfig($module) {
-    $module_config_dir = drupal_get_path('module', $module) . '/'. InstallStorage::CONFIG_INSTALL_DIRECTORY;
+    $module_config_dir = drupal_get_path('module', $module) . '/' . InstallStorage::CONFIG_INSTALL_DIRECTORY;
     if (!is_dir($module_config_dir)) {
       return;
     }
@@ -195,4 +190,5 @@ abstract class ModuleTestBase extends WebTestBase {
       ->fetchField();
     $this->assertTrue($count > 0, format_string('watchdog table contains @count rows for @message', array('@count' => $count, '@message' => format_string($message, $variables))));
   }
+
 }

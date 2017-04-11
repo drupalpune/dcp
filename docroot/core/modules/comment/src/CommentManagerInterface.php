@@ -1,15 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\CommentManagerInterface.
- */
-
 namespace Drupal\comment;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Session\AccountInterface;
-use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 
 /**
  * Comment manager contains common functions to manage comment fields.

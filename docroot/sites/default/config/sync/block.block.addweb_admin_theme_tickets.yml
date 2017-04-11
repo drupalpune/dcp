@@ -1,0 +1,31 @@
+uuid: 2bb2c77a-3b54-4038-b3d2-6bf0e7ee6afb
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:e0ac88c8-6909-4745-9bd0-f2c3a676fd41'
+  module:
+    - block_content
+    - system
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_tickets
+theme: addweb_admin_theme
+region: content
+weight: -6
+provider: null
+plugin: 'block_content:e0ac88c8-6909-4745-9bd0-f2c3a676fd41'
+settings:
+  id: 'block_content:e0ac88c8-6909-4745-9bd0-f2c3a676fd41'
+  label: Tickets
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

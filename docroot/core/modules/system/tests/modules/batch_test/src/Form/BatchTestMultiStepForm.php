@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\batch_test\Form\BatchTestMultiStepForm.
- */
-
 namespace Drupal\batch_test\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -39,6 +34,11 @@ class BatchTestMultiStepForm extends FormBase {
       '#type' => 'submit',
       '#value' => 'Submit',
     );
+
+    // This is a POST form with multiple steps that does not transition from one
+    // step to the next via POST requests, but via GET requests, because it uses
+    // Batch API to advance through the steps.
+    $form['#cache']['max-age'] = 0;
 
     return $form;
   }

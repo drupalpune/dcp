@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Tests\Plugin\StyleTest.
- */
-
 namespace Drupal\views\Tests\Plugin;
 
 use Drupal\views\Views;
@@ -46,6 +41,9 @@ class StyleTest extends ViewTestBase {
    * Tests the general rendering of styles.
    */
   public function testStyle() {
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
+
     // This run use the test row plugin and render with it.
     $view = Views::getView('test_view');
     $view->setDisplay();
@@ -65,7 +63,7 @@ class StyleTest extends ViewTestBase {
     $view->rowPlugin->setOutput($random_text);
 
     $output = $view->preview();
-    $output = drupal_render($output);
+    $output = $renderer->renderRoot($output);
     $this->assertTrue(strpos($output, $random_text) !== FALSE, 'Make sure that the rendering of the row plugin appears in the output of the view.');
 
     // Test without row plugin support.
@@ -85,7 +83,7 @@ class StyleTest extends ViewTestBase {
     // rendered.
     $view->style_plugin->setOutput($random_text);
     $output = $view->preview();
-    $output = drupal_render($output);
+    $output = $renderer->renderRoot($output);
     $this->assertTrue(strpos($output, $random_text) !== FALSE, 'Make sure that the rendering of the style plugin appears in the output of the view.');
   }
 
@@ -115,7 +113,7 @@ class StyleTest extends ViewTestBase {
     ));
 
     // Add the job and age field.
-    $view->displayHandlers->get('default')->overrideOption('fields', array(
+    $fields = array(
       'name' => array(
         'id' => 'name',
         'table' => 'views_test_data',
@@ -137,7 +135,8 @@ class StyleTest extends ViewTestBase {
         'relationship' => 'none',
         'label' => 'Age',
       ),
-    ));
+    );
+    $view->displayHandlers->get('default')->overrideOption('fields', $fields);
 
     // Now run the query and groupby the result.
     $this->executeView($view);
@@ -145,8 +144,10 @@ class StyleTest extends ViewTestBase {
     $expected = array();
     $expected['Job: Singer'] = array();
     $expected['Job: Singer']['group'] = 'Job: Singer';
+    $expected['Job: Singer']['level'] = 0;
     $expected['Job: Singer']['rows']['Age: 25'] = array();
     $expected['Job: Singer']['rows']['Age: 25']['group'] = 'Age: 25';
+    $expected['Job: Singer']['rows']['Age: 25']['level'] = 1;
     $expected['Job: Singer']['rows']['Age: 25']['rows'][0] = new ResultRow(['index' => 0]);
     $expected['Job: Singer']['rows']['Age: 25']['rows'][0]->views_test_data_name = 'John';
     $expected['Job: Singer']['rows']['Age: 25']['rows'][0]->views_test_data_job = 'Singer';
@@ -154,6 +155,7 @@ class StyleTest extends ViewTestBase {
     $expected['Job: Singer']['rows']['Age: 25']['rows'][0]->views_test_data_id = '1';
     $expected['Job: Singer']['rows']['Age: 27'] = array();
     $expected['Job: Singer']['rows']['Age: 27']['group'] = 'Age: 27';
+    $expected['Job: Singer']['rows']['Age: 27']['level'] = 1;
     $expected['Job: Singer']['rows']['Age: 27']['rows'][1] = new ResultRow(['index' => 1]);
     $expected['Job: Singer']['rows']['Age: 27']['rows'][1]->views_test_data_name = 'George';
     $expected['Job: Singer']['rows']['Age: 27']['rows'][1]->views_test_data_job = 'Singer';
@@ -161,8 +163,10 @@ class StyleTest extends ViewTestBase {
     $expected['Job: Singer']['rows']['Age: 27']['rows'][1]->views_test_data_id = '2';
     $expected['Job: Drummer'] = array();
     $expected['Job: Drummer']['group'] = 'Job: Drummer';
+    $expected['Job: Drummer']['level'] = 0;
     $expected['Job: Drummer']['rows']['Age: 28'] = array();
     $expected['Job: Drummer']['rows']['Age: 28']['group'] = 'Age: 28';
+    $expected['Job: Drummer']['rows']['Age: 28']['level'] = 1;
     $expected['Job: Drummer']['rows']['Age: 28']['rows'][2] = new ResultRow(['index' => 2]);
     $expected['Job: Drummer']['rows']['Age: 28']['rows'][2]->views_test_data_name = 'Ringo';
     $expected['Job: Drummer']['rows']['Age: 28']['rows'][2]->views_test_data_job = 'Drummer';
@@ -174,16 +178,16 @@ class StyleTest extends ViewTestBase {
     if ($stripped) {
 
       // Add some html to the result and expected value.
-      $rand = '<a data="' . $this->randomMachineName() . '" />';
-      $view->result[0]->views_test_data_job .= $rand;
-      $expected['Job: Singer']['rows']['Age: 25']['rows'][0]->views_test_data_job = 'Singer' . $rand;
+      $rand1 = '<a data="' . $this->randomMachineName() . '" />';
+      $view->result[0]->views_test_data_job .= $rand1;
+      $expected['Job: Singer']['rows']['Age: 25']['rows'][0]->views_test_data_job = 'Singer' . $rand1;
       $expected['Job: Singer']['group'] = 'Job: Singer';
-      $rand = '<a data="' . $this->randomMachineName() . '" />';
-      $view->result[1]->views_test_data_job .= $rand;
-      $expected['Job: Singer']['rows']['Age: 27']['rows'][1]->views_test_data_job = 'Singer' . $rand;
-      $rand = '<a data="' . $this->randomMachineName() . '" />';
-      $view->result[2]->views_test_data_job .= $rand;
-      $expected['Job: Drummer']['rows']['Age: 28']['rows'][2]->views_test_data_job = 'Drummer' . $rand;
+      $rand2 = '<a data="' . $this->randomMachineName() . '" />';
+      $view->result[1]->views_test_data_job .= $rand2;
+      $expected['Job: Singer']['rows']['Age: 27']['rows'][1]->views_test_data_job = 'Singer' . $rand2;
+      $rand3 = '<a data="' . $this->randomMachineName() . '" />';
+      $view->result[2]->views_test_data_job .= $rand3;
+      $expected['Job: Drummer']['rows']['Age: 28']['rows'][2]->views_test_data_job = 'Drummer' . $rand3;
       $expected['Job: Drummer']['group'] = 'Job: Drummer';
 
       $view->style_plugin->options['grouping'][0] = array('field' => 'job', 'rendered' => TRUE, 'rendered_strip' => TRUE);
@@ -201,19 +205,52 @@ class StyleTest extends ViewTestBase {
       $sets_new_value = $view->style_plugin->renderGrouping($view->result, $view->style_plugin->options['grouping'], FALSE);
 
       // Reorder the group structure to grouping by value.
-      $expected['Singer'] = $expected['Job: Singer'];
-      $expected['Singer']['rows']['25'] = $expected['Job: Singer']['rows']['Age: 25'];
-      $expected['Singer']['rows']['27'] = $expected['Job: Singer']['rows']['Age: 27'];
-      $expected['Drummer'] = $expected['Job: Drummer'];
-      $expected['Drummer']['rows']['28'] = $expected['Job: Drummer']['rows']['Age: 28'];
-      unset($expected['Job: Singer']);
-      unset($expected['Singer']['rows']['Age: 25']);
-      unset($expected['Singer']['rows']['Age: 27']);
-      unset($expected['Job: Drummer']);
-      unset($expected['Drummer']['rows']['Age: 28']);
+      $new_expected = $expected;
+      $new_expected['Singer'] = $expected['Job: Singer'];
+      $new_expected['Singer']['rows']['25'] = $expected['Job: Singer']['rows']['Age: 25'];
+      $new_expected['Singer']['rows']['27'] = $expected['Job: Singer']['rows']['Age: 27'];
+      $new_expected['Drummer'] = $expected['Job: Drummer'];
+      $new_expected['Drummer']['rows']['28'] = $expected['Job: Drummer']['rows']['Age: 28'];
+      unset($new_expected['Job: Singer']);
+      unset($new_expected['Singer']['rows']['Age: 25']);
+      unset($new_expected['Singer']['rows']['Age: 27']);
+      unset($new_expected['Job: Drummer']);
+      unset($new_expected['Drummer']['rows']['Age: 28']);
 
-      $this->assertEqual($sets_new_value, $expected, 'The style plugins should proper group the results with grouping by the value.');
+      $this->assertEqual($sets_new_value, $new_expected, 'The style plugins should proper group the results with grouping by the value.');
     }
+
+    // Test that grouping works on fields having no label.
+    $fields['job']['label'] = '';
+    $view->destroy();
+    $view->setDisplay();
+    $view->initStyle();
+    $view->displayHandlers->get('default')->overrideOption('fields', $fields);
+    $view->style_plugin->options['grouping'] = array(
+      array('field' => 'job'),
+      array('field' => 'age'),
+    );
+
+    $this->executeView($view);
+
+    if ($stripped) {
+      $view->result[0]->views_test_data_job .= $rand1;
+      $view->result[1]->views_test_data_job .= $rand2;
+      $view->result[2]->views_test_data_job .= $rand3;
+      $view->style_plugin->options['grouping'][0] = array('field' => 'job', 'rendered' => TRUE, 'rendered_strip' => TRUE);
+      $view->style_plugin->options['grouping'][1] = array('field' => 'age', 'rendered' => TRUE, 'rendered_strip' => TRUE);
+    }
+
+    $sets_new_rendered = $view->style_plugin->renderGrouping($view->result, $view->style_plugin->options['grouping'], TRUE);
+
+    // Remove labels from expected results.
+    foreach ($expected as $job => $data) {
+      unset($expected[$job]);
+      $job = str_replace('Job: ', '', $job);
+      $data['group'] = $job;
+      $expected[$job] = $data;
+    }
+    $this->assertEqual($expected, $sets_new_rendered);
   }
 
   /**
@@ -229,7 +266,7 @@ class StyleTest extends ViewTestBase {
     $view->style_plugin->options['row_class'] = $random_name . " test-token-{{ name }}";
 
     $output = $view->preview();
-    $this->storeViewPreview(drupal_render($output));
+    $this->storeViewPreview(\Drupal::service('renderer')->renderRoot($output));
 
     $rows = $this->elements->body->div->div->div;
     $count = 0;

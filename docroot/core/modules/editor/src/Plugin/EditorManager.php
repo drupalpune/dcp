@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\editor\Plugin\EditorManager.
- */
-
 namespace Drupal\editor\Plugin;
 
 use Drupal\Core\Plugin\DefaultPluginManager;
@@ -61,7 +56,7 @@ class EditorManager extends DefaultPluginManager {
    * @return array
    *   An array of attachments, for use with #attached.
    *
-   * @see drupal_process_attached()
+   * @see \Drupal\Core\Render\AttachmentsResponseProcessorInterface::processAttachments()
    */
   public function getAttachments(array $format_ids) {
     $attachments = array('library' => array());

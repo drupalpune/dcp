@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\comment\Tests\Views\CommentRestExportTest.
- */
-
 namespace Drupal\comment\Tests\Views;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\comment\Entity\Comment;
 
 /**
  * Tests a comment rest export view.
@@ -43,7 +39,7 @@ class CommentRestExportTest extends CommentTestBase {
       'name' => 'bobby tables',
       'hostname' => 'public.example.com',
     );
-    $this->comment = entity_create('comment', $comment);
+    $this->comment = Comment::create($comment);
     $this->comment->save();
 
     $user = $this->drupalCreateUser(['access comments']);
@@ -55,7 +51,7 @@ class CommentRestExportTest extends CommentTestBase {
    * Test comment row.
    */
   public function testCommentRestExport() {
-    $this->drupalGet(sprintf('node/%d/comments', $this->nodeUserCommented->id()), [], ['Accept' => 'application/hal+json']);
+    $this->drupalGetWithFormat(sprintf('node/%d/comments', $this->nodeUserCommented->id()), 'hal_json');
     $this->assertResponse(200);
     $contents = Json::decode($this->getRawContent());
     $this->assertEqual($contents[0]['subject'], 'How much wood would a woodchuck chuck');

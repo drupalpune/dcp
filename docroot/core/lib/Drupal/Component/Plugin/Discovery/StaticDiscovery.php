@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Component\Plugin\Discovery\StaticDiscovery.
- */
-
 namespace Drupal\Component\Plugin\Discovery;
 
 /**
@@ -16,7 +11,7 @@ class StaticDiscovery implements DiscoveryInterface {
   use DiscoveryCachedTrait;
 
   /**
-   * Implements Drupal\Component\Plugin\Discovery\DiscoveryInterface::getDefinitions().
+   * {@inheritdoc}
    */
   public function getDefinitions() {
     if (!$this->definitions) {
@@ -38,4 +33,5 @@ class StaticDiscovery implements DiscoveryInterface {
   public function deleteDefinition($plugin) {
     unset($this->definitions[$plugin]);
   }
+
 }

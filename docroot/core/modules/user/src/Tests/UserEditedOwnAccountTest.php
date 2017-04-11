@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\user\Tests\UserEditedOwnAccountTest.
- */
-
 namespace Drupal\user\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -15,6 +10,13 @@ use Drupal\simpletest\WebTestBase;
  * @group user
  */
 class UserEditedOwnAccountTest extends WebTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var array
+   */
+  public static $modules = array('user_form_test');
 
   function testUserEditedOwnAccount() {
     // Change account setting 'Who can register accounts?' to Administrators
@@ -37,4 +39,5 @@ class UserEditedOwnAccountTest extends WebTestBase {
     $account->name = $edit['name'];
     $this->drupalLogin($account);
   }
+
 }

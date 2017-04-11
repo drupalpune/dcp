@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Display\VariantBase.
- */
-
 namespace Drupal\Core\Display;
 
+use Drupal\Core\Cache\RefinableCacheableDependencyTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Plugin\PluginDependencyTrait;
@@ -23,6 +19,7 @@ use Drupal\Core\Session\AccountInterface;
 abstract class VariantBase extends PluginBase implements VariantInterface {
 
   use PluginDependencyTrait;
+  use RefinableCacheableDependencyTrait;
 
   /**
    * {@inheritdoc}

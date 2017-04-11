@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\EventSubscriber\MenuRouterRebuildSubscriber.
- */
-
 namespace Drupal\Core\EventSubscriber;
 
 use Drupal\Core\Cache\Cache;
@@ -86,7 +81,8 @@ class MenuRouterRebuildSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   static function getSubscribedEvents() {
-    $events[RoutingEvents::FINISHED][] = array('onRouterRebuild', 200);
+    // Run after CachedRouteRebuildSubscriber.
+    $events[RoutingEvents::FINISHED][] = array('onRouterRebuild', 100);
     return $events;
   }
 

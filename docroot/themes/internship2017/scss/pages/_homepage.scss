@@ -1,0 +1,291 @@
+/*------------------------------------*\
+    * @file
+    * Home Page.
+\*------------------------------------*/
+
+.region-header-bottom {
+    @include banner(100%, auto);
+}
+
+.block-tickets {
+    @include container($container-width, 20px);
+    @include breakpoint(mobileonly) {
+        padding: 0px;
+    }
+}
+
+.region-content {
+    .main-div {
+        padding: 50px 10px;
+        display: flex;
+        justify-content: space-around;
+        @include breakpoint(phablet) {
+            flex-direction: column;
+        }
+    }
+}
+
+.homepage-button p {
+    color: $grey;
+    font-size: 18px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: $body-font;
+}
+
+.homepage-button a {
+    @include abutton($medred);
+    color: #fff;
+    width: 300px;
+    @include breakpoint(mobileonly) {
+        width: 250px;
+    }
+}
+
+#block-internship2017-keynotespeaker {
+    background-color: $medblue;
+    font-family: $body-font;
+}
+
+.class-keynote {
+    @include container($container-width, 0px);
+    display: flex;
+    padding-bottom: 20px;
+    @include breakpoint(mobileonly) {
+        flex-direction: column-reverse;
+    }
+}
+
+.keynote-speaker {
+    width: 50%;
+    color: $grey;
+    margin-top: 50px;
+    padding: 10px 80px;
+    @include breakpoint(desktop) {
+        padding: 10px 40px;
+    }
+    @include breakpoint(tablet) {
+        padding: 10px 0px;
+    }
+    @include breakpoint(phablet) {
+        width: 70%;
+    }
+    @include breakpoint(mobileonly) {
+        width: 100%;
+    }
+    h1 {
+        @include heading($blue, 32px);
+        text-align: left;
+        margin-bottom: 50px;
+    }
+    p {
+        padding-right: 50px;
+        line-height: 20px;
+        @include breakpoint(mobileonly) {
+            padding-right: 0px;
+        }
+    }
+    p:last-child {
+        margin-top: 50px;
+    }
+}
+
+.keynote-speaker-image {
+    display: flex;
+    align-items: center;
+    width: 50%;
+    img {
+        width: 100%;
+    }
+    @include breakpoint(phablet) {
+        width: 30%;
+    }
+    @include breakpoint(mobileonly) {
+        width: 100%;
+    }
+}
+
+#block-internship2017-events {
+    @include container($container-width, 20px);
+    @include breakpoint(mobileonly) {
+        padding: 0px;
+    }
+    h2 {
+        @include heading($blue, 32px);
+    }
+}
+
+.events-wrapper {
+    margin-top: 80px;
+    display: flex;
+    justify-content: space-around;
+    @include breakpoint(phablet) {
+        flex-direction: column;
+    }
+    .event {
+        width: 30%;
+        @include breakpoint(phablet) {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        img {
+            width: 100%;
+            height: 200px;
+            @include breakpoint(phablet) {
+                height: 300px;
+            }
+            @include breakpoint(mobileonly) {
+                height: 200px;
+            }
+        }
+        h1 {
+            font-size: 18px;
+            color: $blue;
+            padding: 20px 0;
+            font-family: $title-font;
+        }
+        p {
+            color: $grey;
+            padding-right: 30px;
+            line-height: 20px;
+            font-family: $body-font;
+        }
+    }
+}
+
+#block-internship2017-views-block-our-sponsors-block-1 {
+    @include container($container-width, 20px);
+    h2 {
+        @include heading($blue, 32px);
+    }
+    .view-content {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        .views-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 50px;
+            @include breakpoint(laptop) {
+                margin: 0 28px;
+            }
+        }
+    }
+}
+
+#block-internship2017-helpusmakethisanawesomeexperience,
+#block-joinustomake {
+    @include container($container-width, 20px);
+    h2 {
+        @include heading($grey, 18px);
+        text-transform: none;
+    }
+    p {
+        text-align: center;
+        font-family: $body-font;
+    }
+    a {
+        @include abutton($medred);
+        color: #fff;
+    }
+}
+
+#block-internship2017-venue-2 {
+    background-color: $lightblue;
+    padding: 30px 0px;
+    h2 {
+        @include heading($blue, 32px);
+    }
+}
+
+.venue-main {
+    @include container($container-width, 20px);
+    @include breakpoint(tablet) {
+        padding: 0px;
+    }
+    @include breakpoint(phablet) {
+        padding: 20px;
+    }
+    display:flex;
+    flex-direction: row-reverse;
+    font-family: $body-font;
+    @include breakpoint(phablet) {
+        flex-direction: column-reverse;
+    }
+    .venue-map,
+    .venue-detail {
+        width: 50%;
+        @include breakpoint(phablet) {
+            width: 100%;
+            margin: 10px 0px;
+        }
+    }
+    .venue-map img {
+        width: 100%;
+    }
+    a {
+        @include abutton(#fff);
+        margin-top: 20px;
+        color: $grey;
+        box-shadow: 1px 2px 1px $grey;
+    }
+    p {
+        color: $grey;
+        line-height: 20px;
+        strong {
+            color: $black;
+            font-size: 24px;
+        }
+    }
+    p:first-child {
+        margin: 20px 0px;
+    }
+    p:nth-child(4) {
+        margin: 20px 0px;
+    }
+}
+
+#block-internship2017-madewithlovebyqed42 {
+    padding: 5px 20px;
+    @include breakpoint(phablet) {
+        padding: 5px 0px;
+    }
+    background-color: #fff;
+    p {
+        @include container($container-width, 0px);
+        text-align: right;
+        font-family: $body-font;
+        color: $grey;
+    }
+}
+
+.path-frontpage #block-internship2017-madewithlovebyqed42 {
+    background-color: $lightblue;
+}
+
+#block-internship2017-followus {
+    color: #fff;
+    font-family: $body-font;
+    background-color: $black;
+    .footer-logo {
+        display: flex;
+        width: $container-width;
+        justify-content: space-between;
+        margin: 0 auto;
+    }
+    p {
+        text-align: right;
+        margin-top: 20px;
+    }
+    p:first-child {
+        padding: 0 0 10px 0;
+        text-align: left;
+        margin-top: -20px;
+        line-height: 10px;
+        width: 50%;
+    }
+    img {
+        margin-left: 5px;
+    }
+}

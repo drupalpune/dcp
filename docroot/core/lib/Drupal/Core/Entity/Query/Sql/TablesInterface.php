@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Query\Sql\TablesInterface.
- */
-
 namespace Drupal\Core\Entity\Query\Sql;
 
 /**
@@ -16,20 +11,22 @@ interface TablesInterface {
    * Adds a field to a database query.
    *
    * @param string $field
-   *   If it contains a dot, then field name dot field column. If it doesn't
-   *   then entity property name.
+   *   If it doesn't contain a dot, then an entity base field name. If it
+   *   contains a dot, then either field name dot field column or field name dot
+   *   delta dot field column. Delta can be a numeric value or a "%delta" for
+   *   any value.
    * @param string $type
    *   Join type, can either be INNER or LEFT.
    * @param string $langcode
    *   The language code the field values are to be queried in.
    *
-   * @throws \Drupal\Core\Entity\Query\QueryException
-   *   If $field specifies an invalid relationship.
-   *
    * @return string
    *   The return value is a string containing the alias of the table, a dot
    *   and the appropriate SQL column as passed in. This allows the direct use
    *   of this in a query for a condition or sort.
+   *
+   * @throws \Drupal\Core\Entity\Query\QueryException
+   *   If $field specifies an invalid relationship.
    */
   public function addField($field, $type, $langcode);
 

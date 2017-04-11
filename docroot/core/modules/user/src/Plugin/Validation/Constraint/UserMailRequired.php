@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\Plugin\Validation\Constraint\UserMailRequired.
- */
-
 namespace Drupal\user\Plugin\Validation\Constraint;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorInterface;
 use Symfony\Component\Validator\ExecutionContextInterface;
@@ -19,7 +13,7 @@ use Symfony\Component\Validator\ExecutionContextInterface;
  * and the user performing the edit has 'administer users' permission.
  * This allows users without email address to be edited and deleted.
  *
- * @Plugin(
+ * @Constraint(
  *   id = "UserMailRequired",
  *   label = @Translation("User email required", context = "Validation")
  * )
@@ -29,9 +23,12 @@ class UserMailRequired extends Constraint implements ConstraintValidatorInterfac
   /**
    * Violation message. Use the same message as FormValidator.
    *
+   * Note that the name argument is not sanitized so that translators only have
+   * one string to translate. The name is sanitized in self::validate().
+   *
    * @var string
    */
-  public $message = '!name field is required.';
+  public $message = '@name field is required.';
 
   /**
    * @var \Symfony\Component\Validator\ExecutionContextInterface
@@ -39,7 +36,7 @@ class UserMailRequired extends Constraint implements ConstraintValidatorInterfac
   protected $context;
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function initialize(ExecutionContextInterface $context) {
     $this->context = $context;
@@ -70,7 +67,7 @@ class UserMailRequired extends Constraint implements ConstraintValidatorInterfac
     $required = !(!$existing_value && \Drupal::currentUser()->hasPermission('administer users'));
 
     if ($required && (!isset($items) || $items->isEmpty())) {
-      $this->context->addViolation($this->message, array('!name' => SafeMarkup::placeholder($account->getFieldDefinition('mail')->getLabel())));
+      $this->context->addViolation($this->message, ['@name' => $account->getFieldDefinition('mail')->getLabel()]);
     }
   }
 

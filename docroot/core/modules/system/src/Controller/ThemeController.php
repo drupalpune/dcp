@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Controller\ThemeController.
- */
-
 namespace Drupal\system\Controller;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -12,7 +7,6 @@ use Drupal\Core\Config\PreExistingConfigException;
 use Drupal\Core\Config\UnmetDependenciesException;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Extension\ThemeHandlerInterface;
-use Drupal\Core\Routing\RouteBuilderInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -30,26 +24,16 @@ class ThemeController extends ControllerBase {
   protected $themeHandler;
 
   /**
-   * The route builder service.
-   *
-   * @var \Drupal\Core\Routing\RouteBuilderInterface
-   */
-  protected $routeBuilder;
-
-  /**
    * Constructs a new ThemeController.
    *
    * @param \Drupal\Core\Extension\ThemeHandlerInterface $theme_handler
    *   The theme handler.
-   * @param \Drupal\Core\Routing\RouteBuilderInterface $route_builder
-   *   The route builder.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
    */
-  public function __construct(ThemeHandlerInterface $theme_handler, RouteBuilderInterface $route_builder, ConfigFactoryInterface $config_factory) {
+  public function __construct(ThemeHandlerInterface $theme_handler, ConfigFactoryInterface $config_factory) {
     $this->themeHandler = $theme_handler;
     $this->configFactory = $config_factory;
-    $this->routeBuilder = $route_builder;
   }
 
   /**
@@ -58,7 +42,6 @@ class ThemeController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('theme_handler'),
-      $container->get('router.builder'),
       $container->get('config.factory')
     );
   }
@@ -77,7 +60,7 @@ class ThemeController extends ControllerBase {
    *   the token is invalid.
    */
   public function uninstall(Request $request) {
-    $theme = $request->get('theme');
+    $theme = $request->query->get('theme');
     $config = $this->config('system.theme');
 
     if (isset($theme)) {
@@ -119,7 +102,7 @@ class ThemeController extends ControllerBase {
    *   the token is invalid.
    */
   public function install(Request $request) {
-    $theme = $request->get('theme');
+    $theme = $request->query->get('theme');
 
     if (isset($theme)) {
       try {
@@ -182,8 +165,6 @@ class ThemeController extends ControllerBase {
 
         // Set the default theme.
         $config->set('default', $theme)->save();
-
-        $this->routeBuilder->setRebuildNeeded();
 
         // The status message depends on whether an admin theme is currently in
         // use: a value of 0 means the admin theme is set to be the default

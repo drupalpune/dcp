@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\migrate\Plugin\migrate\process\Extract.
- */
-
 namespace Drupal\migrate\Plugin\migrate\process;
 
 use Drupal\Component\Utility\NestedArray;
@@ -16,10 +11,11 @@ use Drupal\migrate\Row;
 /**
  * This plugin extracts a value from an array.
  *
- * @see https://www.drupal.org/node/2152731
+ * @link https://www.drupal.org/node/2152731 Online handbook documentation for extract process plugin @endlink
  *
  * @MigrateProcessPlugin(
- *   id = "extract"
+ *   id = "extract",
+ *   handle_multiples = TRUE
  * )
  */
 class Extract extends ProcessPluginBase {
@@ -33,7 +29,12 @@ class Extract extends ProcessPluginBase {
     }
     $new_value = NestedArray::getValue($value, $this->configuration['index'], $key_exists);
     if (!$key_exists) {
-      throw new MigrateException('Array index missing, extraction failed.');
+      if (isset($this->configuration['default'])) {
+        $new_value = $this->configuration['default'];
+      }
+      else {
+        throw new MigrateException('Array index missing, extraction failed.');
+      }
     }
     return $new_value;
   }

@@ -1,16 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\shortcut\Controller\ShortcutController.
- */
-
 namespace Drupal\shortcut\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\shortcut\ShortcutSetInterface;
 use Drupal\shortcut\ShortcutInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides route responses for taxonomy.module.
@@ -18,8 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ShortcutController extends ControllerBase {
 
   /**
-   * Returns a rendered edit form to create a new shortcut associated to the
-   * given shortcut set.
+   * Returns a form to add a new shortcut to a given set.
    *
    * @param \Drupal\shortcut\ShortcutSetInterface $shortcut_set
    *   The shortcut set this shortcut will be added to.

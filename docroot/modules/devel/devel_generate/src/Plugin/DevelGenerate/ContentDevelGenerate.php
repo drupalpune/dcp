@@ -1,15 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\devel_generate\Plugin\DevelGenerate\ContentDevelGenerate.
- */
-
 namespace Drupal\devel_generate\Plugin\DevelGenerate;
 
 use Drupal\comment\CommentManagerInterface;
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Datetime\DateFormatter;
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -85,7 +80,7 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
   /**
    * The date formatter service.
    *
-   * @var \Drupal\Core\Datetime\DateFormatter
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected $dateFormatter;
 
@@ -107,10 +102,10 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
    *   The language manager.
    * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
    *   The url generator service.
-   * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityStorageInterface $node_storage, EntityStorageInterface $node_type_storage, ModuleHandlerInterface $module_handler, CommentManagerInterface $comment_manager = NULL, LanguageManagerInterface $language_manager, UrlGeneratorInterface $url_generator, DateFormatter $date_formatter) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, EntityStorageInterface $node_storage, EntityStorageInterface $node_type_storage, ModuleHandlerInterface $module_handler, CommentManagerInterface $comment_manager = NULL, LanguageManagerInterface $language_manager, UrlGeneratorInterface $url_generator, DateFormatterInterface $date_formatter) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->moduleHandler = $module_handler;
@@ -147,7 +142,7 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
 
     if (empty($types)) {
       $create_url = $this->urlGenerator->generateFromRoute('node.type_add');
-      $this->setMessage($this->t('You do not have any content types that can be generated. <a href="@create-type">Go create a new content type</a>', array('@create-type' => $create_url)), 'error', FALSE);
+      $this->setMessage($this->t('You do not have any content types that can be generated. <a href=":create-type">Go create a new content type</a>', array(':create-type' => $create_url)), 'error', FALSE);
       return;
     }
 
@@ -166,10 +161,11 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
           // Find all comment fields for the bundle.
           if (in_array($type->id(), $info['bundles'])) {
             $instance = FieldConfig::loadByName('node', $type->id(), $field_name);
-            $default_mode = reset($instance->default_value);
-            $fields[] = SafeMarkup::format('@field: !state', array(
+            $default_value = $instance->getDefaultValueLiteral();
+            $default_mode = reset($default_value);
+            $fields[] = new FormattableMarkup('@field: @state', array(
               '@field' => $instance->label(),
-              '!state' => $map[$default_mode['status']],
+              '@state' => $map[$default_mode['status']],
             ));
           }
         }
@@ -285,6 +281,15 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
   /**
    * {@inheritdoc}
    */
+  function settingsFormValidate(array $form, FormStateInterface $form_state) {
+    if (!array_filter($form_state->getValue('node_types'))) {
+      $form_state->setErrorByName('node_types', $this->t('Please select at least one content type'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function generateElements(array $values) {
     if ($values['num'] <= 50 && $values['max_comments'] <= 10) {
       $this->generateContent($values);
@@ -312,7 +317,7 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
         $this->develGenerateContentAddNode($values);
         if (function_exists('drush_log') && $i % drush_get_option('feedback', 1000) == 0) {
           $now = time();
-          drush_log(dt('Completed !feedback nodes (!rate nodes/min)', array('!feedback' => drush_get_option('feedback', 1000), '!rate' => (drush_get_option('feedback', 1000) * 60) / ($now - $start))), 'ok');
+          drush_log(dt('Completed @feedback nodes (@rate nodes/min)', array('@feedback' => drush_get_option('feedback', 1000), '@rate' => (drush_get_option('feedback', 1000) * 60) / ($now - $start))), 'ok');
           $start = $now;
         }
       }
@@ -383,6 +388,11 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
     $default_types = array_intersect(array('page', 'article'), $all_types);
     $selected_types = _convert_csv_to_array(drush_get_option('types', $default_types));
 
+    // Validates the input format for content types option.
+    if (drush_get_option('types', $default_types) === TRUE) {
+      return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', dt('Wrong syntax or no content type selected. The correct syntax uses "=", eg.: --types=page,article'));
+    }
+
     if (empty($selected_types)) {
       return drush_set_error('DEVEL_GENERATE_NO_CONTENT_TYPES', dt('No content types available'));
     }
@@ -392,6 +402,11 @@ class ContentDevelGenerate extends DevelGenerateBase implements ContainerFactory
 
     if (!empty($values['kill']) && empty($node_types)) {
       return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', dt('Please provide content type (--types) in which you want to delete the content.'));
+    }
+
+    // Checks for any missing content types before generating nodes.
+    if (array_diff($node_types, $all_types)) {
+      return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', dt('One or more content types have been entered that don\'t exist on this site'));
     }
 
     return $values;

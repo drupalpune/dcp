@@ -1,18 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\views_ui\Unit\ViewUIObjectTest.
- */
-
 namespace Drupal\Tests\views_ui\Unit;
 
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\views\Entity\View;
-use Drupal\views\ViewExecutable;
 use Drupal\views_ui\ViewUI;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Path\PathMatcher.
- */
-
 namespace Drupal\Core\Path;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -101,7 +96,7 @@ class PathMatcher implements PathMatcherInterface {
       // route match, like on exception responses.
       if ($this->routeMatch->getRouteName()) {
         $url = Url::fromRouteMatch($this->routeMatch);
-        $this->isCurrentFrontPage = ($url->getRouteName() && $url->getInternalPath() === $this->getFrontPagePath());
+        $this->isCurrentFrontPage = ($url->getRouteName() && '/' . $url->getInternalPath() === $this->getFrontPagePath());
       }
     }
     return $this->isCurrentFrontPage;
@@ -116,11 +111,10 @@ class PathMatcher implements PathMatcherInterface {
   protected function getFrontPagePath() {
     // Lazy-load front page config.
     if (!isset($this->frontPage)) {
-      // @todo page.front should store the route name, see
-      //   https://www.drupal.org/node/2371823
       $this->frontPage = $this->configFactory->get('system.site')
         ->get('page.front');
     }
     return $this->frontPage;
   }
+
 }

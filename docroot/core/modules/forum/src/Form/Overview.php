@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\forum\Form\Overview.
- */
-
 namespace Drupal\forum\Form;
 
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -12,12 +7,10 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Form\OverviewTerms;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/*
+/**
  * Provides forum overview form for the forum vocabulary.
  */
 class Overview extends OverviewTerms {
@@ -86,12 +79,10 @@ class Overview extends OverviewTerms {
     // Remove the alphabetical reset.
     unset($form['actions']['reset_alphabetical']);
 
-    // The form needs to have submit and validate handlers set explicitly.
     // Use the existing taxonomy overview submit handler.
-    $form['#submit'] = array('::submitForm');
-    $form['terms']['#empty'] = $this->t('No containers or forums available. <a href="@container">Add container</a> or <a href="@forum">Add forum</a>.', array(
-      '@container' => $this->url('forum.add_container'),
-      '@forum' => $this->url('forum.add_forum')
+    $form['terms']['#empty'] = $this->t('No containers or forums available. <a href=":container">Add container</a> or <a href=":forum">Add forum</a>.', array(
+      ':container' => $this->url('forum.add_container'),
+      ':forum' => $this->url('forum.add_forum')
     ));
     return $form;
   }

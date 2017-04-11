@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Component\Datetime\DateTimePlus
- */
 namespace Drupal\Component\Datetime;
+use Drupal\Component\Utility\ToStringTrait;
 
 /**
  * Wraps DateTime().
@@ -27,6 +24,8 @@ namespace Drupal\Component\Datetime;
  * errors using hasErrors() and getErrors().
  */
 class DateTimePlus {
+
+  use ToStringTrait;
 
   const FORMAT   = 'Y-m-d H:i:s';
 
@@ -105,6 +104,9 @@ class DateTimePlus {
    *   A DateTime object.
    * @param array $settings
    *   @see __construct()
+   *
+   * @return static
+   *   A new DateTimePlus object.
    */
   public static function createFromDateTime(\DateTime $datetime, $settings = array()) {
     return new static($datetime->format(static::FORMAT), $datetime->getTimezone(), $settings);
@@ -117,7 +119,7 @@ class DateTimePlus {
    * date even if some values are missing.
    *
    * @param array $date_parts
-   *   An array of date parts, like ('year' => 2014, 'month => 4).
+   *   An array of date parts, like ('year' => 2014, 'month' => 4).
    * @param mixed $timezone
    *   (optional) \DateTimeZone object, time zone string or NULL. NULL uses the
    *   default system time zone. Defaults to NULL.
@@ -126,8 +128,10 @@ class DateTimePlus {
    *   __construct().
    *
    * @return static
-   *   A new \Drupal\Component\DateTimePlus object based on the parameters
-   *   passed in.
+   *   A new DateTimePlus object.
+   *
+   * @throws \Exception
+   *   If the array date values or value combination is not correct.
    */
   public static function createFromArray(array $date_parts, $timezone = NULL, $settings = array()) {
     $date_parts = static::prepareArray($date_parts, TRUE);
@@ -156,6 +160,12 @@ class DateTimePlus {
    *   @see __construct()
    * @param array $settings
    *   @see __construct()
+   *
+   * @return static
+   *   A new DateTimePlus object.
+   *
+   * @throws \Exception
+   *   If the timestamp is not numeric.
    */
   public static function createFromTimestamp($timestamp, $timezone = NULL, $settings = array()) {
     if (!is_numeric($timestamp)) {
@@ -174,7 +184,7 @@ class DateTimePlus {
    *   to use things like negative years, which php's parser fails on, or
    *   any other specialized input with a known format. If provided the
    *   date will be created using the createFromFormat() method.
-   *   @see http://us3.php.net/manual/en/datetime.createfromformat.php
+   *   @see http://php.net/manual/datetime.createfromformat.php
    * @param mixed $time
    *   @see __construct()
    * @param mixed $timezone
@@ -188,6 +198,13 @@ class DateTimePlus {
    *     from a format string exactly matches the input. This option
    *     indicates the format can be used for validation. Defaults to TRUE.
    *   @see __construct()
+   *
+   * @return static
+   *   A new DateTimePlus object.
+   *
+   * @throws \Exception
+   *   If the a date cannot be created from the given format, or if the
+   *   created date does not match the input value.
    */
   public static function createFromFormat($format, $time, $timezone = NULL, $settings = array()) {
     if (!isset($settings['validate_format'])) {
@@ -200,7 +217,7 @@ class DateTimePlus {
     $datetimeplus = new static('', $timezone, $settings);
 
     $date = \DateTime::createFromFormat($format, $time, $datetimeplus->getTimezone());
-    if (!$date instanceOf \DateTime) {
+    if (!$date instanceof \DateTime) {
       throw new \Exception('The date cannot be created from a format.');
     }
     else {
@@ -209,10 +226,10 @@ class DateTimePlus {
       // re-creating the date/time formatted string and comparing it to the input. For
       // instance, an input value of '11' using a format of Y (4 digits) gets
       // created as '0011' instead of '2011'.
-      if ($date instanceOf DateTimePlus) {
+      if ($date instanceof DateTimePlus) {
         $test_time = $date->format($format, $settings);
       }
-      elseif ($date instanceOf \DateTime) {
+      elseif ($date instanceof \DateTime) {
         $test_time = $date->format($format);
       }
       $datetimeplus->setTimestamp($date->getTimestamp());
@@ -271,16 +288,12 @@ class DateTimePlus {
   }
 
   /**
-   * Implements __toString() for dates.
+   * Renders the timezone name.
    *
-   * The DateTime class does not implement this.
-   *
-   * @see https://bugs.php.net/bug.php?id=62911
-   * @see http://www.serverphorums.com/read.php?7,555645
+   * @return string
    */
-  public function __toString() {
-    $format = static::FORMAT;
-    return $this->format($format) . ' ' . $this->getTimeZone()->getName();
+  public function render() {
+    return $this->format(static::FORMAT) . ' ' . $this->getTimeZone()->getName();
   }
 
   /**
@@ -297,6 +310,30 @@ class DateTimePlus {
       throw new \BadMethodCallException(sprintf('Call to undefined method %s::%s()', get_class($this), $method));
     }
     return call_user_func_array(array($this->dateTimeObject, $method), $args);
+  }
+
+  /**
+   * Returns the difference between two DateTimePlus objects.
+   *
+   * @param \Drupal\Component\Datetime\DateTimePlus|\DateTime $datetime2
+   *    The date to compare to.
+   * @param bool $absolute
+   *    Should the interval be forced to be positive?
+   *
+   * @return \DateInterval
+   *    A DateInterval object representing the difference between the two dates.
+   *
+   * @throws \BadMethodCallException
+   *    If the input isn't a DateTime or DateTimePlus object.
+   */
+  public function diff($datetime2, $absolute = FALSE) {
+    if ($datetime2 instanceof DateTimePlus) {
+      $datetime2 = $datetime2->dateTimeObject;
+    }
+    if (!($datetime2 instanceof \DateTime)) {
+      throw new \BadMethodCallException(sprintf('Method %s expects parameter 1 to be a \DateTime or \Drupal\Component\Datetime\DateTimePlus object', __METHOD__));
+    }
+    return $this->dateTimeObject->diff($datetime2, $absolute);
   }
 
   /**
@@ -329,6 +366,9 @@ class DateTimePlus {
    * @param mixed $time
    *   An input value, which could be a timestamp, a string,
    *   or an array of date parts.
+   *
+   * @return mixed
+   *   The massaged time.
    */
   protected function prepareTime($time) {
     return $time;
@@ -343,10 +383,13 @@ class DateTimePlus {
    *
    * @param mixed $timezone
    *   Either a timezone name or a timezone object or NULL.
+   *
+   * @return \DateTimeZone
+   *   The massaged time zone.
    */
   protected function prepareTimezone($timezone) {
     // If the input timezone is a valid timezone object, use it.
-    if ($timezone instanceOf \DateTimezone) {
+    if ($timezone instanceof \DateTimezone) {
       $timezone_adjusted = $timezone;
     }
 
@@ -357,7 +400,7 @@ class DateTimePlus {
 
     // Default to the system timezone when not explicitly provided.
     // If the system timezone is missing, use 'UTC'.
-    if (empty($timezone_adjusted) || !$timezone_adjusted instanceOf \DateTimezone) {
+    if (empty($timezone_adjusted) || !$timezone_adjusted instanceof \DateTimezone) {
       $system_timezone = date_default_timezone_get();
       $timezone_name = !empty($system_timezone) ? $system_timezone : 'UTC';
       $timezone_adjusted = new \DateTimeZone($timezone_name);
@@ -375,6 +418,9 @@ class DateTimePlus {
    *
    * @param string $format
    *   A PHP format string.
+   *
+   * @return string
+   *   The massaged PHP format string.
    */
   protected function prepareFormat($format) {
     return $format;
@@ -390,7 +436,7 @@ class DateTimePlus {
    * PHP creates a valid date from invalid data with only a warning,
    * 2011-02-30 becomes 2011-03-03, for instance, but we don't want that.
    *
-   * @see http://us3.php.net/manual/en/time.getlasterrors.php
+   * @see http://php.net/manual/time.getlasterrors.php
    */
   public function checkErrors() {
     $errors = \DateTime::getLastErrors();
@@ -408,6 +454,10 @@ class DateTimePlus {
 
   /**
    * Detects if there were errors in the processing of this date.
+   *
+   * @return bool
+   *   TRUE if there were errors in the processing of this date, FALSE
+   *   otherwise.
    */
   public function hasErrors() {
     return (boolean) count($this->errors);
@@ -417,6 +467,9 @@ class DateTimePlus {
    * Gets error messages.
    *
    * Public function to return the error messages.
+   *
+   * @return array
+   *   An array of errors encountered when creating this date.
    */
   public function getErrors() {
     return $this->errors;
@@ -508,7 +561,7 @@ class DateTimePlus {
    * @param array $array
    *   An array of datetime values keyed by date part.
    *
-   * @return boolean
+   * @return bool
    *   TRUE if the datetime parts contain valid values, otherwise FALSE.
    */
   public static function checkArray($array) {
@@ -568,8 +621,6 @@ class DateTimePlus {
    * @param string $format
    *   A format string using either PHP's date().
    * @param array $settings
-   *   - langcode: (optional) String two letter language code used to control
-   *     the result of the format(). Defaults to NULL.
    *   - timezone: (optional) String timezone name. Defaults to the timezone
    *     of the date object.
    *
@@ -585,11 +636,19 @@ class DateTimePlus {
 
     // Format the date and catch errors.
     try {
-      $value = $this->dateTimeObject->format($format);
+      // Clone the date/time object so we can change the time zone without
+      // disturbing the value stored in the object.
+      $dateTimeObject = clone $this->dateTimeObject;
+      if (isset($settings['timezone'])) {
+        $dateTimeObject->setTimezone(new \DateTimeZone($settings['timezone']));
+      }
+      $value = $dateTimeObject->format($format);
     }
     catch (\Exception $e) {
       $this->errors[] = $e->getMessage();
     }
+
     return $value;
   }
+
 }

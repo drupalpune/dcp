@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\ParamConverter\NodePreviewConverter.
- */
-
 namespace Drupal\node\ParamConverter;
 
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\Routing\Route;
 use Drupal\Core\ParamConverter\ParamConverterInterface;

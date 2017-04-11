@@ -1,0 +1,68 @@
+/*------------------------------------*\
+    * @file
+    * Mixins.
+\*------------------------------------*/
+
+@mixin banner($banner-width, $banner-height) {
+    img {
+        width: $banner-width;
+        height: $banner-height;
+    }
+}
+
+@mixin container($container-width, $container-padding) {
+    width: $container-width;
+    margin: 0 auto;
+    padding: $container-padding;
+}
+
+@mixin heading($fontcolor, $fontsize) {
+    font: {
+        family: $title-font;
+        size: $fontsize;
+        weight: 700;
+    }
+    text: {
+        align: center;
+        transform: uppercase;
+    }
+    padding: 50px 0px;
+    color: $fontcolor;
+}
+
+@mixin abutton($background-color) {
+    display: inline-block;
+    padding: 20px 50px;
+    text-decoration: none;
+    border-radius: 5px;
+    background-color: $background-color;
+}
+
+//Media Quaries Mixin
+@mixin breakpoint($point) {
+    @if $point==desktop {
+        @media screen and (max-width: 1440px) {
+            @content ;
+        }
+    }
+    @else if $point==laptop {
+        @media screen and (max-width: 1200px) {
+            @content ;
+        }
+    }
+    @else if $point==tablet {
+        @media screen and (max-width: 992px) {
+            @content ;
+        }
+    }
+    @else if $point==phablet {
+        @media screen and (max-width: 768px) {
+            @content ;
+        }
+    }
+    @else if $point==mobileonly {
+        @media screen and (max-width: 480px) {
+            @content ;
+        }
+    }
+}

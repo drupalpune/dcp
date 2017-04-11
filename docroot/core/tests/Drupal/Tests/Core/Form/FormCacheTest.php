@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Form\FormCacheTest.
- */
-
 namespace Drupal\Tests\Core\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormCache;
 use Drupal\Core\Form\FormState;
 use Drupal\Tests\UnitTestCase;
@@ -91,10 +85,18 @@ class FormCacheTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
+  protected $runTestInSeparateProcess = TRUE;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $preserveGlobalState = FALSE;
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
-
-    $this->resetSafeMarkup();
 
     $this->moduleHandler = $this->getMock('Drupal\Core\Extension\ModuleHandlerInterface');
 
@@ -118,14 +120,6 @@ class FormCacheTest extends UnitTestCase {
     $this->requestPolicy = $this->getMock('\Drupal\Core\PageCache\RequestPolicyInterface');
 
     $this->formCache = new FormCache($this->root, $this->keyValueExpirableFactory, $this->moduleHandler, $this->account, $this->csrfToken, $this->logger, $this->requestStack, $this->requestPolicy);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function tearDown() {
-    parent::tearDown();
-    $this->resetSafeMarkup();
   }
 
   /**
@@ -330,34 +324,6 @@ class FormCacheTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::loadCachedFormState
-   */
-  public function testLoadCachedFormStateWithSafeStrings() {
-    $this->assertEmpty(SafeMarkup::getAll());
-    $form_build_id = 'the_form_build_id';
-    $form_state = new FormState();
-    $cached_form = ['#cache_token' => NULL];
-
-    $this->formCacheStore->expects($this->once())
-      ->method('get')
-      ->with($form_build_id)
-      ->willReturn($cached_form);
-    $this->account->expects($this->once())
-      ->method('isAnonymous')
-      ->willReturn(TRUE);
-
-    $cached_form_state = ['build_info' => ['safe_strings' => [
-      'a_safe_string' => ['html' => TRUE],
-    ]]];
-    $this->formStateCacheStore->expects($this->once())
-      ->method('get')
-      ->with($form_build_id)
-      ->willReturn($cached_form_state);
-
-    $this->formCache->getCache($form_build_id, $form_state);
-  }
-
-  /**
    * @covers ::setCache
    */
   public function testSetCacheWithForm() {
@@ -372,7 +338,6 @@ class FormCacheTest extends UnitTestCase {
       ->with($form_build_id, $form, $this->isType('int'));
 
     $form_state_data = $form_state->getCacheableArray();
-    $form_state_data['build_info']['safe_strings'] = [];
     $this->formStateCacheStore->expects($this->once())
       ->method('setWithExpire')
       ->with($form_build_id, $form_state_data, $this->isType('int'));
@@ -392,7 +357,6 @@ class FormCacheTest extends UnitTestCase {
       ->method('setWithExpire');
 
     $form_state_data = $form_state->getCacheableArray();
-    $form_state_data['build_info']['safe_strings'] = [];
     $this->formStateCacheStore->expects($this->once())
       ->method('setWithExpire')
       ->with($form_build_id, $form_state_data, $this->isType('int'));
@@ -416,7 +380,6 @@ class FormCacheTest extends UnitTestCase {
       ->with($form_build_id, $form_data, $this->isType('int'));
 
     $form_state_data = $form_state->getCacheableArray();
-    $form_state_data['build_info']['safe_strings'] = [];
     $this->formStateCacheStore->expects($this->once())
       ->method('setWithExpire')
       ->with($form_build_id, $form_state_data, $this->isType('int'));
@@ -427,32 +390,6 @@ class FormCacheTest extends UnitTestCase {
     $this->account->expects($this->once())
       ->method('isAuthenticated')
       ->willReturn(TRUE);
-
-    $this->formCache->setCache($form_build_id, $form, $form_state);
-  }
-
-  /**
-   * @covers ::setCache
-   */
-  public function testSetCacheWithSafeStrings() {
-    SafeMarkup::set('a_safe_string');
-    $form_build_id = 'the_form_build_id';
-    $form = [
-      '#form_id' => 'the_form_id'
-    ];
-    $form_state = new FormState();
-
-    $this->formCacheStore->expects($this->once())
-      ->method('setWithExpire')
-      ->with($form_build_id, $form, $this->isType('int'));
-
-    $form_state_data = $form_state->getCacheableArray();
-    $form_state_data['build_info']['safe_strings'] = [
-      'a_safe_string' => ['html' => TRUE],
-    ];
-    $this->formStateCacheStore->expects($this->once())
-      ->method('setWithExpire')
-      ->with($form_build_id, $form_state_data, $this->isType('int'));
 
     $this->formCache->setCache($form_build_id, $form, $form_state);
   }
@@ -492,15 +429,6 @@ class FormCacheTest extends UnitTestCase {
       ->method('delete')
       ->with($form_build_id);
     $this->formCache->deleteCache($form_build_id);
-  }
-
-  /**
-   * Ensures SafeMarkup does not bleed from one test to another.
-   */
-  protected function resetSafeMarkup() {
-    $property = (new \ReflectionClass('Drupal\Component\Utility\SafeMarkup'))->getProperty('safeStrings');
-    $property->setAccessible(TRUE);
-    $property->setValue(array());
   }
 
 }

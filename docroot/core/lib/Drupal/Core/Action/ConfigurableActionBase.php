@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Action\ConfigurableActionBase.
- */
-
 namespace Drupal\Core\Action;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
-use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 

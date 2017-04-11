@@ -1,22 +1,50 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Tableselect.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Component\Utility\Html as HtmlUtility;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Provides a form element for a table with radios or checkboxes in left column.
  *
- * Build the table headings and columns with the #headers property, and the rows
- * with the #options property. See https://www.drupal.org/node/94510 for a full
- * explanation.
+ * Properties:
+ * - #header: An array of table header labels.
+ * - #options: An associative array where each key is the value returned when
+ *   a user selects the radio button or checkbox, and each value is the row of
+ *   table data.
+ * - #empty: The message to display if table does not have any options.
+ * - #multiple: Set to FALSE to render the table with radios instead checkboxes.
+ * - #js_select: Set to FALSE if you don't want the select all checkbox added to
+ *   the header.
+ *
+ * Other properties of the \Drupal\Core\Render\Element\Table element are also
+ * available.
+ *
+ * Usage example:
+ * @code
+ * $header = [
+ *   'first_name' => $this->t('First Name'),
+ *   'last_name' => $this->t('Last Name'),
+ * ];
+ *
+ * $options = [
+ *   1 => ['first_name' => 'Indy', 'last_name' => 'Jones'],
+ *   2 => ['first_name' => 'Darth', 'last_name' => 'Vader'],
+ *   3 => ['first_name' => 'Super', 'last_name' => 'Man'],
+ * ];
+ *
+ * $form['table'] = array(
+ *   '#type' => 'tableselect',
+ *   '#header' => $header,
+ *   '#options' => $options,
+ *   '#empty' => $this->t('No users found'),
+ * );
+ * @endcode
+ *
+ * See https://www.drupal.org/node/945102 for a full explanation.
  *
  * @see \Drupal\Core\Render\Element\Table
  *
@@ -90,28 +118,28 @@ class Tableselect extends Table {
    *   @code
    *     $options = array(
    *       array(
-   *         'title' => 'How to Learn Drupal',
-   *         'content_type' => 'Article',
+   *         'title' => $this->t('How to Learn Drupal'),
+   *         'content_type' => $this->t('Article'),
    *         'status' => 'published',
    *         '#attributes' => array('class' => array('article-row')),
    *       ),
    *       array(
-   *         'title' => 'Privacy Policy',
-   *         'content_type' => 'Page',
+   *         'title' => $this->t('Privacy Policy'),
+   *         'content_type' => $this->t('Page'),
    *         'status' => 'published',
    *         '#attributes' => array('class' => array('page-row')),
    *       ),
    *     );
    *     $header = array(
-   *       'title' => t('Title'),
-   *       'content_type' => t('Content type'),
-   *       'status' => t('Status'),
+   *       'title' => $this->t('Title'),
+   *       'content_type' => $this->t('Content type'),
+   *       'status' => $this->t('Status'),
    *     );
    *     $form['table'] = array(
    *       '#type' => 'tableselect',
    *       '#header' => $header,
    *       '#options' => $options,
-   *       '#empty' => t('No content available.'),
+   *       '#empty' => $this->t('No content available.'),
    *     );
    *   @endcode
    *
@@ -212,10 +240,12 @@ class Tableselect extends Table {
         if (!isset($element[$key])) {
           if ($element['#multiple']) {
             $title = '';
-            if (!empty($element['#options'][$key]['title']['data']['#title'])) {
-              $title = t('Update @title', array(
-                '@title' => $element['#options'][$key]['title']['data']['#title'],
-              ));
+            if (isset($element['#options'][$key]['title']) && is_array($element['#options'][$key]['title'])) {
+              if (!empty($element['#options'][$key]['title']['data']['#title'])) {
+                $title = new TranslatableMarkup('Update @title', array(
+                  '@title' => $element['#options'][$key]['title']['data']['#title'],
+                ));
+              }
             }
             $element[$key] = array(
               '#type' => 'checkbox',
@@ -224,6 +254,7 @@ class Tableselect extends Table {
               '#return_value' => $key,
               '#default_value' => isset($value[$key]) ? $key : NULL,
               '#attributes' => $element['#attributes'],
+              '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
             );
           }
           else {

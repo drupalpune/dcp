@@ -1,29 +1,27 @@
 <?php
+
 /**
  * @file
  * Functions that need to be loaded on every Drupal request.
  */
 
-use Drupal\Component\Datetime\DateTimePlus;
 use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Environment;
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\DrupalKernel;
-use Drupal\Core\Extension\ExtensionDiscovery;
 use Drupal\Core\Logger\RfcLogLevel;
+use Drupal\Core\Render\Markup;
+use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Test\TestDatabase;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Utility\Error;
-use Symfony\Component\ClassLoader\ApcClassLoader;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Minimum supported version of PHP.
  */
-const DRUPAL_MINIMUM_PHP = '5.4.5';
+const DRUPAL_MINIMUM_PHP = '5.5.9';
 
 /**
  * Minimum recommended value of PHP memory_limit.
@@ -100,13 +98,27 @@ const DRUPAL_PHP_FUNCTION_PATTERN = '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*';
  * $config_directories key for active directory.
  *
  * @see config_get_config_directory()
+ *
+ * @deprecated in Drupal 8.0.x and will be removed before 9.0.0. Drupal core no
+ *   longer creates an active directory.
  */
 const CONFIG_ACTIVE_DIRECTORY = 'active';
+
+/**
+ * $config_directories key for sync directory.
+ *
+ * @see config_get_config_directory()
+ */
+const CONFIG_SYNC_DIRECTORY = 'sync';
 
 /**
  * $config_directories key for staging directory.
  *
  * @see config_get_config_directory()
+ * @see CONFIG_SYNC_DIRECTORY
+ *
+ * @deprecated in Drupal 8.0.x and will be removed before 9.0.0. The staging
+ *   directory was renamed to sync.
  */
 const CONFIG_STAGING_DIRECTORY = 'staging';
 
@@ -118,63 +130,33 @@ const CONFIG_STAGING_DIRECTORY = 'staging';
 define('DRUPAL_ROOT', dirname(dirname(__DIR__)));
 
 /**
- * Returns the appropriate configuration directory.
- *
- * @param bool $require_settings
- *   Only configuration directories with an existing settings.php file
- *   will be recognized. Defaults to TRUE. During initial installation,
- *   this is set to FALSE so that Drupal can detect a matching directory,
- *   then create a new settings.php file in it.
- * @param bool $reset
- *   Force a full search for matching directories even if one had been
- *   found previously. Defaults to FALSE.
- * @param \Symfony\Component\HttpFoundation\Request $request
- *   (optional) The current request. Defaults to \Drupal::request() or a new
- *   request created from globals.
- *
- * @return string
- *   The path of the matching directory.@see default.settings.php
- *
- * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
- *   Use \Drupal\Core\DrupalKernel::getSitePath() instead. If the kernel is
- *   unavailable or the site path needs to be recalculated then
- *   Drupal\Core\DrupalKernel::findSitePath() can be used.
- */
-function conf_path($require_settings = TRUE, $reset = FALSE, Request $request = NULL) {
-  if (!isset($request)) {
-    if (\Drupal::hasRequest()) {
-      $request = \Drupal::request();
-    }
-    // @todo Remove once external CLI scripts (Drush) are updated.
-    else {
-      $request = Request::createFromGlobals();
-    }
-  }
-  if (\Drupal::hasService('kernel')) {
-    $site_path = \Drupal::service('kernel')->getSitePath();
-  }
-  if (!isset($site_path) || empty($site_path)) {
-    $site_path = DrupalKernel::findSitePath($request, $require_settings);
-  }
-  return $site_path;
-}
-/**
  * Returns the path of a configuration directory.
  *
+ * Configuration directories are configured using $config_directories in
+ * settings.php.
+ *
  * @param string $type
- *   (optional) The type of config directory to return. Drupal core provides
- *   'active' and 'staging'. Defaults to CONFIG_ACTIVE_DIRECTORY.
+ *   The type of config directory to return. Drupal core provides the
+ *   CONFIG_SYNC_DIRECTORY constant to access the sync directory.
  *
  * @return string
  *   The configuration directory path.
+ *
+ * @throws \Exception
  */
-function config_get_config_directory($type = CONFIG_ACTIVE_DIRECTORY) {
+function config_get_config_directory($type) {
   global $config_directories;
+
+  // @todo Remove fallback in Drupal 9. https://www.drupal.org/node/2574943
+  if ($type == CONFIG_SYNC_DIRECTORY && !isset($config_directories[CONFIG_SYNC_DIRECTORY]) && isset($config_directories[CONFIG_STAGING_DIRECTORY])) {
+    $type = CONFIG_STAGING_DIRECTORY;
+  }
 
   if (!empty($config_directories[$type])) {
     return $config_directories[$type];
   }
-  throw new \Exception(format_string('The configuration directory type %type does not exist.', array('%type' => $type)));
+  // @todo https://www.drupal.org/node/2696103 Throw a more specific exception.
+  throw new \Exception("The configuration directory type '$type' does not exist");
 }
 
 /**
@@ -223,7 +205,6 @@ function drupal_get_filename($type, $name, $filename = NULL) {
 
   // Profiles are converted into modules in system_rebuild_module_data().
   // @todo Remove false-exposure of profiles as modules.
-  $original_type = $type;
   if ($type == 'profile') {
     $type = 'module';
   }
@@ -279,155 +260,59 @@ function drupal_get_path($type, $name) {
 }
 
 /**
- * Sets an HTTP response header for the current page.
- *
- * Note: When sending a Content-Type header, always include a 'charset' type,
- * too. This is necessary to avoid security bugs (e.g. UTF-7 XSS).
- *
- * @param $name
- *   The HTTP header name, or the special 'Status' header name.
- * @param $value
- *   The HTTP header value; if equal to FALSE, the specified header is unset.
- *   If $name is 'Status', this is expected to be a status code followed by a
- *   reason phrase, e.g. "404 Not Found".
- * @param $append
- *   Whether to append the value to an existing header or to replace it.
- *
- * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
- *   Use \Symfony\Component\HttpFoundation\Response->headers->set().
- *   See https://www.drupal.org/node/2181523.
- */
-function _drupal_add_http_header($name, $value, $append = FALSE) {
-  // The headers as name/value pairs.
-  $headers = &drupal_static('drupal_http_headers', array());
-
-  $name_lower = strtolower($name);
-  _drupal_set_preferred_header_name($name);
-
-  if ($value === FALSE) {
-    $headers[$name_lower] = FALSE;
-  }
-  elseif (isset($headers[$name_lower]) && $append) {
-    // Multiple headers with identical names may be combined using comma (RFC
-    // 2616, section 4.2).
-    $headers[$name_lower] .= ',' . $value;
-  }
-  else {
-    $headers[$name_lower] = $value;
-  }
-}
-
-/**
- * Gets the HTTP response headers for the current page.
- *
- * @param $name
- *   An HTTP header name. If omitted, all headers are returned as name/value
- *   pairs. If an array value is FALSE, the header has been unset.
- *
- * @return
- *   A string containing the header value, or FALSE if the header has been set,
- *   or NULL if the header has not been set.
- *
- * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
- *   Use \Symfony\Component\HttpFoundation\Response->headers->get().
- *   See https://www.drupal.org/node/2181523.
- */
-function drupal_get_http_header($name = NULL) {
-  $headers = &drupal_static('drupal_http_headers', array());
-  if (isset($name)) {
-    $name = strtolower($name);
-    return isset($headers[$name]) ? $headers[$name] : NULL;
-  }
-  else {
-    return $headers;
-  }
-}
-
-/**
- * Sets the preferred name for the HTTP header.
- *
- * Header names are case-insensitive, but for maximum compatibility they should
- * follow "common form" (see RFC 2616, section 4.2).
- *
- * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
- *   See https://www.drupal.org/node/2181523.
- */
-function _drupal_set_preferred_header_name($name = NULL) {
-  static $header_names = array();
-
-  if (!isset($name)) {
-    return $header_names;
-  }
-  $header_names[strtolower($name)] = $name;
-}
-
-/**
  * Translates a string to the current language or to a given language.
  *
- * The t() function serves two purposes. First, at run-time it translates
- * user-visible text into the appropriate language. Second, various mechanisms
- * that figure out what text needs to be translated work off t() -- the text
- * inside t() calls is added to the database of strings to be translated.
- * These strings are expected to be in English, so the first argument should
- * always be in English. To enable a fully-translatable site, it is important
- * that all human-readable text that will be displayed on the site or sent to
- * a user is passed through the t() function, or a related function. See the
- * @link https://www.drupal.org/node/322729 Localization API @endlink pages for
- * more information, including recommendations on how to break up or not
- * break up strings for translation.
+ * In order for strings to be localized, make them available in one of the ways
+ * supported by the @link i18n Localization API. @endlink When possible, use
+ * the \Drupal\Core\StringTranslation\StringTranslationTrait $this->t().
+ * Otherwise create a new \Drupal\Core\StringTranslation\TranslatableMarkup
+ * object directly.
  *
- * @section sec_translating_vars Translating Variables
- * You should never use t() to translate variables, such as calling t($text)
- * unless the text that the variable holds has been passed through t()
- * elsewhere (e.g., $text is one of several translated literal strings in an
- * array). It is especially important never to call t($user_text) where
- * $user_text is some text that a user entered - doing that can lead to
- * cross-site scripting and other security problems. However, you can use
- * variable substitution in your string, to put variable text such as user
- * names or link URLs into translated text. Variable substitution looks like
- * this:
- * @code
- * $text = t("@name's blog", array('@name' => user_format_name($account)));
- * @endcode
- * Basically, you can put variables like @name into your string, and t() will
- * substitute their sanitized values at translation time. (See the
- * Localization API pages referenced above and the documentation of
- * \Drupal\Component\Utility\SafeMarkup::format() for details about how to
- * define variables in your string.). Translators can then rearrange the string
- * as necessary for the language (e.g., in Spanish, it might be "blog de
- * @name").
+ * See \Drupal\Core\StringTranslation\TranslatableMarkup::__construct() for
+ * important security information and usage guidelines.
  *
- * @param $string
- *   A string containing the English string to translate.
- * @param $args
- *   An associative array of replacements to make after translation. Based
- *   on the first character of the key, the value is escaped and/or themed.
- *   See \Drupal\Component\Utility\SafeMarkup::format() for details.
- * @param $options
- *   An associative array of additional options, with the following elements:
- *   - 'langcode' (defaults to the current language): The language code to
+ * @param string $string
+ *   A string containing the English text to translate.
+ * @param array $args
+ *   (optional) An associative array of replacements to make after translation.
+ *   Based on the first character of the key, the value is escaped and/or
+ *   themed. See
+ *   \Drupal\Component\Render\FormattableMarkup::placeholderFormat() for
+ *   details.
+ * @param array $options
+ *   (optional) An associative array of additional options, with the following
+ *   elements:
+ *   - 'langcode' (defaults to the current language): A language code, to
  *     translate to a language other than what is used to display the page.
  *   - 'context' (defaults to the empty context): The context the source string
- *     belongs to.
+ *     belongs to. See the @link i18n Internationalization topic @endlink for
+ *     more information about string contexts.
  *
- * @return
- *   The translated string.
+ * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+ *   An object that, when cast to a string, returns the translated string.
  *
- * @see \Drupal\Component\Utility\SafeMarkup::format()
+ * @see \Drupal\Component\Render\FormattableMarkup::placeholderFormat()
+ * @see \Drupal\Core\StringTranslation\StringTranslationTrait::t()
+ * @see \Drupal\Core\StringTranslation\TranslatableMarkup::__construct()
+ *
  * @ingroup sanitization
  */
 function t($string, array $args = array(), array $options = array()) {
-  return \Drupal::translation()->translate($string, $args, $options);
+  return new TranslatableMarkup($string, $args, $options);
 }
 
 /**
  * Formats a string for HTML display by replacing variable placeholders.
  *
- * @see \Drupal\Component\Utility\SafeMarkup::format()
+ * @see \Drupal\Component\Render\FormattableMarkup::placeholderFormat()
+ * @see \Drupal\Component\Render\FormattableMarkup
  * @see t()
  * @ingroup sanitization
+ *
+ * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0.
+ *   Use \Drupal\Component\Render\FormattableMarkup.
  */
-function format_string($string, array $args = array()) {
+function format_string($string, array $args) {
   return SafeMarkup::format($string, $args);
 }
 
@@ -452,10 +337,13 @@ function format_string($string, array $args = array()) {
  * @param $text
  *   The text to check.
  *
- * @return
+ * @return bool
  *   TRUE if the text is valid UTF-8, FALSE if not.
  *
  * @see \Drupal\Component\Utility\Unicode::validateUtf8()
+ *
+ * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0.
+ *   Use \Drupal\Component\Utility\Unicode::validateUtf8().
  */
 function drupal_validate_utf8($text) {
   return Unicode::validateUtf8($text);
@@ -488,10 +376,7 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
 
   // Use a default value if $message is not set.
   if (empty($message)) {
-    // The exception message is run through
-    // \Drupal\Component\Utility\SafeMarkup::checkPlain() by
-    // \Drupal\Core\Utility\Error:decodeException().
-    $message = '%type: !message in %function (line %line of %file).';
+    $message = '%type: @message in %function (line %line of %file).';
   }
 
   if ($link) {
@@ -514,7 +399,7 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
  * drupal_set_message(t('An error occurred and processing did not complete.'), 'error');
  * @endcode
  *
- * @param string $message
+ * @param string|\Drupal\Component\Render\MarkupInterface $message
  *   (optional) The translated message to be displayed to the user. For
  *   consistency with other messages, it should begin with a capital letter and
  *   end with a period.
@@ -561,12 +446,15 @@ function drupal_set_message($message = NULL, $type = 'status', $repeat = FALSE) 
       $_SESSION['messages'][$type] = array();
     }
 
-    $new = array(
-      'safe' => SafeMarkup::isSafe($message),
-      'message' => $message,
-    );
-    if ($repeat || !in_array($new, $_SESSION['messages'][$type])) {
-      $_SESSION['messages'][$type][] = $new;
+    // Convert strings which are safe to the simplest Markup objects.
+    if (!($message instanceof Markup) && $message instanceof MarkupInterface) {
+      $message = Markup::create((string) $message);
+    }
+
+    // Do not use strict type checking so that equivalent string and
+    // MarkupInterface objects are detected.
+    if ($repeat || !in_array($message, $_SESSION['messages'][$type])) {
+      $_SESSION['messages'][$type][] = $message;
     }
 
     // Mark this page as being uncacheable.
@@ -604,14 +492,6 @@ function drupal_set_message($message = NULL, $type = 'status', $repeat = FALSE) 
  */
 function drupal_get_messages($type = NULL, $clear_queue = TRUE) {
   if ($messages = drupal_set_message()) {
-    foreach ($messages as $message_type => $message_typed_messages) {
-      foreach ($message_typed_messages as $key => $message) {
-        if ($message['safe']) {
-          $message['message'] = SafeMarkup::set($message['message']);
-        }
-        $messages[$message_type][$key] = $message['message'];
-      }
-    }
     if ($type) {
       if ($clear_queue) {
         unset($_SESSION['messages'][$type]);
@@ -675,7 +555,7 @@ function _drupal_error_handler($error_level, $message, $filename, $line, $contex
  * always fatal: the execution of the script will stop as soon as the exception
  * handler exits.
  *
- * @param \Exception|\BaseException $exception
+ * @param \Exception|\Throwable $exception
  *   The exception object that was thrown.
  */
 function _drupal_exception_handler($exception) {
@@ -685,12 +565,13 @@ function _drupal_exception_handler($exception) {
     // Log the message to the watchdog and return an error page to the user.
     _drupal_log_error(Error::decodeException($exception), TRUE);
   }
-  // PHP 7 introduces BaseExceptions.
-  catch (BaseException $exception2) {
-    _drupal_exception_handler_additional($exception, $exception2);
+  // PHP 7 introduces Throwable, which covers both Error and
+  // Exception throwables.
+  catch (\Throwable $error) {
+    _drupal_exception_handler_additional($exception, $error);
   }
-  // In order to be compatibile with PHP 5 we also catch regular Exceptions.
-  catch (Exception $exception2) {
+  // In order to be compatible with PHP 5 we also catch regular Exceptions.
+  catch (\Exception $exception2) {
     _drupal_exception_handler_additional($exception, $exception2);
   }
 }
@@ -698,9 +579,9 @@ function _drupal_exception_handler($exception) {
 /**
  * Displays any additional errors caught while handling an exception.
  *
- * @param \Exception|\BaseException $exception
+ * @param \Exception|\Throwable $exception
  *   The first exception object that was thrown.
- * @param \Exception|\BaseException $exception
+ * @param \Exception|\Throwable $exception2
  *   The second exception object that was thrown.
  */
 function _drupal_exception_handler_additional($exception, $exception2) {
@@ -720,7 +601,7 @@ function _drupal_exception_handler_additional($exception, $exception2) {
  * @param string $new_prefix
  *   Internal use only. A new prefix to be stored.
  *
- * @return string|FALSE
+ * @return string|false
  *   Either the simpletest prefix (the string "simpletest" followed by any
  *   number of digits) or FALSE if the user agent does not contain a valid
  *   HMAC and timestamp.
@@ -743,15 +624,16 @@ function drupal_valid_test_ua($new_prefix = NULL) {
   // string.
   $http_user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : NULL;
   $user_agent = isset($_COOKIE['SIMPLETEST_USER_AGENT']) ? $_COOKIE['SIMPLETEST_USER_AGENT'] : $http_user_agent;
-  if (isset($user_agent) && preg_match("/^(simpletest\d+);(.+);(.+);(.+)$/", $user_agent, $matches)) {
+  if (isset($user_agent) && preg_match("/^simple(\w+\d+):(.+):(.+):(.+)$/", $user_agent, $matches)) {
     list(, $prefix, $time, $salt, $hmac) = $matches;
-    $check_string =  $prefix . ';' . $time . ';' . $salt;
+    $check_string = $prefix . ':' . $time . ':' . $salt;
     // Read the hash salt prepared by drupal_generate_test_ua().
     // This function is called before settings.php is read and Drupal's error
     // handlers are set up. While Drupal's error handling may be properly
     // configured on production sites, the server's PHP error_reporting may not.
     // Ensure that no information leaks on production sites.
-    $key_file = DRUPAL_ROOT . '/sites/simpletest/' . substr($prefix, 10) . '/.htkey';
+    $test_db = new TestDatabase($prefix);
+    $key_file = DRUPAL_ROOT . '/' . $test_db->getTestSitePath() . '/.htkey';
     if (!is_readable($key_file)) {
       header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
       exit;
@@ -761,10 +643,14 @@ function drupal_valid_test_ua($new_prefix = NULL) {
     $key = $private_key . filectime(__FILE__) . fileinode(__FILE__);
     $time_diff = REQUEST_TIME - $time;
     $test_hmac = Crypt::hmacBase64($check_string, $key);
-    // Since we are making a local request a 5 second time window is allowed,
+    // Since we are making a local request a 600 second time window is allowed,
     // and the HMAC must match.
-    if ($time_diff >= 0 && $time_diff <= 5 && $hmac === $test_hmac) {
+    if ($time_diff >= 0 && $time_diff <= 600 && $hmac === $test_hmac) {
       $test_prefix = $prefix;
+    }
+    else {
+      header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden (SIMPLETEST_USER_AGENT invalid)');
+      exit;
     }
   }
   return $test_prefix;
@@ -778,7 +664,8 @@ function drupal_generate_test_ua($prefix) {
 
   if (!isset($key) || $last_prefix != $prefix) {
     $last_prefix = $prefix;
-    $key_file = DRUPAL_ROOT . '/sites/simpletest/' . substr($prefix, 10) . '/.htkey';
+    $test_db = new TestDatabase($prefix);
+    $key_file = DRUPAL_ROOT . '/' . $test_db->getTestSitePath() . '/.htkey';
     // When issuing an outbound HTTP client request from within an inbound test
     // request, then the outbound request has to use the same User-Agent header
     // as the inbound request. A newly generated private key for the same test
@@ -802,8 +689,8 @@ function drupal_generate_test_ua($prefix) {
   }
   // Generate a moderately secure HMAC based on the database credentials.
   $salt = uniqid('', TRUE);
-  $check_string = $prefix . ';' . time() . ';' . $salt;
-  return $check_string . ';' . Crypt::hmacBase64($check_string, $key);
+  $check_string = $prefix . ':' . time() . ':' . $salt;
+  return 'simple' . $check_string . ':' . Crypt::hmacBase64($check_string, $key);
 }
 
 /**
@@ -1037,10 +924,16 @@ function drupal_static_reset($name = NULL) {
 /**
  * Formats text for emphasized display in a placeholder inside a sentence.
  *
- * @see \Drupal\Component\Utility\SafeMarkup::placeholder()
+ * @deprecated in Drupal 8.0.0, will be removed before Drupal 9.0.0. Use
+ *   \Drupal\Component\Utility\SafeMarkup::format() or Twig's "placeholder"
+ *   filter instead. Note this method should not be used to simply emphasize a
+ *   string and therefore has few valid use-cases. Note also, that this method
+ *   does not mark the string as safe.
+ *
+ * @see \Drupal\Component\Utility\SafeMarkup::format()
  */
 function drupal_placeholder($text) {
-  return SafeMarkup::placeholder($text);
+  return '<em class="placeholder">' . Html::escape($text) . '</em>';
 }
 
 /**
@@ -1094,12 +987,13 @@ function _drupal_shutdown_function() {
       call_user_func_array($callback['callback'], $callback['arguments']);
     }
   }
-  // PHP 7 introduces BaseExceptions.
-  catch (BaseException $exception) {
-    _drupal_shutdown_function_handle_exception($exception);
+  // PHP 7 introduces Throwable, which covers both Error and
+  // Exception throwables.
+  catch (\Throwable $error) {
+    _drupal_shutdown_function_handle_exception($error);
   }
-  // In order to be compatibile with PHP 5 we also catch regular Exceptions.
-  catch (Exception $exception) {
+  // In order to be compatible with PHP 5 we also catch regular Exceptions.
+  catch (\Exception $exception) {
     _drupal_shutdown_function_handle_exception($exception);
   }
 }
@@ -1107,7 +1001,7 @@ function _drupal_shutdown_function() {
 /**
  * Displays and logs any errors that may happen during shutdown.
  *
- * @param \Exception|\BaseException $exception
+ * @param \Exception|\Throwable $exception
  *   The exception object that was thrown.
  *
  * @see _drupal_shutdown_function()

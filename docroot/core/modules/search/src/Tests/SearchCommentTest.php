@@ -1,16 +1,12 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\search\Tests\SearchCommentTest.
- */
-
 namespace Drupal\search\Tests;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\user\RoleInterface;
+use Drupal\filter\Entity\FilterFormat;
 
 /**
  * Tests integration searching comments.
@@ -59,7 +55,7 @@ class SearchCommentTest extends SearchTestBase {
   protected function setUp() {
     parent::setUp();
 
-    $full_html_format = entity_create('filter_format', array(
+    $full_html_format = FilterFormat::create(array(
       'format' => 'full_html',
       'name' => 'Full HTML',
       'weight' => 1,
@@ -90,7 +86,7 @@ class SearchCommentTest extends SearchTestBase {
   function testSearchResultsComment() {
     $node_storage = $this->container->get('entity.manager')->getStorage('node');
     // Create basic_html format that escapes all HTML.
-    $basic_html_format = entity_create('filter_format', array(
+    $basic_html_format = FilterFormat::create(array(
       'format' => 'basic_html',
       'name' => 'Basic HTML',
       'weight' => 1,
@@ -124,7 +120,24 @@ class SearchCommentTest extends SearchTestBase {
     $edit_comment['comment_body[0][value]'] = '<h1>' . $comment_body . '</h1>';
     $full_html_format_id = 'full_html';
     $edit_comment['comment_body[0][format]'] = $full_html_format_id;
-    $this->drupalPostForm('comment/reply/node/' . $node->id() .'/comment', $edit_comment, t('Save'));
+    $this->drupalPostForm('comment/reply/node/' . $node->id() . '/comment', $edit_comment, t('Save'));
+
+    // Post a comment with an evil script tag in the comment subject and a
+    // script tag nearby a keyword in the comment body. Use the 'FULL HTML' text
+    // format so the script tag stored.
+    $edit_comment2 = array();
+    $edit_comment2['subject[0][value]'] = "<script>alert('subjectkeyword');</script>";
+    $edit_comment2['comment_body[0][value]'] = "nearbykeyword<script>alert('somethinggeneric');</script>";
+    $edit_comment2['comment_body[0][format]'] = $full_html_format_id;
+    $this->drupalPostForm('comment/reply/node/' . $node->id() . '/comment', $edit_comment2, t('Save'));
+
+    // Post a comment with a keyword inside an evil script tag in the comment
+    // body. Use the 'FULL HTML' text format so the script tag is stored.
+    $edit_comment3 = array();
+    $edit_comment3['subject[0][value]'] = 'asubject';
+    $edit_comment3['comment_body[0][value]'] = "<script>alert('insidekeyword');</script>";
+    $edit_comment3['comment_body[0][format]'] = $full_html_format_id;
+    $this->drupalPostForm('comment/reply/node/' . $node->id() . '/comment', $edit_comment3, t('Save'));
 
     // Invoke search index update.
     $this->drupalLogout();
@@ -151,6 +164,39 @@ class SearchCommentTest extends SearchTestBase {
     $this->assertText($comment_body, 'Comment body text found in search results.');
     $this->assertNoRaw(t('n/a'), 'HTML in comment body is not hidden.');
     $this->assertNoEscaped($edit_comment['comment_body[0][value]'], 'HTML in comment body is not escaped.');
+
+    // Search for the evil script comment subject.
+    $edit = array(
+      'keys' => 'subjectkeyword',
+    );
+    $this->drupalPostForm('search/node', $edit, t('Search'));
+
+    // Verify the evil comment subject is escaped in search results.
+    $this->assertRaw('&lt;script&gt;alert(&#039;<strong>subjectkeyword</strong>&#039;);');
+    $this->assertNoRaw('<script>');
+
+    // Search for the keyword near the evil script tag in the comment body.
+    $edit = [
+      'keys' => 'nearbykeyword',
+    ];
+    $this->drupalPostForm('search/node', $edit, t('Search'));
+
+    // Verify that nearby script tag in the evil comment body is stripped from
+    // search results.
+    $this->assertRaw('<strong>nearbykeyword</strong>');
+    $this->assertNoRaw('<script>');
+
+    // Search for contents inside the evil script tag in the comment body.
+    $edit = [
+      'keys' => 'insidekeyword',
+    ];
+    $this->drupalPostForm('search/node', $edit, t('Search'));
+
+    // @todo Verify the actual search results.
+    //   https://www.drupal.org/node/2551135
+
+    // Verify there is no script tag in search results.
+    $this->assertNoRaw('<script>');
 
     // Hide comments.
     $this->drupalLogin($this->adminUser);
@@ -304,4 +350,5 @@ class SearchCommentTest extends SearchTestBase {
     $this->assertText($node->label(), 'Search for keyword worked');
     $this->assertNoText(t('Add new comment'));
   }
+
 }

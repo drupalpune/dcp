@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\user\Tests\UserLoginTest.
- */
-
 namespace Drupal\user\Tests;
 
 use Drupal\simpletest\WebTestBase;
-use Drupal\Core\Password\PhpassHashedPassword;
 use Drupal\user\Entity\User;
 
 /**
@@ -31,7 +25,7 @@ class UserLoginTest extends WebTestBase {
     $this->drupalGet('user/login', array('query' => array('destination' => 'foo')));
     $edit = array('name' => $user->getUserName(), 'pass' => $user->pass_raw);
     $this->drupalPostForm(NULL, $edit, t('Log in'));
-    $this->assertUrl('foo', [],  'Redirected to the correct URL');
+    $this->assertUrl('foo', [], 'Redirected to the correct URL');
   }
 
   /**
@@ -144,6 +138,7 @@ class UserLoginTest extends WebTestBase {
     $user_storage->resetCache(array($account->id()));
     $account = $user_storage->load($account->id());
     $this->assertIdentical($password_hasher->getCountLog2($account->getPassword()), $overridden_count_log2);
+    $this->assertTrue($password_hasher->check($password, $account->getPassword()));
   }
 
   /**
@@ -168,15 +163,16 @@ class UserLoginTest extends WebTestBase {
     $this->assertNoFieldByXPath("//input[@name='pass' and @value!='']", NULL, 'Password value attribute is blank.');
     if (isset($flood_trigger)) {
       if ($flood_trigger == 'user') {
-        $this->assertRaw(\Drupal::translation()->formatPlural($this->config('user.flood')->get('user_limit'), 'Sorry, there has been more than one failed login attempt for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', 'Sorry, there have been more than @count failed login attempts for this account. It is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => \Drupal::url('user.pass'))));
+        $this->assertRaw(\Drupal::translation()->formatPlural($this->config('user.flood')->get('user_limit'), 'There has been more than one failed login attempt for this account. It is temporarily blocked. Try again later or <a href=":url">request a new password</a>.', 'There have been more than @count failed login attempts for this account. It is temporarily blocked. Try again later or <a href=":url">request a new password</a>.', array(':url' => \Drupal::url('user.pass'))));
       }
       else {
         // No uid, so the limit is IP-based.
-        $this->assertRaw(t('Sorry, too many failed login attempts from your IP address. This IP address is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => \Drupal::url('user.pass'))));
+        $this->assertRaw(t('Too many failed login attempts from your IP address. This IP address is temporarily blocked. Try again later or <a href=":url">request a new password</a>.', array(':url' => \Drupal::url('user.pass'))));
       }
     }
     else {
-      $this->assertText(t('Sorry, unrecognized username or password. Have you forgotten your password?'));
+      $this->assertText(t('Unrecognized username or password. Forgot your password?'));
     }
   }
+
 }

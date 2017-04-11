@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\TypedData\Plugin\DataType\Map.
- */
-
 namespace Drupal\Core\TypedData\Plugin\DataType;
 
 use Drupal\Core\TypedData\TypedData;
@@ -18,7 +13,8 @@ use Drupal\Core\TypedData\ComplexDataInterface;
  * complex data type.
  *
  * By default there is no metadata for contained properties. Extending classes
- * may want to override Map::getPropertyDefinitions() to define it.
+ * may want to override MapDataDefinition::getPropertyDefinitions() to define
+ * it.
  *
  * @ingroup typed_data
  *
@@ -50,17 +46,6 @@ class Map extends TypedData implements \IteratorAggregate, ComplexDataInterface 
    * @var \Drupal\Core\TypedData\TypedDataInterface[]
    */
   protected $properties = array();
-
-  /**
-   * Gets an array of property definitions of contained properties.
-   *
-   * @return \Drupal\Core\TypedData\DataDefinitionInterface[]
-   *   An array of property definitions of contained properties, keyed by
-   *   property name.
-   */
-  protected function getPropertyDefinitions() {
-    return $this->definition->getPropertyDefinitions();
-  }
 
   /**
    * {@inheritdoc}
@@ -107,7 +92,7 @@ class Map extends TypedData implements \IteratorAggregate, ComplexDataInterface 
   }
 
   /**
-   * Overrides \Drupal\Core\TypedData\TypedData::getString().
+   * {@inheritdoc}
    */
   public function getString() {
     $strings = array();
@@ -119,7 +104,7 @@ class Map extends TypedData implements \IteratorAggregate, ComplexDataInterface 
   }
 
   /**
-   * Implements \Drupal\Core\TypedData\ComplexDataInterface::get().
+   * {@inheritdoc}
    */
   public function get($property_name) {
     if (!isset($this->properties[$property_name])) {
@@ -128,7 +113,7 @@ class Map extends TypedData implements \IteratorAggregate, ComplexDataInterface 
         $value = $this->values[$property_name];
       }
       // If the property is unknown, this will throw an exception.
-      $this->properties[$property_name] = \Drupal::typedDataManager()->getPropertyInstance($this, $property_name, $value);
+      $this->properties[$property_name] = $this->getTypedDataManager()->getPropertyInstance($this, $property_name, $value);
     }
     return $this->properties[$property_name];
   }
@@ -166,7 +151,7 @@ class Map extends TypedData implements \IteratorAggregate, ComplexDataInterface 
   }
 
   /**
-   * Implements \Drupal\Core\TypedData\ComplexDataInterface::getProperties().
+   * {@inheritdoc}
    */
   public function getProperties($include_computed = FALSE) {
     $properties = array();
@@ -190,14 +175,14 @@ class Map extends TypedData implements \IteratorAggregate, ComplexDataInterface 
   }
 
   /**
-   * Implements \IteratorAggregate::getIterator().
+   * {@inheritdoc}
    */
   public function getIterator() {
     return new \ArrayIterator($this->getProperties());
   }
 
   /**
-   * Implements \Drupal\Core\TypedData\ComplexDataInterface::isEmpty().
+   * {@inheritdoc}
    */
   public function isEmpty() {
     foreach ($this->properties as $property) {
@@ -251,4 +236,5 @@ class Map extends TypedData implements \IteratorAggregate, ComplexDataInterface 
     }
     return $this;
   }
+
 }

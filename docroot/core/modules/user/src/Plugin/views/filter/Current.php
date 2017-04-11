@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of views_handler_filter_user_current.
- */
-
 namespace Drupal\user\Plugin\views\filter;
 
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
@@ -21,7 +16,7 @@ use Drupal\views\Plugin\views\filter\BooleanOperator;
 class Current extends BooleanOperator {
 
   /**
-   * Overrides Drupal\views\Plugin\views\filter\BooleanOperator::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);

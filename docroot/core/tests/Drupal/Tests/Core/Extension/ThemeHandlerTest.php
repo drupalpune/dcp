@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\Tests\Core\Extension\ThemeInstallerTest.
+ * Contains \Drupal\Tests\Core\Extension\ThemeHandlerTest.
  */
 
 namespace Drupal\Tests\Core\Extension;
@@ -135,6 +135,20 @@ class ThemeHandlerTest extends UnitTestCase {
 
     $this->assertEquals('twig', $info->info['engine']);
     $this->assertEquals(array('seven/global-styling'), $info->info['libraries']);
+  }
+
+  /**
+   * Tests empty libraries in theme.info.yml file.
+   */
+  public function testThemeLibrariesEmpty() {
+    $theme = new Extension($this->root, 'theme', '/core/modules/system/tests/themes/test_theme_libraries_empty', 'test_theme_libraries_empty.info.yml');
+    try {
+      $this->themeHandler->addTheme($theme);
+      $this->assertTrue(TRUE, 'Empty libraries key in theme.info.yml does not cause PHP warning');
+    }
+    catch (\Exception $e) {
+      $this->fail('Empty libraries key in theme.info.yml causes PHP warning.');
+    }
   }
 
   /**

@@ -1,15 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\locale\Gettext.
- */
-
 namespace Drupal\locale;
 
 use Drupal\Component\Gettext\PoStreamReader;
-use Drupal\Component\Gettext\PoMemoryWriter;
-use Drupal\locale\PoDatabaseWriter;
 
 /**
  * Static class providing Drupal specific Gettext functionality.
@@ -100,4 +93,5 @@ class Gettext {
     $report['seek'] = $reader->getSeek();
     return $report;
   }
+
 }

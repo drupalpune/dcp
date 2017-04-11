@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\File\ConfigTest.
- */
-
 namespace Drupal\system\Tests\File;
 
 use Drupal\simpletest\WebTestBase;

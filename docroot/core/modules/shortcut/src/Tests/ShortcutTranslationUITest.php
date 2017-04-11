@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\shortcut\Tests\ShortcutTranslationUITest.
- */
-
 namespace Drupal\shortcut\Tests;
 
 use Drupal\content_translation\Tests\ContentTranslationUITestBase;
@@ -17,6 +12,11 @@ use Drupal\Core\Language\Language;
  * @group Shortcut
  */
 class ShortcutTranslationUITest extends ContentTranslationUITestBase {
+
+  /**
+   * {inheritdoc}
+   */
+  protected $defaultCacheContexts = ['languages:language_interface', 'session', 'theme', 'user', 'url.path', 'url.query_args', 'url.site'];
 
   /**
    * Modules to enable.
@@ -65,7 +65,10 @@ class ShortcutTranslationUITest extends ContentTranslationUITestBase {
   protected function doTestBasicTranslation() {
     parent::doTestBasicTranslation();
 
-    $entity = entity_load($this->entityTypeId, $this->entityId, TRUE);
+    $storage = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityTypeId);
+    $storage->resetCache([$this->entityId]);
+    $entity = $storage->load($this->entityId);
     foreach ($this->langcodes as $langcode) {
       if ($entity->hasTranslation($langcode)) {
         $language = new Language(array('id' => $langcode));
@@ -84,7 +87,10 @@ class ShortcutTranslationUITest extends ContentTranslationUITestBase {
    * {@inheritdoc}
    */
   protected function doTestTranslationEdit() {
-    $entity = entity_load($this->entityTypeId, $this->entityId, TRUE);
+    $storage = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityTypeId);
+    $storage->resetCache([$this->entityId]);
+    $entity = $storage->load($this->entityId);
     $languages = $this->container->get('language_manager')->getLanguages();
 
     foreach ($this->langcodes as $langcode) {
@@ -107,11 +113,14 @@ class ShortcutTranslationUITest extends ContentTranslationUITestBase {
    * Tests the basic translation workflow.
    */
   protected function doTestTranslationChanged() {
-    $entity = entity_load($this->entityTypeId, $this->entityId, TRUE);
+    $storage = $this->container->get('entity_type.manager')
+      ->getStorage($this->entityTypeId);
+    $storage->resetCache([$this->entityId]);
+    $entity = $storage->load($this->entityId);
 
     $this->assertFalse(
       $entity instanceof EntityChangedInterface,
-      format_string('%entity is not implementing EntityChangedInterface.' , array('%entity' => $this->entityTypeId))
+      format_string('%entity is not implementing EntityChangedInterface.', array('%entity' => $this->entityTypeId))
     );
   }
 

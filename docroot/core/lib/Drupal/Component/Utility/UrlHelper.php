@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Component\Utility\UrlHelper.
- */
-
 namespace Drupal\Component\Utility;
 
 /**
@@ -24,7 +19,6 @@ class UrlHelper {
   /**
    * Parses an array into a valid, rawurlencoded query string.
    *
-   *
    * rawurlencode() is RFC3986 compliant, and as a consequence RFC3987
    * compliant. The latter defines the required format of "URLs" in HTML5.
    * urlencode() is almost the same as rawurlencode(), except that it encodes
@@ -36,10 +30,11 @@ class UrlHelper {
    *   http_build_query() directly.
    *
    * @param array $query
-   *   The query parameter array to be processed,
-   *   e.g. \Drupal::request()->query->all().
+   *   The query parameter array to be processed; for instance,
+   *   \Drupal::request()->query->all().
    * @param string $parent
-   *   Internal use only. Used to build the $query array key for nested items.
+   *   (optional) Internal use only. Used to build the $query array key for
+   *   nested items. Defaults to an empty string.
    *
    * @return string
    *   A rawurlencoded string which can be used as or appended to the URL query
@@ -168,8 +163,8 @@ class UrlHelper {
     }
     // Internal URLs.
     else {
-      // parse_url() does not support relative URLs, so make it absolute. E.g. the
-      // relative URL "foo/bar:1" isn't properly parsed.
+      // parse_url() does not support relative URLs, so make it absolute. For
+      // instance, the relative URL "foo/bar:1" isn't properly parsed.
       $parts = parse_url('http://example.com/' . $url);
       // Strip the leading slash that was just added.
       $options['path'] = substr($parts['path'], 1);
@@ -200,10 +195,11 @@ class UrlHelper {
   }
 
   /**
-   * Determines whether a path is external to Drupal (e.g. http://example.com).
+   * Determines whether a path is external to Drupal.
    *
-   * If a path cannot be assessed by Drupal's menu handler, then we must
-   * treat it as potentially insecure.
+   * An example of an external path is http://example.com. If a path cannot be
+   * assessed by Drupal's menu handler, then we must treat it as potentially
+   * insecure.
    *
    * @param string $path
    *   The internal path or external URL being linked to, such as "node/34" or
@@ -214,12 +210,19 @@ class UrlHelper {
    */
   public static function isExternal($path) {
     $colonpos = strpos($path, ':');
-    // Avoid calling drupal_strip_dangerous_protocols() if there is any slash
-    // (/), hash (#) or question_mark (?) before the colon (:) occurrence - if
-    // any - as this would clearly mean it is not a URL. If the path starts with
-    // 2 slashes then it is always considered an external URL without an
-    // explicit protocol part.
+    // Some browsers treat \ as / so normalize to forward slashes.
+    $path = str_replace('\\', '/', $path);
+    // If the path starts with 2 slashes then it is always considered an
+    // external URL without an explicit protocol part.
     return (strpos($path, '//') === 0)
+      // Leading control characters may be ignored or mishandled by browsers,
+      // so assume such a path may lead to an external location. The \p{C}
+      // character class matches all UTF-8 control, unassigned, and private
+      // characters.
+      || (preg_match('/^\p{C}/u', $path) !== 0)
+      // Avoid calling static::stripDangerousProtocols() if there is any slash
+      // (/), hash (#) or question_mark (?) before the colon (:) occurrence -
+      // if any - as this would clearly mean it is not a URL.
       || ($colonpos !== FALSE
         && !preg_match('![/?#]!', substr($path, 0, $colonpos))
         && static::stripDangerousProtocols($path) == $path);
@@ -244,7 +247,7 @@ class UrlHelper {
     $base_parts = parse_url($base_url);
 
     if (empty($base_parts['host']) || empty($url_parts['host'])) {
-      throw new \InvalidArgumentException(SafeMarkup::format('A path was passed when a fully qualified domain was expected.'));
+      throw new \InvalidArgumentException('A path was passed when a fully qualified domain was expected.');
     }
 
     if (!isset($url_parts['path']) || !isset($base_parts['path'])) {
@@ -272,7 +275,7 @@ class UrlHelper {
     // Get the plain text representation of the attribute value (i.e. its
     // meaning).
     $string = Html::decodeEntities($string);
-    return SafeMarkup::checkPlain(static::stripDangerousProtocols($string));
+    return Html::escape(static::stripDangerousProtocols($string));
   }
 
   /**
@@ -296,14 +299,30 @@ class UrlHelper {
   }
 
   /**
-   * Strips dangerous protocols (e.g. 'javascript:') from a URI.
+   * Strips dangerous protocols (for example, 'javascript:') from a URI.
    *
    * This function must be called for all URIs within user-entered input prior
    * to being output to an HTML attribute value. It is often called as part of
-   * check_url() or Drupal\Component\Utility\Xss::filter(), but those functions
-   * return an HTML-encoded string, so this function can be called independently
-   * when the output needs to be a plain-text string for passing to functions
-   * that will call \Drupal\Component\Utility\SafeMarkup::checkPlain() separately.
+   * \Drupal\Component\Utility\UrlHelper::filterBadProtocol() or
+   * \Drupal\Component\Utility\Xss::filter(), but those functions return an
+   * HTML-encoded string, so this function can be called independently when the
+   * output needs to be a plain-text string for passing to functions that will
+   * call Html::escape() separately. The exact behavior depends on the value:
+   * - If the value is a well-formed (per RFC 3986) relative URL or
+   *   absolute URL that does not use a dangerous protocol (like
+   *   "javascript:"), then the URL remains unchanged. This includes all
+   *   URLs generated via Url::toString() and UrlGeneratorTrait::url().
+   * - If the value is a well-formed absolute URL with a dangerous protocol,
+   *   the protocol is stripped. This process is repeated on the remaining URL
+   *   until it is stripped down to a safe protocol.
+   * - If the value is not a well-formed URL, the same sanitization behavior as
+   *   for well-formed URLs will be invoked, which strips most substrings that
+   *   precede a ":". The result can be used in URL attributes such as "href"
+   *   or "src" (only after calling Html::escape() separately), but this may not
+   *   produce valid HTML (for example, malformed URLs within "href" attributes
+   *   fail HTML validation). This can be avoided by using
+   *   Url::fromUri($possibly_not_a_url)->toString(), which either throws an
+   *   exception or returns a well-formed URL.
    *
    * @param string $uri
    *   A plain-text URI that might contain dangerous protocols.
@@ -313,6 +332,11 @@ class UrlHelper {
    *   strings, this return value must not be output to an HTML page without
    *   being sanitized first. However, it can be passed to functions
    *   expecting plain-text strings.
+   *
+   * @see \Drupal\Component\Utility\Html::escape()
+   * @see \Drupal\Core\Url::toString()
+   * @see \Drupal\Core\Routing\UrlGeneratorTrait::url()
+   * @see \Drupal\Core\Url::fromUri()
    */
   public static function stripDangerousProtocols($uri) {
     $allowed_protocols = array_flip(static::$allowedProtocols);

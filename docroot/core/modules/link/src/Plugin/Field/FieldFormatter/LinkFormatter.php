@@ -1,15 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\link\Plugin\field\formatter\LinkFormatter.
- */
-
 namespace Drupal\link\Plugin\Field\FieldFormatter;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Utility\Unicode;
-use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
@@ -19,7 +12,6 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Url;
 use Drupal\link\LinkItemInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Plugin implementation of the 'link' formatter.
@@ -177,7 +169,7 @@ class LinkFormatter extends FormatterBase implements ContainerFactoryPluginInter
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $element = array();
     $entity = $items->getEntity();
     $settings = $this->getSettings();
@@ -190,8 +182,9 @@ class LinkFormatter extends FormatterBase implements ContainerFactoryPluginInter
       // If the title field value is available, use it for the link text.
       if (empty($settings['url_only']) && !empty($item->title)) {
         // Unsanitized token replacement here because the entire link title
-        // gets auto-escaped during link generation.
-        $link_title = \Drupal::token()->replace($item->title, array($entity->getEntityTypeId() => $entity), array('sanitize' => FALSE, 'clear' => TRUE));
+        // gets auto-escaped during link generation in
+        // \Drupal\Core\Utility\LinkGenerator::generate().
+        $link_title = \Drupal::token()->replace($item->title, [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
       }
 
       // Trim the link text to the desired length.
@@ -201,7 +194,7 @@ class LinkFormatter extends FormatterBase implements ContainerFactoryPluginInter
 
       if (!empty($settings['url_only']) && !empty($settings['url_plain'])) {
         $element[$delta] = array(
-          '#markup' => SafeMarkup::checkPlain($link_title),
+          '#plain_text' => $link_title,
         );
 
         if (!empty($item->_attributes)) {
@@ -209,7 +202,7 @@ class LinkFormatter extends FormatterBase implements ContainerFactoryPluginInter
           // field template wrapper, and set the URL value in a content
           // attribute.
           // @todo Does RDF need a URL rather than an internal URI here?
-          // @see \Drupal\rdf\Tests\Field\LinkFieldRdfaTest.
+          // @see \Drupal\Tests\rdf\Kernel\Field\LinkFieldRdfaTest.
           $content = str_replace('internal:/', '', $item->uri);
           $item->_attributes += array('content' => $content);
         }
@@ -242,13 +235,14 @@ class LinkFormatter extends FormatterBase implements ContainerFactoryPluginInter
    *   The link field item being rendered.
    *
    * @return \Drupal\Core\Url
-   *   An Url object.
+   *   A Url object.
    */
   protected function buildUrl(LinkItemInterface $item) {
     $url = $item->getUrl() ?: Url::fromRoute('<none>');
 
     $settings = $this->getSettings();
     $options = $item->options;
+    $options += $url->getOptions();
 
     // Add optional 'rel' attribute to link options.
     if (!empty($settings['rel'])) {

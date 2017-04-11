@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\entity_test\Entity\EntityTestMulDefaultValue.
- */
-
 namespace Drupal\entity_test\Entity;
 
 use Drupal\Core\Entity\EntityChangedInterface;
@@ -25,6 +20,9 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *       "default" = "Drupal\entity_test\EntityTestForm",
  *       "delete" = "Drupal\entity_test\EntityTestDeleteForm"
  *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+ *     },
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "views_data" = "Drupal\views\EntityViewsData"
  *   },
@@ -39,8 +37,9 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "langcode" = "langcode"
  *   },
  *   links = {
+ *     "add-form" = "/entity_test_mul_changed/add",
  *     "canonical" = "/entity_test_mul_changed/manage/{entity_test_mul_changed}",
- *     "edit-form" = "/entity_test_mul_changed/manage/{entity_test_mul_changed}",
+ *     "edit-form" = "/entity_test_mul_changed/manage/{entity_test_mul_changed}/edit",
  *     "delete-form" = "/entity_test/delete/entity_test_mul_changed/{entity_test_mul_changed}",
  *   },
  *   field_ui_base_route = "entity.entity_test_mul_changed.admin_form",
@@ -71,13 +70,6 @@ class EntityTestMulChanged extends EntityTestMul implements EntityChangedInterfa
     // Ensure a new timestamp.
     sleep(1);
     parent::save();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getChangedTime() {
-    return $this->get('changed')->value;
   }
 
 }

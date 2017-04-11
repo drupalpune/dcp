@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\action\Plugin\Action\EmailAction.
- */
-
 namespace Drupal\action\Plugin\Action;
 
+use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Action\ConfigurableActionBase;
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -59,7 +55,8 @@ class EmailAction extends ConfigurableActionBase implements ContainerFactoryPlug
    */
   protected $mailManager;
 
-  /** The language manager.
+  /**
+   * The language manager.
    *
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
@@ -87,9 +84,9 @@ class EmailAction extends ConfigurableActionBase implements ContainerFactoryPlug
    *   The entity manager.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
-   * @param \Drupal\Core\Mail\MailManagerInterface
+   * @param \Drupal\Core\Mail\MailManagerInterface $mail_manager
    *   The mail manager.
-   * @param \Drupal\Core\Language\LanguageManagerInterface
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager.
    * @param \Egulias\EmailValidator\EmailValidator $email_validator
    *   The email validator.
@@ -127,7 +124,7 @@ class EmailAction extends ConfigurableActionBase implements ContainerFactoryPlug
       $this->configuration['node'] = $entity;
     }
 
-    $recipient = $this->token->replace($this->configuration['recipient'], $this->configuration);
+    $recipient = PlainTextOutput::renderFromHtml($this->token->replace($this->configuration['recipient'], $this->configuration));
 
     // If the recipient is a registered user with a language preference, use
     // the recipient's preferred language. Otherwise, use the system default
@@ -185,7 +182,7 @@ class EmailAction extends ConfigurableActionBase implements ContainerFactoryPlug
       '#default_value' => $this->configuration['message'],
       '#cols' => '80',
       '#rows' => '20',
-      '#description' => t('The message that should be sent. You may include placeholders like [node:title], [user:name], and [comment:body] to represent data that will be different each time message is sent. Not all placeholders will be available in all contexts.'),
+      '#description' => t('The message that should be sent. You may include placeholders like [node:title], [user:account-name], [user:display-name] and [comment:body] to represent data that will be different each time message is sent. Not all placeholders will be available in all contexts.'),
     );
     return $form;
   }

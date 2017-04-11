@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\RoleAccessControlHandler.
- */
-
 namespace Drupal\user;
 
 use Drupal\Core\Access\AccessResult;
@@ -22,7 +17,7 @@ class RoleAccessControlHandler extends EntityAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     switch ($operation) {
       case 'delete':
         if ($entity->id() == RoleInterface::ANONYMOUS_ID || $entity->id() == RoleInterface::AUTHENTICATED_ID) {
@@ -30,7 +25,7 @@ class RoleAccessControlHandler extends EntityAccessControlHandler {
         }
 
       default:
-        return parent::checkAccess($entity, $operation, $langcode, $account);
+        return parent::checkAccess($entity, $operation, $account);
     }
   }
 

@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Extension\ThemeHandler.
- */
-
 namespace Drupal\Core\Extension;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\State\StateInterface;
 
@@ -20,12 +14,12 @@ class ThemeHandler implements ThemeHandlerInterface {
    * Contains the features enabled for themes by default.
    *
    * @var array
+   *
+   * @see _system_default_theme_features()
    */
   protected $defaultFeatures = array(
-    'logo',
     'favicon',
-    'name',
-    'slogan',
+    'logo',
     'node_user_picture',
     'comment_user_picture',
     'comment_user_verification',
@@ -60,7 +54,7 @@ class ThemeHandler implements ThemeHandlerInterface {
   protected $state;
 
   /**
-   *  The config installer to install configuration.
+   * The config installer to install configuration.
    *
    * @var \Drupal\Core\Config\ConfigInstallerInterface
    */
@@ -167,7 +161,7 @@ class ThemeHandler implements ThemeHandlerInterface {
   public function install(array $theme_list, $install_dependencies = TRUE) {
     // We keep the old install() method as BC layer but redirect directly to the
     // theme installer.
-    \Drupal::service('theme_installer')->install($theme_list, $install_dependencies);
+    return \Drupal::service('theme_installer')->install($theme_list, $install_dependencies);
   }
 
   /**
@@ -204,8 +198,10 @@ class ThemeHandler implements ThemeHandlerInterface {
    * {@inheritdoc}
    */
   public function addTheme(Extension $theme) {
-    foreach ($theme->info['libraries'] as $library => $name) {
-      $theme->libraries[$library] = $name;
+    if (!empty($theme->info['libraries'])) {
+      foreach ($theme->info['libraries'] as $library => $name) {
+        $theme->libraries[$library] = $name;
+      }
     }
     if (isset($theme->info['engine'])) {
       $theme->engine = $theme->info['engine'];
@@ -256,6 +252,7 @@ class ThemeHandler implements ThemeHandlerInterface {
     // Set defaults for theme info.
     $defaults = array(
       'engine' => 'twig',
+      'base theme' => 'stable',
       'regions' => array(
         'sidebar_first' => 'Left sidebar',
         'sidebar_second' => 'Right sidebar',
@@ -286,6 +283,11 @@ class ThemeHandler implements ThemeHandlerInterface {
       $theme->status = (int) isset($installed[$key]);
 
       $theme->info = $this->infoParser->parse($theme->getPathname()) + $defaults;
+      // Remove the default Stable base theme when 'base theme: false' is set in
+      // a theme .info.yml file.
+      if ($theme->info['base theme'] === FALSE) {
+        unset($theme->info['base theme']);
+      }
 
       // Add the info file modification time, so it becomes available for
       // contributed modules to use for ordering theme lists.
@@ -429,9 +431,9 @@ class ThemeHandler implements ThemeHandlerInterface {
   public function getName($theme) {
     $themes = $this->listInfo();
     if (!isset($themes[$theme])) {
-      throw new \InvalidArgumentException(SafeMarkup::format('Requested the name of a non-existing theme @theme', array('@theme' => $theme)));
+      throw new \InvalidArgumentException("Requested the name of a non-existing theme $theme");
     }
-    return SafeMarkup::checkPlain($themes[$theme]->info['name']);
+    return $themes[$theme]->info['name'];
   }
 
   /**
@@ -479,6 +481,21 @@ class ThemeHandler implements ThemeHandlerInterface {
       return $themes[$name];
     }
     throw new \InvalidArgumentException(sprintf('The theme %s does not exist.', $name));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasUi($name) {
+    $themes = $this->listInfo();
+    if (isset($themes[$name])) {
+      if (!empty($themes[$name]->info['hidden'])) {
+        $theme_config = $this->configFactory->get('system.theme');
+        return $name == $theme_config->get('default') || $name == $theme_config->get('admin');
+      }
+      return TRUE;
+    }
+    return FALSE;
   }
 
 }

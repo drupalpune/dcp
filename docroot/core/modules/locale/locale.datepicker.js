@@ -5,10 +5,12 @@
 
 (function ($, Drupal, drupalSettings) {
 
-  "use strict";
+  'use strict';
 
   /**
    * Attaches language support to the jQuery UI datepicker component.
+   *
+   * @type {Drupal~behavior}
    */
   Drupal.behaviors.localeDatepicker = {
     attach: function (context, settings) {
@@ -21,18 +23,18 @@
         nextText: Drupal.t('Next'),
         currentText: Drupal.t('Today'),
         monthNames: [
-          Drupal.t('January', {}, {context: "Long month name"}),
-          Drupal.t('February', {}, {context: "Long month name"}),
-          Drupal.t('March', {}, {context: "Long month name"}),
-          Drupal.t('April', {}, {context: "Long month name"}),
-          Drupal.t('May', {}, {context: "Long month name"}),
-          Drupal.t('June', {}, {context: "Long month name"}),
-          Drupal.t('July', {}, {context: "Long month name"}),
-          Drupal.t('August', {}, {context: "Long month name"}),
-          Drupal.t('September', {}, {context: "Long month name"}),
-          Drupal.t('October', {}, {context: "Long month name"}),
-          Drupal.t('November', {}, {context: "Long month name"}),
-          Drupal.t('December', {}, {context: "Long month name"})
+          Drupal.t('January', {}, {context: 'Long month name'}),
+          Drupal.t('February', {}, {context: 'Long month name'}),
+          Drupal.t('March', {}, {context: 'Long month name'}),
+          Drupal.t('April', {}, {context: 'Long month name'}),
+          Drupal.t('May', {}, {context: 'Long month name'}),
+          Drupal.t('June', {}, {context: 'Long month name'}),
+          Drupal.t('July', {}, {context: 'Long month name'}),
+          Drupal.t('August', {}, {context: 'Long month name'}),
+          Drupal.t('September', {}, {context: 'Long month name'}),
+          Drupal.t('October', {}, {context: 'Long month name'}),
+          Drupal.t('November', {}, {context: 'Long month name'}),
+          Drupal.t('December', {}, {context: 'Long month name'})
         ],
         monthNamesShort: [
           Drupal.t('Jan'),

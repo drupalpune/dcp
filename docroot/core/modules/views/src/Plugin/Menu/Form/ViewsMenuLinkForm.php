@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\Menu\Form\ViewsMenuLinkForm.
- */
-
 namespace Drupal\views\Plugin\Menu\Form;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -61,7 +56,7 @@ class ViewsMenuLinkForm extends MenuLinkDefaultForm {
     $id = $view->storage->id();
     $label = $view->storage->label();
     if ($this->moduleHandler->moduleExists('views_ui')) {
-      $message = $this->t('This link is provided by the Views module. The path can be changed by editing the view <a href="@url">@label</a>', array('@url' => \Drupal::url('entity.view.edit_form', array('view' => $id)), '@label' => $label));
+      $message = $this->t('This link is provided by the Views module. The path can be changed by editing the view <a href=":url">@label</a>', array(':url' => \Drupal::url('entity.view.edit_form', array('view' => $id)), '@label' => $label));
     }
     else {
       $message = $this->t('This link is provided by the Views module from view %label.', array('%label' => $label));

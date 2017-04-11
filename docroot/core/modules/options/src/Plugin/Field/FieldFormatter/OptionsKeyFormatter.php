@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\options\Plugin\field\formatter\OptionsKeyFormatter.
- */
-
 namespace Drupal\options\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\AllowedTagsXssTrait;
+use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
 
@@ -31,11 +27,14 @@ class OptionsKeyFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = array();
 
     foreach ($items as $delta => $item) {
-      $elements[$delta] = array('#markup' => $this->fieldFilterXss($item->value));
+      $elements[$delta] = array(
+        '#markup' => $item->value,
+        '#allowed_tags' => FieldFilteredMarkup::allowedTags(),
+      );
     }
 
     return $elements;

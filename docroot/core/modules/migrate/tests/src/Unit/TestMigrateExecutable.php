@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\migrate\Unit\TestMigrateExecutable.
- */
-
 namespace Drupal\Tests\migrate\Unit;
 
 use Drupal\Core\StringTranslation\TranslationInterface;
@@ -14,13 +9,6 @@ use Drupal\migrate\MigrateExecutable;
  * Tests MigrateExecutable.
  */
 class TestMigrateExecutable extends MigrateExecutable {
-
-  /**
-   * The (fake) number of seconds elapsed since the start of the test.
-   *
-   * @var int
-   */
-  protected $timeElapsed;
 
   /**
    * The fake memory usage in bytes.
@@ -47,86 +35,6 @@ class TestMigrateExecutable extends MigrateExecutable {
   }
 
   /**
-   * Allows access to protected timeOptionExceeded method.
-   *
-   * @return bool
-   *   A threshold exceeded value.
-   */
-  public function timeOptionExceeded() {
-    return parent::timeOptionExceeded();
-  }
-
-  /**
-   * Allows access to set protected maxExecTime property.
-   *
-   * @param int $max_exec_time
-   *   The value to set.
-   */
-  public function setMaxExecTime($max_exec_time) {
-    $this->maxExecTime = $max_exec_time;
-  }
-
-  /**
-   * Allows access to protected maxExecTime property.
-   *
-   * @return int
-   *   The value of the protected property.
-   */
-  public function getMaxExecTime() {
-    return $this->maxExecTime;
-  }
-
-  /**
-   * Allows access to protected successesSinceFeedback property.
-   *
-   * @return int
-   *   The value of the protected property.
-   */
-  public function getSuccessesSinceFeedback() {
-    return $this->successesSinceFeedback;
-  }
-
-  /**
-   * Allows access to protected totalSuccesses property.
-   *
-   * @return int
-   *   The value of the protected property.
-   */
-  public function getTotalSuccesses() {
-    return $this->totalSuccesses;
-  }
-
-  /**
-   * Allows access to protected totalProcessed property.
-   *
-   * @return int
-   *   The value of the protected property.
-   */
-  public function getTotalProcessed() {
-    return $this->totalProcessed;
-  }
-
-  /**
-   * Allows access to protected processedSinceFeedback property.
-   *
-   * @return int
-   *   The value of the protected property.
-   */
-  public function getProcessedSinceFeedback() {
-    return $this->processedSinceFeedback;
-  }
-
-  /**
-   * Allows access to protected maxExecTimeExceeded method.
-   *
-   * @return bool
-   *   The threshold exceeded value.
-   */
-  public function maxExecTimeExceeded() {
-    return parent::maxExecTimeExceeded();
-  }
-
-  /**
    * Allows access to set protected source property.
    *
    * @param \Drupal\migrate\Plugin\MigrateSourceInterface $source
@@ -140,27 +48,10 @@ class TestMigrateExecutable extends MigrateExecutable {
    * Allows access to protected sourceIdValues property.
    *
    * @param array $source_id_values
-   *   The value to set.
+   *   The values to set.
    */
   public function setSourceIdValues($source_id_values) {
     $this->sourceIdValues = $source_id_values;
-  }
-
-  /**
-   * Allows setting a fake elapsed time.
-   *
-   * @param int $time
-   *   The time in seconds.
-   */
-  public function setTimeElapsed($time) {
-    $this->timeElapsed = $time;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getTimeElapsed() {
-    return $this->timeElapsed;
   }
 
   /**
@@ -204,7 +95,7 @@ class TestMigrateExecutable extends MigrateExecutable {
    * @param int $memory_usage
    *   The fake memory usage value.
    * @param int $cleared_memory_usage
-   *   (optional) The fake cleared memory value.
+   *   (optional) The fake cleared memory value. Defaults to NULL.
    */
   public function setMemoryUsage($memory_usage, $cleared_memory_usage = NULL) {
     $this->memoryUsage = $memory_usage;
@@ -229,16 +120,6 @@ class TestMigrateExecutable extends MigrateExecutable {
    */
   public function setMemoryThreshold($threshold) {
     $this->memoryThreshold = $threshold;
-  }
-
-  /**
-   * Sets the time threshold.
-   *
-   * @param float $threshold
-   *   The new threshold.
-   */
-  public function setTimeThreshold($threshold) {
-    $this->timeThreshold = $threshold;
   }
 
   /**

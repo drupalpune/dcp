@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Plugin\field\formatter\EntityReferenceTaxonomyTermRssFormatter.
- */
-
 namespace Drupal\taxonomy\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -28,11 +23,11 @@ class EntityReferenceTaxonomyTermRssFormatter extends EntityReferenceFormatterBa
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $parent_entity = $items->getEntity();
     $elements = array();
 
-    foreach ($this->getEntitiesToView($items) as $delta => $entity) {
+    foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
       $parent_entity->rss_elements[] = array(
         'key' => 'category',
         'value' => $entity->label(),

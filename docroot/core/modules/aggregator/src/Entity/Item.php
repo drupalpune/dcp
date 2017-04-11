@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Entity\Item.
- */
-
 namespace Drupal\aggregator\Entity;
 
 use Drupal\Core\Cache\Cache;
@@ -42,7 +37,7 @@ use Drupal\Core\Url;
 class Item extends ContentEntityBase implements ItemInterface {
 
   /**
-   * Implements Drupal\Core\Entity\EntityInterface::label().
+   * {@inheritdoc}
    */
   public function label() {
     return $this->get('title')->value;
@@ -52,14 +47,18 @@ class Item extends ContentEntityBase implements ItemInterface {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields['iid'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('Aggregator item ID'))
-      ->setDescription(t('The ID of the feed item.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
+    /** @var \Drupal\Core\Field\BaseFieldDefinition[] $fields */
+    $fields = parent::baseFieldDefinitions($entity_type);
+
+    $fields['iid']->setLabel(t('Aggregator item ID'))
+      ->setDescription(t('The ID of the feed item.'));
+
+    $fields['langcode']->setLabel(t('Language code'))
+      ->setDescription(t('The feed item language code.'));
 
     $fields['fid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Source feed'))
+      ->setRequired(TRUE)
       ->setDescription(t('The aggregator feed entity associated with this item.'))
       ->setSetting('target_type', 'aggregator_feed')
       ->setDisplayOptions('view', array(
@@ -72,10 +71,6 @@ class Item extends ContentEntityBase implements ItemInterface {
     $fields['title'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Title'))
       ->setDescription(t('The title of the feed item.'));
-
-    $fields['langcode'] = BaseFieldDefinition::create('language')
-      ->setLabel(t('Language code'))
-      ->setDescription(t('The feed item language code.'));
 
     $fields['link'] = BaseFieldDefinition::create('uri')
       ->setLabel(t('Link'))
@@ -225,13 +220,15 @@ class Item extends ContentEntityBase implements ItemInterface {
     // handles the regular cases. The Item entity has one special case: a newly
     // created Item is *also* associated with a Feed, so we must invalidate the
     // associated Feed's cache tag.
-    Cache::invalidateTags($this->getCacheTags());
+    if (!$update) {
+      Cache::invalidateTags($this->getCacheTagsToInvalidate());
+    }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getCacheTags() {
+  public function getCacheTagsToInvalidate() {
     return Feed::load($this->getFeedId())->getCacheTags();
   }
 

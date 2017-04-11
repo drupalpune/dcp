@@ -1,0 +1,28 @@
+uuid: cc32ec04-255b-4f42-a8b4-c4d8cb5ef091
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.sponsors.field_image
+    - node.type.sponsors
+  module:
+    - image
+    - user
+id: node.sponsors.default
+targetEntityType: node
+bundle: sponsors
+mode: default
+content:
+  field_image:
+    weight: 102
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

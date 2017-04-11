@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\image\Form\ImageStyleEditForm.
- */
-
 namespace Drupal\image\Form;
 
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -12,7 +7,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\image\ConfigurableImageEffectInterface;
 use Drupal\image\ImageEffectManager;
-use Drupal\Component\Utility\SafeMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -99,7 +93,7 @@ class ImageStyleEditForm extends ImageStyleFormBase {
         '#tree' => FALSE,
         'data' => array(
           'label' => array(
-            '#markup' => SafeMarkup::checkPlain($effect->label()),
+            '#plain_text' => $effect->label(),
           ),
         ),
       );
@@ -274,7 +268,7 @@ class ImageStyleEditForm extends ImageStyleFormBase {
    * Updates image effect weights.
    *
    * @param array $effects
-   *   Associative array with effects having effect uuid as keys and and array
+   *   Associative array with effects having effect uuid as keys and array
    *   with effect data as values.
    */
   protected function updateEffectWeights(array $effects) {

@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\Plugin\EntityReferenceSelection\NodeSelection.
- */
-
 namespace Drupal\node\Plugin\EntityReferenceSelection;
 
-use Drupal\Core\Entity\Plugin\EntityReferenceSelection\SelectionBase;
+use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -21,7 +16,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   weight = 1
  * )
  */
-class NodeSelection extends SelectionBase {
+class NodeSelection extends DefaultSelection {
 
   /**
    * {@inheritdoc}
@@ -46,6 +41,34 @@ class NodeSelection extends SelectionBase {
       $query->condition('status', NODE_PUBLISHED);
     }
     return $query;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createNewEntity($entity_type_id, $bundle, $label, $uid) {
+    $node = parent::createNewEntity($entity_type_id, $bundle, $label, $uid);
+
+    // In order to create a referenceable node, it needs to published.
+    /** @var \Drupal\node\NodeInterface $node */
+    $node->setPublished(TRUE);
+
+    return $node;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateReferenceableNewEntities(array $entities) {
+    $entities = parent::validateReferenceableNewEntities($entities);
+    // Mirror the conditions checked in buildEntityQuery().
+    if (!$this->currentUser->hasPermission('bypass node access') && !count($this->moduleHandler->getImplementations('node_grants'))) {
+      $entities = array_filter($entities, function ($node) {
+        /** @var \Drupal\node\NodeInterface $node */
+        return $node->isPublished();
+      });
+    }
+    return $entities;
   }
 
 }

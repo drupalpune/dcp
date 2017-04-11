@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_ui\Tests\EntityDisplayModeTest.
- */
-
 namespace Drupal\field_ui\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -19,9 +14,19 @@ class EntityDisplayModeTest extends WebTestBase {
   /**
    * Modules to enable.
    *
-   * @var array
+   * @var string[]
    */
-  public static $modules = array('entity_test', 'field_ui');
+  public static $modules = ['block', 'entity_test', 'field_ui'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('local_actions_block');
+    $this->drupalPlaceBlock('page_title_block');
+  }
 
   /**
    * Tests the EntityViewMode user interface.
@@ -33,7 +38,7 @@ class EntityDisplayModeTest extends WebTestBase {
     $this->drupalLogin($this->drupalCreateUser(array('administer display modes')));
     $this->drupalGet('admin/structure/display-modes/view');
     $this->assertResponse(200);
-    $this->assertText(t('Add new view mode'));
+    $this->assertText(t('Add view mode'));
     $this->assertLinkByHref('admin/structure/display-modes/view/add');
     $this->assertLinkByHref('admin/structure/display-modes/view/add/entity_test');
 
@@ -80,7 +85,7 @@ class EntityDisplayModeTest extends WebTestBase {
     $this->drupalLogin($this->drupalCreateUser(array('administer display modes')));
     $this->drupalGet('admin/structure/display-modes/form');
     $this->assertResponse(200);
-    $this->assertText(t('Add new form mode'));
+    $this->assertText(t('Add form mode'));
     $this->assertLinkByHref('admin/structure/display-modes/form/add');
 
     $this->drupalGet('admin/structure/display-modes/form/add/entity_test_no_label');

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\form_test\Form\FormTestValidateForm.
- */
-
 namespace Drupal\form_test\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -49,10 +44,6 @@ class FormTestValidateForm extends FormBase {
       '#value' => 'Save',
     );
 
-    // To simplify this test, enable form caching and use form storage to
-    // remember our alteration.
-    $form_state->setCached();
-
     return $form;
   }
 
@@ -70,6 +61,10 @@ class FormTestValidateForm extends FormBase {
 
       // Trigger a form validation error to see our changes.
       $form_state->setErrorByName('');
+
+      // To simplify this test, enable form caching and use form storage to
+      // remember our alteration.
+      $form_state->setCached();
     }
   }
 

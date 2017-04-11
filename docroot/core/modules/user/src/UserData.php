@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\user\UserData.
- */
-
 namespace Drupal\user;
 
 use Drupal\Core\Database\Connection;
@@ -32,7 +27,7 @@ class UserData implements UserDataInterface {
   }
 
   /**
-   * Implements \Drupal\user\UserDataInterface::get().
+   * {@inheritdoc}
    */
   public function get($module, $uid = NULL, $name = NULL) {
     $query = $this->connection->select('users_data', 'ud')
@@ -80,7 +75,7 @@ class UserData implements UserDataInterface {
   }
 
   /**
-   * Implements \Drupal\user\UserDataInterface::set().
+   * {@inheritdoc}
    */
   public function set($module, $uid, $name, $value) {
     $serialized = 0;
@@ -102,7 +97,7 @@ class UserData implements UserDataInterface {
   }
 
   /**
-   * Implements \Drupal\user\UserDataInterface::delete().
+   * {@inheritdoc}
    */
   public function delete($module = NULL, $uid = NULL, $name = NULL) {
     $query = $this->connection->delete('users_data');

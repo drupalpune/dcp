@@ -18,17 +18,13 @@
  * - status_headings: List of all status types.
  * - display: (optional) May have a value of 'status' or 'error' when only
  *   displaying messages of that specific type.
- *
- * @see template_preprocess_status_messages()
  */
 #}
 {% block messages %}
   {% if message_list is not empty %}
     {{ attach_library('bartik/messages') }}
-    <div id="messages">
-      <div class="section clearfix">
-        {{ parent() }}
-      </div>
+    <div class="messages__wrapper layout-container">
+      {{ parent() }}
     </div>
   {% endif %}
 {% endblock messages %}

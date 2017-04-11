@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\StorageComparerInterface.
- */
-
 namespace Drupal\Core\Config;
 
 /**
@@ -72,10 +67,10 @@ interface StorageComparerInterface {
    *
    * Until the changelist has been calculated this will always be FALSE.
    *
-   * @see \Drupal\Core\Config\StorageComparerInterface::createChangelist().
-   *
    * @return bool
    *   TRUE if there are changes to process and FALSE if not.
+   *
+   * @see \Drupal\Core\Config\StorageComparerInterface::createChangelist()
    */
   public function hasChanges();
 
@@ -109,7 +104,7 @@ interface StorageComparerInterface {
    *
    * @return array
    *   An associative array of configuration names. The array keys are
-   *   'old_name' and and 'new_name' representing the old and name configuration
+   *   'old_name' and 'new_name' representing the old and new configuration
    *   object names during a rename operation.
    *
    * @see \Drupal\Core\Config\StorageComparer::createRenameNames()

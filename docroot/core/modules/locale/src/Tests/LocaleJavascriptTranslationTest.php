@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\locale\Tests\LocaleJavascriptTranslationTest.
- */
-
 namespace Drupal\locale\Tests;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -23,10 +18,10 @@ class LocaleJavascriptTranslationTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('locale');
+  public static $modules = array('locale', 'locale_test');
 
   public function testFileParsing() {
-    $filename = drupal_get_path('module', 'locale') . '/tests/locale_test.js';
+    $filename = __DIR__ . '/../../tests/locale_test.js';
 
     // Parse the file to look for source strings.
     _locale_parse_js_file($filename);

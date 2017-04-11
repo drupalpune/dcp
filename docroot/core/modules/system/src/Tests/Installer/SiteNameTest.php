@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Installer\SiteNameTest.
- */
-
 namespace Drupal\system\Tests\Installer;
 
 use Drupal\simpletest\WebTestBase;
@@ -24,7 +19,7 @@ class SiteNameTest extends WebTestBase {
   protected $siteName;
 
   /**
-   * Overrides \Drupal\simpletest\WebTestBase::installParameters().
+   * {@inheritdoc}
    */
   protected function installParameters() {
     $this->siteName = $this->randomMachineName();

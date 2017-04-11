@@ -1,13 +1,6 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Ajax\AlertCommand.
- */
-
 namespace Drupal\Core\Ajax;
-
-use Drupal\Core\Ajax\CommandInterface;
 
 /**
  * AJAX command for a javascript alert box.

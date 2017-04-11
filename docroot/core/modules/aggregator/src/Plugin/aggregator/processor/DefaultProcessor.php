@@ -1,20 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Plugin\aggregator\processor\DefaultProcessor.
- */
-
 namespace Drupal\aggregator\Plugin\aggregator\processor;
 
+use Drupal\aggregator\Entity\Item;
 use Drupal\aggregator\ItemStorageInterface;
 use Drupal\aggregator\Plugin\AggregatorPluginSettingsBase;
 use Drupal\aggregator\Plugin\ProcessorInterface;
 use Drupal\aggregator\FeedInterface;
 use Drupal\Component\Utility\Unicode;
-use Drupal\Core\Database\Database;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Datetime\DateFormatter;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Form\ConfigFormBaseTrait;
 use Drupal\Core\Form\FormStateInterface;
@@ -61,7 +56,7 @@ class DefaultProcessor extends AggregatorPluginSettingsBase implements Processor
   /**
    * The date formatter service.
    *
-   * @var \Drupal\Core\Datetime\DateFormatter
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected $dateFormatter;
 
@@ -80,10 +75,10 @@ class DefaultProcessor extends AggregatorPluginSettingsBase implements Processor
    *   The entity query object for feed items.
    * @param \Drupal\aggregator\ItemStorageInterface $item_storage
    *   The entity storage for feed items.
-   * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config, QueryInterface $item_query, ItemStorageInterface $item_storage, DateFormatter $date_formatter) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config, QueryInterface $item_query, ItemStorageInterface $item_storage, DateFormatterInterface $date_formatter) {
     $this->configFactory = $config;
     $this->itemStorage = $item_storage;
     $this->itemQuery = $item_query;
@@ -154,7 +149,7 @@ class DefaultProcessor extends AggregatorPluginSettingsBase implements Processor
       '#title' => t('Discard items older than'),
       '#default_value' => $config->get('items.expire'),
       '#options' => $period,
-      '#description' => t('Requires a correctly configured <a href="@cron">cron maintenance task</a>.', array('@cron' => $this->url('system.status'))),
+      '#description' => t('Requires a correctly configured <a href=":cron">cron maintenance task</a>.', array(':cron' => $this->url('system.status'))),
     );
 
     $lengths = array(0, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000);
@@ -216,7 +211,7 @@ class DefaultProcessor extends AggregatorPluginSettingsBase implements Processor
         $entry = reset($entry);
       }
       else {
-        $entry = entity_create('aggregator_item', array('langcode' => $feed->language()->getId()));
+        $entry = Item::create(array('langcode' => $feed->language()->getId()));
       }
       if ($item['timestamp']) {
         $entry->setPostedTime($item['timestamp']);

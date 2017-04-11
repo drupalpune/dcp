@@ -5,8 +5,16 @@
 
 (function ($, Drupal) {
 
-  "use strict";
+  'use strict';
 
+  /**
+   * Initialize dialogs for Ajax purposes.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches the behaviors for dialog ajax functionality.
+   */
   Drupal.behaviors.dialog = {
     attach: function (context, settings) {
       var $context = $(context);
@@ -46,14 +54,15 @@
     /**
      * Scan a dialog for any primary buttons and move them to the button area.
      *
-     * @param $dialog
+     * @param {jQuery} $dialog
      *   An jQuery object containing the element that is the dialog target.
-     * @return
+     *
+     * @return {Array}
      *   An array of buttons that need to be added to the button area.
      */
     prepareDialogButtons: function ($dialog) {
       var buttons = [];
-      var $buttons = $dialog.find('.form-actions input[type=submit]');
+      var $buttons = $dialog.find('.form-actions input[type=submit], .form-actions a.button');
       $buttons.each(function () {
         // Hidden form buttons need special attention. For browser consistency,
         // the button needs to be "visible" in order to have the enter key fire
@@ -61,17 +70,26 @@
         // "display: none", we set its dimensions to zero.
         // See http://mattsnider.com/how-forms-submit-when-pressing-enter/
         var $originalButton = $(this).css({
+          display: 'block',
           width: 0,
           height: 0,
           padding: 0,
-          border: 0
+          border: 0,
+          overflow: 'hidden'
         });
         buttons.push({
-          'text': $originalButton.html() || $originalButton.attr('value'),
-          'class': $originalButton.attr('class'),
-          'click': function (e) {
-            $originalButton.trigger('mousedown').trigger('click').trigger('mouseup');
-            e.preventDefault();
+          text: $originalButton.html() || $originalButton.attr('value'),
+          class: $originalButton.attr('class'),
+          click: function (e) {
+            // If the original button is an anchor tag, triggering the "click"
+            // event will not simulate a click. Use the click method instead.
+            if ($originalButton.is('a')) {
+              $originalButton[0].click();
+            }
+            else {
+              $originalButton.trigger('mousedown').trigger('mouseup').trigger('click');
+              e.preventDefault();
+            }
           }
         });
       });
@@ -81,6 +99,16 @@
 
   /**
    * Command to open a dialog.
+   *
+   * @param {Drupal.Ajax} ajax
+   *   The Drupal Ajax object.
+   * @param {object} response
+   *   Object holding the server response.
+   * @param {number} [status]
+   *   The HTTP status code.
+   *
+   * @return {bool|undefined}
+   *   Returns false if there was no selector property in the response object.
    */
   Drupal.AjaxCommands.prototype.openDialog = function (ajax, response, status) {
     if (!response.selector) {
@@ -89,7 +117,7 @@
     var $dialog = $(response.selector);
     if (!$dialog.length) {
       // Create the element if needed.
-      $dialog = $('<div id="' + response.selector.replace(/^#/, '') + '"/>').appendTo('body');
+      $dialog = $('<div id="' + response.selector.replace(/^#/, '') + '" class="ui-front"/>').appendTo('body');
     }
     // Set up the wrapper, if there isn't one.
     if (!ajax.wrapper) {
@@ -107,7 +135,7 @@
       response.dialogOptions.buttons = Drupal.behaviors.dialog.prepareDialogButtons($dialog);
     }
 
-    // Bind dialogButtonsChange
+    // Bind dialogButtonsChange.
     $dialog.on('dialogButtonsChange', function () {
       var buttons = Drupal.behaviors.dialog.prepareDialogButtons($dialog);
       $dialog.dialog('option', 'buttons', buttons);
@@ -131,6 +159,17 @@
    * Command to close a dialog.
    *
    * If no selector is given, it defaults to trying to close the modal.
+   *
+   * @param {Drupal.Ajax} [ajax]
+   *   The ajax object.
+   * @param {object} response
+   *   Object holding the server response.
+   * @param {string} response.selector
+   *   The selector of the dialog.
+   * @param {bool} response.persist
+   *   Whether to persist the dialog element or not.
+   * @param {number} [status]
+   *   The HTTP status code.
    */
   Drupal.AjaxCommands.prototype.closeDialog = function (ajax, response, status) {
     var $dialog = $(response.selector);
@@ -141,14 +180,27 @@
       }
     }
 
-    // Unbind dialogButtonsChange
+    // Unbind dialogButtonsChange.
     $dialog.off('dialogButtonsChange');
   };
 
   /**
    * Command to set a dialog property.
    *
-   * jQuery UI specific way of setting dialog options.
+   * JQuery UI specific way of setting dialog options.
+   *
+   * @param {Drupal.Ajax} [ajax]
+   *   The Drupal Ajax object.
+   * @param {object} response
+   *   Object holding the server response.
+   * @param {string} response.selector
+   *   Selector for the dialog element.
+   * @param {string} response.optionsName
+   *   Name of a key to set.
+   * @param {string} response.optionValue
+   *   Value to set.
+   * @param {number} [status]
+   *   The HTTP status code.
    */
   Drupal.AjaxCommands.prototype.setDialogOption = function (ajax, response, status) {
     var $dialog = $(response.selector);
@@ -159,6 +211,15 @@
 
   /**
    * Binds a listener on dialog creation to handle the cancel link.
+   *
+   * @param {jQuery.Event} e
+   *   The event triggered.
+   * @param {Drupal.dialog~dialogDefinition} dialog
+   *   The dialog instance.
+   * @param {jQuery} $element
+   *   The jQuery collection of the dialog element.
+   * @param {object} [settings]
+   *   Dialog settings.
    */
   $(window).on('dialog:aftercreate', function (e, dialog, $element, settings) {
     $element.on('click.dialog', '.dialog-cancel', function (e) {
@@ -170,6 +231,13 @@
 
   /**
    * Removes all 'dialog' listeners.
+   *
+   * @param {jQuery.Event} e
+   *   The event triggered.
+   * @param {Drupal.dialog~dialogDefinition} dialog
+   *   The dialog instance.
+   * @param {jQuery} $element
+   *   jQuery collection of the dialog element.
    */
   $(window).on('dialog:beforeclose', function (e, dialog, $element) {
     $element.off('.dialog');

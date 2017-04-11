@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\Core\Condition\Annotation\Condition.
- */
 
 namespace Drupal\Core\Condition\Annotation;
 
@@ -53,11 +49,13 @@ class Condition extends Plugin {
   public $module;
 
   /**
-   * An array of contextual data.
+   * An array of context definitions describing the context used by the plugin.
    *
-   * @var array
+   * The array is keyed by context names.
+   *
+   * @var \Drupal\Core\Annotation\ContextDefinition[]
    */
-  public $condition = array();
+  public $context = array();
 
   /**
    * The category under which the condition should listed in the UI.

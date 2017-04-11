@@ -1,15 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\editor\Form\EditorLinkDialog.
- */
-
 namespace Drupal\editor\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\filter\Entity\FilterFormat;
+use Drupal\editor\Entity\Editor;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\editor\Ajax\EditorDialogSave;
@@ -30,10 +25,10 @@ class EditorLinkDialog extends FormBase {
   /**
    * {@inheritdoc}
    *
-   * @param \Drupal\filter\Entity\FilterFormat $filter_format
-   *   The filter format for which this dialog corresponds.
+   * @param \Drupal\editor\Entity\Editor $editor
+   *   The text editor to which this dialog corresponds.
    */
-  public function buildForm(array $form, FormStateInterface $form_state, FilterFormat $filter_format = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, Editor $editor = NULL) {
     // The default values are set directly from \Drupal::request()->request,
     // provided by the editor plugin opening the dialog.
     $user_input = $form_state->getUserInput();
@@ -51,13 +46,6 @@ class EditorLinkDialog extends FormBase {
       '#type' => 'textfield',
       '#default_value' => isset($input['href']) ? $input['href'] : '',
       '#maxlength' => 2048,
-    );
-
-    $form['attributes']['target'] = array(
-      '#title' => $this->t('Open in new window'),
-      '#type' => 'checkbox',
-      '#default_value' => !empty($input['target']),
-      '#return_value' => '_blank',
     );
 
     $form['actions'] = array(

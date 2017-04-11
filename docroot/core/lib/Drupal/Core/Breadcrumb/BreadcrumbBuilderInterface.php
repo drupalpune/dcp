@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface.
- */
-
 namespace Drupal\Core\Breadcrumb;
 
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -32,9 +27,8 @@ interface BreadcrumbBuilderInterface {
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The current route match.
    *
-   * @return \Drupal\Core\Link[]
-   *   An array of links for the breadcrumb. Returning an empty array will
-   *   suppress all breadcrumbs.
+   * @return \Drupal\Core\Breadcrumb\Breadcrumb
+   *   A breadcrumb.
    */
   public function build(RouteMatchInterface $route_match);
 

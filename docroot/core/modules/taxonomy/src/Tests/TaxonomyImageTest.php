@@ -1,13 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Tests\TaxonomyImageTest.
- */
-
 namespace Drupal\taxonomy\Tests;
 
+use Drupal\field\Entity\FieldConfig;
 use Drupal\user\RoleInterface;
+use Drupal\file\Entity\File;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests access checks of private image fields.
@@ -40,7 +38,7 @@ class TaxonomyImageTest extends TaxonomyTestBase {
     // Add a field to the vocabulary.
     $entity_type = 'taxonomy_term';
     $name = 'field_test';
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'field_name' => $name,
       'entity_type' => $entity_type,
       'type' => 'image',
@@ -48,12 +46,12 @@ class TaxonomyImageTest extends TaxonomyTestBase {
         'uri_scheme' => 'private',
       ),
     ))->save();
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_name' => $name,
       'entity_type' => $entity_type,
       'bundle' => $this->vocabulary->id(),
       'settings' => array(),
-    ))->save();
+    ])->save();
     entity_get_display($entity_type, $this->vocabulary->id(), 'default')
       ->setComponent($name, array(
         'type' => 'image',
@@ -77,7 +75,7 @@ class TaxonomyImageTest extends TaxonomyTestBase {
     $image = array_pop($files);
     $edit['name[0][value]'] = $this->randomMachineName();
     $edit['files[field_test_0]'] = drupal_realpath($image->uri);
-    $this->drupalPostForm('admin/structure/taxonomy/manage/' . $this->vocabulary->id()  . '/add', $edit, t('Save'));
+    $this->drupalPostForm('admin/structure/taxonomy/manage/' . $this->vocabulary->id() . '/add', $edit, t('Save'));
     $this->drupalPostForm(NULL, ['field_test[0][alt]' => $this->randomMachineName()], t('Save'));
     $terms = entity_load_multiple_by_properties('taxonomy_term', array('name' => $edit['name[0][value]']));
     $term = reset($terms);
@@ -86,7 +84,7 @@ class TaxonomyImageTest extends TaxonomyTestBase {
     // Create a user that should have access to the file and one that doesn't.
     $access_user = $this->drupalCreateUser(array('access content'));
     $no_access_user = $this->drupalCreateUser();
-    $image = file_load($term->field_test->target_id);
+    $image = File::load($term->field_test->target_id);
     $this->drupalLogin($access_user);
     $this->drupalGet(file_create_url($image->getFileUri()));
     $this->assertResponse(200, 'Private image on term is accessible with right permission');

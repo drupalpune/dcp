@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Query\Sql\Query.
- */
-
 namespace Drupal\Core\Entity\Query\Sql;
 
 use Drupal\Core\Database\Connection;
@@ -52,13 +47,6 @@ class Query extends QueryBase implements QueryInterface {
   protected $connection;
 
   /**
-   * Stores the entity manager used by the query.
-   *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
-   */
-  protected $entityManager;
-
-  /**
    * Constructs a query object.
    *
    * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
@@ -78,7 +66,7 @@ class Query extends QueryBase implements QueryInterface {
 
 
   /**
-   * Implements \Drupal\Core\Entity\Query\QueryInterface::execute().
+   * {@inheritdoc}
    */
   public function execute() {
     return $this
@@ -92,11 +80,11 @@ class Query extends QueryBase implements QueryInterface {
   /**
    * Prepares the basic query with proper metadata/tags and base fields.
    *
-   * @throws \Drupal\Core\Entity\Query\QueryException
-   *   Thrown if the base table does not exists.
-   *
    * @return \Drupal\Core\Entity\Query\Sql\Query
    *   Returns the called object.
+   *
+   * @throws \Drupal\Core\Entity\Query\QueryException
+   *   Thrown if the base table does not exist.
    */
   protected function prepare() {
     if ($this->allRevisions) {
@@ -237,7 +225,7 @@ class Query extends QueryBase implements QueryInterface {
     if ($this->range) {
       $this->sqlQuery->range($this->range['start'], $this->range['length']);
     }
-   foreach ($this->sqlGroupBy as $field) {
+    foreach ($this->sqlGroupBy as $field) {
       $this->sqlQuery->groupBy($field);
     }
     foreach ($this->sqlFields as $field) {

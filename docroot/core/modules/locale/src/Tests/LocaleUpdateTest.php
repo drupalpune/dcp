@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\locale\Tests\LocaleUpdateTest.
- */
-
 namespace Drupal\locale\Tests;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -141,7 +136,7 @@ class LocaleUpdateTest extends LocaleUpdateBase {
     // Check the status on the Available translation status page.
     $this->assertRaw('<label for="edit-langcodes-de" class="visually-hidden">Update German</label>', 'German language found');
     $this->assertText('Updates for: Contributed module one, Contributed module two, Custom module one, Locale test', 'Updates found');
-    $this->assertText('Contributed module one (' . format_date($this->timestampNow, 'html_date') . ')', 'Updates for Contrib module one');
+    $this->assertText('Contributed module one (' . format_date($this->timestampNew, 'html_date') . ')', 'Updates for Contrib module one');
     $this->assertText('Contributed module two (' . format_date($this->timestampNew, 'html_date') . ')', 'Updates for Contrib module two');
 
     // Execute the translation update.
@@ -315,7 +310,7 @@ class LocaleUpdateTest extends LocaleUpdateBase {
     $edit = array(
       'modules[Testing][locale_test_translate][enable]' => 'locale_test_translate',
     );
-    $this->drupalPostForm('admin/modules', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/modules', $edit, t('Install'));
 
     // Check if translations have been imported.
     $this->assertRaw(t('One translation file imported. %number translations were added, %update translations were updated and %delete translations were removed.',
@@ -350,7 +345,7 @@ class LocaleUpdateTest extends LocaleUpdateBase {
     $edit = array(
       'modules[Testing][locale_test_translate][enable]' => 'locale_test_translate',
     );
-    $this->drupalPostForm('admin/modules', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/modules', $edit, t('Install'));
 
     // Check if there is no Dutch translation yet.
     $this->assertTranslation('Extraday', '', 'nl');
@@ -394,7 +389,7 @@ class LocaleUpdateTest extends LocaleUpdateBase {
     $edit = array(
       'modules[Testing][locale_test_translate][enable]' => 'locale_test_translate',
     );
-    $this->drupalPostForm('admin/modules', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/modules', $edit, t('Install'));
 
     // Create a custom language with language code 'xx' and a random
     // name.

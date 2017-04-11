@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Email.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -12,6 +7,20 @@ use Drupal\Core\Render\Element;
 
 /**
  * Provides a form input element for entering an email address.
+ *
+ * Properties:
+ * - #default_value: An RFC-compliant email address.
+ * - #size: The size of the input element in characters.
+ *
+ * Example usage:
+ * @code
+ * $form['email'] = array(
+ *   '#type' => 'email',
+ *   '#title' => $this->t('Email'),
+ * );
+ * @end
+ *
+ * @see \Drupal\Core\Render\Element\Render\Textfield
  *
  * @FormElement("email")
  */

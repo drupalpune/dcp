@@ -1,19 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\ConfigManager.
- */
-
 namespace Drupal\Core\Config;
 
 use Drupal\Component\Diff\Diff;
-use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\Entity\ConfigDependencyManager;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Serialization\Yaml;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -155,11 +150,15 @@ class ConfigManager implements ConfigManagerInterface {
     // Check for new or removed files.
     if ($source_data === array('false')) {
       // Added file.
-      $source_data = array($this->t('File added'));
+      // Cast the result of t() to a string, as the diff engine doesn't know
+      // about objects.
+      $source_data = array((string) $this->t('File added'));
     }
     if ($target_data === array('false')) {
       // Deleted file.
-      $target_data = array($this->t('File removed'));
+      // Cast the result of t() to a string, as the diff engine doesn't know
+      // about objects.
+      $target_data = array((string) $this->t('File removed'));
     }
 
     return new Diff($source_data, $target_data);
@@ -228,16 +227,20 @@ class ConfigManager implements ConfigManagerInterface {
    */
   public function getConfigDependencyManager() {
     $dependency_manager = new ConfigDependencyManager();
-    // This uses the configuration storage directly to avoid blowing the static
-    // caches in the configuration factory and the configuration entity system.
-    // Additionally this ensures that configuration entity dependency discovery
-    // has no dependencies on the config entity classes. Assume data with UUID
-    // is a config entity. Only configuration entities can be depended on so we
-    // can ignore everything else.
-    $data = array_filter($this->activeStorage->readMultiple($this->activeStorage->listAll()), function($config) {
-      return isset($config['uuid']);
-    });
-    $dependency_manager->setData($data);
+    // Read all configuration using the factory. This ensures that multiple
+    // deletes during the same request benefit from the static cache. Using the
+    // factory also ensures configuration entity dependency discovery has no
+    // dependencies on the config entity classes. Assume data with UUID is a
+    // config entity. Only configuration entities can be depended on so we can
+    // ignore everything else.
+    $data = array_map(function($config) {
+      $data = $config->get();
+      if (isset($data['uuid'])) {
+        return $data;
+      }
+      return FALSE;
+    }, $this->configFactory->loadMultiple($this->activeStorage->listAll()));
+    $dependency_manager->setData(array_filter($data));
     return $dependency_manager;
   }
 
@@ -294,7 +297,7 @@ class ConfigManager implements ConfigManagerInterface {
     $dependency_manager = $this->getConfigDependencyManager();
     $dependents = $this->findConfigEntityDependentsAsEntities($type, $names, $dependency_manager);
     $original_dependencies = $dependents;
-    $update_uuids = [];
+    $delete_uuids = [];
 
     $return = [
       'update' => [],
@@ -302,57 +305,68 @@ class ConfigManager implements ConfigManagerInterface {
       'unchanged' => [],
     ];
 
+    // Create a map of UUIDs to $original_dependencies key so that we can remove
+    // fixed dependencies.
+    $uuid_map = [];
+    foreach ($original_dependencies as $key => $entity) {
+      $uuid_map[$entity->uuid()] = $key;
+    }
+
     // Try to fix any dependencies and find out what will happen to the
-    // dependency graph.
-    foreach ($dependents as $dependent) {
+    // dependency graph. Entities are processed in the order of most dependent
+    // first. For example, this ensures that Menu UI third party dependencies on
+    // node types are fixed before processing the node type's other
+    // dependencies.
+    while ($dependent = array_pop($dependents)) {
       /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $dependent */
       if ($dry_run) {
         // Clone the entity so any changes do not change any static caches.
         $dependent = clone $dependent;
       }
+      $fixed = FALSE;
       if ($this->callOnDependencyRemoval($dependent, $original_dependencies, $type, $names)) {
         // Recalculate dependencies and update the dependency graph data.
-        $dependency_manager->updateData($dependent->getConfigDependencyName(), $dependent->calculateDependencies());
-        // Based on the updated data rebuild the list of dependents.
+        $dependent->calculateDependencies();
+        $dependency_manager->updateData($dependent->getConfigDependencyName(), $dependent->getDependencies());
+        // Based on the updated data rebuild the list of dependents. This will
+        // remove entities that are no longer dependent after the recalculation.
         $dependents = $this->findConfigEntityDependentsAsEntities($type, $names, $dependency_manager);
+        // Remove any entities that we've already marked for deletion.
+        $dependents = array_filter($dependents, function ($dependent) use ($delete_uuids) {
+          return !in_array($dependent->uuid(), $delete_uuids);
+        });
         // Ensure that the dependency has actually been fixed. It is possible
         // that the dependent has multiple dependencies that cause it to be in
         // the dependency chain.
         $fixed = TRUE;
-        foreach ($dependents as $entity) {
+        foreach ($dependents as $key => $entity) {
           if ($entity->uuid() == $dependent->uuid()) {
             $fixed = FALSE;
+            unset($dependents[$key]);
             break;
           }
         }
         if ($fixed) {
+          // Remove the fixed dependency from the list of original dependencies.
+          unset($original_dependencies[$uuid_map[$dependent->uuid()]]);
           $return['update'][] = $dependent;
-          $update_uuids[] = $dependent->uuid();
         }
       }
+      // If the entity cannot be fixed then it has to be deleted.
+      if (!$fixed) {
+        $delete_uuids[] = $dependent->uuid();
+        // Deletes should occur in the order of the least dependent first. For
+        // example, this ensures that fields are removed before field storages.
+        array_unshift($return['delete'], $dependent);
+      }
     }
-    // Now that we've fixed all the possible dependencies the remaining need to
-    // be deleted. Reverse the deletes so that entities are removed in the
-    // correct order of dependence. For example, this ensures that fields are
-    // removed before field storages.
-    $return['delete'] = array_reverse($dependents);
-    $delete_uuids = array_map(function($dependent) {
-      return $dependent->uuid();
-    }, $return['delete']);
     // Use the lists of UUIDs to filter the original list to work out which
     // configuration entities are unchanged.
-    $return['unchanged'] = array_filter($original_dependencies, function ($dependent) use ($delete_uuids, $update_uuids) {
-      return !(in_array($dependent->uuid(), $delete_uuids) || in_array($dependent->uuid(), $update_uuids));
+    $return['unchanged'] = array_filter($original_dependencies, function ($dependent) use ($delete_uuids) {
+      return !(in_array($dependent->uuid(), $delete_uuids));
     });
 
     return $return;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function supportsConfigurationEntities($collection) {
-    return $collection == StorageInterface::DEFAULT_COLLECTION;
   }
 
   /**
@@ -456,6 +470,9 @@ class ConfigManager implements ConfigManagerInterface {
     foreach ($this->activeStorage->readMultiple($this->activeStorage->listAll()) as $config_data) {
       if (isset($config_data['dependencies']['content'])) {
         $content_dependencies = array_merge($content_dependencies, $config_data['dependencies']['content']);
+      }
+      if (isset($config_data['dependencies']['enforced']['content'])) {
+        $content_dependencies = array_merge($content_dependencies, $config_data['dependencies']['enforced']['content']);
       }
     }
     foreach (array_unique($content_dependencies) as $content_dependency) {

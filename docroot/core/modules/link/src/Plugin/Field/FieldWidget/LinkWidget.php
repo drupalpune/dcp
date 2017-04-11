@@ -1,20 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\link\Plugin\Field\FieldWidget\LinkWidget.
- */
-
 namespace Drupal\link\Plugin\Field\FieldWidget;
 
-use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\link\LinkItemInterface;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
@@ -159,7 +151,9 @@ class LinkWidget extends WidgetBase {
   public static function validateTitleElement(&$element, FormStateInterface $form_state, $form) {
     if ($element['uri']['#value'] !== '' && $element['title']['#value'] === '') {
       $element['title']['#required'] = TRUE;
-      $form_state->setError($element['title'], t('!name field is required.', array('!name' => $element['title']['#title'])));
+      // We expect the field name placeholder value to be wrapped in t() here,
+      // so it won't be escaped again as it's already marked safe.
+      $form_state->setError($element['title'], t('@name field is required.', array('@name' => $element['title']['#title'])));
     }
   }
 
@@ -351,7 +345,7 @@ class LinkWidget extends WidgetBase {
   public function flagErrors(FieldItemListInterface $items, ConstraintViolationListInterface $violations, array $form, FormStateInterface $form_state) {
     /** @var \Symfony\Component\Validator\ConstraintViolationInterface $violation */
     foreach ($violations as $offset => $violation) {
-      $parameters = $violation->getMessageParameters();
+      $parameters = $violation->getParameters();
       if (isset($parameters['@uri'])) {
         $parameters['@uri'] = static::getUriAsDisplayableString($parameters['@uri']);
         $violations->set($offset, new ConstraintViolation(
@@ -361,7 +355,7 @@ class LinkWidget extends WidgetBase {
           $violation->getRoot(),
           $violation->getPropertyPath(),
           $violation->getInvalidValue(),
-          $violation->getMessagePluralization(),
+          $violation->getPlural(),
           $violation->getCode()
         ));
       }

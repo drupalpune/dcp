@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\tour\TourViewBuilder.
- */
-
 namespace Drupal\tour;
 
 use Drupal\Core\Entity\EntityViewBuilder;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Utility\Html;
 
 /**
@@ -44,7 +38,7 @@ class TourViewBuilder extends EntityViewBuilder {
                   'tour-progress',
                 ),
               ),
-              '#children' => t('!tour_item of !total', array('!tour_item' => $index + 1, '!total' => $count)),
+              '#children' => t('@tour_item of @total', array('@tour_item' => $index + 1, '@total' => $count)),
             ),
             '#wrapper_attributes' => $tip->getAttributes() + $attributes,
           );

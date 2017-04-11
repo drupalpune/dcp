@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\TypedData\DataReferenceBase.
- */
-
 namespace Drupal\Core\TypedData;
 
 /**
@@ -19,7 +14,7 @@ namespace Drupal\Core\TypedData;
  *
  * @see \Drupal\Core\TypedData\DataReferenceDefinition
  */
-abstract class DataReferenceBase extends TypedData implements DataReferenceInterface  {
+abstract class DataReferenceBase extends TypedData implements DataReferenceInterface {
 
   /**
    * The referenced data.
@@ -48,7 +43,7 @@ abstract class DataReferenceBase extends TypedData implements DataReferenceInter
    * {@inheritdoc}
    */
   public function setValue($value, $notify = TRUE) {
-    $this->target = \Drupal::typedDataManager()->create($this->definition->getTargetDefinition(), $value);
+    $this->target = $this->getTypedDataManager()->create($this->definition->getTargetDefinition(), $value);
     // Notify the parent of any changes.
     if ($notify && isset($this->parent)) {
       $this->parent->onChange($this->name);

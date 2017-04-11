@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- *
- * Contains \Drupal\field_test\Plugin\Field\FieldFormatter\TestFieldNoSettingsFormatter.
- */
 namespace Drupal\field_test\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -27,7 +22,7 @@ class TestFieldNoSettingsFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = array();
 
     foreach ($items as $delta => $item) {

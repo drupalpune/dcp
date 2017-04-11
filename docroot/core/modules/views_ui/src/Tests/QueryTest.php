@@ -1,16 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Tests\QueryTest.
- */
-
 namespace Drupal\views_ui\Tests;
 
 use Drupal\views\Views;
 use Drupal\views\Entity\View;
-use Drupal\views\Tests\ViewTestBase;
-use Drupal\views_test_data\Plugin\views\query\QueryTest as QueryTestPlugin;
 
 /**
  * Tests query plugins.
@@ -27,7 +20,7 @@ class QueryTest extends UITestBase {
   public static $testViews = array('test_view');
 
   /**
-   * Overrides \Drupal\views\Tests\ViewTestBase::viewsData().
+   * {@inheritdoc}
    */
   protected function viewsData() {
     $data = parent::viewsData();

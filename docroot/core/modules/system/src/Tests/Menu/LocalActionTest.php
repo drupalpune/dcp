@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Menu\LocalActionTest.
- */
-
 namespace Drupal\system\Tests\Menu;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 use Drupal\simpletest\WebTestBase;
 
@@ -18,9 +14,20 @@ use Drupal\simpletest\WebTestBase;
 class LocalActionTest extends WebTestBase {
 
   /**
+   * Modules to enable.
+   *
+   * @var string[]
+   */
+  public static $modules = ['block', 'menu_test'];
+
+  /**
    * {@inheritdoc}
    */
-  public static $modules = array('menu_test');
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('local_actions_block');
+  }
 
   /**
    * Tests appearance of local actions.
@@ -30,9 +37,27 @@ class LocalActionTest extends WebTestBase {
     // Ensure that both menu and route based actions are shown.
     $this->assertLocalAction([
       [Url::fromRoute('menu_test.local_action4'), 'My dynamic-title action'],
+      [Url::fromRoute('menu_test.local_action4'), Html::escape("<script>alert('Welcome to the jungle!')</script>")],
+      [Url::fromRoute('menu_test.local_action4'), Html::escape("<script>alert('Welcome to the derived jungle!')</script>")],
       [Url::fromRoute('menu_test.local_action2'), 'My hook_menu action'],
       [Url::fromRoute('menu_test.local_action3'), 'My YAML discovery action'],
       [Url::fromRoute('menu_test.local_action5'), 'Title override'],
+    ]);
+    // Test a local action title that changes based on a config value.
+    $this->drupalGet(Url::fromRoute('menu_test.local_action6'));
+    $this->assertLocalAction([
+      [Url::fromRoute('menu_test.local_action5'), 'Original title'],
+    ]);
+    // Verify the expected cache tag in the response headers.
+    $header_values = explode(' ', $this->drupalGetHeader('x-drupal-cache-tags'));
+    $this->assertTrue(in_array('config:menu_test.links.action', $header_values), "Found 'config:menu_test.links.action' cache tag in header");
+    /** @var \Drupal\Core\Config\Config $config */
+    $config = $this->container->get('config.factory')->getEditable('menu_test.links.action');
+    $config->set('title', 'New title');
+    $config->save();
+    $this->drupalGet(Url::fromRoute('menu_test.local_action6'));
+    $this->assertLocalAction([
+      [Url::fromRoute('menu_test.local_action5'), 'New title'],
     ]);
   }
 
@@ -50,7 +75,11 @@ class LocalActionTest extends WebTestBase {
     foreach ($actions as $action) {
       /** @var \Drupal\Core\Url $url */
       list($url, $title) = $action;
-      $this->assertEqual((string) $elements[$index], $title);
+      // SimpleXML gives us the unescaped text, not the actual escaped markup,
+      // so use a pattern instead to check the raw content.
+      // This behaviour is a bug in libxml, see
+      // https://bugs.php.net/bug.php?id=49437.
+      $this->assertPattern('@<a [^>]*class="[^"]*button-action[^"]*"[^>]*>' . preg_quote($title, '@') . '</@');
       $this->assertEqual($elements[$index]['href'], $url->toString());
       $index++;
     }

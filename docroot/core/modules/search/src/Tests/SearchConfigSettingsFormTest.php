@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\search\Tests\SearchConfigSettingsFormTest.
- */
-
 namespace Drupal\search\Tests;
 
 use Drupal\Core\Url;
+use Drupal\search\Entity\SearchPage;
 
 /**
  * Verify the search config settings form.
@@ -40,7 +36,7 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Login as a user that can create and search content.
+    // Log in as a user that can create and search content.
     $this->searchUser = $this->drupalCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks', 'access site reports'));
     $this->drupalLogin($this->searchUser);
 
@@ -58,6 +54,8 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
 
     // Enable the search block.
     $this->drupalPlaceBlock('search_form_block');
+    $this->drupalPlaceBlock('local_tasks_block');
+    $this->drupalPlaceBlock('page_title_block');
   }
 
   /**
@@ -148,7 +146,7 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
     );
     $plugins = array_keys($plugin_info);
     /** @var $entities \Drupal\search\SearchPageInterface[] */
-    $entities = entity_load_multiple('search_page');
+    $entities = SearchPage::loadMultiple();
     // Disable all of the search pages.
     foreach ($entities as $entity) {
       $entity->disable()->save();
@@ -156,8 +154,7 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
 
     // Test each plugin if it's enabled as the only search plugin.
     foreach ($entities as $entity_id => $entity) {
-      // Set this as default.
-      $this->drupalGet("admin/config/search/pages/manage/$entity_id/set-default");
+      $this->setDefaultThroughUi($entity_id);
 
       // Run a search from the correct search URL.
       $info = $plugin_info[$entity_id];
@@ -189,13 +186,16 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
       $entity->disable()->save();
     }
 
+    // Set the node search as default.
+    $this->setDefaultThroughUi('node_search');
+
     // Test with all search plugins enabled. When you go to the search
     // page or run search, all plugins should be shown.
     foreach ($entities as $entity) {
       $entity->enable()->save();
     }
-    // Set the node search as default.
-    $this->drupalGet('admin/config/search/pages/manage/node_search/set-default');
+
+    \Drupal::service('router.builder')->rebuild();
 
     $paths = array(
       array('path' => 'search/node', 'options' => array('query' => array('keys' => 'pizza'))),
@@ -239,26 +239,26 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
     // Add a search page.
     $edit = array();
     $edit['search_type'] = 'search_extra_type_search';
-    $this->drupalPostForm(NULL, $edit, t('Add new page'));
+    $this->drupalPostForm(NULL, $edit, t('Add search page'));
     $this->assertTitle('Add new search page | Drupal');
 
     $first = array();
     $first['label'] = $this->randomString();
     $first_id = $first['id'] = strtolower($this->randomMachineName(8));
     $first['path'] = strtolower($this->randomMachineName(8));
-    $this->drupalPostForm(NULL, $first, t('Add search page'));
+    $this->drupalPostForm(NULL, $first, t('Save'));
     $this->assertDefaultSearch($first_id, 'The default page matches the only search page.');
     $this->assertRaw(t('The %label search page has been added.', array('%label' => $first['label'])));
 
     // Attempt to add a search page with an existing path.
     $edit = array();
     $edit['search_type'] = 'search_extra_type_search';
-    $this->drupalPostForm(NULL, $edit, t('Add new page'));
+    $this->drupalPostForm(NULL, $edit, t('Add search page'));
     $edit = array();
     $edit['label'] = $this->randomString();
     $edit['id'] = strtolower($this->randomMachineName(8));
     $edit['path'] = $first['path'];
-    $this->drupalPostForm(NULL, $edit, t('Add search page'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertText(t('The search page path must be unique.'));
 
     // Add a second search page.
@@ -266,7 +266,7 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
     $second['label'] = $this->randomString();
     $second_id = $second['id'] = strtolower($this->randomMachineName(8));
     $second['path'] = strtolower($this->randomMachineName(8));
-    $this->drupalPostForm(NULL, $second, t('Add search page'));
+    $this->drupalPostForm(NULL, $second, t('Save'));
     $this->assertDefaultSearch($first_id, 'The default page matches the only search page.');
 
     // Ensure both search pages have their tabs displayed.
@@ -316,6 +316,19 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->assertRaw(t('The search page %label has been deleted.', array('%label' => $first['label'])));
     $this->verifySearchPageOperations($first_id, FALSE, FALSE, FALSE, FALSE);
+  }
+
+  /**
+   * Tests that the enable/disable/default routes are protected from CSRF.
+   */
+  public function testRouteProtection() {
+    // Ensure that the enable and disable routes are protected.
+    $this->drupalGet('admin/config/search/pages/manage/node_search/enable');
+    $this->assertResponse(403);
+    $this->drupalGet('admin/config/search/pages/manage/node_search/disable');
+    $this->assertResponse(403);
+    $this->drupalGet('admin/config/search/pages/manage/node_search/set-default');
+    $this->assertResponse(403);
   }
 
   /**
@@ -373,6 +386,19 @@ class SearchConfigSettingsFormTest extends SearchTestBase {
     /** @var $search_page_repository \Drupal\search\SearchPageRepositoryInterface */
     $search_page_repository = \Drupal::service('search.search_page_repository');
     $this->assertIdentical($search_page_repository->getDefaultSearchPage(), $expected, $message, $group);
+  }
+
+  /**
+   * Sets a search page as the default in the UI.
+   *
+   * @param string $entity_id
+   *   The search page entity ID to enable.
+   */
+  protected function setDefaultThroughUi($entity_id) {
+    $this->drupalGet('admin/config/search/pages');
+    preg_match('|href="([^"]+' . $entity_id . '/set-default[^"]+)"|', $this->getRawContent(), $matches);
+
+    $this->drupalGet($this->getAbsoluteUrl($matches[1]));
   }
 
 }

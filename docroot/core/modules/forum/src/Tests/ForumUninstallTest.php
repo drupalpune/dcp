@@ -1,20 +1,13 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\forum\Tests\ForumUninstallTest.
- */
-
 namespace Drupal\forum\Tests;
 
 use Drupal\comment\CommentInterface;
-use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
-use Drupal\Core\DrupalKernel;
-use Drupal\Core\Session\UserSession;
-use Drupal\Core\Site\Settings;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\NodeType;
 use Drupal\simpletest\WebTestBase;
+use Drupal\comment\Entity\Comment;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Tests forum module uninstallation.
@@ -40,14 +33,14 @@ class ForumUninstallTest extends WebTestBase {
     $this->assertNotNull($field_storage, 'The taxonomy_forums field storage exists.');
 
     // Create a taxonomy term.
-    $term = entity_create('taxonomy_term', array(
+    $term = Term::create([
       'name' => t('A term'),
       'langcode' => \Drupal::languageManager()->getDefaultLanguage()->getId(),
       'description' => '',
       'parent' => array(0),
       'vid' => 'forums',
       'forum_container' => 0,
-    ));
+    ]);
     $term->save();
 
     // Create a forum node.
@@ -58,7 +51,7 @@ class ForumUninstallTest extends WebTestBase {
     ));
 
     // Create at least one comment against the forum node.
-    $comment = entity_create('comment', array(
+    $comment = Comment::create(array(
       'entity_id' => $node->nid->value,
       'entity_type' => 'node',
       'field_name' => 'comment_forum',
@@ -74,8 +67,7 @@ class ForumUninstallTest extends WebTestBase {
     $this->drupalGet('admin/modules/uninstall');
     // Assert forum is required.
     $this->assertNoFieldByName('uninstall[forum]');
-    $this->drupalGet('admin/modules');
-    $this->assertText('To uninstall Forum first delete all Forum content');
+    $this->assertText('To uninstall Forum, first delete all Forum content');
 
     // Delete the node.
     $this->drupalPostForm('node/' . $node->id() . '/delete', array(), t('Delete'));
@@ -84,8 +76,7 @@ class ForumUninstallTest extends WebTestBase {
     $this->drupalGet('admin/modules/uninstall');
     // Assert forum is still required.
     $this->assertNoFieldByName('uninstall[forum]');
-    $this->drupalGet('admin/modules');
-    $this->assertText('To uninstall Forum first delete all Forums terms');
+    $this->assertText('To uninstall Forum, first delete all Forums terms');
 
     // Delete any forum terms.
     $vid = $this->config('forum.settings')->get('vocabulary');
@@ -102,8 +93,6 @@ class ForumUninstallTest extends WebTestBase {
     $this->drupalGet('admin/modules/uninstall');
     // Assert forum is no longer required.
     $this->assertFieldByName('uninstall[forum]');
-    $this->drupalGet('admin/modules');
-    $this->assertNoText('To uninstall Forum first delete all Forum content');
     $this->drupalPostForm('admin/modules/uninstall', array(
       'uninstall[forum]' => 1,
     ), t('Uninstall'));
@@ -127,6 +116,10 @@ class ForumUninstallTest extends WebTestBase {
     $this->drupalPostForm(NULL, array(), t('Delete'));
     $this->assertResponse(200);
     $this->assertFalse((bool) NodeType::load('forum'), 'Node type with machine forum deleted.');
+
+    // Double check everything by reinstalling the forum module again.
+    $this->drupalPostForm('admin/modules', ['modules[Core][forum][enable]' => 1], 'Install');
+    $this->assertText('Module Forum has been enabled.');
   }
 
   /**
@@ -141,6 +134,13 @@ class ForumUninstallTest extends WebTestBase {
     // Check that the field is now deleted.
     $field_storage = FieldStorageConfig::loadByName('node', 'taxonomy_forums');
     $this->assertNull($field_storage, 'The taxonomy_forums field storage has been deleted.');
+
+    // Delete all terms in the Forums vocabulary. Uninstalling the forum module
+    // will fail unless this is done.
+    $terms = entity_load_multiple_by_properties('taxonomy_term', array('vid' => 'forums'));
+    foreach ($terms as $term) {
+      $term->delete();
+    }
 
     // Ensure that uninstallation succeeds even if the field has already been
     // deleted manually beforehand.

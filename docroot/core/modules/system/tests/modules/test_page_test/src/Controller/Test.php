@@ -1,11 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\test_page_test\Controller\Test.
- */
-
 namespace Drupal\test_page_test\Controller;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Defines a test controller for page titles.
@@ -50,6 +46,20 @@ class Test {
   }
 
   /**
+   * Defines a controller with a cached render array.
+   *
+   * @return array
+   *   A render array
+   */
+  public function controllerWithCache() {
+    $build = [];
+    $build['#title'] = '<span>Cached title</span>';
+    $build['#cache']['keys'] = ['test_controller', 'with_title'];
+
+    return $build;
+  }
+
+  /**
    * Returns a generic page render array for title tests.
    *
    * @return array
@@ -59,6 +69,33 @@ class Test {
     return array(
       '#markup' => 'Content',
     );
+  }
+
+  /**
+   * Throws a HTTP exception.
+   *
+   * @param int $code
+   *   The status code.
+   */
+  public function httpResponseException($code) {
+    throw new HttpException($code);
+  }
+
+  public function error() {
+    trigger_error('foo', E_USER_NOTICE);
+    return [
+      '#markup' => 'Content',
+    ];
+  }
+
+  /**
+   * Renders a page with encoded markup.
+   *
+   * @return array
+   *   A render array as expected by drupal_render()
+   */
+  public function renderEncodedMarkup() {
+    return ['#plain_text' => 'Bad html <script>alert(123);</script>'];
   }
 
 }

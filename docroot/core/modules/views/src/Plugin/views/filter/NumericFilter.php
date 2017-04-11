@@ -1,14 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\filter\NumericFilter.
- */
-
 namespace Drupal\views\Plugin\views\filter;
 
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Database\Database;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -201,9 +194,10 @@ class NumericFilter extends FilterPluginBase {
     if ($which == 'all' || $which == 'minmax') {
       $form['value']['min'] = array(
         '#type' => 'textfield',
-        '#title' => !$exposed ? $this->t('Min') : '',
+        '#title' => !$exposed ? $this->t('Min') : $this->exposedInfo()['label'],
         '#size' => 30,
         '#default_value' => $this->value['min'],
+        '#description' => !$exposed ? '' : $this->exposedInfo()['description']
       );
       $form['value']['max'] = array(
         '#type' => 'textfield',
@@ -254,7 +248,7 @@ class NumericFilter extends FilterPluginBase {
       $this->query->addWhere($this->options['group'], $field, array($this->value['min'], $this->value['max']), 'BETWEEN');
     }
     else {
-      $this->query->addWhere($this->options['group'], db_or()->condition($field, $this->value['min'], '<=')->condition($field, $this->value['max'], '>='));
+      $this->query->addWhere($this->options['group'], $field, array($this->value['min'], $this->value['max']), 'NOT BETWEEN');
     }
   }
 
@@ -292,12 +286,12 @@ class NumericFilter extends FilterPluginBase {
     }
 
     $options = $this->operatorOptions('short');
-    $output = SafeMarkup::checkPlain($options[$this->operator]);
+    $output = $options[$this->operator];
     if (in_array($this->operator, $this->operatorValues(2))) {
       $output .= ' ' . $this->t('@min and @max', array('@min' => $this->value['min'], '@max' => $this->value['max']));
     }
     elseif (in_array($this->operator, $this->operatorValues(1))) {
-      $output .= ' ' . SafeMarkup::checkPlain($this->value['value']);
+      $output .= ' ' . $this->value['value'];
     }
     return $output;
   }

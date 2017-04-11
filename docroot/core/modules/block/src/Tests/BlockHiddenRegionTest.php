@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\block\Tests\BlockHiddenRegionTest.
- */
-
 namespace Drupal\block\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -42,6 +37,7 @@ class BlockHiddenRegionTest extends WebTestBase {
 
     $this->drupalLogin($this->adminUser);
     $this->drupalPlaceBlock('search_form_block');
+    $this->drupalPlaceBlock('local_tasks_block');
   }
 
   /**
@@ -55,7 +51,9 @@ class BlockHiddenRegionTest extends WebTestBase {
 
     // Install "block_test_theme" and set it as the default theme.
     $theme = 'block_test_theme';
-    \Drupal::service('theme_handler')->install(array($theme));
+    // We need to install a non-hidden theme so that there is more than one
+    // local task.
+    \Drupal::service('theme_handler')->install(array($theme, 'stark'));
     $this->config('system.theme')
       ->set('default', $theme)
       ->save();

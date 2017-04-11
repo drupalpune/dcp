@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\filter\Plugin\Filter\FilterBase.
- */
-
 namespace Drupal\filter\Plugin;
 
 use Drupal\Core\Form\FormStateInterface;

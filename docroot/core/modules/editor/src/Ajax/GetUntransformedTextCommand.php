@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\editor\Ajax\GetUntransformedTextCommand.
- */
-
 namespace Drupal\editor\Ajax;
 
-use Drupal\Core\Ajax\CommandInterface;
-use Drupal\quickedit\Ajax\BaseCommand;
+use Drupal\Core\Ajax\BaseCommand;
 
 /**
  * AJAX command to rerender a formatted text field without any transformation

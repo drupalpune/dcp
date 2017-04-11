@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\ContentEntityType.
- */
-
 namespace Drupal\Core\Entity;
 
 /**
@@ -28,6 +23,22 @@ class ContentEntityType extends EntityType implements ContentEntityTypeInterface
    */
   public function getConfigDependencyKey() {
     return 'content';
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @throws \InvalidArgumentException
+   *   If the provided class does not implement
+   *   \Drupal\Core\Entity\ContentEntityStorageInterface.
+   *
+   * @see \Drupal\Core\Entity\ContentEntityStorageInterface
+   */
+  protected function checkStorageClass($class) {
+    $required_interface = ContentEntityStorageInterface::class;
+    if (!is_subclass_of($class, $required_interface)) {
+      throw new \InvalidArgumentException("$class does not implement $required_interface");
+    }
   }
 
 }

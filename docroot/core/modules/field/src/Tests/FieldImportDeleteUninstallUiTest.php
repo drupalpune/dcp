@@ -1,11 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field\Tests\FieldImportDeleteUninstallUiTest.
- */
-
 namespace Drupal\field\Tests;
+
+use Drupal\entity_test\Entity\EntityTest;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Delete field storages and fields during config synchronization and uninstall
@@ -36,31 +35,31 @@ class FieldImportDeleteUninstallUiTest extends FieldTestBase {
    */
   public function testImportDeleteUninstall() {
     // Create a telephone field.
-    $field_storage = entity_create('field_storage_config', array(
+    $field_storage = FieldStorageConfig::create(array(
       'field_name' => 'field_tel',
       'entity_type' => 'entity_test',
       'type' => 'telephone',
     ));
     $field_storage->save();
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_storage' => $field_storage,
       'bundle' => 'entity_test',
-    ))->save();
+    ])->save();
 
     // Create a text field.
-    $date_field_storage = entity_create('field_storage_config', array(
+    $date_field_storage = FieldStorageConfig::create(array(
       'field_name' => 'field_date',
       'entity_type' => 'entity_test',
       'type' => 'datetime',
     ));
     $date_field_storage->save();
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_storage' => $date_field_storage,
       'bundle' => 'entity_test',
-    ))->save();
+    ])->save();
 
     // Create an entity which has values for the telephone and text field.
-    $entity = entity_create('entity_test');
+    $entity = EntityTest::create();
     $value = '+0123456789';
     $entity->field_tel = $value;
     $entity->field_date = time();
@@ -74,22 +73,22 @@ class FieldImportDeleteUninstallUiTest extends FieldTestBase {
 
     // Verify entity has been created properly.
     $id = $entity->id();
-    $entity = entity_load('entity_test', $id);
+    $entity = EntityTest::load($id);
     $this->assertEqual($entity->field_tel->value, $value);
     $this->assertEqual($entity->field_tel[0]->value, $value);
 
     $active = $this->container->get('config.storage');
-    $staging = $this->container->get('config.storage.staging');
-    $this->copyConfig($active, $staging);
+    $sync = $this->container->get('config.storage.sync');
+    $this->copyConfig($active, $sync);
 
     // Stage uninstall of the Telephone module.
     $core_extension = $this->config('core.extension')->get();
     unset($core_extension['module']['telephone']);
-    $staging->write('core.extension', $core_extension);
+    $sync->write('core.extension', $core_extension);
 
     // Stage the field deletion
-    $staging->delete('field.storage.entity_test.field_tel');
-    $staging->delete('field.field.entity_test.entity_test.field_tel');
+    $sync->delete('field.storage.entity_test.field_tel');
+    $sync->delete('field.field.entity_test.entity_test.field_tel');
     $this->drupalGet('admin/config/development/configuration');
     // Test that the message for one field being purged during a configuration
     // synchronization is correct.
@@ -98,7 +97,7 @@ class FieldImportDeleteUninstallUiTest extends FieldTestBase {
     // Stage an uninstall of the datetime module to test the message for
     // multiple fields.
     unset($core_extension['module']['datetime']);
-    $staging->write('core.extension', $core_extension);
+    $sync->write('core.extension', $core_extension);
 
     $this->drupalGet('admin/config/development/configuration');
     $this->assertText('This synchronization will delete data from the fields: entity_test.field_tel, entity_test.field_date.');

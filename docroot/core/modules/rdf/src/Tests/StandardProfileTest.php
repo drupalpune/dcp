@@ -1,17 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\rdf\Tests\StandardProfileTest.
- */
-
 namespace Drupal\rdf\Tests;
 
 use Drupal\Core\Url;
+use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\simpletest\WebTestBase;
+use Drupal\comment\Entity\Comment;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Tests the RDF mappings and RDFa markup of the standard profile.
@@ -107,6 +105,10 @@ class StandardProfileTest extends WebTestBase {
   protected function setUp() {
     parent::setUp();
 
+    // Use Classy theme for testing markup output.
+    \Drupal::service('theme_handler')->install(['classy']);
+    \Drupal::service('theme_handler')->setDefault('classy');
+
     $this->baseUri = \Drupal::url('<front>', [], ['absolute' => TRUE]);
 
     // Create two test users.
@@ -126,16 +128,16 @@ class StandardProfileTest extends WebTestBase {
     $this->drupalLogin($this->adminUser);
 
     // Create term.
-    $this->term = entity_create('taxonomy_term', array(
+    $this->term = Term::create([
       'name' => $this->randomMachineName(),
       'description' => $this->randomMachineName(),
       'vid' => 'tags',
-    ));
+    ]);
     $this->term->save();
 
     // Create image.
     file_unmanaged_copy(\Drupal::root() . '/core/misc/druplicon.png', 'public://example.jpg');
-    $this->image = entity_create('file', array('uri' => 'public://example.jpg'));
+    $this->image = File::create(['uri' => 'public://example.jpg']);
     $this->image->save();
 
     // Create article.
@@ -356,7 +358,7 @@ class StandardProfileTest extends WebTestBase {
     // Created date.
     $expected_value = array(
       'type' => 'literal',
-      'value' => date_iso8601($node->get('created')->value),
+      'value' => format_date($node->get('created')->value, 'custom', 'c', 'UTC'),
       'lang' => 'en',
     );
     $this->assertTrue($graph->hasProperty($uri, 'http://schema.org/dateCreated', $expected_value), "$message_prefix created date was found (schema:dateCreated) in teaser.");
@@ -445,7 +447,7 @@ class StandardProfileTest extends WebTestBase {
     // Comment created date.
     $expected_value = array(
       'type' => 'literal',
-      'value' => date_iso8601($this->articleComment->get('created')->value),
+      'value' => format_date($this->articleComment->get('created')->value, 'custom', 'c', 'UTC'),
       'lang' => 'en',
     );
     $this->assertTrue($graph->hasProperty($this->articleCommentUri, 'http://schema.org/dateCreated', $expected_value), 'Article comment created date was found (schema:dateCreated).');
@@ -511,7 +513,7 @@ class StandardProfileTest extends WebTestBase {
       $values += $contact;
     }
 
-    $comment = entity_create('comment', $values);
+    $comment = Comment::create($values);
     $comment->save();
     return $comment;
   }
@@ -531,4 +533,5 @@ class StandardProfileTest extends WebTestBase {
     $parser->parse($graph, $this->drupalGet($url), 'rdfa', $this->baseUri);
     return $graph;
   }
+
 }

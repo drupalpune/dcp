@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\UserListBuilder.
- */
-
 namespace Drupal\user;
 
-use Drupal\Core\Datetime\DateFormatter;
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -33,7 +29,7 @@ class UserListBuilder extends EntityListBuilder {
   /**
    * The date formatter service.
    *
-   * @var \Drupal\Core\Datetime\DateFormatter
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
   protected $dateFormatter;
 
@@ -53,12 +49,12 @@ class UserListBuilder extends EntityListBuilder {
    *   The entity storage class.
    * @param \Drupal\Core\Entity\Query\QueryFactory $query_factory
    *   The entity query factory.
-   * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
    *   The date formatter service.
    * @param \Drupal\Core\Routing\RedirectDestinationInterface $redirect_destination
    *   The redirect destination service.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, QueryFactory $query_factory, DateFormatter $date_formatter,  RedirectDestinationInterface $redirect_destination) {
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, QueryFactory $query_factory, DateFormatterInterface $date_formatter, RedirectDestinationInterface $redirect_destination) {
     parent::__construct($entity_type, $storage);
     $this->queryFactory = $query_factory;
     $this->dateFormatter = $date_formatter;
@@ -138,7 +134,7 @@ class UserListBuilder extends EntityListBuilder {
     );
     $row['status'] = $entity->isActive() ? $this->t('active') : $this->t('blocked');
 
-    $roles = array_map('\Drupal\Component\Utility\SafeMarkup::checkPlain', user_role_names(TRUE));
+    $roles = user_role_names(TRUE);
     unset($roles[RoleInterface::AUTHENTICATED_ID]);
     $users_roles = array();
     foreach ($entity->getRoles() as $role) {
@@ -151,10 +147,19 @@ class UserListBuilder extends EntityListBuilder {
       '#theme' => 'item_list',
       '#items' => $users_roles,
     );
-    $row['member_for'] = $this->dateFormatter->formatInterval(REQUEST_TIME - $entity->getCreatedTime());
-    $row['access'] = $entity->access ? $this->t('@time ago', array(
-      '@time' => $this->dateFormatter->formatInterval(REQUEST_TIME - $entity->getLastAccessedTime()),
-    )) : t('never');
+    $options = [
+      'return_as_object' => TRUE,
+    ];
+    $row['member_for']['data'] = $this->dateFormatter->formatTimeDiffSince($entity->getCreatedTime(), $options)->toRenderable();
+    $last_access = $this->dateFormatter->formatTimeDiffSince($entity->getLastAccessedTime(), $options);
+
+    if ($entity->getLastAccessedTime()) {
+      $row['access']['data']['#markup'] = $last_access->getString();
+      CacheableMetadata::createFromObject($last_access)->applyTo($row['access']['data']);
+    }
+    else {
+      $row['access']['data']['#markup'] = t('never');
+    }
     return $row + parent::buildRow($entity);
   }
 

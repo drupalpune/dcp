@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\Tests\migrate\Unit\process\ExtractTest.
- */
 
 namespace Drupal\Tests\migrate\Unit\process;
 
@@ -49,6 +45,15 @@ class ExtractTest extends MigrateProcessTestCase {
    */
   public function testExtractFail() {
     $this->plugin->transform(array('bar' => 'foo'), $this->migrateExecutable, $this->row, 'destinationproperty');
+  }
+
+  /**
+   * Tests unsuccessful extraction.
+   */
+  public function testExtractFailDefault() {
+    $plugin = new Extract(['index' => ['foo'], 'default' => 'test'], 'map', []);
+    $value = $plugin->transform(['bar' => 'foo'], $this->migrateExecutable, $this->row, 'destinationproperty');
+    $this->assertSame($value, 'test', '');
   }
 
 }

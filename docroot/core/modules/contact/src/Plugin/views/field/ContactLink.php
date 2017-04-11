@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\contact\Plugin\views\field\ContactLink.
- */
-
 namespace Drupal\contact\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\views\Plugin\views\field\LinkBase;
 use Drupal\views\ResultRow;

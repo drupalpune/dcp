@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\devel\Form\SystemStateEdit.
- */
-
 namespace Drupal\devel\Form;
 
 use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
@@ -61,7 +56,7 @@ class SystemStateEdit extends FormBase {
     $old_value = $this->state->get($state_name);
 
     if (!isset($old_value)) {
-      drupal_set_message(t('State !name does not exist in the system.', array('!name' => $state_name)), 'warning');
+      drupal_set_message(t('State @name does not exist in the system.', array('@name' => $state_name)), 'warning');
       return;
     }
 
@@ -69,14 +64,14 @@ class SystemStateEdit extends FormBase {
     $disabled = !$this->checkObject($old_value);
 
     if ($disabled) {
-      drupal_set_message(t('Only simple structures are allowed to be edited. State !name contains objects.', array('!name' => $state_name)), 'warning');
+      drupal_set_message(t('Only simple structures are allowed to be edited. State @name contains objects.', array('@name' => $state_name)), 'warning');
     }
 
     // First we will show the user the content of the variable about to be edited.
     $form['value'] = array(
       '#type' => 'item',
       '#title' => $this->t('Current value for %name', array('%name' => $state_name)),
-      '#markup' => kprint_r($old_value, TRUE),
+      '#markup' => kpr($old_value, TRUE),
     );
 
     $transport = 'plain';
@@ -87,7 +82,7 @@ class SystemStateEdit extends FormBase {
         $transport = 'yaml';
       }
       catch (InvalidDataTypeException $e) {
-        drupal_set_message(t('Invalid data detected for !name : %error', array('!name' => $state_name, '%error' => $e->getMessage())), 'error');
+        drupal_set_message(t('Invalid data detected for @name : %error', array('@name' => $state_name, '%error' => $e->getMessage())), 'error');
         return;
       }
     }

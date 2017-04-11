@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views_test_data\Plugin\views\style\StyleTest.
- */
-
 namespace Drupal\views_test_data\Plugin\views\style;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -41,7 +36,7 @@ class StyleTest extends StylePluginBase {
   protected $usesRowPlugin = TRUE;
 
   /**
-   * Overrides Drupal\views\Plugin\views\style\StylePluginBase::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -51,7 +46,7 @@ class StyleTest extends StylePluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\style\StylePluginBase::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
@@ -94,7 +89,7 @@ class StyleTest extends StylePluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\style\StylePluginBase::render()
+   * {@inheritdoc}
    */
   public function render() {
     $output = '';

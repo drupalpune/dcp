@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\locale\StringDatabaseStorage.
- */
-
 namespace Drupal\locale;
 
 use Drupal\Core\Database\Connection;
@@ -180,9 +175,9 @@ class StringDatabaseStorage implements StringStorageInterface {
     if ($string->getId() && $string->getVersion() != $version) {
       $string->setVersion($version);
       $this->connection->update('locales_source', $this->options)
-      ->condition('lid', $string->getId())
-      ->fields(array('version' => $version))
-      ->execute();
+        ->condition('lid', $string->getId())
+        ->fields(array('version' => $version))
+        ->execute();
     }
   }
 
@@ -199,9 +194,7 @@ class StringDatabaseStorage implements StringStorageInterface {
       }
     }
     else {
-      throw new StringStorageException(format_string('The string cannot be deleted because it lacks some key fields: @string', array(
-        '@string' => $string->getString(),
-      )));
+      throw new StringStorageException('The string cannot be deleted because it lacks some key fields: ' . $string->getString());
     }
     return $this;
   }
@@ -433,7 +426,7 @@ class StringDatabaseStorage implements StringStorageInterface {
       }
     }
 
-    // Process other options, string filter, query limit, etc...
+    // Process other options, string filter, query limit, etc.
     if (!empty($options['filters'])) {
       if (count($options['filters']) > 1) {
         $filter = db_or();
@@ -483,9 +476,7 @@ class StringDatabaseStorage implements StringStorageInterface {
         ->execute();
     }
     else {
-      throw new StringStorageException(format_string('The string cannot be saved: @string', array(
-          '@string' => $string->getString(),
-      )));
+      throw new StringStorageException('The string cannot be saved: ' . $string->getString());
     }
   }
 
@@ -516,9 +507,7 @@ class StringDatabaseStorage implements StringStorageInterface {
         ->execute();
     }
     else {
-      throw new StringStorageException(format_string('The string cannot be updated: @string', array(
-          '@string' => $string->getString(),
-      )));
+      throw new StringStorageException('The string cannot be updated: ' . $string->getString());
     }
   }
 
@@ -547,4 +536,5 @@ class StringDatabaseStorage implements StringStorageInterface {
   protected function dbExecute($query, array $args = array()) {
     return $this->connection->query($query, $args, $this->options);
   }
+
 }

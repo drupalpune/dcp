@@ -1,22 +1,15 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\NodeForm.
- */
-
 namespace Drupal\node;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\Entity\User;
 use Drupal\user\PrivateTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form controller for the node edit forms.
+ * Form handler for the node edit forms.
  */
 class NodeForm extends ContentEntityForm {
 
@@ -29,6 +22,9 @@ class NodeForm extends ContentEntityForm {
 
   /**
    * Whether this node has been previewed or not.
+   *
+   * @deprecated Scheduled for removal in Drupal 8.3.x. Use the form state
+   *   property 'has_been_previewed' instead.
    */
   protected $hasBeenPreviewed = FALSE;
 
@@ -72,30 +68,33 @@ class NodeForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
+    $this->hasBeenPreviewed = $form_state->get('has_been_previewed') ?: FALSE;
+
     // Try to restore from temp store, this must be done before calling
     // parent::form().
-    $uuid = $this->entity->uuid();
     $store = $this->tempStoreFactory->get('node_preview');
 
-    // If the user is creating a new node, the UUID is passed in the request.
-    if ($request_uuid = \Drupal::request()->query->get('uuid')) {
-      $uuid = $request_uuid;
-    }
-
-    if ($preview = $store->get($uuid)) {
+    // Attempt to load from preview when the uuid is present unless we are
+    // rebuilding the form.
+    $request_uuid = \Drupal::request()->query->get('uuid');
+    if (!$form_state->isRebuilding() && $request_uuid && $preview = $store->get($request_uuid)) {
       /** @var $preview \Drupal\Core\Form\FormStateInterface */
-      $form_state = $preview;
+
+      $form_state->setStorage($preview->getStorage());
+      $form_state->setUserInput($preview->getUserInput());
 
       // Rebuild the form.
       $form_state->setRebuild();
+
+      // The combination of having user input and rebuilding the form means
+      // that it will attempt to cache the form state which will fail if it is
+      // a GET request.
+      $form_state->setRequestMethod('POST');
+
       $this->entity = $preview->getFormObject()->getEntity();
-      unset($this->entity->in_preview);
+      $this->entity->in_preview = NULL;
 
-      // Remove the stale temp store entry for existing nodes.
-      if (!$this->entity->isNew()) {
-        $store->delete($uuid);
-      }
-
+      $form_state->set('has_been_previewed', TRUE);
       $this->hasBeenPreviewed = TRUE;
     }
 
@@ -204,7 +203,30 @@ class NodeForm extends ContentEntityForm {
 
     $form['#attached']['library'][] = 'node/form';
 
+    $form['#entity_builders']['update_status'] = [$this, 'updateStatus'];
+
     return $form;
+  }
+
+  /**
+   * Entity builder updating the node status with the submitted value.
+   *
+   * @param string $entity_type_id
+   *   The entity type identifier.
+   * @param \Drupal\node\NodeInterface $node
+   *   The node updated with the submitted values.
+   * @param array $form
+   *   The complete form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @see \Drupal\node\NodeForm::form()
+   */
+  function updateStatus($entity_type_id, NodeInterface $node, array $form, FormStateInterface $form_state) {
+    $element = $form_state->getTriggeringElement();
+    if (isset($element['#published_status'])) {
+      $node->setPublished($element['#published_status']);
+    }
   }
 
   /**
@@ -215,7 +237,7 @@ class NodeForm extends ContentEntityForm {
     $node = $this->entity;
     $preview_mode = $node->type->entity->getPreviewMode();
 
-    $element['submit']['#access'] = $preview_mode != DRUPAL_REQUIRED || $this->hasBeenPreviewed;
+    $element['submit']['#access'] = $preview_mode != DRUPAL_REQUIRED || $form_state->get('has_been_previewed');
 
     // If saving is an option, privileged users get dedicated form submit
     // buttons to adjust the publishing status while saving in one go.
@@ -232,6 +254,8 @@ class NodeForm extends ContentEntityForm {
 
       // Add a "Publish" button.
       $element['publish'] = $element['submit'];
+      // If the "Publish" button is clicked, we want to update the status to "published".
+      $element['publish']['#published_status'] = TRUE;
       $element['publish']['#dropbutton'] = 'save';
       if ($node->isNew()) {
         $element['publish']['#value'] = t('Save and publish');
@@ -240,10 +264,11 @@ class NodeForm extends ContentEntityForm {
         $element['publish']['#value'] = $node->isPublished() ? t('Save and keep published') : t('Save and publish');
       }
       $element['publish']['#weight'] = 0;
-      array_unshift($element['publish']['#submit'], '::publish');
 
       // Add a "Unpublish" button.
       $element['unpublish'] = $element['submit'];
+      // If the "Unpublish" button is clicked, we want to update the status to "unpublished".
+      $element['unpublish']['#published_status'] = FALSE;
       $element['unpublish']['#dropbutton'] = 'save';
       if ($node->isNew()) {
         $element['unpublish']['#value'] = t('Save as unpublished');
@@ -252,7 +277,6 @@ class NodeForm extends ContentEntityForm {
         $element['unpublish']['#value'] = !$node->isPublished() ? t('Save and keep unpublished') : t('Save and unpublish');
       }
       $element['unpublish']['#weight'] = 10;
-      array_unshift($element['unpublish']['#submit'], '::unpublish');
 
       // If already published, the 'publish' button is primary.
       if ($node->isPublished()) {
@@ -273,7 +297,6 @@ class NodeForm extends ContentEntityForm {
       '#access' => $preview_mode != DRUPAL_DISABLED && ($node->access('create') || $node->access('update')),
       '#value' => t('Preview'),
       '#weight' => 20,
-      '#validate' => array('::validate'),
       '#submit' => array('::submitForm', '::preview'),
     );
 
@@ -281,19 +304,6 @@ class NodeForm extends ContentEntityForm {
     $element['delete']['#weight'] = 100;
 
     return $element;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validate(array $form, FormStateInterface $form_state) {
-    $node = parent::validate($form, $form_state);
-
-    if ($node->id() && (node_last_changed($node->id()) > $node->getChangedTimeAcrossTranslations())) {
-      $form_state->setErrorByName('changed', $this->t('The content on this page has either been modified by another user, or you have already submitted modifications using this form. As a result, your changes cannot be saved.'));
-    }
-
-    return $node;
   }
 
   /**
@@ -315,7 +325,7 @@ class NodeForm extends ContentEntityForm {
       $node->setNewRevision();
       // If a new revision is created, save the current user as revision author.
       $node->setRevisionCreationTime(REQUEST_TIME);
-      $node->setRevisionAuthorId(\Drupal::currentUser()->id());
+      $node->setRevisionUserId(\Drupal::currentUser()->id());
     }
     else {
       $node->setNewRevision(FALSE);
@@ -334,56 +344,19 @@ class NodeForm extends ContentEntityForm {
     $store = $this->tempStoreFactory->get('node_preview');
     $this->entity->in_preview = TRUE;
     $store->set($this->entity->uuid(), $form_state);
-    $form_state->setRedirect('entity.node.preview', array(
+
+    $route_parameters = [
       'node_preview' => $this->entity->uuid(),
-      'view_mode_id' => 'default',
-    ));
-  }
+      'view_mode_id' => 'full',
+    ];
 
-  /**
-   * Form submission handler for the 'publish' action.
-   *
-   * @param $form
-   *   An associative array containing the structure of the form.
-   * @param $form_state
-   *   The current state of the form.
-   */
-  public function publish(array $form, FormStateInterface $form_state) {
-    $node = $this->entity;
-    $node->setPublished(TRUE);
-    return $node;
-  }
-
-  /**
-   * Form submission handler for the 'unpublish' action.
-   *
-   * @param $form
-   *   An associative array containing the structure of the form.
-   * @param $form_state
-   *   The current state of the form.
-   */
-  public function unpublish(array $form, FormStateInterface $form_state) {
-    $node = $this->entity;
-    $node->setPublished(FALSE);
-    return $node;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildEntity(array $form, FormStateInterface $form_state) {
-    /** @var \Drupal\node\NodeInterface $entity */
-    $entity = parent::buildEntity($form, $form_state);
-    // A user might assign the node author by entering a user name in the node
-    // form, which we then need to translate to a user ID.
-    // @todo: Remove it when https://www.drupal.org/node/2322525 is pushed.
-    if (!empty($form_state->getValue('uid')[0]['target_id']) && $account = User::load($form_state->getValue('uid')[0]['target_id'])) {
-      $entity->setOwnerId($account->id());
+    $options = [];
+    $query = $this->getRequest()->query;
+    if ($query->has('destination')) {
+      $options['query']['destination'] = $query->get('destination');
+      $query->remove('destination');
     }
-    else {
-      $entity->setOwnerId(0);
-    }
-    return $entity;
+    $form_state->setRedirect('entity.node.preview', $route_parameters, $options);
   }
 
   /**
@@ -395,7 +368,7 @@ class NodeForm extends ContentEntityForm {
     $node->save();
     $node_link = $node->link($this->t('View'));
     $context = array('@type' => $node->getType(), '%title' => $node->label(), 'link' => $node_link);
-    $t_args = array('@type' => node_get_type_label($node), '%title' => $node->label());
+    $t_args = array('@type' => node_get_type_label($node), '%title' => $node->link($node->label()));
 
     if ($insert) {
       $this->logger('content')->notice('@type: added %title.', $context);

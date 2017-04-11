@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Installer\SingleVisibleProfileTest.
- */
-
 namespace Drupal\system\Tests\Installer;
 
-use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Serialization\Yaml;
 use Drupal\simpletest\InstallerTestBase;
 
 /**
@@ -49,7 +44,7 @@ class SingleVisibleProfileTest extends InstallerTestBase {
   }
 
   /**
-   * Overrides InstallerTest::setUpProfile().
+   * {@inheritdoc}
    */
   protected function setUpProfile() {
     // This step is skipped, because there is only one visible profile.

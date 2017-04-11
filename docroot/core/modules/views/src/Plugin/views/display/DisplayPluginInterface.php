@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\display\DisplayPluginInterface.
- */
-
 namespace Drupal\views\Plugin\views\display;
 
 use Drupal\views\ViewExecutable;
@@ -37,8 +32,21 @@ use Drupal\Core\Session\AccountInterface;
  */
 interface DisplayPluginInterface {
 
+  /**
+   * Initializes the display plugin.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   *   The views executable.
+   * @param array $display
+   *   The display that will be populated and attached to the view.
+   * @param array $options
+   *   (optional) The options for the display plugin. Defaults to NULL.
+   */
   public function initDisplay(ViewExecutable $view, array &$display, array &$options = NULL);
 
+  /**
+   * Destroys the display's components and the display itself.
+   */
   public function destroy();
 
   /**
@@ -225,7 +233,7 @@ interface DisplayPluginInterface {
    * block display links to a page display, the page display will be returned
    * in both cases.
    *
-   * @return \Drupal\views\Plugin\views\display\DisplayRouterInterface|NULL
+   * @return \Drupal\views\Plugin\views\display\DisplayRouterInterface|null
    */
   public function getRoutedDisplay();
 
@@ -382,16 +390,6 @@ interface DisplayPluginInterface {
   public function renderMoreLink();
 
   /**
-   * Gets menu links, if this display provides some.
-   *
-   * @return array
-   *   The menu links registers for this display.
-   *
-   * @see \Drupal\views\Plugin\Derivative\ViewsMenuLink
-   */
-  public function getMenuLinks();
-
-  /**
    * Renders this display.
    */
   public function render();
@@ -439,20 +437,16 @@ interface DisplayPluginInterface {
   /**
    * Calculates the display's cache metadata by inspecting each handler/plugin.
    *
-   * @return array
-   *   Returns an array:
-   *   - first value: (boolean) Whether the display is cacheable.
-   *   - second value: (string[]) The cache contexts the display varies by.
+   * @return \Drupal\Core\Cache\CacheableMetadata
+   *   The cache metadata.
    */
   public function calculateCacheMetadata();
 
   /**
    * Gets the cache metadata.
    *
-   * @return array
-   *   Returns an array:
-   *   - first value: (boolean) Whether the display is cacheable.
-   *   - second value: (string[]) The cache contexts the display varies by.
+   * @return \Drupal\Core\Cache\CacheableMetadata
+   *   The cache metadata.
    */
   public function getCacheMetadata();
 
@@ -463,16 +457,40 @@ interface DisplayPluginInterface {
    */
   public function execute();
 
+
+  /**
+   * Builds a basic render array which can be properly render cached.
+   *
+   * In order to be rendered cached, it includes cache keys as well as the data
+   * required to load the view on cache misses.
+   *
+   * @param string $view_id
+   *   The view ID.
+   * @param string $display_id
+   *   The display ID.
+   * @param array $args
+   *   (optional) The view arguments.
+   *
+   * @return array
+   *   The view render array.
+   */
+  public static function buildBasicRenderable($view_id, $display_id, array $args = []);
+
   /**
    * Builds a renderable array of the view.
    *
    * Note: This does not yet contain the executed view, but just the loaded view
    * executable.
    *
+   * @param array $args
+   *   (optional) Arguments of the view.
+   * @param bool $cache
+   *   (optional) Specify FALSE in order to opt out of render caching.
+   *
    * @return array
    *   The render array of a view.
    */
-  public function buildRenderable(array $args = []);
+  public function buildRenderable(array $args = [], $cache = TRUE);
 
   /**
    * Renders the display for the purposes of a live preview.
@@ -480,6 +498,21 @@ interface DisplayPluginInterface {
    * Also might be used for some other AJAXy reason.
    */
   function preview();
+
+  /**
+   * Returns the display type that this display requires.
+   *
+   * This can be used for filtering views plugins. E.g. if a plugin category of
+   * 'foo' is specified, only plugins with no 'types' declared or 'types'
+   * containing 'foo'. If you have a type of bar, this plugin will not be used.
+   * This is applicable for style, row, access, cache, and exposed_form plugins.
+   *
+   * @return string
+   *   The required display type. Defaults to 'normal'.
+   *
+   * @see \Drupal\views\Views::fetchPluginNames()
+   */
+  public function getType();
 
   /**
    * Make sure the display and all associated handlers are valid.
@@ -512,7 +545,6 @@ interface DisplayPluginInterface {
    *
    * @return bool
    *   Returns whether the identifier is unique on all handlers.
-   *
    */
   public function isIdentifierUnique($id, $identifier);
 
@@ -536,7 +568,7 @@ interface DisplayPluginInterface {
    * Renders the exposed form as block.
    *
    * @return string|null
-   *  The rendered exposed form as string or NULL otherwise.
+   *   The rendered exposed form as string or NULL otherwise.
    */
   public function viewExposedFormBlocks();
 

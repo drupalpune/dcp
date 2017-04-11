@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- *
- * Contains \Drupal\field_test\Plugin\field\formatter\TestFieldEmptyFormatter.
- */
 namespace Drupal\field_test\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -36,7 +31,7 @@ class TestFieldEmptyFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = array();
 
     if ($items->isEmpty()) {

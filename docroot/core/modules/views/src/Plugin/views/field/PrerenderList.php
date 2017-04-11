@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\field\PrerenderList.
- */
-
 namespace Drupal\views\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -30,7 +25,7 @@ abstract class PrerenderList extends FieldPluginBase implements MultiItemsFieldH
    *
    * @var array
    */
-  var $items = array();
+  public $items = array();
 
   /**
    * {@inheritdoc}
@@ -78,17 +73,24 @@ abstract class PrerenderList extends FieldPluginBase implements MultiItemsFieldH
   public function renderItems($items) {
     if (!empty($items)) {
       if ($this->options['type'] == 'separator') {
-        return implode($this->sanitizeValue($this->options['separator'], 'xss_admin'), $items);
+        $render = [
+          '#type' => 'inline_template',
+          '#template' => '{{ items|safe_join(separator) }}',
+          '#context' => [
+            'items' => $items,
+            'separator' => $this->sanitizeValue($this->options['separator'], 'xss_admin')
+          ]
+        ];
       }
       else {
-        $item_list = array(
+        $render = array(
           '#theme' => 'item_list',
           '#items' => $items,
           '#title' => NULL,
           '#list_type' => $this->options['type'],
         );
-        return drupal_render($item_list);
       }
+      return drupal_render($render);
     }
   }
 

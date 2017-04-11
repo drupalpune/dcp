@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Form\OpmlFeedAdd.
- */
-
 namespace Drupal\aggregator\Form;
 
 use Drupal\aggregator\FeedStorageInterface;
@@ -87,7 +82,7 @@ class OpmlFeedAdd extends FormBase {
       '#title' => $this->t('Update interval'),
       '#default_value' => 3600,
       '#options' => $period,
-      '#description' => $this->t('The length of time between feed updates. Requires a correctly configured <a href="@cron">cron maintenance task</a>.', array('@cron' => $this->url('system.status'))),
+      '#description' => $this->t('The length of time between feed updates. Requires a correctly configured <a href=":cron">cron maintenance task</a>.', array(':cron' => $this->url('system.status'))),
     );
 
     $form['actions'] = array('#type' => 'actions');
@@ -104,8 +99,8 @@ class OpmlFeedAdd extends FormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // If both fields are empty or filled, cancel.
-    $file_upload = $this->getRequest()->files->get('files[upload]', NULL, TRUE);
-    if ($form_state->isValueEmpty('remote') == empty($file_upload)) {
+    $all_files = $this->getRequest()->files->get('files', []);
+    if ($form_state->isValueEmpty('remote') == empty($all_files['upload'])) {
       $form_state->setErrorByName('remote', $this->t('<em>Either</em> upload a file or enter a URL.'));
     }
   }
@@ -122,7 +117,7 @@ class OpmlFeedAdd extends FormBase {
       // @todo Move this to a fetcher implementation.
       try {
         $response = $this->httpClient->get($form_state->getValue('remote'));
-        $data = $response->getBody(TRUE);
+        $data = (string) $response->getBody();
       }
       catch (RequestException $e) {
         $this->logger('aggregator')->warning('Failed to download OPML file due to "%error".', array('%error' => $e->getMessage()));

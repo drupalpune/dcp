@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_ui\Form\EntityFormDisplayEditForm.
- */
-
 namespace Drupal\field_ui\Form;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -62,23 +57,6 @@ class EntityFormDisplayEditForm extends EntityDisplayFormBase {
   /**
    * {@inheritdoc}
    */
-  protected function getPlugin(FieldDefinitionInterface $field_definition, $configuration) {
-    $plugin = NULL;
-
-    if ($configuration && $configuration['type'] != 'hidden') {
-      $plugin = $this->pluginManager->getInstance(array(
-        'field_definition' => $field_definition,
-        'form_mode' => $this->entity->getMode(),
-        'configuration' => $configuration
-      ));
-    }
-
-    return $plugin;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function getDefaultPlugin($field_type) {
     return isset($this->fieldTypes[$field_type]['default_widget']) ? $this->fieldTypes[$field_type]['default_widget'] : NULL;
   }
@@ -88,6 +66,24 @@ class EntityFormDisplayEditForm extends EntityDisplayFormBase {
    */
   protected function getDisplayModes() {
     return $this->entityManager->getFormModes($this->entity->getTargetEntityTypeId());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getDisplayModeOptions() {
+    return $this->entityManager->getFormModeOptions($this->entity->getTargetEntityTypeId());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getDisplayModesLink() {
+    return [
+      '#type' => 'link',
+      '#title' => t('Manage form modes'),
+      '#url' => Url::fromRoute('entity.entity_form_mode.collection'),
+    ];
   }
 
   /**

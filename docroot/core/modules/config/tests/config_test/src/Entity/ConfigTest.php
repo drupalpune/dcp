@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\config_test\Entity\ConfigTest.
- */
-
 namespace Drupal\config_test\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
@@ -80,7 +75,7 @@ class ConfigTest extends ConfigEntityBase implements ConfigTestInterface {
   protected $protected_property;
 
   /**
-   * Overrides \Drupal\Core\Config\Entity\ConfigEntityBase::sort().
+   * {@inheritdoc}
    */
   public static function sort(ConfigEntityInterface $a, ConfigEntityInterface $b) {
     \Drupal::state()->set('config_entity_sort', TRUE);
@@ -122,6 +117,11 @@ class ConfigTest extends ConfigEntityBase implements ConfigTestInterface {
    * {@inheritdoc}
    */
   public function onDependencyRemoval(array $dependencies) {
+    // Record which entities have this method called on.
+    $called = \Drupal::state()->get('config_test.on_dependency_removal_called', []);
+    $called[] = $this->id();
+    \Drupal::state()->set('config_test.on_dependency_removal_called', $called);
+
     $changed = parent::onDependencyRemoval($dependencies);
     if (!isset($this->dependencies['enforced']['config'])) {
       return $changed;
@@ -135,6 +135,10 @@ class ConfigTest extends ConfigEntityBase implements ConfigTestInterface {
           unset($this->dependencies['enforced']['config'][$key]);
         }
       }
+    }
+    // If any of the dependencies removed still exists, return FALSE.
+    if (array_intersect_key(array_flip($this->dependencies['enforced']['config']), $dependencies['config'])) {
+      return FALSE;
     }
     return $changed;
   }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\devel_generate\Plugin\DevelGenerate\TermDevelGenerate.
- */
-
 namespace Drupal\devel_generate\Plugin\DevelGenerate;
 
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -132,7 +127,7 @@ class TermDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
     $vocabs = $this->vocabularyStorage->loadMultiple($values['vids']);
     $new_terms = $this->generateTerms($values['num'], $vocabs, $values['title_length']);
     if (!empty($new_terms)) {
-      $this->setMessage($this->t('Created the following new terms: !terms', array('!terms' => implode(', ', $new_terms))));
+      $this->setMessage($this->t('Created the following new terms: @terms', array('@terms' => implode(', ', $new_terms))));
     }
   }
 
@@ -219,7 +214,7 @@ class TermDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
         $feedback = drush_get_option('feedback', 1000);
         if ($i % $feedback == 0) {
           $now = time();
-          drush_log(dt('Completed !feedback terms (!rate terms/min)', array('!feedback' => $feedback, '!rate' => $feedback * 60 / ($now - $start))), 'ok');
+          drush_log(dt('Completed @feedback terms (@rate terms/min)', array('@feedback' => $feedback, '@rate' => $feedback * 60 / ($now - $start))), 'ok');
           $start = $now;
         }
       }
@@ -239,21 +234,32 @@ class TermDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
    * {@inheritdoc}
    */
   public function validateDrushParams($args) {
-    $vname = array_shift($args);
-    $values = array(
-      'num' => array_shift($args),
-      'kill' => drush_get_option('kill'),
-      'title_length' => 12,
-    );
-    // Try to convert machine name to a vocab ID
-    if (!$vocab = $this->vocabularyStorage->load($vname)) {
-      return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', dt('Invalid vocabulary name: !name', array('!name' => $vname)));
-    }
-    if ($this->isNumber($values['num']) == FALSE) {
-      return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', dt('Invalid number of terms: !num', array('!num' => $values['num'])));
+    $vocabulary_name = array_shift($args);
+    $number = array_shift($args);
+
+    if ($number === NULL) {
+      $number = 10;
     }
 
-    $values['vids'] = array($vocab->id());
+    if (!$vocabulary_name) {
+      return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', dt('Please provide a vocabulary machine name.'));
+    }
+
+    if (!$this->isNumber($number)) {
+      return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', dt('Invalid number of terms: @num', array('@num' => $number)));
+    }
+
+    // Try to convert machine name to a vocabulary id.
+    if (!$vocabulary = $this->vocabularyStorage->load($vocabulary_name)) {
+      return drush_set_error('DEVEL_GENERATE_INVALID_INPUT', dt('Invalid vocabulary name: @name', array('@name' => $vocabulary_name)));
+    }
+
+    $values = [
+      'num' => $number,
+      'kill' => drush_get_option('kill'),
+      'title_length' => 12,
+      'vids' => [$vocabulary->id()],
+    ];
 
     return $values;
   }

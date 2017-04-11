@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\filter\FilterProcessResult.
- */
-
 namespace Drupal\filter;
 
-use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Cache\Cache;
+use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Render\BubbleableMetadata;
 
 /**
@@ -34,7 +29,7 @@ use Drupal\Core\Render\BubbleableMetadata;
  * public function process($text, $langcode) {
  *   // Modify $text.
  *
- *   return new FilterProcess($text);
+ *   return new FilterProcessResult($text);
  * }
  * @endcode
  *
@@ -43,10 +38,10 @@ use Drupal\Core\Render\BubbleableMetadata;
  * public function process($text, $langcode) {
  *   // Modify $text.
  *
- *   $result = new FilterProcess($text);
+ *   $result = new FilterProcessResult($text);
  *
  *   // Associate assets to be attached.
- *   $result->setAssets(array(
+ *   $result->setAttachments(array(
  *     'library' => array(
  *        'filter/caption',
  *     ),
@@ -116,4 +111,45 @@ class FilterProcessResult extends BubbleableMetadata {
     $this->processedText = $processed_text;
     return $this;
   }
+
+  /**
+   * Creates a placeholder.
+   *
+   * This generates its own placeholder markup for one major reason: to not have
+   * FilterProcessResult depend on the Renderer service, because this is a value
+   * object. As a side-effect and added benefit, this makes it easier to
+   * distinguish placeholders for filtered text versus generic render system
+   * placeholders.
+   *
+   * @param string $callback
+   *   The #lazy_builder callback that will replace the placeholder with its
+   *   eventual markup.
+   * @param array $args
+   *   The arguments for the #lazy_builder callback.
+   *
+   * @return string
+   *   The placeholder markup.
+   */
+  public function createPlaceholder($callback, array $args) {
+    // Generate placeholder markup.
+    // @see \Drupal\Core\Render\PlaceholderGenerator::createPlaceholder()
+    $arguments = UrlHelper::buildQuery($args);
+    $token = hash('crc32b', serialize([$callback, $args]));
+    $placeholder_markup = '<drupal-filter-placeholder callback="' . Html::escape($callback) . '" arguments="' . Html::escape($arguments) . '" token="' . Html::escape($token) . '"></drupal-filter-placeholder>';
+
+    // Add the placeholder attachment.
+    $this->addAttachments([
+      'placeholders' => [
+        $placeholder_markup => [
+          '#lazy_builder' => [$callback, $args],
+        ]
+      ],
+    ]);
+
+    // Return the placeholder markup, so that the filter wanting to use a
+    // placeholder can actually insert the placeholder markup where it needs the
+    // placeholder to be replaced.
+    return $placeholder_markup;
+  }
+
 }

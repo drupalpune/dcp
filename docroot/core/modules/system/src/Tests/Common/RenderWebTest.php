@@ -1,12 +1,9 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\Common\RenderWebTest.
- */
-
 namespace Drupal\system\Tests\Common;
 
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Url;
 use Drupal\simpletest\WebTestBase;
 
@@ -23,6 +20,24 @@ class RenderWebTest extends WebTestBase {
    * @var array
    */
   public static $modules = array('common_test');
+
+  /**
+   * Asserts the cache context for the wrapper format is always present.
+   */
+  function testWrapperFormatCacheContext() {
+    $this->drupalGet('common-test/type-link-active-class');
+    $this->assertIdentical(0, strpos($this->getRawContent(), "<!DOCTYPE html>\n<html"));
+    $this->assertIdentical('text/html; charset=UTF-8', $this->drupalGetHeader('Content-Type'));
+    $this->assertTitle('Test active link class | Drupal');
+    $this->assertCacheContext('url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT);
+
+    $this->drupalGet('common-test/type-link-active-class', ['query' => [MainContentViewSubscriber::WRAPPER_FORMAT => 'json']]);
+    $this->assertIdentical('application/json', $this->drupalGetHeader('Content-Type'));
+    $json = Json::decode($this->getRawContent());
+    $this->assertEqual(['content', 'title'], array_keys($json));
+    $this->assertIdentical('Test active link class', $json['title']);
+    $this->assertCacheContext('url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT);
+  }
 
   /**
    * Tests rendering form elements without passing through
@@ -112,7 +127,7 @@ class RenderWebTest extends WebTestBase {
       ),
     );
     $this->assertRenderedElement($element, '//a[@href=:href and contains(., :title)]', array(
-      ':href' => \Drupal::urlGenerator()->generateFromPath('common-test/destination', ['absolute' => TRUE]),
+      ':href' => URL::fromRoute('common_test.destination')->setAbsolute()->toString(),
       ':title' => $element['#title'],
     ));
 

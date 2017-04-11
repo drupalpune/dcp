@@ -1,0 +1,25 @@
+uuid: da0190ff-2a79-4f8f-83ac-b1c2baf63f4e
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:0fcf01f3-71d2-459b-97a6-f149378ad03b'
+  module:
+    - block_content
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_followus
+theme: addweb_admin_theme
+region: footer
+weight: 0
+provider: null
+plugin: 'block_content:0fcf01f3-71d2-459b-97a6-f149378ad03b'
+settings:
+  id: 'block_content:0fcf01f3-71d2-459b-97a6-f149378ad03b'
+  label: 'Follow us '
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

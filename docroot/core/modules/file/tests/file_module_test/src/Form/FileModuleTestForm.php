@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\file_module_test\Form\FileModuleTestForm.
- */
-
 namespace Drupal\file_module_test\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -43,7 +38,7 @@ class FileModuleTestForm extends FormBase {
 
     $form['nested']['file'] = array(
       '#type' => 'managed_file',
-      '#title' => $this->t('Managed file'),
+      '#title' => $this->t('Managed <em>@type</em>', ['@type' => 'file & butter']),
       '#upload_location' => 'public://test',
       '#progress_message' => $this->t('Please wait...'),
       '#extended' => (bool) $extended,

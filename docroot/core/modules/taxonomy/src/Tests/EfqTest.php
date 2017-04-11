@@ -1,13 +1,6 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\taxonomy\Tests\EfqTest.
- */
-
 namespace Drupal\taxonomy\Tests;
-
-use Drupal\Core\Entity\Query\QueryFactory;
 
 /**
  * Verifies operation of a taxonomy-based Entity Query.
@@ -72,4 +65,5 @@ class EfqTest extends TaxonomyTestBase {
     $term = _field_create_entity_from_ids($ids);
     $this->assertEqual($term->id(), $tid, 'Taxonomy term can be created based on the IDs.');
   }
+
 }

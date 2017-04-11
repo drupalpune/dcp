@@ -5,14 +5,14 @@
  * API for handling file uploads and server file management.
  */
 
+use Drupal\Component\FileSystem\FileSystem as ComponentFileSystem;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\PhpStorage\FileStorage;
 use Drupal\Component\Utility\Bytes;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\File\FileSystem;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\StreamWrapper\PublicStream;
-use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StreamWrapper\PrivateStream;
 
 /**
@@ -35,23 +35,6 @@ const FILE_CHMOD_FILE = FileSystem::CHMOD_FILE;
  * @defgroup file File interface
  * @{
  * Common file handling functions.
- *
- * Fields on the file entity:
- * - fid: File ID
- * - uid: The {users}.uid of the user who is associated with the file.
- * - filename: Name of the file with no path components. This may differ from
- *   the basename of the filepath if the file is renamed to avoid overwriting
- *   an existing file.
- * - uri: URI of the file.
- * - filemime: The file's MIME type.
- * - filesize: The size of the file in bytes.
- * - status: A bitmapped field indicating the status of the file. The first 8
- *   bits are reserved for Drupal core. The least significant bit indicates
- *   temporary (0) or permanent (1). Temporary files will be removed during
- *   cron runs if they are older than the configuration value
- *   "system.file.temporary_maximum_age", and if clean-up is enabled. Permanent
- *   files will not be removed.
- * - timestamp: UNIX timestamp for the date the file was added to the database.
  */
 
 /**
@@ -88,49 +71,6 @@ const FILE_EXISTS_ERROR = 2;
  * collection process.
  */
 const FILE_STATUS_PERMANENT = 1;
-
-/**
- * Provides Drupal stream wrapper registry.
- *
- * @param int $filter
- *   (Optional) Filters out all types except those with an on bit for each on
- *   bit in $filter. For example, if $filter is
- *   StreamWrapperInterface::WRITE_VISIBLE, which is equal to
- *   (StreamWrapperInterface::READ | StreamWrapperInterface::WRITE |
- *   StreamWrapperInterface::VISIBLE), then only stream wrappers with all three
- *   of these bits set are returned. Defaults to StreamWrapperInterface::ALL,
- *   which returns all registered stream wrappers.
- *
- * @return array
- *   An array keyed by scheme, with values containing an array of information
- *   about the stream wrapper, as returned by hook_stream_wrappers(). If $filter
- *   is omitted or set to StreamWrapperInterface::ALL, the entire Drupal stream
- *   wrapper registry is returned. Otherwise only the stream wrappers whose
- *   'type' bitmask has an on bit for each bit specified in $filter are
- *   returned.
- *
- * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
- *   Use \Drupal::service('stream_wrapper_manager')->getWrappers().
- */
-function file_get_stream_wrappers($filter = StreamWrapperInterface::ALL) {
-  return \Drupal::service('stream_wrapper_manager')->getWrappers($filter);
-}
-
-/**
- * Returns the stream wrapper class name for a given scheme.
- *
- * @param string $scheme
- *   Stream scheme.
- *
- * @return string|bool
- *   Return string if a scheme has a registered handler, or FALSE.
- *
- * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
- *   Use \Drupal::service('stream_wrapper_manager')->getClass().
- */
-function file_stream_wrapper_get_class($scheme) {
-  return \Drupal::service('stream_wrapper_manager')->getClass($scheme);
-}
 
 /**
  * Returns the scheme of a URI (e.g. a stream).
@@ -201,7 +141,7 @@ function file_default_scheme() {
  *   The normalized URI.
  */
 function file_stream_wrapper_uri_normalize($uri) {
-  $scheme = file_uri_scheme($uri);
+  $scheme = \Drupal::service('file_system')->uriScheme($uri);
 
   if (file_stream_wrapper_valid_scheme($scheme)) {
     $target = file_uri_target($uri);
@@ -212,55 +152,6 @@ function file_stream_wrapper_uri_normalize($uri) {
   }
 
   return $uri;
-}
-
-/**
- * Returns a reference to the stream wrapper class responsible for a given URI.
- *
- * The scheme determines the stream wrapper class that should be
- * used by consulting the stream wrapper registry.
- *
- * @param string $uri
- *   A stream, referenced as "scheme://target".
- *
- * @return \Drupal\Core\StreamWrapper\StreamWrapperInterface|bool
- *   Returns a new stream wrapper object appropriate for the given URI or FALSE
- *   if no registered handler could be found. For example, a URI of
- *   "private://example.txt" would return a new private stream wrapper object
- *   (Drupal\Core\StreamWrapper\PrivateStream).
- *
- * * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
- *   Use \Drupal::service('stream_wrapper_manager')->getViaUri().
- */
-function file_stream_wrapper_get_instance_by_uri($uri) {
-  return \Drupal::service('stream_wrapper_manager')->getViaUri($uri);
-}
-
-/**
- * Returns a reference to the stream wrapper class responsible for a scheme.
- *
- * This helper method returns a stream instance using a scheme. That is, the
- * passed string does not contain a "://". For example, "public" is a scheme
- * but "public://" is a URI (stream). This is because the later contains both
- * a scheme and target despite target being empty.
- *
- * Note: the instance URI will be initialized to "scheme://" so that you can
- * make the customary method calls as if you had retrieved an instance by URI.
- *
- * @param string $scheme
- *   If the stream was "public://target", "public" would be the scheme.
- *
- * @return \Drupal\Core\StreamWrapper\StreamWrapperInterface|bool
- *   Returns a new stream wrapper object appropriate for the given $scheme.
- *   For example, for the public scheme a stream wrapper object
- *   (Drupal\Core\StreamWrapper\PublicStream).
- *   FALSE is returned if no registered handler could be found.
- *
- * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
- *   Use \Drupal::service('stream_wrapper_manager')->getViaScheme().
- */
-function file_stream_wrapper_get_instance_by_scheme($scheme) {
-  return \Drupal::service('stream_wrapper_manager')->getViaScheme($scheme);
 }
 
 /**
@@ -293,7 +184,7 @@ function file_create_url($uri) {
   // file server.
   \Drupal::moduleHandler()->alter('file_url', $uri);
 
-  $scheme = file_uri_scheme($uri);
+  $scheme = \Drupal::service('file_system')->uriScheme($uri);
 
   if (!$scheme) {
     // Allow for:
@@ -331,7 +222,7 @@ function file_create_url($uri) {
   }
   else {
     // Attempt to return an external URL using the appropriate wrapper.
-    if ($wrapper = file_stream_wrapper_get_instance_by_uri($uri)) {
+    if ($wrapper = \Drupal::service('stream_wrapper_manager')->getViaUri($uri)) {
       return $wrapper->getExternalUrl();
     }
     else {
@@ -360,7 +251,6 @@ function file_url_transform_relative($file_url) {
   // Unfortunately, we pretty much have to duplicate Symfony's
   // Request::getHttpHost() method because Request::getPort() may return NULL
   // instead of a port number.
-  $http_host = '';
   $request = \Drupal::request();
   $host = $request->getHost();
   $scheme = $request->getScheme();
@@ -394,7 +284,7 @@ function file_url_transform_relative($file_url) {
  *   otherwise.
  */
 function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS) {
-  if (!file_stream_wrapper_valid_scheme(file_uri_scheme($directory))) {
+  if (!file_stream_wrapper_valid_scheme(\Drupal::service('file_system')->uriScheme($directory))) {
     // Only trim if we're not dealing with a stream.
     $directory = rtrim($directory, '/\\');
   }
@@ -427,8 +317,22 @@ function file_ensure_htaccess() {
     file_save_htaccess('private://', TRUE);
   }
   file_save_htaccess('temporary://', TRUE);
-  file_save_htaccess(config_get_config_directory(), TRUE);
-  file_save_htaccess(config_get_config_directory(CONFIG_STAGING_DIRECTORY), TRUE);
+
+  // If a staging directory exists then it should contain a .htaccess file.
+  // @todo https://www.drupal.org/node/2696103 catch a more specific exception
+  //   and simplify this code.
+  try {
+    $staging = config_get_config_directory(CONFIG_SYNC_DIRECTORY);
+  }
+  catch (\Exception $e) {
+    $staging = FALSE;
+  }
+  if ($staging) {
+    // Note that we log an error here if we can't write the .htaccess file. This
+    // can occur if the staging directory is read-only. If it is then it is the
+    // user's responsibility to create the .htaccess file.
+    file_save_htaccess($staging, TRUE);
+  }
 }
 
 /**
@@ -444,7 +348,7 @@ function file_ensure_htaccess() {
  *   if one is already present. Defaults to FALSE.
  */
 function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
-  if (file_uri_scheme($directory)) {
+  if (\Drupal::service('file_system')->uriScheme($directory)) {
     $htaccess_path = file_stream_wrapper_uri_normalize($directory . '/.htaccess');
   }
   else {
@@ -463,8 +367,8 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
     return drupal_chmod($htaccess_path, 0444);
   }
   else {
-    $variables = array('%directory' => $directory, '!htaccess' => '<br />' . nl2br(SafeMarkup::checkPlain($htaccess_lines)));
-    \Drupal::logger('security')->error("Security warning: Couldn't write .htaccess file. Please create a .htaccess file in your %directory directory which contains the following lines: <code>!htaccess</code>", $variables);
+    $variables = array('%directory' => $directory, '@htaccess' => $htaccess_lines);
+    \Drupal::logger('security')->error("Security warning: Couldn't write .htaccess file. Please create a .htaccess file in your %directory directory which contains the following lines: <pre><code>@htaccess</code></pre>", $variables);
     return FALSE;
   }
 }
@@ -502,7 +406,7 @@ function file_htaccess_lines($private = TRUE) {
  */
 function file_valid_uri($uri) {
   // Assert that the URI has an allowed scheme. Bare paths are not allowed.
-  $uri_scheme = file_uri_scheme($uri);
+  $uri_scheme = \Drupal::service('file_system')->uriScheme($uri);
   if (!file_stream_wrapper_valid_scheme($uri_scheme)) {
     return FALSE;
   }
@@ -510,7 +414,7 @@ function file_valid_uri($uri) {
 }
 
 /**
- * Copies a file to a new location without invoking the file API.
+ * Copies a file to a new location without database changes or hook invocation.
  *
  * This is a powerful function that in many ways performs like an advanced
  * version of copy().
@@ -520,10 +424,9 @@ function file_valid_uri($uri) {
  * - If the $source and $destination are equal, the behavior depends on the
  *   $replace parameter. FILE_EXISTS_REPLACE will error out. FILE_EXISTS_RENAME
  *   will rename the file until the $destination is unique.
- * - Provides a fallback using realpaths if the move fails using stream
- *   wrappers. This can occur because PHP's copy() function does not properly
- *   support streams if open_basedir is enabled. See
- *   https://bugs.php.net/bug.php?id=60456
+ * - Works around a PHP bug where copy() does not properly support streams if
+ *   safe_mode or open_basedir are enabled.
+ *   @see https://bugs.php.net/bug.php?id=60456
  *
  * @param $source
  *   A string specifying the filepath or URI of the source file.
@@ -544,18 +447,66 @@ function file_valid_uri($uri) {
  * @see file_copy()
  */
 function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
+  if (!file_unmanaged_prepare($source, $destination, $replace)) {
+    return FALSE;
+  }
+  // Attempt to resolve the URIs. This is necessary in certain configurations
+  // (see above).
+  $real_source = drupal_realpath($source) ?: $source;
+  $real_destination = drupal_realpath($destination) ?: $destination;
+  // Perform the copy operation.
+  if (!@copy($real_source, $real_destination)) {
+    \Drupal::logger('file')->error('The specified file %file could not be copied to %destination.', array('%file' => $source, '%destination' => $destination));
+    return FALSE;
+  }
+  // Set the permissions on the new file.
+  drupal_chmod($destination);
+  return $destination;
+}
+
+/**
+ * Internal function that prepares the destination for a file_unmanaged_copy or
+ * file_unmanaged_move operation.
+ *
+ * - Checks if $source and $destination are valid and readable/writable.
+ * - Checks that $source is not equal to $destination; if they are an error
+ *   is reported.
+ * - If file already exists in $destination either the call will error out,
+ *   replace the file or rename the file based on the $replace parameter.
+ *
+ * @param $source
+ *   A string specifying the filepath or URI of the source file.
+ * @param $destination
+ *   A URI containing the destination that $source should be moved/copied to.
+ *   The URI may be a bare filepath (without a scheme) and in that case the
+ *   default scheme (file://) will be used. If this value is omitted, Drupal's
+ *   default files scheme will be used, usually "public://".
+ * @param $replace
+ *   Replace behavior when the destination file already exists:
+ *   - FILE_EXISTS_REPLACE - Replace the existing file.
+ *   - FILE_EXISTS_RENAME - Append _{incrementing number} until the filename is
+ *       unique.
+ *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
+ *
+ * @return
+ *   TRUE, or FALSE in the event of an error.
+ *
+ * @see file_unmanaged_copy()
+ * @see file_unmanaged_move()
+ */
+function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_EXISTS_RENAME) {
   $original_source = $source;
   $logger = \Drupal::logger('file');
 
   // Assert that the source file actually exists.
   if (!file_exists($source)) {
     // @todo Replace drupal_set_message() calls with exceptions instead.
-    drupal_set_message(t('The specified file %file could not be copied because no file by that name exists. Please check that you supplied the correct filename.', array('%file' => $original_source)), 'error');
+    drupal_set_message(t('The specified file %file could not be moved/copied because no file by that name exists. Please check that you supplied the correct filename.', array('%file' => $original_source)), 'error');
     if (($realpath = drupal_realpath($original_source)) !== FALSE) {
-      $logger->notice('File %file (%realpath) could not be copied because it does not exist.', array('%file' => $original_source, '%realpath' => $realpath));
+      $logger->notice('File %file (%realpath) could not be moved/copied because it does not exist.', array('%file' => $original_source, '%realpath' => $realpath));
     }
     else {
-      $logger->notice('File %file could not be copied because it does not exist.', array('%file' => $original_source));
+      $logger->notice('File %file could not be moved/copied because it does not exist.', array('%file' => $original_source));
     }
     return FALSE;
   }
@@ -576,8 +527,8 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
     $dirname = drupal_dirname($destination);
     if (!file_prepare_directory($dirname)) {
       // The destination is not valid.
-      $logger->notice('File %file could not be copied because the destination directory %destination is not configured correctly.', array('%file' => $original_source, '%destination' => $dirname));
-      drupal_set_message(t('The specified file %file could not be copied because the destination directory is not properly configured. This may be caused by a problem with file or directory permissions. More information is available in the system log.', array('%file' => $original_source)), 'error');
+      $logger->notice('File %file could not be moved/copied because the destination directory %destination is not configured correctly.', array('%file' => $original_source, '%destination' => $dirname));
+      drupal_set_message(t('The specified file %file could not be moved/copied because the destination directory is not properly configured. This may be caused by a problem with file or directory permissions. More information is available in the system log.', array('%file' => $original_source)), 'error');
       return FALSE;
     }
   }
@@ -585,8 +536,8 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
   // Determine whether we can perform this operation based on overwrite rules.
   $destination = file_destination($destination, $replace);
   if ($destination === FALSE) {
-    drupal_set_message(t('The file %file could not be copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
-    $logger->notice('File %file could not be copied because a file by that name already exists in the destination directory (%destination)', array('%file' => $original_source, '%destination' => $destination));
+    drupal_set_message(t('The file %file could not be moved/copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
+    $logger->notice('File %file could not be moved/copied because a file by that name already exists in the destination directory (%destination)', array('%file' => $original_source, '%destination' => $destination));
     return FALSE;
   }
 
@@ -594,26 +545,13 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
   $real_source = drupal_realpath($source);
   $real_destination = drupal_realpath($destination);
   if ($source == $destination || ($real_source !== FALSE) && ($real_source == $real_destination)) {
-    drupal_set_message(t('The specified file %file was not copied because it would overwrite itself.', array('%file' => $source)), 'error');
-    $logger->notice('File %file could not be copied because it would overwrite itself.', array('%file' => $source));
+    drupal_set_message(t('The specified file %file was not moved/copied because it would overwrite itself.', array('%file' => $source)), 'error');
+    $logger->notice('File %file could not be moved/copied because it would overwrite itself.', array('%file' => $source));
     return FALSE;
   }
   // Make sure the .htaccess files are present.
   file_ensure_htaccess();
-  // Perform the copy operation.
-  if (!@copy($source, $destination)) {
-    // If the copy failed and realpaths exist, retry the operation using them
-    // instead.
-    if ($real_source === FALSE || $real_destination === FALSE || !@copy($real_source, $real_destination)) {
-      $logger->error('The specified file %file could not be copied to %destination.', array('%file' => $source, '%destination' => $destination));
-      return FALSE;
-    }
-  }
-
-  // Set the permissions on the new file.
-  drupal_chmod($destination);
-
-  return $destination;
+  return TRUE;
 }
 
 /**
@@ -664,12 +602,24 @@ function file_destination($destination, $replace) {
 /**
  * Moves a file to a new location without database changes or hook invocation.
  *
+ * This is a powerful function that in many ways performs like an advanced
+ * version of rename().
+ * - Checks if $source and $destination are valid and readable/writable.
+ * - Checks that $source is not equal to $destination; if they are an error
+ *   is reported.
+ * - If file already exists in $destination either the call will error out,
+ *   replace the file or rename the file based on the $replace parameter.
+ * - Works around a PHP bug where rename() does not properly support streams if
+ *   safe_mode or open_basedir are enabled.
+ *   @see https://bugs.php.net/bug.php?id=60456
+ *
  * @param $source
- *   A string specifying the filepath or URI of the original file.
+ *   A string specifying the filepath or URI of the source file.
  * @param $destination
- *   A string containing the destination that $source should be moved to.
- *   This must be a stream wrapper URI. If this value is omitted, Drupal's
- *   default files scheme will be used, usually "public://".
+ *   A URI containing the destination that $source should be moved to. The
+ *   URI may be a bare filepath (without a scheme) and in that case the default
+ *   scheme (file://) will be used. If this value is omitted, Drupal's default
+ *   files scheme will be used, usually "public://".
  * @param $replace
  *   Replace behavior when the destination file already exists:
  *   - FILE_EXISTS_REPLACE - Replace the existing file.
@@ -678,16 +628,37 @@ function file_destination($destination, $replace) {
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
  * @return
- *   The URI of the moved file, or FALSE in the event of an error.
+ *   The path to the new file, or FALSE in the event of an error.
  *
  * @see file_move()
  */
 function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
-  $filepath = file_unmanaged_copy($source, $destination, $replace);
-  if ($filepath == FALSE || file_unmanaged_delete($source) == FALSE) {
+  if (!file_unmanaged_prepare($source, $destination, $replace)) {
     return FALSE;
   }
-  return $filepath;
+  // Ensure compatibility with Windows.
+  // @see drupal_unlink()
+  if ((substr(PHP_OS, 0, 3) == 'WIN') && (!file_stream_wrapper_valid_scheme(file_uri_scheme($source)))) {
+    chmod($source, 0600);
+  }
+  // Attempt to resolve the URIs. This is necessary in certain configurations
+  // (see above) and can also permit fast moves across local schemes.
+  $real_source = drupal_realpath($source) ?: $source;
+  $real_destination = drupal_realpath($destination) ?: $destination;
+  // Perform the move operation.
+  if (!@rename($real_source, $real_destination)) {
+    // Fall back to slow copy and unlink procedure. This is necessary for
+    // renames across schemes that are not local, or where rename() has not been
+    // implemented. It's not necessary to use drupal_unlink() as the Windows
+    // issue has already been resolved above.
+    if (!@copy($real_source, $real_destination) || !@unlink($real_source)) {
+      \Drupal::logger('file')->error('The specified file %file could not be moved to %destination.', array('%file' => $source, '%destination' => $destination));
+      return FALSE;
+    }
+  }
+  // Set the permissions on the new file.
+  drupal_chmod($destination);
+  return $destination;
 }
 
 /**
@@ -726,7 +697,8 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
 
   // Allow potentially insecure uploads for very savvy users and admin
   if (!\Drupal::config('system.file')->get('allow_insecure_uploads')) {
-    // Remove any null bytes. See http://php.net/manual/en/security.filesystem.nullbytes.php
+    // Remove any null bytes. See
+    // http://php.net/manual/security.filesystem.nullbytes.php
     $filename = str_replace(chr(0), '', $filename);
 
     $whitelist = array_unique(explode(' ', strtolower(trim($extensions))));
@@ -1008,7 +980,7 @@ function file_unmanaged_save_data($data, $destination = NULL, $replace = FILE_EX
  * @param $options
  *   An associative array of additional options, with the following elements:
  *   - 'nomask': The preg_match() regular expression for files to be excluded.
- *     There is no default.
+ *     Defaults to the 'file_scan_ignore_directories' setting.
  *   - 'callback': The callback function to call for each match. There is no
  *     default callback.
  *   - 'recurse': When TRUE, the directory scan will recurse the entire tree
@@ -1041,6 +1013,18 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
     $dir_has_slash = (substr($dir, -1) === '/');
   }
 
+  // Allow directories specified in settings.php to be ignored. You can use this
+  // to not check for files in common special-purpose directories. For example,
+  // node_modules and bower_components. Ignoring irrelevant directories is a
+  // performance boost.
+  if (!isset($options['nomask'])) {
+    $ignore_directories = Settings::get('file_scan_ignore_directories', []);
+    array_walk($ignore_directories, function(&$value) {
+      $value = preg_quote($value, '/');
+    });
+    $default_nomask = '/^' . implode('|', $ignore_directories) . '$/';
+  }
+
   $options['key'] = in_array($options['key'], array('uri', 'filename', 'name')) ? $options['key'] : 'uri';
   $files = array();
   // Avoid warnings when opendir does not have the permissions to open a
@@ -1049,7 +1033,10 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
     if ($handle = @opendir($dir)) {
       while (FALSE !== ($filename = readdir($handle))) {
         // Skip this file if it matches the nomask or starts with a dot.
-        if ($filename[0] != '.' && !(isset($options['nomask']) && preg_match($options['nomask'], $filename))) {
+        if ($filename[0] != '.'
+          && !(isset($options['nomask']) && preg_match($options['nomask'], $filename))
+          && !(!empty($default_nomask) && preg_match($default_nomask, $filename))
+          ) {
           if ($depth == 0 && $dir_has_slash) {
             $uri = "$dir$filename";
           }
@@ -1203,7 +1190,7 @@ function file_directory_temp() {
   if (empty($temporary_directory)) {
     // Needs set up.
     $config = \Drupal::configFactory()->getEditable('system.file');
-    $temporary_directory = file_directory_os_temp();
+    $temporary_directory = ComponentFileSystem::getOsTemporaryDirectory();
 
     if (empty($temporary_directory)) {
       // If no directory has been found default to 'files/tmp'.
@@ -1228,32 +1215,12 @@ function file_directory_temp() {
  *
  * @return mixed
  *   A string containing the path to the temporary directory.
+ *
+ * @deprecated in Drupal 8.3.x-dev, will be removed before Drupal 9.0.0.
+ *   Use \Drupal\Component\FileSystem\FileSystem::getOsTemporaryDirectory().
  */
 function file_directory_os_temp() {
-  $directories = array();
-
-  // Has PHP been set with an upload_tmp_dir?
-  if (ini_get('upload_tmp_dir')) {
-    $directories[] = ini_get('upload_tmp_dir');
-  }
-
-  // Operating system specific dirs.
-  if (substr(PHP_OS, 0, 3) == 'WIN') {
-    $directories[] = 'c:\\windows\\temp';
-    $directories[] = 'c:\\winnt\\temp';
-  }
-  else {
-    $directories[] = '/tmp';
-  }
-  // PHP may be able to find an alternative tmp directory.
-  $directories[] = sys_get_temp_dir();
-
-  foreach ($directories as $directory) {
-    if (is_dir($directory) && is_writable($directory)) {
-      return $directory;
-    }
-  }
-  return FALSE;
+  return ComponentFileSystem::getOsTemporaryDirectory();
 }
 
 /**

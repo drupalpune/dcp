@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Plugin\Condition\CurrentThemeCondition.
- */
-
 namespace Drupal\system\Plugin\Condition;
 
 use Drupal\Core\Condition\ConditionPluginBase;
@@ -121,6 +116,15 @@ class CurrentThemeCondition extends ConditionPluginBase implements ContainerFact
     }
 
     return $this->t('The current theme is @theme', array('@theme' => $this->configuration['theme']));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheContexts() {
+    $contexts = parent::getCacheContexts();
+    $contexts[] = 'theme';
+    return $contexts;
   }
 
 }

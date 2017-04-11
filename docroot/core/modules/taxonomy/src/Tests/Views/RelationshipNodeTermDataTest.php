@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Tests\Views\RelationshipNodeTermDataTest.
- */
-
 namespace Drupal\taxonomy\Tests\Views;
 
 use Drupal\views\Views;
@@ -34,7 +29,7 @@ class RelationshipNodeTermDataTest extends TaxonomyTestBase {
         'user',
       ],
     ];
-    $this->assertIdentical($expected, $view->calculateDependencies());
+    $this->assertIdentical($expected, $view->getDependencies());
     $this->executeView($view, array($this->term1->id(), $this->term2->id()));
     $expected_result = array(
       array(
@@ -55,7 +50,7 @@ class RelationshipNodeTermDataTest extends TaxonomyTestBase {
     $view = Views::getView('test_taxonomy_node_term_data');
     // Tests \Drupal\taxonomy\Plugin\views\relationship\NodeTermData::calculateDependencies().
     $expected['config'][] = 'taxonomy.vocabulary.views_testing_tags';
-    $this->assertIdentical($expected, $view->calculateDependencies());
+    $this->assertIdentical($expected, $view->getDependencies());
     $this->executeView($view, array($this->term1->id(), $this->term2->id()));
     $this->assertIdenticalResultset($view, $expected_result, $column_map);
   }

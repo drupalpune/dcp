@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\Mail\HtmlToTextTest.
- */
-
 namespace Drupal\system\Tests\Mail;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Mail\MailFormatHelper;
 use Drupal\Core\Site\Settings;
@@ -34,7 +29,7 @@ class HtmlToTextTest extends WebTestBase {
       str_replace(
         array("\n", ' '),
         array('\n', '&nbsp;'),
-        SafeMarkup::checkPlain($text)
+        Html::escape($text)
       ) . '"';
   }
 
@@ -57,7 +52,7 @@ class HtmlToTextTest extends WebTestBase {
     $tested_tags = implode(', ', array_unique($matches[1]));
     $message .= ' (' . $tested_tags . ')';
     $result = MailFormatHelper::htmlToText($html, $allowed_tags);
-    $pass = $this->assertEqual($result, $text, SafeMarkup::checkPlain($message));
+    $pass = $this->assertEqual($result, $text, Html::escape($message));
     $verbose = 'html = <pre>' . $this->stringToHtml($html)
       . '</pre><br />' . 'result = <pre>' . $this->stringToHtml($result)
       . '</pre><br />' . 'expected = <pre>' . $this->stringToHtml($text)
@@ -388,4 +383,5 @@ class HtmlToTextTest extends WebTestBase {
     $mail_lines = explode("\n", MailFormatHelper::wrapMail($text));
     $this->assertEqual("--", $mail_lines[1], 'Trailing whitespace removed for incorrect dash-dash-space signatures.');
   }
+
 }

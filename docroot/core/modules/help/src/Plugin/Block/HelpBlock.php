@@ -1,18 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\help\Plugin\Block\HelpBlock.
- */
-
 namespace Drupal\help\Plugin\Block;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -25,13 +19,6 @@ use Symfony\Component\HttpFoundation\Request;
  * )
  */
 class HelpBlock extends BlockBase implements ContainerFactoryPluginInterface {
-
-  /**
-   * Stores the help text associated with the active menu item.
-   *
-   * @var string
-   */
-  protected $help;
 
   /**
    * The module handler.
@@ -95,48 +82,34 @@ class HelpBlock extends BlockBase implements ContainerFactoryPluginInterface {
   /**
    * {@inheritdoc}
    */
-  protected function blockAccess(AccountInterface $account) {
-    $this->help = $this->getActiveHelp($this->request);
-    if ($this->help) {
-      return AccessResult::allowed();
-    }
-    else {
-      return AccessResult::forbidden();
-    }
-  }
-
-  /**
-   * Returns the help associated with the active menu item.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The current request.
-   */
-  protected function getActiveHelp(Request $request) {
-    // Do not show on a 403 or 404 page.
-    if ($request->attributes->has('exception')) {
-      return '';
-    }
-
-    $help = $this->moduleHandler->invokeAll('help', array($this->routeMatch->getRouteName(), $this->routeMatch));
-    return $help ? implode("\n", $help) : '';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function build() {
-    return array(
-      '#children' => $this->help,
-    );
+    // Do not show on a 403 or 404 page.
+    if ($this->request->attributes->has('exception')) {
+      return [];
+    }
+
+    $implementations = $this->moduleHandler->getImplementations('help');
+    $build = [];
+    $args = [
+      $this->routeMatch->getRouteName(),
+      $this->routeMatch,
+    ];
+    foreach ($implementations as $module) {
+      // Don't add empty strings to $build array.
+      if ($help = $this->moduleHandler->invoke($module, 'help', $args)) {
+        // Convert strings to #markup render arrays so that they will XSS admin
+        // filtered.
+        $build[] = is_array($help) ? $help : ['#markup' => $help];
+      }
+    }
+    return $build;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCacheContexts() {
-    // The "Help" block must be cached per URL: help is defined for a
-    // given path, and does not come with any access restrictions.
-    return array('url');
+    return Cache::mergeContexts(parent::getCacheContexts(), ['route']);
   }
 
 }

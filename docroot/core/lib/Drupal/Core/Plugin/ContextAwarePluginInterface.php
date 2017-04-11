@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\Core\Plugin\ContextAwarePluginInterface.
- */
 
 namespace Drupal\Core\Plugin;
 
@@ -31,11 +27,11 @@ interface ContextAwarePluginInterface extends ComponentContextAwarePluginInterfa
    * @param string $name
    *   The name of the context in the plugin definition.
    *
-   * @throws \Drupal\Component\Plugin\Exception\PluginException
-   *   If the requested context is not defined.
-   *
    * @return \Drupal\Core\Plugin\Context\ContextDefinitionInterface.
    *   The definition against which the context value must validate.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   *   If the requested context is not defined.
    */
   public function getContextDefinition($name);
 

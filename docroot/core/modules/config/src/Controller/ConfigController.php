@@ -1,18 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config\Controller\ConfigController
- */
-
 namespace Drupal\config\Controller;
 
 use Drupal\Core\Archiver\ArchiveTar;
-use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\ConfigManagerInterface;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Diff\DiffFormatter;
+use Drupal\Core\Serialization\Yaml;
 use Drupal\Core\Url;
 use Drupal\system\FileDownloadController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -64,7 +59,7 @@ class ConfigController implements ContainerInjectionInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.storage'),
-      $container->get('config.storage.staging'),
+      $container->get('config.storage.sync'),
       $container->get('config.manager'),
       new FileDownloadController(),
       $container->get('diff.formatter')
@@ -142,9 +137,12 @@ class ConfigController implements ContainerInjectionInterface {
 
     $build['diff'] = array(
       '#type' => 'table',
+      '#attributes' => array(
+        'class' => array('diff'),
+      ),
       '#header' => array(
-        array('data' => t('Old'), 'colspan' => '2'),
-        array('data' => t('New'), 'colspan' => '2'),
+        array('data' => t('Active'), 'colspan' => '2'),
+        array('data' => t('Staged'), 'colspan' => '2'),
       ),
       '#rows' => $this->diffFormatter->format($diff),
     );
@@ -162,4 +160,5 @@ class ConfigController implements ContainerInjectionInterface {
 
     return $build;
   }
+
 }

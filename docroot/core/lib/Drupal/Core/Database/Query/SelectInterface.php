@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Query\SelectInterface
- */
-
 namespace Drupal\Core\Database\Query;
 
 use Drupal\Core\Database\Connection;
@@ -139,6 +134,21 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    * @see \Drupal\Core\Database\Connection::escapeLike()
    */
   public function escapeLike($string);
+
+  /**
+   * Escapes a field name string.
+   *
+   * Force all field names to be strictly alphanumeric-plus-underscore.
+   * For some database drivers, it may also wrap the field name in
+   * database-specific escape characters.
+   *
+   * @param string $string
+   *   An unsanitized field name.
+   *
+   * @return
+   *   The sanitized field name string.
+   */
+  public function escapeField($string);
 
   /**
    * Compiles and returns an associative array of the arguments for this prepared statement.
@@ -330,6 +340,12 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    *   An array of arguments to replace into the $condition of this join.
    * @return
    *   The unique alias that was assigned for this table.
+   *
+   * @deprecated as of Drupal 8.1.x, will be removed in Drupal 9.0.0. Instead,
+   *   change the query to use leftJoin(). For instance:
+   *   db_query('A')->rightJoin('B') is identical to
+   *   db_query('B')->leftJoin('A'). This functionality has been deprecated
+   *   because SQLite does not support it.
    */
   public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = array());
 
@@ -632,4 +648,13 @@ interface SelectInterface extends ConditionInterface, AlterableInterface, Extend
    *   The called object.
    */
   public function forUpdate($set = TRUE);
+
+  /**
+   * Returns a string representation of how the query will be executed in SQL.
+   *
+   * @return string
+   *   The Select Query object expressed as a string.
+   */
+  public function __toString();
+
 }

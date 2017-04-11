@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field_test\Plugin\Field\FieldType\TestItem.
- */
-
 namespace Drupal\field_test\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -33,6 +28,7 @@ class TestItem extends FieldItemBase {
       'test_field_storage_setting' => 'dummy test string',
       'changeable' => 'a changeable field storage setting',
       'unchangeable' => 'an unchangeable field storage setting',
+      'translatable_storage_setting' => 'a translatable field storage setting',
     ) + parent::defaultStorageSettings();
   }
 
@@ -42,6 +38,7 @@ class TestItem extends FieldItemBase {
   public static function defaultFieldSettings() {
     return array(
       'test_field_setting' => 'dummy test string',
+      'translatable_field_setting' => 'a translatable field setting',
     ) + parent::defaultFieldSettings();
   }
 

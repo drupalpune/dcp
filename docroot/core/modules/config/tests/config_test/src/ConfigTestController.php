@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config_test\ConfigTestController.
- */
-
 namespace Drupal\config_test;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\config_test\Entity\ConfigTest;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**

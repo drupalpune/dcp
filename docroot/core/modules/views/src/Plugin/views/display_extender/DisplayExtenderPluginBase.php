@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\display_extender\DisplayExtenderPluginBase.
- */
-
 namespace Drupal\views\Plugin\views\display_extender;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\PluginBase;
 
 /**

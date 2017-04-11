@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Form\FormValidatorInterface.
- */
-
 namespace Drupal\Core\Form;
 
 /**
@@ -53,5 +48,15 @@ interface FormValidatorInterface {
    *   not be repeated in the submission step.
    */
   public function validateForm($form_id, &$form, FormStateInterface &$form_state);
+
+  /**
+   * Sets a form_token error on the given form state.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return $this
+   */
+  public function setInvalidTokenError(FormStateInterface $form_state);
 
 }

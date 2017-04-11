@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\user\UserAccessControlHandler.
- */
-
 namespace Drupal\user;
 
 use Drupal\Core\Access\AccessResult;
@@ -22,10 +17,24 @@ use Drupal\Core\Session\AccountInterface;
 class UserAccessControlHandler extends EntityAccessControlHandler {
 
   /**
+   * Allow access to user label.
+   *
+   * @var bool
+   */
+  protected $viewLabelOperation = TRUE;
+
+  /**
    * {@inheritdoc}
    */
-  protected function checkAccess(EntityInterface $entity, $operation, $langcode, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var \Drupal\user\UserInterface $entity*/
+
+    // We don't treat the user label as privileged information, so this check
+    // has to be the first one in order to allow labels for all users to be
+    // viewed, including the special anonymous user.
+    if ($operation === 'view label') {
+      return AccessResult::allowed();
+    }
 
     // The anonymous user's profile can neither be viewed, updated nor deleted.
     if ($entity->isAnonymous()) {
@@ -41,10 +50,10 @@ class UserAccessControlHandler extends EntityAccessControlHandler {
       case 'view':
         // Only allow view access if the account is active.
         if ($account->hasPermission('access user profiles') && $entity->isActive()) {
-          return AccessResult::allowed()->cachePerPermissions()->cacheUntilEntityChanges($entity);
+          return AccessResult::allowed()->cachePerPermissions()->addCacheableDependency($entity);
         }
         // Users can view own profiles at all times.
-        else if ($account->id() == $entity->id()) {
+        elseif ($account->id() == $entity->id()) {
           return AccessResult::allowed()->cachePerUser();
         }
         break;
@@ -80,8 +89,11 @@ class UserAccessControlHandler extends EntityAccessControlHandler {
     $is_own_account = $items ? $items->getEntity()->id() == $account->id() : FALSE;
     switch ($field_definition->getName()) {
       case 'name':
-        // Allow view access to anyone with access to the entity.
-        if ($operation == 'view') {
+        // Allow view access to anyone with access to the entity. Anonymous
+        // users should be able to access the username field during the
+        // registration process, otherwise the username and email constraints
+        // are not checked.
+        if ($operation == 'view' || ($items && $account->isAnonymous() && $items->getEntity()->isAnonymous())) {
           return AccessResult::allowed()->cachePerPermissions();
         }
         // Allow edit access for the own user name if the permission is

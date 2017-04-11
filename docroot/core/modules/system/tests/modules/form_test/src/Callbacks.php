@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\form_test\Callbacks.
- */
-
 namespace Drupal\form_test;
 
 use Drupal\Core\Form\FormStateInterface;

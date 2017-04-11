@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\path\Tests\PathAdminTest.
- */
-
 namespace Drupal\path\Tests;
 
 /**
@@ -24,7 +19,7 @@ class PathAdminTest extends PathTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Create test user and login.
+    // Create test user and log in.
     $web_user = $this->drupalCreateUser(array('create page content', 'edit own page content', 'administer url aliases', 'create url aliases'));
     $this->drupalLogin($web_user);
   }
@@ -39,23 +34,23 @@ class PathAdminTest extends PathTestBase {
     $node3 = $this->drupalCreateNode();
 
     // Create aliases.
-    $alias1 = $this->randomMachineName(8);
+    $alias1 = '/' . $this->randomMachineName(8);
     $edit = array(
-      'source' => 'node/' . $node1->id(),
+      'source' => '/node/' . $node1->id(),
       'alias' => $alias1,
     );
     $this->drupalPostForm('admin/config/search/path/add', $edit, t('Save'));
 
-    $alias2 = $this->randomMachineName(8);
+    $alias2 = '/' . $this->randomMachineName(8);
     $edit = array(
-      'source' => 'node/' . $node2->id(),
+      'source' => '/node/' . $node2->id(),
       'alias' => $alias2,
     );
     $this->drupalPostForm('admin/config/search/path/add', $edit, t('Save'));
 
-    $alias3 = $this->randomMachineName(4) . '/' . $this->randomMachineName(4);
+    $alias3 = '/' . $this->randomMachineName(4) . '/' . $this->randomMachineName(4);
     $edit = array(
-      'source' => 'node/' . $node3->id(),
+      'source' => '/node/' . $node3->id(),
       'alias' => $alias3,
     );
     $this->drupalPostForm('admin/config/search/path/add', $edit, t('Save'));

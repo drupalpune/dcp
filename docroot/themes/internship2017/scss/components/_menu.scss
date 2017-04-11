@@ -1,0 +1,68 @@
+/*------------------------------------*\
+    * @file
+    * Menu Navigation.
+\*------------------------------------*/
+
+.region-header {
+    @include container($container-width, 0px);
+    @include breakpoint(phablet) {
+        width: 100%;
+    }
+}
+
+.region-header nav ul {
+    margin: 0px;
+    display: flex;
+    justify-content: center;
+    @include breakpoint(tablet) {
+        justify-content: space-around;
+    }
+    li {
+        display: inline-block;
+        margin: 0 20px 0 20px;
+        display: flex;
+        @include breakpoint (tablet) {
+            margin: 0 2px 0 2px;
+        }
+        a {
+            display: flex;
+            align-items: center;
+            color: $blue;
+            text-decoration: none;
+            font-size: 18px;
+            text-transform: uppercase;
+            font-family: $title-font;
+            padding: 5px 10px;
+            &.is-active {
+                border-bottom: 4px solid #ff5252;
+                color: $medred;
+            }
+            &.logopath {
+                padding: 0px 0px;
+            }
+            img {
+                position: relative;
+                top: 35px;
+                z-index: 1;
+            }
+        }
+    }
+}
+
+.mobile-menu-responsive {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media screen and (max-width:959px) {
+    li#logopath {
+        display: none;
+    }
+}
+
+li a {
+    @include breakpoint(tablet) {
+        color: #1975d2;
+    }
+}

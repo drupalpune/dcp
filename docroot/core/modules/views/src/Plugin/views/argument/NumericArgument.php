@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\argument\NumericArgument.
- */
-
 namespace Drupal\views\Plugin\views\argument;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -23,13 +18,13 @@ class NumericArgument extends ArgumentPluginBase {
    * The operator used for the query: or|and.
    * @var string
    */
-  var $operator;
+  public $operator;
 
   /**
    * The actual value which is used for querying.
    * @var array
    */
-  var $value;
+  public $value;
 
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -49,7 +44,7 @@ class NumericArgument extends ArgumentPluginBase {
       '#title' => $this->t('Allow multiple values'),
       '#description' => $this->t('If selected, users can enter multiple values in the form of 1+2+3 (for OR) or 1,2,3 (for AND).'),
       '#default_value' => !empty($this->options['break_phrase']),
-      '#fieldset' => 'more',
+      '#group' => 'options][more',
     );
 
     $form['not'] = array(
@@ -57,7 +52,7 @@ class NumericArgument extends ArgumentPluginBase {
       '#title' => $this->t('Exclude'),
       '#description' => $this->t('If selected, the numbers entered for the filter will be excluded rather than limiting the view.'),
       '#default_value' => !empty($this->options['not']),
-      '#fieldset' => 'more',
+      '#group' => 'options][more',
     );
   }
 
@@ -67,7 +62,7 @@ class NumericArgument extends ArgumentPluginBase {
     }
 
     if (!empty($this->options['break_phrase'])) {
-      $break = static::breakString($this->argument, TRUE);
+      $break = static::breakString($this->argument, FALSE);
       $this->value = $break->value;
       $this->operator = $break->operator;
     }
@@ -100,7 +95,7 @@ class NumericArgument extends ArgumentPluginBase {
     $this->ensureMyTable();
 
     if (!empty($this->options['break_phrase'])) {
-      $break = static::breakString($this->argument, TRUE);
+      $break = static::breakString($this->argument, FALSE);
       $this->value = $break->value;
       $this->operator = $break->operator;
     }

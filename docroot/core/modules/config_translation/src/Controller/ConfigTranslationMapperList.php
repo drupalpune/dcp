@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config_translation\Controller\ConfigTranslationMapperList.
- */
-
 namespace Drupal\config_translation\Controller;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\config_translation\ConfigMapperInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -94,7 +88,7 @@ class ConfigTranslationMapperList extends ControllerBase {
    *   A render array structure of fields for this mapper.
    */
   public function buildRow(ConfigMapperInterface $mapper) {
-    $row['label'] = SafeMarkup::checkPlain($mapper->getTypeLabel());
+    $row['label'] = $mapper->getTypeLabel();
     $row['operations']['data'] = $this->buildOperations($mapper);
     return $row;
   }

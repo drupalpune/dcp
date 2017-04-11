@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\Routing\NullGenerator.
- */
-
 namespace Drupal\Core\Routing;
 
-use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Render\BubbleableMetadata;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RequestContext as SymfonyRequestContext;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -51,7 +46,7 @@ class NullGenerator extends UrlGenerator {
   /**
    * {@inheritdoc}
    */
-  protected function processRoute($name, Route $route, array &$parameters, CacheableMetadata $cacheable_metadata = NULL) {
+  protected function processRoute($name, Route $route, array &$parameters, BubbleableMetadata $bubbleable_metadata = NULL) {
   }
 
   /**
@@ -62,21 +57,22 @@ class NullGenerator extends UrlGenerator {
   }
 
   /**
-   * Overrides Drupal\Core\Routing\UrlGenerator::setContext();
+   * {@inheritdoc}
    */
   public function setContext(SymfonyRequestContext $context) {
   }
 
   /**
-   * Implements Symfony\Component\Routing\RequestContextAwareInterface::getContext();
+   * {@inheritdoc}
    */
   public function getContext() {
   }
 
   /**
-   * Overrides Drupal\Core\Routing\UrlGenerator::processPath().
+   * {@inheritdoc}
    */
-  protected function processPath($path, &$options = array(), CacheableMetadata $cacheable_metadata = NULL) {
+  protected function processPath($path, &$options = array(), BubbleableMetadata $bubbleable_metadata = NULL) {
     return $path;
   }
+
 }

@@ -1,15 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\StringTranslation\TranslationManager.
- */
-
 namespace Drupal\Core\StringTranslation;
 
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\Core\State\StateInterface;
+use Drupal\Core\Language\LanguageDefault;
 use Drupal\Core\StringTranslation\Translator\TranslatorInterface;
 
 /**
@@ -18,27 +11,24 @@ use Drupal\Core\StringTranslation\Translator\TranslatorInterface;
 class TranslationManager implements TranslationInterface, TranslatorInterface {
 
   /**
-   * The language manager.
+   * An unsorted array of arrays of active translators.
    *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
-
-  /**
-   * An array of active translators keyed by priority.
+   * An associative array. The keys are integers that indicate priority. Values
+   * are arrays of TranslatorInterface objects.
    *
-   * @var array
-   *   Array of \Drupal\Core\StringTranslation\Translator\TranslatorInterface objects
+   * @var \Drupal\Core\StringTranslation\Translator\TranslatorInterface[][]
+   *
+   * @see \Drupal\Core\StringTranslation\TranslationManager::addTranslator()
+   * @see \Drupal\Core\StringTranslation\TranslationManager::sortTranslators()
    */
   protected $translators = array();
 
   /**
-   * Holds the array of translators sorted by priority.
+   * An array of translators, sorted by priority.
    *
    * If this is NULL a rebuild will be triggered.
    *
-   * @var array
-   *   An array of path processor objects.
+   * @var null|\Drupal\Core\StringTranslation\Translator\TranslatorInterface[]
    *
    * @see \Drupal\Core\StringTranslation\TranslationManager::addTranslator()
    * @see \Drupal\Core\StringTranslation\TranslationManager::sortTranslators()
@@ -54,35 +44,13 @@ class TranslationManager implements TranslationInterface, TranslatorInterface {
   protected $defaultLangcode;
 
   /**
-   * The state service.
-   *
-   * @var \Drupal\Core\State\StateInterface
-   */
-  protected $state;
-
-  /**
    * Constructs a TranslationManager object.
    *
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
-   *   The language manager.
-   * @param \Drupal\Core\State\StateInterface $state
-   *   (optional) The state service.
+   * @param \Drupal\Core\Language\LanguageDefault $default_language
+   *   The default language.
    */
-  public function __construct(LanguageManagerInterface $language_manager, StateInterface $state = NULL) {
-    $this->languageManager = $language_manager;
-    $this->defaultLangcode = $language_manager->getDefaultLanguage()->getId();
-    $this->state = $state;
-  }
-
-  /**
-   * Initializes the injected language manager with the translation manager.
-   *
-   * This should be called right after instantiating the translation manager to
-   * make it available to the language manager without introducing a circular
-   * dependency.
-   */
-  public function initLanguageManager() {
-    $this->languageManager->setTranslation($this);
+  public function __construct(LanguageDefault $default_language) {
+    $this->defaultLangcode = $default_language->get()->getId();
   }
 
   /**
@@ -93,8 +61,7 @@ class TranslationManager implements TranslationInterface, TranslatorInterface {
    * @param int $priority
    *   The priority of the logger being added.
    *
-   * @return \Drupal\Core\StringTranslation\TranslationManager
-   *   The called object.
+   * @return $this
    */
   public function addTranslator(TranslatorInterface $translator, $priority = 0) {
     $this->translators[$priority][] = $translator;
@@ -106,8 +73,8 @@ class TranslationManager implements TranslationInterface, TranslatorInterface {
   /**
    * Sorts translators according to priority.
    *
-   * @return array
-   *   A sorted array of translators objects.
+   * @return \Drupal\Core\StringTranslation\Translator\TranslatorInterface[]
+   *   A sorted array of translator objects.
    */
   protected function sortTranslators() {
     $sorted = array();
@@ -140,20 +107,21 @@ class TranslationManager implements TranslationInterface, TranslatorInterface {
    * {@inheritdoc}
    */
   public function translate($string, array $args = array(), array $options = array()) {
-    $string = $this->doTranslate($string, $options);
-    if (empty($args)) {
-      return SafeMarkup::set($string);
-    }
-    else {
-      return SafeMarkup::format($string, $args);
-    }
+    return new TranslatableMarkup($string, $args, $options, $this);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function translateString(TranslatableMarkup $translated_string) {
+    return $this->doTranslate($translated_string->getUntranslatedString(), $translated_string->getOptions());
   }
 
   /**
    * Translates a string to the current language or to a given language.
    *
    * @param string $string
-   *   A string containing the English string to translate.
+   *   A string containing the English text to translate.
    * @param array $options
    *   An associative array of additional options, with the following elements:
    *   - 'langcode': The language code to translate to a language other than
@@ -164,13 +132,16 @@ class TranslationManager implements TranslationInterface, TranslatorInterface {
    *   The translated string.
    */
   protected function doTranslate($string, array $options = array()) {
-    // Merge in defaults.
-    if (empty($options['langcode'])) {
-      $options['langcode'] = $this->defaultLangcode;
+    // If a NULL langcode has been provided, unset it.
+    if (!isset($options['langcode']) && array_key_exists('langcode', $options)) {
+      unset($options['langcode']);
     }
-    if (empty($options['context'])) {
-      $options['context'] = '';
-    }
+
+    // Merge in options defaults.
+    $options = $options + [
+      'langcode' => $this->defaultLangcode,
+      'context' => '',
+    ];
     $translation = $this->getStringTranslation($options['langcode'], $string, $options['context']);
     return $translation === FALSE ? $string : $translation;
   }
@@ -179,43 +150,7 @@ class TranslationManager implements TranslationInterface, TranslatorInterface {
    * {@inheritdoc}
    */
   public function formatPlural($count, $singular, $plural, array $args = array(), array $options = array()) {
-    $translatable_string = implode(LOCALE_PLURAL_DELIMITER, array($singular, $plural));
-    $translated_strings = $this->doTranslate($translatable_string, $options);
-    return $this->formatPluralTranslated($count, $translated_strings, $args, $options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function formatPluralTranslated($count, $translation, array $args = array(), array $options = array()) {
-    $args['@count'] = $count;
-    $translated_array = explode(LOCALE_PLURAL_DELIMITER, $translation);
-
-    if ($count == 1) {
-      return SafeMarkup::format($translated_array[0], $args);
-    }
-
-    // Get the plural index through the gettext formula.
-    // @todo implement static variable to minimize function_exists() usage.
-    $index = (function_exists('locale_get_plural')) ? locale_get_plural($count, isset($options['langcode']) ? $options['langcode'] : NULL) : -1;
-    if ($index == 0) {
-      // Singular form.
-      $return = $translated_array[0];
-    }
-    else {
-      if (isset($translated_array[$index])) {
-        // N-th plural form.
-        $return = $translated_array[$index];
-      }
-      else {
-        // If the index cannot be computed or there's no translation, use
-        // the second plural form as a fallback (which allows for most flexibility
-        // with the replaceable @count value).
-        $return = $translated_array[1];
-      }
-    }
-
-    return SafeMarkup::format($return, $args);
+    return new PluralTranslatableMarkup($count, $singular, $plural, $args, $options, $this);
   }
 
   /**
@@ -238,23 +173,6 @@ class TranslationManager implements TranslationInterface, TranslatorInterface {
     foreach ($this->sortedTranslators as $translator) {
       $translator->reset();
     }
-  }
-
-  /**
-   * @inheritdoc.
-   */
-  public function getNumberOfPlurals($langcode = NULL) {
-    // If the state service is not injected, we assume 2 plural variants are
-    // allowed. This may happen in the installer for simplicity. We also assume
-    // 2 plurals if there is no explicit information yet.
-    if (isset($this->state)) {
-      $langcode = $langcode ?: $this->languageManager->getCurrentLanguage()->getId();
-      $plural_formulas = $this->state->get('locale.translation.plurals') ?: array();
-      if (isset($plural_formulas[$langcode]['plurals'])) {
-        return $plural_formulas[$langcode]['plurals'];
-      }
-    }
-    return 2;
   }
 
 }

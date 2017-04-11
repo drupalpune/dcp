@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\views\Unit\Plugin\argument_default\QueryParameterTest.
- */
-
 namespace Drupal\Tests\views\Unit\Plugin\argument_default;
 
 use Drupal\Tests\UnitTestCase;
@@ -48,41 +43,33 @@ class QueryParameterTest extends UnitTestCase {
    *   - third entry: the expected default argument value.
    */
   public function providerGetArgument() {
-    $data = array();
+    $data = [];
 
-    $single[] = array(
-      'query_param' => 'test',
-    );
-    $single[] = new Request(array('test' => 'data'));
-    $single[] = 'data';
-    $data[] = $single;
+    $data[] = [
+      ['query_param' => 'test'],
+      new Request(['test' => 'data']),
+      'data',
+    ];
 
-    $single[] = array(
-      'query_param' => 'test',
-      'multiple' => 'AND'
-    );
-    $single[] = new Request(array('test' => array('data1', 'data2')));
-    $single[] = 'data1+data2';
-    $data[] = $single;
+    $data[] = [
+      ['query_param' => 'test', 'multiple' => 'and'],
+      new Request(['test' => ['data1', 'data2']]),
+      'data1,data2',
+    ];
 
-    $single[] = array(
-      'query_param' => 'test',
-      'multiple' => 'OR'
-    );
-    $single[] = new Request(array('test' => array('data1', 'data2')));
-    $single[] = 'data1,data2';
-    $data[] = $single;
+    $data[] = [
+      ['query_param' => 'test', 'multiple' => 'or'],
+      new Request(['test' => ['data1', 'data2']]),
+      'data1+data2',
+    ];
 
-    $single[] = array(
-      'query_param' => 'test',
-      'fallback' => 'blub',
-    );
-    $single[] = new Request(array());
-    $single[] = 'blub';
-    $data[] = $single;
+    $data[] = [
+      ['query_param' => 'test', 'fallback' => 'blub'],
+      new Request([]),
+      'blub',
+    ];
 
     return $data;
   }
 
 }
-

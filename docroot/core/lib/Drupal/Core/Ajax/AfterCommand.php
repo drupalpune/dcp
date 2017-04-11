@@ -1,13 +1,6 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Ajax\AfterCommand.
- */
-
 namespace Drupal\Core\Ajax;
-
-use Drupal\Core\Ajax\InsertCommand;
 
 /**
  * An AJAX command for calling the jQuery after() method.

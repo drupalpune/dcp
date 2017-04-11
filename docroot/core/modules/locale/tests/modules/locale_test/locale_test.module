@@ -45,6 +45,10 @@ function locale_test_locale_translation_projects_alter(&$projects) {
   // translation update system will not go out to l.d.o to check.
   $projects['drupal']['server_pattern'] = 'translations://';
 
+  if (\Drupal::state()->get('locale.remove_core_project')) {
+    unset($projects['drupal']);
+  }
+
   if (\Drupal::state()->get('locale.test_projects_alter')) {
 
     // Instead of the default ftp.drupal.org we use the file system of the test
@@ -141,4 +145,61 @@ function locale_test_locale_translation_projects_alter(&$projects) {
 function locale_test_language_fallback_candidates_locale_lookup_alter(array &$candidates, array $context) {
   \Drupal::state()->set('locale.test_language_fallback_candidates_locale_lookup_alter_candidates', $candidates);
   \Drupal::state()->set('locale.test_language_fallback_candidates_locale_lookup_alter_context', $context);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function locale_test_theme() {
+  $return = [];
+
+  $return['locale_test_tokenized'] = [
+    'variable' => ['content' => ''],
+  ];
+
+  return $return;
+}
+
+/**
+ * Implements hook_token_info().
+ */
+function locale_test_token_info() {
+  $info = [];
+
+  $info['types']['locale_test'] = [
+    'name' => t('Locale test'),
+    'description' => t('Locale test'),
+  ];
+
+  $info['tokens']['locale_test']['security_test1'] = [
+    'type' => 'text',
+    'name' => t('Security test 1'),
+  ];
+  $info['tokens']['locale_test']['security_test2'] = [
+    'type' => 'text',
+    'name' => t('Security test 2'),
+  ];
+
+  return $info;
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function locale_test_tokens($type, $tokens, array $data = [], array $options = []) {
+  $return = [];
+  if ($type == 'locale_test') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'security_test1':
+          $return[$original] = "javascript:alert('Mooooh!');";
+          break;
+        case 'security_test2':
+          $return[$original] = "<script>alert('Mooooh!');</script>";
+          break;
+      }
+    }
+  }
+
+  return $return;
 }

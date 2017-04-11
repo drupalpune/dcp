@@ -13,7 +13,7 @@
 /**
  * Perform alterations on filter definitions.
  *
- * @param $info
+ * @param array $info
  *   Array of information on filters exposed by filter plugins.
  */
 function hook_filter_info_alter(&$info) {
@@ -35,7 +35,7 @@ function hook_filter_info_alter(&$info) {
  */
 function hook_filter_secure_image_alter(&$image) {
   // Turn an invalid image into an error indicator.
-  $image->setAttribute('src', base_path() . 'core/misc/icons/ea2800/error.svg');
+  $image->setAttribute('src', base_path() . 'core/misc/icons/e32700/error.svg');
   $image->setAttribute('alt', t('Image removed.'));
   $image->setAttribute('title', t('This image has been removed. For security reasons, only images from the local domain are allowed.'));
 
@@ -48,7 +48,7 @@ function hook_filter_secure_image_alter(&$image) {
 /**
  * Perform actions when a text format has been disabled.
  *
- * @param $format
+ * @param \Drupal\filter\FilterFormatInterface $format
  *   The format object of the format being disabled.
  */
 function hook_filter_format_disable($format) {

@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\theme_test\EventSubscriber\ThemeTestSubscriber.
- */
-
 namespace Drupal\theme_test\EventSubscriber;
 
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -33,12 +29,22 @@ class ThemeTestSubscriber implements EventSubscriberInterface {
   protected $currentRouteMatch;
 
   /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * Constructs a new ThemeTestSubscriber.
    *
    * @param \Drupal\Core\Routing\RouteMatchInterface $current_route_match
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   The renderer.
    */
-  public function __construct(RouteMatchInterface $current_route_match) {
+  public function __construct(RouteMatchInterface $current_route_match, RendererInterface $renderer) {
     $this->currentRouteMatch = $current_route_match;
+    $this->renderer = $renderer;
   }
 
   /**
@@ -62,7 +68,7 @@ class ThemeTestSubscriber implements EventSubscriberInterface {
         '#url' => Url::fromRoute('user.page'),
         '#attributes' => array('title' => 'Themed output generated in a KernelEvents::REQUEST listener'),
       );
-      $GLOBALS['theme_test_output'] = drupal_render($more_link);
+      $GLOBALS['theme_test_output'] = $this->renderer->renderPlain($more_link);
     }
   }
 

@@ -1,12 +1,6 @@
 <?php
 
-/**
- * Contains \Drupal\Core\Asset\JsCollectionGrouper.
- */
-
 namespace Drupal\Core\Asset;
-
-use Drupal\Core\Asset\AssetCollectionGrouperInterface;
 
 /**
  * Groups JavaScript assets.
@@ -18,8 +12,7 @@ class JsCollectionGrouper implements AssetCollectionGrouperInterface {
    *
    * Puts multiple items into the same group if they are groupable and if they
    * are for the same browsers. Items of the 'file' type are groupable if their
-   * 'preprocess' flag is TRUE. Items of the 'inline', 'settings', or 'external'
-   * type are not groupable.
+   * 'preprocess' flag is TRUE. Items of the 'external' type are not groupable.
    *
    * Also ensures that the process of grouping items does not change their
    * relative order. This requirement may result in multiple groups for the same
@@ -44,15 +37,12 @@ class JsCollectionGrouper implements AssetCollectionGrouperInterface {
         case 'file':
           // Group file items if their 'preprocess' flag is TRUE.
           // Help ensure maximum reuse of aggregate files by only grouping
-          // together items that share the same 'group' value and 'every_page'
-          // flag.
-          $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['browsers']) : FALSE;
+          // together items that share the same 'group' value.
+          $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['browsers']) : FALSE;
           break;
 
         case 'external':
-        case 'setting':
-        case 'inline':
-          // Do not group external, settings, and inline items.
+          // Do not group external items.
           $group_keys = FALSE;
           break;
       }

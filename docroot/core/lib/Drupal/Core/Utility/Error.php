@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Utility\Error.
- */
-
 namespace Drupal\Core\Utility;
 
 use Drupal\Component\Utility\SafeMarkup;
@@ -33,7 +28,7 @@ class Error {
   /**
    * Decodes an exception and retrieves the correct caller.
    *
-   * @param \Exception|\BaseException $exception
+   * @param \Exception|\Throwable $exception
    *   The exception object that was thrown.
    *
    * @return array
@@ -52,7 +47,7 @@ class Error {
       // The first element in the stack is the call, the second element gives us
       // the caller. We skip calls that occurred in one of the classes of the
       // database layer or in one of its global functions.
-      $db_functions = array('db_query',  'db_query_range');
+      $db_functions = array('db_query', 'db_query_range');
       while (!empty($backtrace[1]) && ($caller = $backtrace[1]) &&
         ((isset($caller['class']) && (strpos($caller['class'], 'Query') !== FALSE || strpos($caller['class'], 'Database') !== FALSE || strpos($caller['class'], 'PDO') !== FALSE)) ||
           in_array($caller['function'], $db_functions))) {
@@ -70,19 +65,20 @@ class Error {
       '%type' => get_class($exception),
       // The standard PHP exception handler considers that the exception message
       // is plain-text. We mimic this behavior here.
-      '!message' => SafeMarkup::checkPlain($message),
+      '@message' => $message,
       '%function' => $caller['function'],
       '%file' => $caller['file'],
       '%line' => $caller['line'],
       'severity_level' => static::ERROR,
       'backtrace' => $backtrace,
+      '@backtrace_string' => $exception->getTraceAsString(),
     );
   }
 
   /**
    * Renders an exception error message without further exceptions.
    *
-   * @param \Exception|\BaseException $exception
+   * @param \Exception|\Throwable $exception
    *   The exception object that was thrown.
    *
    * @return string
@@ -95,14 +91,13 @@ class Error {
     // Remove 'main()'.
     array_shift($backtrace);
 
-    $output = SafeMarkup::format('%type: !message in %function (line %line of %file).', $decode);
     // Even though it is possible that this method is called on a public-facing
     // site, it is only called when the exception handler itself threw an
     // exception, which normally means that a code change caused the system to
     // no longer function correctly (as opposed to a user-triggered error), so
     // we assume that it is safe to include a verbose backtrace.
-    $output .= '<pre>' . static::formatBacktrace($backtrace) . '</pre>';
-    return SafeMarkup::set($output);
+    $decode['@backtrace'] = Error::formatBacktrace($backtrace);
+    return SafeMarkup::format('%type: @message in %function (line %line of %file). <pre class="backtrace">@backtrace</pre>', $decode);
   }
 
   /**
@@ -180,7 +175,12 @@ class Error {
         }
       }
 
-      $return .= $call['function'] . '(' . implode(', ', $call['args']) . ")\n";
+      $line = '';
+      if (isset($trace['line'])) {
+        $line = " (Line: {$trace['line']})";
+      }
+
+      $return .= $call['function'] . '(' . implode(', ', $call['args']) . ")$line\n";
     }
 
     return $return;

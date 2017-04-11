@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Entity\EntityViewDisplay.
- */
-
 namespace Drupal\Core\Entity\Entity;
 
 use Drupal\Component\Utility\NestedArray;
@@ -13,6 +8,7 @@ use Drupal\Core\Entity\EntityDisplayPluginCollection;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\EntityDisplayBase;
+use Drupal\Core\TypedData\TranslatableInterface;
 
 /**
  * Configuration entity that contains display options for all components of a
@@ -46,8 +42,8 @@ class EntityViewDisplay extends EntityDisplayBase implements EntityViewDisplayIn
    * Returns the display objects used to render a set of entities.
    *
    * Depending on the configuration of the view mode for each bundle, this can
-   * be either the display object associated to the view mode, or the 'default'
-   * display.
+   * be either the display object associated with the view mode, or the
+   * 'default' display.
    *
    * This method should only be used internally when rendering an entity. When
    * assigning suggested display options for a component in a given view mode,
@@ -181,6 +177,7 @@ class EntityViewDisplay extends EntityDisplayBase implements EntityViewDisplayIn
    */
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     // Reset the render cache for the target entity type.
+    parent::postSave($storage, $update);
     if (\Drupal::entityManager()->hasHandler($this->targetEntityType, 'view_builder')) {
       \Drupal::entityManager()->getViewBuilder($this->targetEntityType)->resetCache();
     }
@@ -248,7 +245,18 @@ class EntityViewDisplay extends EntityDisplayBase implements EntityViewDisplayIn
           $items = $grouped_items[$id];
           /** @var \Drupal\Core\Access\AccessResultInterface $field_access */
           $field_access = $items->access('view', NULL, TRUE);
-          $build_list[$id][$name] = $field_access->isAllowed() ? $formatter->view($items) : [];
+          // The language of the field values to display is already determined
+          // in the incoming $entity. The formatter should build its output of
+          // those values using:
+          // - the entity language if the entity is translatable,
+          // - the current "content language" otherwise.
+          if ($entity instanceof TranslatableInterface && $entity->isTranslatable()) {
+            $view_langcode = $entity->language()->getId();
+          }
+          else {
+            $view_langcode = NULL;
+          }
+          $build_list[$id][$name] = $field_access->isAllowed() ? $formatter->view($items, $view_langcode) : [];
           // Apply the field access cacheability metadata to the render array.
           $this->renderer->addCacheableDependency($build_list[$id][$name], $field_access);
         }
@@ -269,7 +277,7 @@ class EntityViewDisplay extends EntityDisplayBase implements EntityViewDisplayIn
         'view_mode' => $this->originalMode,
         'display' => $this,
       );
-      \Drupal::moduleHandler()->alter('entity_display_build', $build_list[$key], $context);
+      \Drupal::moduleHandler()->alter('entity_display_build', $build_list[$id], $context);
     }
 
     return $build_list;
@@ -293,4 +301,5 @@ class EntityViewDisplay extends EntityDisplayBase implements EntityViewDisplayIn
       'formatters' => new EntityDisplayPluginCollection($this->pluginManager, $configurations)
     );
   }
+
 }

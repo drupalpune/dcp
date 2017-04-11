@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\toolbar\Element\Toolbar.
- */
-
 namespace Drupal\toolbar\Element;
 
 use Drupal\Component\Utility\Html;
@@ -61,19 +56,19 @@ class Toolbar extends RenderElement {
    * rendering to ensure that it is built only if it will be displayed.
    *
    * @param array $element
-   *  A renderable array.
+   *   A renderable array.
    *
    * @return array
-   *  A renderable array.
+   *   A renderable array.
    *
-   * @see toolbar_page_top().
+   * @see toolbar_page_top()
    */
   public static function preRenderToolbar($element) {
     // Get the configured breakpoints to switch from vertical to horizontal
     // toolbar presentation.
     $breakpoints = static::breakpointManager()->getBreakpointsByGroup('toolbar');
     if (!empty($breakpoints)) {
-      $media_queries =  array();
+      $media_queries = array();
       foreach ($breakpoints as $id => $breakpoint) {
         $media_queries[$id] = $breakpoint->getMediaQuery();
       }
@@ -96,9 +91,6 @@ class Toolbar extends RenderElement {
     foreach (Element::children($element) as $key) {
       $element[$key]['#id'] = Html::getId('toolbar-item-' . $key);
     }
-
-    // Render the children.
-    $element['#children'] = drupal_render_children($element);
 
     return $element;
   }

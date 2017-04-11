@@ -1,13 +1,8 @@
 <?php
-/**
- * @file
- * Contains \Drupal\Tests\comment\Unit\Entity\CommentTest
- */
 
 namespace Drupal\Tests\comment\Unit\Entity;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Entity\EntityType;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -45,6 +40,10 @@ class CommentLockTest extends UnitTestCase {
     $lock->expects($this->exactly(2))
       ->method($this->anything());
     $container->set('lock', $lock);
+
+    $cache_tag_invalidator = $this->getMock('Drupal\Core\Cache\CacheTagsInvalidator');
+    $container->set('cache_tags.invalidator', $cache_tag_invalidator);
+
     \Drupal::setContainer($container);
     $methods = get_class_methods('Drupal\comment\Entity\Comment');
     unset($methods[array_search('preSave', $methods)]);
@@ -69,6 +68,14 @@ class CommentLockTest extends UnitTestCase {
     $comment->expects($this->any())
       ->method('getThread')
       ->will($this->returnValue(''));
+
+    $parent_entity = $this->getMock('\Drupal\Core\Entity\ContentEntityInterface');
+    $parent_entity->expects($this->atLeastOnce())
+      ->method('getCacheTagsToInvalidate')
+      ->willReturn(['node:1']);
+    $comment->expects($this->once())
+      ->method('getCommentedEntity')
+      ->willReturn($parent_entity);
 
     $entity_type = $this->getMock('\Drupal\Core\Entity\EntityTypeInterface');
     $comment->expects($this->any())

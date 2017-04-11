@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\file\FileStorage.
- */
-
 namespace Drupal\file;
 
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;

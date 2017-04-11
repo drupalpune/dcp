@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\aggregator\Tests\AddFeedTest.
- */
-
 namespace Drupal\aggregator\Tests;
 
 /**
@@ -13,6 +8,13 @@ namespace Drupal\aggregator\Tests;
  * @group aggregator
  */
 class AddFeedTest extends AggregatorTestBase {
+
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('page_title_block');
+  }
+
   /**
    * Creates and ensures that a feed is unique, checks source, and deletes feed.
    */
@@ -21,7 +23,7 @@ class AddFeedTest extends AggregatorTestBase {
     $feed->refreshItems();
 
     // Check feed data.
-    $this->assertUrl(\Drupal::url('aggregator.feed_add', [], ['absolute' => TRUE]), [], 'Directed to correct url.');
+    $this->assertUrl(\Drupal::url('aggregator.feed_add', [], ['absolute' => TRUE]), [], 'Directed to correct URL.');
     $this->assertTrue($this->uniqueFeed($feed->label(), $feed->getUrl()), 'The feed is unique.');
 
     // Check feed source.
@@ -42,6 +44,23 @@ class AddFeedTest extends AggregatorTestBase {
 
     // Delete feed.
     $this->deleteFeed($feed);
+  }
+
+  /**
+   * Ensures that the feed label is escaping when rendering the feed icon.
+   */
+  public function testFeedLabelEscaping() {
+    $feed = $this->createFeed(NULL, ['title[0][value]' => 'Test feed title <script>alert(123);</script>']);
+    $this->checkForMetaRefresh();
+
+    $this->drupalGet('aggregator/sources/' . $feed->id());
+    $this->assertResponse(200);
+
+    $this->assertEscaped('Test feed title <script>alert(123);</script>');
+    $this->assertNoRaw('Test feed title <script>alert(123);</script>');
+
+    // Ensure the feed icon title is escaped.
+    $this->assertTrue(strpos(str_replace(["\n", "\r"], '', $this->getRawContent()), 'class="feed-icon">  Subscribe to Test feed title &lt;script&gt;alert(123);&lt;/script&gt; feed</a>') !== FALSE);
   }
 
   /**
@@ -72,4 +91,5 @@ class AddFeedTest extends AggregatorTestBase {
     $this->deleteFeed($feed);
     $this->deleteFeed($feed_2);
   }
+
 }

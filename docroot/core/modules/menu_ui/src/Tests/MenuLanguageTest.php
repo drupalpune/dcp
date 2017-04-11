@@ -1,18 +1,14 @@
 <?php
 
-/**
- * @file
- * Tests for menu_ui language settings.
- */
-
 namespace Drupal\menu_ui\Tests;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\language\Entity\ContentLanguageSettings;
-use Drupal\system\Entity\Menu;
 
 /**
+ * Tests for menu_ui language settings.
+ *
  * Create menu and menu links in non-English language, and edit language
  * settings.
  *
@@ -52,7 +48,7 @@ class MenuLanguageTest extends MenuWebTestBase {
     $edit = array(
       'id' => $menu_name,
       'description' => '',
-      'label' =>  $label,
+      'label' => $label,
       'langcode' => 'aa',
     );
     $this->drupalPostForm('admin/structure/menu/add', $edit, t('Save'));

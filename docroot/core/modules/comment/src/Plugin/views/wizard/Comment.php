@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Plugin\views\wizard\Comment.
- */
-
 namespace Drupal\comment\Plugin\views\wizard;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\wizard\WizardPluginBase;
 
 /**
@@ -54,7 +48,7 @@ class Comment extends WizardPluginBase {
   );
 
   /**
-   * Overrides Drupal\views\Plugin\views\wizard\WizardPluginBase::rowStyleOptions().
+   * {@inheritdoc}
    */
   protected function rowStyleOptions() {
     $options = array();
@@ -64,7 +58,7 @@ class Comment extends WizardPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\wizard\WizardPluginBase::defaultDisplayOptions().
+   * {@inheritdoc}
    */
   protected function defaultDisplayOptions() {
     $display_options = parent::defaultDisplayOptions();

@@ -1,17 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Cache\CacheableMetadataTest.
- */
-
 namespace Drupal\Tests\Core\Cache;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Tests\Core\Render\TestCacheableDependency;
 use Drupal\Tests\UnitTestCase;
-use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -32,14 +26,39 @@ class CacheableMetadataTest extends UnitTestCase {
    * @see \Drupal\Tests\Core\Cache\CacheContextsTest
    */
   public function testMerge(CacheableMetadata $a, CacheableMetadata $b, CacheableMetadata $expected) {
-    $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\CacheContextsManager')
+    $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\Context\CacheContextsManager')
       ->disableOriginalConstructor()
       ->getMock();
+    $cache_contexts_manager->method('assertValidTokens')->willReturn(TRUE);
+
     $container = new ContainerBuilder();
     $container->set('cache_contexts_manager', $cache_contexts_manager);
     \Drupal::setContainer($container);
 
     $this->assertEquals($expected, $a->merge($b));
+  }
+
+  /**
+   * @covers ::addCacheableDependency
+   * @dataProvider providerTestMerge
+   *
+   * This only tests at a high level, because it reuses existing logic. Detailed
+   * tests exist for the existing logic:
+   *
+   * @see \Drupal\Tests\Core\Cache\CacheTest::testMergeTags()
+   * @see \Drupal\Tests\Core\Cache\CacheTest::testMergeMaxAges()
+   * @see \Drupal\Tests\Core\Cache\CacheContextsTest
+   */
+  public function testAddCacheableDependency(CacheableMetadata $a, CacheableMetadata $b, CacheableMetadata $expected) {
+    $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\Context\CacheContextsManager')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $cache_contexts_manager->method('assertValidTokens')->willReturn(TRUE);
+    $container = new ContainerBuilder();
+    $container->set('cache_contexts_manager', $cache_contexts_manager);
+    \Drupal::setContainer($container);
+
+    $this->assertEquals($expected, $a->addCacheableDependency($b));
   }
 
   /**
@@ -102,14 +121,14 @@ class CacheableMetadataTest extends UnitTestCase {
    * Data provider for testSetCacheMaxAge.
    */
   public function providerSetCacheMaxAge() {
-   return [
-     [0 , FALSE],
-     ['http', TRUE],
-     ['0', TRUE],
-     [new \stdClass(), TRUE],
-     [300, FALSE],
-     [[], TRUE],
-     [8.0, TRUE]
+    return [
+      [0 , FALSE],
+      ['http', TRUE],
+      ['0', TRUE],
+      [new \stdClass(), TRUE],
+      [300, FALSE],
+      [[], TRUE],
+      [8.0, TRUE]
    ];
   }
 

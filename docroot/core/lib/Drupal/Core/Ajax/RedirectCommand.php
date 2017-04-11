@@ -1,13 +1,6 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Ajax\RedirectCommand.
- */
-
 namespace Drupal\Core\Ajax;
-
-use Drupal\Core\Ajax\CommandInterface;
 
 /**
  * Defines an AJAX command to set the window.location, loading that URL.

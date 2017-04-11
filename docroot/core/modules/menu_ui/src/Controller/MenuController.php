@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\menu_ui\Controller\MenuController.
- */
-
 namespace Drupal\menu_ui\Controller;
 
 use Drupal\Component\Utility\Xss;
@@ -73,11 +68,11 @@ class MenuController extends ControllerBase {
    * @param \Drupal\system\MenuInterface $menu
    *   The menu entity.
    *
-   * @return string
-   *   The menu label.
+   * @return array
+   *   The menu label as a render array.
    */
   public function menuTitle(MenuInterface $menu) {
-    return Xss::filter($menu->label());
+    return ['#markup' => $menu->label(), '#allowed_tags' => Xss::getHtmlTagList()];
   }
 
 }

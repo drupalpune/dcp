@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Updater\Updater.
- */
-
 namespace Drupal\Core\Updater;
 
 use Drupal\Component\Utility\Unicode;
@@ -24,13 +19,25 @@ class Updater {
   public $source;
 
   /**
+   * The root directory under which new projects will be copied.
+   *
+   * @var string
+   */
+  protected $root;
+
+  /**
    * Constructs a new updater.
    *
    * @param string $source
    *   Directory to install from.
+   * @param string $root
+   *   The root directory under which the project will be copied to if it's a
+   *   new project. Usually this is the app root (the directory in which the
+   *   Drupal site is installed).
    */
-  public function __construct($source) {
+  public function __construct($source, $root) {
     $this->source = $source;
+    $this->root = $root;
     $this->name = self::getProjectName($source);
     $this->title = self::getProjectTitle($source);
   }
@@ -43,20 +50,24 @@ class Updater {
    *
    * @param string $source
    *   Directory of a Drupal project.
+   * @param string $root
+   *   The root directory under which the project will be copied to if it's a
+   *   new project. Usually this is the app root (the directory in which the
+   *   Drupal site is installed).
    *
    * @return \Drupal\Core\Updater\Updater
    *   A new Drupal\Core\Updater\Updater object.
    *
    * @throws \Drupal\Core\Updater\UpdaterException
    */
-  public static function factory($source) {
+  public static function factory($source, $root) {
     if (is_dir($source)) {
       $updater = self::getUpdaterFromDirectory($source);
     }
     else {
       throw new UpdaterException(t('Unable to determine the type of the source directory.'));
     }
-    return new $updater($source);
+    return new $updater($source, $root);
   }
 
   /**
@@ -219,9 +230,6 @@ class Updater {
       // Make sure the installation parent directory exists and is writable.
       $this->prepareInstallDirectory($filetransfer, $args['install_dir']);
 
-      // Note: If the project is installed in the top-level, it will not be
-      // deleted. It will be installed in sites/default as that will override
-      // the top-level reference and not break other sites which are using it.
       if (is_dir($args['install_dir'] . '/' . $this->name)) {
         // Remove the existing installed file.
         $filetransfer->removeDirectory($args['install_dir'] . '/' . $this->name);
@@ -241,7 +249,7 @@ class Updater {
       return $this->postUpdateTasks();
     }
     catch (FileTransferException $e) {
-      throw new UpdaterFileTransferException(t('File Transfer failed, reason: !reason', array('!reason' => strtr($e->getMessage(), $e->arguments))));
+      throw new UpdaterFileTransferException(t('File Transfer failed, reason: @reason', array('@reason' => strtr($e->getMessage(), $e->arguments))));
     }
   }
 
@@ -279,7 +287,7 @@ class Updater {
       return $this->postInstallTasks();
     }
     catch (FileTransferException $e) {
-      throw new UpdaterFileTransferException(t('File Transfer failed, reason: !reason', array('!reason' => strtr($e->getMessage(), $e->arguments))));
+      throw new UpdaterFileTransferException(t('File Transfer failed, reason: @reason', array('@reason' => strtr($e->getMessage(), $e->arguments))));
     }
   }
 
@@ -365,7 +373,7 @@ class Updater {
    * Returns the full path to a directory where backups should be written.
    */
   public function getBackupDir() {
-    return file_stream_wrapper_get_instance_by_scheme('temporary')->getDirectoryPath();
+    return \Drupal::service('stream_wrapper_manager')->getViaScheme('temporary')->getDirectoryPath();
   }
 
   /**
@@ -399,4 +407,5 @@ class Updater {
   public function postUpdateTasks() {
     return array();
   }
+
 }

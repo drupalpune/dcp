@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\row\EntityRow.
- */
-
 namespace Drupal\views\Plugin\views\row;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -132,7 +126,7 @@ class EntityRow extends RowPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\row\RowPluginBase::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -141,7 +135,7 @@ class EntityRow extends RowPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\row\RowPluginBase::buildOptionsForm().
+   * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
@@ -155,12 +149,12 @@ class EntityRow extends RowPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\PluginBase::summaryTitle().
+   * {@inheritdoc}
    */
   public function summaryTitle() {
     $options = \Drupal::entityManager()->getViewModeOptions($this->entityTypeId);
     if (isset($options[$this->options['view_mode']])) {
-      return SafeMarkup::checkPlain($options[$this->options['view_mode']]);
+      return $options[$this->options['view_mode']];
     }
     else {
       return $this->t('No view mode selected');
@@ -186,7 +180,7 @@ class EntityRow extends RowPluginBase {
   }
 
   /**
-   * Overrides Drupal\views\Plugin\views\row\RowPluginBase::render().
+   * {@inheritdoc}
    */
   public function render($row) {
     return $this->getEntityTranslationRenderer()->render($row);

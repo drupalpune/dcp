@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\entity_test\Entity\EntityTestMulRevChanged.
- */
-
 namespace Drupal\entity_test\Entity;
 
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -23,6 +18,9 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *       "default" = "Drupal\entity_test\EntityTestForm",
  *       "delete" = "Drupal\entity_test\EntityTestDeleteForm"
  *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider",
+ *     },
  *     "translation" = "Drupal\content_translation\ContentTranslationHandler",
  *     "views_data" = "Drupal\views\EntityViewsData"
  *   },
@@ -40,9 +38,10 @@ use Drupal\Core\Field\BaseFieldDefinition;
  *     "langcode" = "langcode",
  *   },
  *   links = {
+ *     "add-form" = "/entity_test_mulrev_changed/add",
  *     "canonical" = "/entity_test_mulrev_changed/manage/{entity_test_mulrev_changed}",
  *     "delete-form" = "/entity_test/delete/entity_test_mulrev_changed/{entity_test_mulrev_changed}",
- *     "edit-form" = "/entity_test_mulrev_changed/manage/{entity_test_mulrev_changed}",
+ *     "edit-form" = "/entity_test_mulrev_changed/manage/{entity_test_mulrev_changed}/edit",
  *     "revision" = "/entity_test_mulrev_changed/{entity_test_mulrev_changed}/revision/{entity_test_mulrev_changed_revision}/view",
  *   }
  * )
@@ -60,6 +59,13 @@ class EntityTestMulRevChanged extends EntityTestMulChanged {
       ->setDescription(t('The version id of the test entity.'))
       ->setReadOnly(TRUE)
       ->setSetting('unsigned', TRUE);
+
+    $fields['revision_translation_affected'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Revision translation affected'))
+      ->setDescription(t('Indicates if the last edit of a translation belongs to current revision.'))
+      ->setReadOnly(TRUE)
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE);
 
     $fields['langcode']->setRevisionable(TRUE);
     $fields['name']->setRevisionable(TRUE);

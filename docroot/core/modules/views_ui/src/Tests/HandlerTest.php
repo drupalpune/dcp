@@ -1,13 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Tests\HandlerTest.
- */
-
 namespace Drupal\views_ui\Tests;
 
 use Drupal\Component\Utility\SafeMarkup;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\views\Tests\ViewTestData;
 use Drupal\views\ViewExecutable;
 
 /**
@@ -19,11 +17,26 @@ use Drupal\views\ViewExecutable;
 class HandlerTest extends UITestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  public static $modules = array('node_test_views');
+
+  /**
    * Views used by this test.
    *
    * @var array
    */
-  public static $testViews = array('test_view_empty', 'test_view_broken');
+  public static $testViews = array('test_view_empty', 'test_view_broken', 'node', 'test_node_view');
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('page_title_block');
+    ViewTestData::createTestViews(get_class($this), array('node_test_views'));
+  }
 
   /**
    * Overrides \Drupal\views\Tests\ViewTestBase::schemaDefinition().
@@ -47,7 +60,9 @@ class HandlerTest extends UITestBase {
   /**
    * Overrides \Drupal\views\Tests\ViewTestBase::viewsData().
    *
-   * Adds a relationship for the uid column.
+   * Adds:
+   * - a relationship for the uid column.
+   * - a dummy field with no help text.
    */
   protected function viewsData() {
     $data = parent::viewsData();
@@ -60,6 +75,12 @@ class HandlerTest extends UITestBase {
         'base field' => 'uid'
       )
     );
+
+    // Create a dummy field with no help text.
+    $data['views_test_data']['no_help'] = $data['views_test_data']['name'];
+    $data['views_test_data']['no_help']['field']['title'] = t('No help');
+    $data['views_test_data']['no_help']['field']['real field'] = 'name';
+    unset($data['views_test_data']['no_help']['help']);
 
     return $data;
   }
@@ -138,6 +159,41 @@ class HandlerTest extends UITestBase {
   }
 
   /**
+   * Tests escaping of field labels in help text.
+   */
+  public function testHandlerHelpEscaping() {
+    // Setup a field with two instances using a different label.
+    // Ensure that the label is escaped properly.
+
+    $this->drupalCreateContentType(['type' => 'article']);
+    $this->drupalCreateContentType(['type' => 'page']);
+
+    FieldStorageConfig::create([
+      'field_name' => 'field_test',
+      'entity_type' => 'node',
+      'type' => 'string',
+    ])->save();
+
+    FieldConfig::create([
+      'field_name' => 'field_test',
+      'entity_type' => 'node',
+      'bundle' => 'page',
+      'label' => 'The giraffe" label'
+    ])->save();
+
+    FieldConfig::create([
+      'field_name' => 'field_test',
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'label' => 'The <em>giraffe"</em> label <script>alert("the return of the xss")</script>'
+    ])->save();
+
+    $this->drupalGet('admin/structure/views/nojs/add-handler/content/default/field');
+    $this->assertEscaped('The <em>giraffe"</em> label <script>alert("the return of the xss")</script>');
+    $this->assertEscaped('Appears in: page, article. Also known as: Content: The giraffe" label');
+  }
+
+  /**
    * Tests broken handlers.
    */
   public function testBrokenHandlers() {
@@ -150,12 +206,12 @@ class HandlerTest extends UITestBase {
       $result = $this->xpath('//a[contains(@href, :href)]', array(':href' => $href));
       $this->assertEqual(count($result), 1, SafeMarkup::format('Handler (%type) edit link found.', array('%type' => $type)));
 
-      $text = t('Broken/missing handler');
+      $text = 'Broken/missing handler';
 
       $this->assertIdentical((string) $result[0], $text, 'Ensure the broken handler text was found.');
 
       $this->drupalGet($href);
-      $result = $this->xpath('//h1');
+      $result = $this->xpath('//h1[@class="page-title"]');
       $this->assertTrue(strpos((string) $result[0], $text) !== FALSE, 'Ensure the broken handler text was found.');
 
       $original_configuration = [
@@ -170,6 +226,57 @@ class HandlerTest extends UITestBase {
         $this->assertText(SafeMarkup::format('@key: @value', array('@key' => $key, '@value' => $value)));
       }
     }
+  }
+
+  /**
+   * Ensures that neither node type or node ID appears multiple times.
+   *
+   * @see \Drupal\views\EntityViewsData
+   */
+  public function testNoDuplicateFields() {
+    $handler_types = ['field', 'filter', 'sort', 'argument'];
+
+    foreach ($handler_types as $handler_type) {
+      $add_handler_url = 'admin/structure/views/nojs/add-handler/test_node_view/default/' . $handler_type;
+      $this->drupalGet($add_handler_url);
+
+      $this->assertNoDuplicateField('ID', 'Content');
+      $this->assertNoDuplicateField('ID', 'Content revision');
+      $this->assertNoDuplicateField('Content type', 'Content');
+      $this->assertNoDuplicateField('UUID', 'Content');
+      $this->assertNoDuplicateField('Revision ID', 'Content');
+      $this->assertNoDuplicateField('Revision ID', 'Content revision');
+    }
+  }
+
+  /**
+   * Ensures that no missing help text is shown.
+   *
+   * @see \Drupal\views\EntityViewsData
+   */
+  public function testErrorMissingHelp() {
+    // Test that the error message is not shown for entity fields but an empty
+    // description field is shown instead.
+    $this->drupalGet('admin/structure/views/nojs/add-handler/test_node_view/default/field');
+    $this->assertNoText('Error: missing help');
+    $this->assertRaw('<td class="description"></td>', 'Empty description found');
+
+    // Test that no error message is shown for other fields.
+    $this->drupalGet('admin/structure/views/nojs/add-handler/test_view_empty/default/field');
+    $this->assertNoText('Error: missing help');
+  }
+
+  /**
+   * Asserts that fields only appear once.
+   *
+   * @param string $field_name
+   *   The field name.
+   * @param string $entity_type
+   *   The entity type to which the field belongs.
+   */
+  public function assertNoDuplicateField($field_name, $entity_type) {
+    $elements = $this->xpath('//td[.=:entity_type]/preceding-sibling::td[@class="title" and .=:title]', [':title' => $field_name, ':entity_type' => $entity_type]);
+    $this->assertEqual(1, count($elements), $field_name . ' appears just once in ' . $entity_type . '.');
   }
 
 }

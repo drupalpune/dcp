@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsButtonsWidget.
- */
-
 namespace Drupal\Core\Field\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -18,6 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
  *   label = @Translation("Check boxes/radio buttons"),
  *   field_types = {
  *     "boolean",
+ *     "entity_reference",
  *     "list_integer",
  *     "list_float",
  *     "list_string",

@@ -1,16 +1,14 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Driver\pgsql\Update
- */
-
 namespace Drupal\Core\Database\Driver\pgsql;
 
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\Query\Update as QueryUpdate;
 use Drupal\Core\Database\Query\SelectInterface;
 
+/**
+ * PostgreSQL implementation of \Drupal\Core\Database\Query\Update.
+ */
 class Update extends QueryUpdate {
 
   public function execute() {

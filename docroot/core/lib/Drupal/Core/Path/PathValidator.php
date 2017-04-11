@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Path\PathValidator
- */
-
 namespace Drupal\Core\Path;
 
 use Drupal\Component\Utility\UrlHelper;
@@ -16,6 +11,7 @@ use Drupal\Core\Url;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 
@@ -96,6 +92,8 @@ class PathValidator implements PathValidatorInterface {
    * Helper for getUrlIfValid() and getUrlIfValidWithoutAccessCheck().
    */
   protected function getUrl($path, $access_check) {
+    $path = ltrim($path, '/');
+
     $parsed_url = UrlHelper::parse($path);
 
     $options = [];
@@ -119,7 +117,6 @@ class PathValidator implements PathValidatorInterface {
       return Url::fromUri($path);
     }
 
-    $path = ltrim($path, '/');
     $request = Request::create('/' . $path);
     $attributes = $this->getPathAttributes($path, $request, $access_check);
 
@@ -155,10 +152,10 @@ class PathValidator implements PathValidatorInterface {
       $router = $this->accessAwareRouter;
     }
 
-    $path = $this->pathProcessor->processInbound($path, $request);
+    $path = $this->pathProcessor->processInbound('/' . $path, $request);
 
     try {
-      return $router->match('/' . $path);
+      return $router->match($path);
     }
     catch (ResourceNotFoundException $e) {
       return FALSE;
@@ -167,6 +164,9 @@ class PathValidator implements PathValidatorInterface {
       return FALSE;
     }
     catch (AccessDeniedHttpException $e) {
+      return FALSE;
+    }
+    catch (MethodNotAllowedException $e) {
       return FALSE;
     }
   }

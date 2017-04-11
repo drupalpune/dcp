@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Ajax\CommandWithAttachedAssetsTrait.
- */
-
 namespace Drupal\Core\Ajax;
 
 use Drupal\Core\Asset\AttachedAssets;
@@ -29,7 +24,7 @@ trait CommandWithAttachedAssetsTrait {
    * If content is a render array, it may contain attached assets to be
    * processed.
    *
-   * @return string
+   * @return string|\Drupal\Component\Render\MarkupInterface
    *   HTML rendered content.
    */
   protected function getRenderedContent() {

@@ -1,17 +1,9 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Plugin\views\row\Rss.
- */
-
 namespace Drupal\node\Plugin\views\row;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\views\Plugin\views\row\RssPluginBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\node\NodeStorageInterface;
 
 /**
  * Plugin which performs a node_view on the resulting object
@@ -30,12 +22,12 @@ use Drupal\node\NodeStorageInterface;
 class Rss extends RssPluginBase {
 
   // Basic properties that let the row style follow relationships.
-  var $base_table = 'node_field_data';
+  public $base_table = 'node_field_data';
 
-  var $base_field = 'nid';
+  public $base_field = 'nid';
 
   // Stores the nodes loaded with preRender.
-  var $nodes = array();
+  public $nodes = array();
 
   /**
    * {@inheritdoc}
@@ -78,7 +70,7 @@ class Rss extends RssPluginBase {
 
   public function summaryTitle() {
     $options = $this->buildOptionsForm_summary_options();
-    return SafeMarkup::checkPlain($options[$this->options['view_mode']]);
+    return $options[$this->options['view_mode']];
   }
 
   public function preRender($values) {
@@ -111,8 +103,6 @@ class Rss extends RssPluginBase {
       return;
     }
 
-    $item_text = '';
-
     $node->link = $node->url('canonical', array('absolute' => TRUE));
     $node->rss_namespaces = array();
     $node->rss_elements = array(
@@ -122,7 +112,7 @@ class Rss extends RssPluginBase {
       ),
       array(
         'key' => 'dc:creator',
-        'value' => $node->getOwner()->getUsername(),
+        'value' => $node->getOwner()->getDisplayName(),
       ),
       array(
         'key' => 'guid',
@@ -152,24 +142,25 @@ class Rss extends RssPluginBase {
       $this->view->style_plugin->namespaces += $xml_rdf_namespaces;
     }
 
+    $item = new \stdClass();
     if ($display_mode != 'title') {
       // We render node contents.
-      $item_text .= drupal_render_root($build);
+      $item->description = $build;
     }
-
-    $item = new \stdClass();
-    $item->description = SafeMarkup::set($item_text);
     $item->title = $node->label();
     $item->link = $node->link;
-    $item->elements = $node->rss_elements;
+    // Provide a reference so that the render call in
+    // template_preprocess_views_view_row_rss() can still access it.
+    $item->elements = &$node->rss_elements;
     $item->nid = $node->id();
-    $theme_function = array(
+    $build = array(
       '#theme' => $this->themeFunctions(),
       '#view' => $this->view,
       '#options' => $this->options,
       '#row' => $item,
     );
-    return drupal_render_root($theme_function);
+
+    return $build;
   }
 
 }

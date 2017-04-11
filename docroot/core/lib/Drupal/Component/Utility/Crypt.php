@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Component\Utility\Crypt.
- */
-
 namespace Drupal\Component\Utility;
 
 /**
@@ -22,6 +17,10 @@ class Crypt {
    * bytes normally from mt_rand()) and uses the best available pseudo-random
    * source.
    *
+   * In PHP 7 and up, this uses the built-in PHP function random_bytes().
+   * In older PHP versions, this uses the random_bytes() function provided by
+   * the random_compat library.
+   *
    * @param int $count
    *   The number of characters (bytes) to return in the string.
    *
@@ -29,58 +28,7 @@ class Crypt {
    *   A randomly generated string.
    */
   public static function randomBytes($count) {
-    // $random_state does not use drupal_static as it stores random bytes.
-    static $random_state, $bytes;
-
-    $missing_bytes = $count - strlen($bytes);
-
-    if ($missing_bytes > 0) {
-      // openssl_random_pseudo_bytes() will find entropy in a system-dependent
-      // way.
-      if (function_exists('openssl_random_pseudo_bytes')) {
-        $bytes .= openssl_random_pseudo_bytes($missing_bytes);
-      }
-
-      // Else, read directly from /dev/urandom, which is available on many *nix
-      // systems and is considered cryptographically secure.
-      elseif ($fh = @fopen('/dev/urandom', 'rb')) {
-        // PHP only performs buffered reads, so in reality it will always read
-        // at least 4096 bytes. Thus, it costs nothing extra to read and store
-        // that much so as to speed any additional invocations.
-        $bytes .= fread($fh, max(4096, $missing_bytes));
-        fclose($fh);
-      }
-
-      // If we couldn't get enough entropy, this simple hash-based PRNG will
-      // generate a good set of pseudo-random bytes on any system.
-      // Note that it may be important that our $random_state is passed
-      // through hash() prior to being rolled into $output, that the two hash()
-      // invocations are different, and that the extra input into the first one -
-      // the microtime() - is prepended rather than appended. This is to avoid
-      // directly leaking $random_state via the $output stream, which could
-      // allow for trivial prediction of further "random" numbers.
-      if (strlen($bytes) < $count) {
-        // Initialize on the first call. The contents of $_SERVER includes a mix
-        // of user-specific and system information that varies a little with
-        // each page.
-        if (!isset($random_state)) {
-          $random_state = print_r($_SERVER, TRUE);
-          if (function_exists('getmypid')) {
-            // Further initialize with the somewhat random PHP process ID.
-            $random_state .= getmypid();
-          }
-          $bytes = '';
-        }
-
-        do {
-          $random_state = hash('sha256', microtime() . mt_rand() . $random_state);
-          $bytes .= hash('sha256', mt_rand() . $random_state, TRUE);
-        } while (strlen($bytes) < $count);
-      }
-    }
-    $output = substr($bytes, 0, $count);
-    $bytes = substr($bytes, $count);
-    return $output;
+    return random_bytes($count);
   }
 
   /**
@@ -106,7 +54,7 @@ class Crypt {
 
     $hmac = base64_encode(hash_hmac('sha256', $data, $key, TRUE));
     // Modify the hmac so it's safe to use in URLs.
-    return strtr($hmac, array('+' => '-', '/' => '_', '=' => ''));
+    return str_replace(['+', '/', '='], ['-', '_', ''], $hmac);
   }
 
   /**
@@ -122,22 +70,65 @@ class Crypt {
   public static function hashBase64($data) {
     $hash = base64_encode(hash('sha256', $data, TRUE));
     // Modify the hash so it's safe to use in URLs.
-    return strtr($hash, array('+' => '-', '/' => '_', '=' => ''));
+    return str_replace(['+', '/', '='], ['-', '_', ''], $hash);
+  }
+
+  /**
+   * Compares strings in constant time.
+   *
+   * @param string $known_string
+   *   The expected string.
+   * @param string $user_string
+   *   The user supplied string to check.
+   *
+   * @return bool
+   *   Returns TRUE when the two strings are equal, FALSE otherwise.
+   */
+  public static function hashEquals($known_string, $user_string) {
+    if (function_exists('hash_equals')) {
+      return hash_equals($known_string, $user_string);
+    }
+    else {
+      // Backport of hash_equals() function from PHP 5.6
+      // @see https://github.com/php/php-src/blob/PHP-5.6/ext/hash/hash.c#L739
+      if (!is_string($known_string)) {
+        trigger_error(sprintf("Expected known_string to be a string, %s given", gettype($known_string)), E_USER_WARNING);
+        return FALSE;
+      }
+
+      if (!is_string($user_string)) {
+        trigger_error(sprintf("Expected user_string to be a string, %s given", gettype($user_string)), E_USER_WARNING);
+        return FALSE;
+      }
+
+      $known_len = strlen($known_string);
+      if ($known_len !== strlen($user_string)) {
+        return FALSE;
+      }
+
+      // This is security sensitive code. Do not optimize this for speed.
+      $result = 0;
+      for ($i = 0; $i < $known_len; $i++) {
+        $result |= (ord($known_string[$i]) ^ ord($user_string[$i]));
+      }
+
+      return $result === 0;
+    }
   }
 
   /**
    * Returns a URL-safe, base64 encoded string of highly randomized bytes.
    *
-   * @param $byte_count
+   * @param $count
    *   The number of random bytes to fetch and base64 encode.
    *
    * @return string
-   *   The base64 encoded result will have a length of up to 4 * $byte_count.
+   *   The base64 encoded result will have a length of up to 4 * $count.
    *
    * @see \Drupal\Component\Utility\Crypt::randomBytes()
    */
   public static function randomBytesBase64($count = 32) {
-    return strtr(base64_encode(static::randomBytes($count)), array('+' => '-', '/' => '_', '=' => ''));
+    return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(static::randomBytes($count)));
   }
 
 }

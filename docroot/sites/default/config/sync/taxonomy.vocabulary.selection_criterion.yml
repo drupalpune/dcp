@@ -1,0 +1,9 @@
+uuid: c10a606d-b887-488d-bdf0-001d1345f0c2
+langcode: en
+status: true
+dependencies: {  }
+name: 'selection criterion'
+vid: selection_criterion
+description: ''
+hierarchy: 0
+weight: 0

@@ -1,17 +1,11 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\query\QueryPluginBase.
- */
-
 namespace Drupal\views\Plugin\views\query;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\views\Plugin\CacheablePluginInterface;
 use Drupal\views\Plugin\views\PluginBase;
-use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
 
@@ -37,14 +31,14 @@ use Drupal\views\Views;
 /**
  * Base plugin class for Views queries.
  */
-abstract class QueryPluginBase extends PluginBase implements CacheablePluginInterface {
+abstract class QueryPluginBase extends PluginBase implements CacheableDependencyInterface {
 
   /**
    * A pager plugin that should be provided by the display.
    *
    * @var views_plugin_pager
    */
-  var $pager = NULL;
+  public $pager = NULL;
 
   /**
    * Stores the limit of items that should be requested in the query.
@@ -68,7 +62,7 @@ abstract class QueryPluginBase extends PluginBase implements CacheablePluginInte
    * @param view $view
    *   The view which is executed.
    */
-  function alter(ViewExecutable $view) {  }
+  public function alter(ViewExecutable $view) {  }
 
   /**
    * Builds the necessary info to execute the query.
@@ -76,7 +70,7 @@ abstract class QueryPluginBase extends PluginBase implements CacheablePluginInte
    * @param view $view
    *   The view which is executed.
    */
-  function build(ViewExecutable $view) { }
+  public function build(ViewExecutable $view) { }
 
   /**
    * Executes the query and fills the associated view object with according
@@ -91,7 +85,7 @@ abstract class QueryPluginBase extends PluginBase implements CacheablePluginInte
    * @param view $view
    *   The view which is executed.
    */
-  function execute(ViewExecutable $view) {  }
+  public function execute(ViewExecutable $view) {  }
 
   /**
    * Add a signature to the query, if such a thing is feasible.
@@ -166,7 +160,7 @@ abstract class QueryPluginBase extends PluginBase implements CacheablePluginInte
    * @param $where
    *   'where' or 'having'.
    *
-   * @return $group
+   * @return
    *   The group ID generated.
    */
   public function setWhereGroup($type = 'AND', $group = NULL, $where = 'where') {
@@ -237,12 +231,15 @@ abstract class QueryPluginBase extends PluginBase implements CacheablePluginInte
    *   An appropriate query expression pointing to the date field.
    * @param string $format
    *   A format string for the result, like 'Y-m-d H:i:s'.
+   * @param bool $string_date
+   *   For certain databases, date format functions vary depending on string or
+   *   numeric storage.
    *
    * @return string
    *   A string representing the field formatted as a date in the format
    *   specified by $format.
    */
-  public function getDateFormat($field, $format) {
+  public function getDateFormat($field, $format, $string_date = FALSE) {
     return $field;
   }
 
@@ -288,6 +285,14 @@ abstract class QueryPluginBase extends PluginBase implements CacheablePluginInte
     foreach ((array) $this->view->relationship as $relationship_id => $relationship) {
       $table_data = $views_data->get($relationship->definition['base']);
       if (isset($table_data['table']['entity type'])) {
+
+        // If this is not one of the entity base tables, skip it.
+        $entity_type = \Drupal::entityTypeManager()->getDefinition($table_data['table']['entity type']);
+        $entity_base_tables = [$entity_type->getBaseTable(), $entity_type->getDataTable(), $entity_type->getRevisionTable(), $entity_type->getRevisionDataTable()];
+        if (!in_array($relationship->definition['base'], $entity_base_tables)) {
+          continue;
+        }
+
         $entity_tables[$relationship_id . '__' . $relationship->tableAlias] = array(
           'base' => $relationship->definition['base'],
           'relationship_id' => $relationship_id,
@@ -317,9 +322,8 @@ abstract class QueryPluginBase extends PluginBase implements CacheablePluginInte
   /**
    * {@inheritdoc}
    */
-  public function isCacheable() {
-    // This plugin can't really determine that.
-    return TRUE;
+  public function getCacheMaxAge() {
+    return Cache::PERMANENT;
   }
 
   /**
@@ -340,13 +344,6 @@ abstract class QueryPluginBase extends PluginBase implements CacheablePluginInte
    */
   public function getCacheTags() {
     return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheMaxAge() {
-    return Cache::PERMANENT;
   }
 
 }

@@ -1,23 +1,16 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block_content\BlockContentTypeForm.
- */
-
 namespace Drupal\block_content;
 
-use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\field\Entity\FieldConfig;
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\language\Entity\ContentLanguageSettings;
 
 /**
  * Base form for category edit forms.
  */
-class BlockContentTypeForm extends EntityForm {
+class BlockContentTypeForm extends BundleEntityFormBase {
 
   /**
    * {@inheritdoc}
@@ -27,6 +20,13 @@ class BlockContentTypeForm extends EntityForm {
 
     /* @var \Drupal\block_content\BlockContentTypeInterface $block_type */
     $block_type = $this->entity;
+
+    if ($this->operation == 'add') {
+      $form['#title'] = $this->t('Add custom block type');
+    }
+    else {
+      $form['#title'] = $this->t('Edit %label custom block type', array('%label' => $block_type->label()));
+    }
 
     $form['label'] = array(
       '#type' => 'textfield',
@@ -43,7 +43,6 @@ class BlockContentTypeForm extends EntityForm {
         'exists' => '\Drupal\block_content\Entity\BlockContentType::load',
       ),
       '#maxlength' => EntityTypeInterface::BUNDLE_MAX_LENGTH,
-      '#disabled' => !$block_type->isNew(),
     );
 
     $form['description'] = array(
@@ -57,7 +56,7 @@ class BlockContentTypeForm extends EntityForm {
       '#type' => 'checkbox',
       '#title' => t('Create new revision'),
       '#default_value' => $block_type->shouldCreateNewRevision(),
-      '#description' => t('Create a new revision by default for this block type.')
+      '#description' => t('Create a new revision by default for this block type.'),
     );
 
     if ($this->moduleHandler->moduleExists('language')) {
@@ -86,7 +85,7 @@ class BlockContentTypeForm extends EntityForm {
       '#value' => t('Save'),
     );
 
-    return $form;
+    return $this->protectBundleIdElement($form);
   }
 
   /**

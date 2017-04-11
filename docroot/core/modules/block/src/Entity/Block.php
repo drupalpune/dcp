@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\block\Entity\Block.
- */
-
 namespace Drupal\block\Entity;
 
 use Drupal\Core\Cache\Cache;
@@ -231,7 +226,7 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
   public function calculateDependencies() {
     parent::calculateDependencies();
     $this->addDependency('theme', $this->theme);
-    return $this->dependencies;
+    return $this;
   }
 
   /**
@@ -246,23 +241,8 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
     // so we must invalidate the associated block's cache tag (which includes
     // the theme cache tag).
     if (!$update) {
-      Cache::invalidateTags($this->getCacheTags());
+      Cache::invalidateTags($this->getCacheTagsToInvalidate());
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setContexts(array $contexts) {
-    $this->contexts = $contexts;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getContexts() {
-    return $this->contexts;
   }
 
   /**
@@ -311,7 +291,6 @@ class Block extends ConfigEntityBase implements BlockInterface, EntityWithPlugin
    *   The condition plugin manager.
    */
   protected function conditionPluginManager() {
-    $this->conditionPluginManager;
     if (!isset($this->conditionPluginManager)) {
       $this->conditionPluginManager = \Drupal::service('plugin.manager.condition');
     }

@@ -1,11 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityTypeInterface.
- */
-
 namespace Drupal\Core\Entity;
+
+use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 
 /**
  * Provides an interface for an entity type and its metadata.
@@ -15,7 +12,7 @@ namespace Drupal\Core\Entity;
  * implemented to alter existing data and fill-in defaults. Module-specific
  * properties should be documented in the hook implementations defining them.
  */
-interface EntityTypeInterface {
+interface EntityTypeInterface extends PluginDefinitionInterface {
 
   /**
    * The maximum length of ID, in characters.
@@ -67,14 +64,6 @@ interface EntityTypeInterface {
   public function getProvider();
 
   /**
-   * Gets the name of the entity type class.
-   *
-   * @return string
-   *   The name of the entity type class.
-   */
-  public function getClass();
-
-  /**
    * Gets the name of the original entity type class.
    *
    * In case the class name was changed with setClass(), this will return
@@ -108,8 +97,8 @@ interface EntityTypeInterface {
    *   - label: (optional) The name of the property that contains the entity
    *     label. For example, if the entity's label is located in
    *     $entity->subject, then 'subject' should be specified here. If complex
-   *     logic is required to build the label, a 'label_callback' should be
-   *     defined instead (see the $label_callback block above for details).
+   *     logic is required to build the label,
+   *     \Drupal\Core\Entity\EntityInterface::label() should be used.
    *   - langcode: (optional) The name of the property that contains the
    *     language code. For instance, if the entity's language is located in
    *     $entity->langcode, then 'langcode' should be specified here.
@@ -169,16 +158,6 @@ interface EntityTypeInterface {
    * @return bool
    */
   public function isPersistentlyCacheable();
-
-  /**
-   * Sets the name of the entity type class.
-   *
-   * @param string $class
-   *   The name of the entity type class.
-   *
-   * @return $this
-   */
-  public function setClass($class);
 
   /**
    * Determines if there is a handler for a given type.
@@ -493,15 +472,23 @@ interface EntityTypeInterface {
    * entity label is the main string associated with an entity; for example, the
    * title of a node or the subject of a comment. If there is an entity object
    * property that defines the label, use the 'label' element of the
-   * 'entity_keys' return value component to provide this information (see
-   * below). If more complex logic is needed to determine the label of an
-   * entity, you can instead specify a callback function here, which will be
-   * called to determine the entity label. See also the
-   * \Drupal\Core\Entity\EntityInterface::label() method, which implements this
-   * logic.
+   * 'entity_keys' return value component to provide this information. If more
+   * complex logic is needed to determine the label of an entity, you can
+   * instead specify a callback function here, which will be called to determine
+   * the entity label.
    *
    * @return callable|null
    *   The callback, or NULL if none exists.
+   *
+   * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
+   *   Use Drupal\Core\Entity\EntityInterface::label() for complex label
+   *   generation as needed.
+   *
+   * @see \Drupal\Core\Entity\EntityInterface::label()
+   * @see \Drupal\Core\Entity\EntityTypeInterface::setLabelCallback()
+   * @see \Drupal\Core\Entity\EntityTypeInterface::hasLabelCallback()
+   *
+   * @todo Remove usages of label_callback https://www.drupal.org/node/2450793.
    */
   public function getLabelCallback();
 
@@ -512,6 +499,13 @@ interface EntityTypeInterface {
    *   A callable that returns the label of the entity.
    *
    * @return $this
+   *
+   * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
+   *   Use EntityInterface::label() for complex label generation as needed.
+   *
+   * @see \Drupal\Core\Entity\EntityInterface::label()
+   * @see \Drupal\Core\Entity\EntityTypeInterface::getLabelCallback()
+   * @see \Drupal\Core\Entity\EntityTypeInterface::hasLabelCallback()
    */
   public function setLabelCallback($callback);
 
@@ -519,13 +513,22 @@ interface EntityTypeInterface {
    * Indicates if a label callback exists.
    *
    * @return bool
+   *
+   * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
+   *   Use EntityInterface::label() for complex label generation as needed.
+   *
+   * @see \Drupal\Core\Entity\EntityInterface::label()
+   * @see \Drupal\Core\Entity\EntityTypeInterface::getLabelCallback()
+   * @see \Drupal\Core\Entity\EntityTypeInterface::setLabelCallback()
    */
   public function hasLabelCallback();
 
   /**
    * Gets the name of the entity type which provides bundles.
    *
-   * @return string
+   * @return string|null
+   *   The name of the entity type which provides bundles, or NULL if the entity
+   *   type does not have a bundle entity type.
    */
   public function getBundleEntityType();
 
@@ -625,6 +628,33 @@ interface EntityTypeInterface {
   public function getLowercaseLabel();
 
   /**
+   * Gets the singular label of the entity type.
+   *
+   * @return string
+   *   The singular label.
+   */
+  public function getSingularLabel();
+
+  /**
+   * Gets the plural label of the entity type.
+   *
+   * @return string
+   *   The plural label.
+   */
+  public function getPluralLabel();
+
+  /**
+   * Gets the count label of the entity type
+   *
+   * @param int $count
+   *   The item count to display if the plural form was requested.
+   *
+   * @return string
+   *   The count label.
+   */
+  public function getCountLabel($count);
+
+  /**
    * Gets a callable that can be used to provide the entity URI.
    *
    * This is only called if there is no matching link template for the link
@@ -644,6 +674,20 @@ interface EntityTypeInterface {
    * @return $this
    */
   public function setUriCallback($callback);
+
+  /**
+   * Gets the machine name of the entity type group.
+   *
+   * @return string
+   */
+  public function getGroup();
+
+  /**
+   * Gets the human-readable name of the entity type group.
+   *
+   * @return string
+   */
+  public function getGroupLabel();
 
   /**
    * The list cache contexts associated with this entity type.
@@ -731,5 +775,18 @@ interface EntityTypeInterface {
    * @return $this
    */
   public function addConstraint($constraint_name, $options = NULL);
+
+  /**
+   * Gets the config dependency info for this entity, if any exists.
+   *
+   * @param string $bundle
+   *   The bundle name.
+   *
+   * @return array
+   *   An associative array containing the following keys:
+   *   - 'type': The config dependency type (e.g. 'module', 'config').
+   *   - 'name': The name of the config dependency.
+   */
+  public function getBundleConfigDependency($bundle);
 
 }

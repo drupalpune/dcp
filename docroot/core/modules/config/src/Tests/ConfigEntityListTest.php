@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\config\Tests\ConfigEntityListTest.
- */
-
 namespace Drupal\config\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -23,7 +18,7 @@ class ConfigEntityListTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('config_test');
+  public static $modules = ['block', 'config_test'];
 
   /**
    * {@inheritdoc}
@@ -33,6 +28,7 @@ class ConfigEntityListTest extends WebTestBase {
     // Delete the override config_test entity since it is not required by this
     // test.
     \Drupal::entityManager()->getStorage('config_test')->load('override')->delete();
+    $this->drupalPlaceBlock('local_actions_block');
   }
 
   /**

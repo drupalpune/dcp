@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Query\Sql\QueryAggregate.
- */
-
 namespace Drupal\Core\Entity\Query\Sql;
 
 use Drupal\Core\Entity\Query\QueryAggregateInterface;
@@ -23,7 +18,7 @@ class QueryAggregate extends Query implements QueryAggregateInterface {
   protected $sqlExpressions = array();
 
   /**
-   * Implements \Drupal\Core\Entity\Query\QueryAggregateInterface::execute().
+   * {@inheritdoc}
    */
   public function execute() {
     return $this
@@ -39,7 +34,7 @@ class QueryAggregate extends Query implements QueryAggregateInterface {
   }
 
   /**
-   * Overrides \Drupal\Core\Entity\Query\Sql::prepare().
+   * {@inheritdoc}
    */
   public function prepare() {
     parent::prepare();
@@ -49,21 +44,22 @@ class QueryAggregate extends Query implements QueryAggregateInterface {
   }
 
   /**
-   * Implements \Drupal\Core\Entity\Query\QueryAggregateInterface::conditionAggregateGroupFactory().
+   * {@inheritdoc}
    */
   public function conditionAggregateGroupFactory($conjunction = 'AND') {
-    return new ConditionAggregate($conjunction, $this);
+    $class = static::getClass($this->namespaces, 'ConditionAggregate');
+    return new $class($conjunction, $this, $this->namespaces);
   }
 
   /**
-   * Overrides \Drupal\Core\Entity\QueryBase::exists().
+   * {@inheritdoc}
    */
   public function existsAggregate($field, $function, $langcode = NULL) {
     return $this->conditionAggregate->exists($field, $function, $langcode);
   }
 
   /**
-   * Overrides \Drupal\Core\Entity\QueryBase::notExists().
+   * {@inheritdoc}
    */
   public function notExistsAggregate($field, $function, $langcode = NULL) {
     return $this->conditionAggregate->notExists($field, $function, $langcode);
@@ -122,7 +118,7 @@ class QueryAggregate extends Query implements QueryAggregateInterface {
    *   Returns the called object.
    */
   protected function addSortAggregate() {
-    if(!$this->count) {
+    if (!$this->count) {
       foreach ($this->sortAggregate as $alias => $sort) {
         $this->sqlQuery->orderBy($alias, $sort['direction']);
       }

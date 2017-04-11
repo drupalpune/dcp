@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\locale\Tests\LocaleUpdateBase.
- */
-
 namespace Drupal\locale\Tests;
 
 use Drupal\Core\StreamWrapper\PublicStream;
-use Drupal\Core\Url;
+use Drupal\file\Entity\File;
 use Drupal\simpletest\WebTestBase;
 use Drupal\Component\Utility\SafeMarkup;
 
@@ -20,28 +15,28 @@ abstract class LocaleUpdateBase extends WebTestBase {
   /**
    * Timestamp for an old translation.
    *
-   * @var integer
+   * @var int
    */
   protected $timestampOld;
 
   /**
    * Timestamp for a medium aged translation.
    *
-   * @var integer
+   * @var int
    */
   protected $timestampMedium;
 
   /**
    * Timestamp for a new translation.
    *
-   * @var integer
+   * @var int
    */
   protected $timestampNew;
 
   /**
    * Timestamp for current time.
    *
-   * @var integer
+   * @var int
    */
   protected $timestampNow;
 
@@ -50,18 +45,13 @@ abstract class LocaleUpdateBase extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('update', 'update_test', 'locale', 'locale_test');
+  public static $modules = array('locale', 'locale_test');
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
     parent::setUp();
-
-    // Update module should not go out to d.o to check for updates. We override
-    // the url to the default update_test xml path. But without providing
-    // a mock xml file, no update data will be found.
-    $this->config('update.settings')->set('fetch.url', Url::fromRoute('update_test.update_test', [], ['absolute' => TRUE])->toString())->save();
 
     // Setup timestamps to identify old and new translation sources.
     $this->timestampOld = REQUEST_TIME - 300;
@@ -139,14 +129,14 @@ EOF;
     }
 
     file_prepare_directory($path, FILE_CREATE_DIRECTORY);
-    $file = entity_create('file', array(
+    $file = File::create([
       'uid' => 1,
       'filename' => $filename,
       'uri' => $path . '/' . $filename,
       'filemime' => 'text/x-gettext-translation',
       'timestamp' => $timestamp,
       'status' => FILE_STATUS_PERMANENT,
-    ));
+    ]);
     file_put_contents($file->getFileUri(), $po_header . $text);
     touch(drupal_realpath($file->getFileUri()), $timestamp);
     $file->save();
@@ -186,6 +176,7 @@ EOF;
     // A flag is set to let the locale_test module replace the project data with
     // a set of test projects which match the below project files.
     \Drupal::state()->set('locale.test_projects_alter', TRUE);
+    \Drupal::state()->set('locale.remove_core_project', FALSE);
 
     // Setup the environment.
     $public_path = PublicStream::basePath();
@@ -310,4 +301,5 @@ EOF;
     $db_translation = $db_translation == FALSE ? '' : $db_translation;
     $this->assertEqual($translation, $db_translation, $message ? $message : format_string('Correct translation of %source (%language)', array('%source' => $source, '%language' => $langcode)));
   }
+
 }

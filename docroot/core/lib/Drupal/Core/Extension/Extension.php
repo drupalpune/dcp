@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Extension\Extension.
- */
-
 namespace Drupal\Core\Extension;
 
 /**
@@ -166,8 +161,9 @@ class Extension implements \Serializable {
    * Serializes the Extension object in the most optimized way.
    */
   public function serialize() {
+    // Don't serialize the app root, since this could change if the install is
+    // moved.
     $data = array(
-      'root' => $this->root,
       'type' => $this->type,
       'pathname' => $this->pathname,
       'filename' => $this->filename,
@@ -184,11 +180,12 @@ class Extension implements \Serializable {
   }
 
   /**
-   * Implements Serializable::unserialize().
+   * {@inheritdoc}
    */
   public function unserialize($data) {
     $data = unserialize($data);
-    $this->root = $data['root'];
+    // Get the app root from the container.
+    $this->root = DRUPAL_ROOT;
     $this->type = $data['type'];
     $this->pathname = $data['pathname'];
     $this->filename = $data['filename'];

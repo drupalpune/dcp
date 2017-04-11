@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\relationship\GroupwiseMax.
- */
-
 namespace Drupal\views\Plugin\views\relationship;
 
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Views;
+use Drupal\views\Entity\View;
 
 /**
  * Relationship handler that allows a groupwise maximum of the linked in table.
@@ -156,7 +152,7 @@ class GroupwiseMax extends RelationshipPluginBase {
    * We use this to obtain our subquery SQL.
    */
   protected function getTemporaryView() {
-    $view = entity_create('view', array('base_table' => $this->definition['base']));
+    $view = View::create(array('base_table' => $this->definition['base']));
     $view->addDisplay('default');
     return $view->getExecutable();
   }
@@ -207,8 +203,8 @@ class GroupwiseMax extends RelationshipPluginBase {
     }
 
     // Get the namespace string.
-    $temp_view->namespace = (!empty($options['subquery_namespace'])) ? '_'. $options['subquery_namespace'] : '_INNER';
-    $this->subquery_namespace = (!empty($options['subquery_namespace'])) ? '_'. $options['subquery_namespace'] : 'INNER';
+    $temp_view->namespace = (!empty($options['subquery_namespace'])) ? '_' . $options['subquery_namespace'] : '_INNER';
+    $this->subquery_namespace = (!empty($options['subquery_namespace'])) ? '_' . $options['subquery_namespace'] : 'INNER';
 
     // The value we add here does nothing, but doing this adds the right tables
     // and puts in a WHERE clause with a placeholder we can grab later.
@@ -269,7 +265,7 @@ class GroupwiseMax extends RelationshipPluginBase {
     // Not sure why, but our sort order clause doesn't have a table.
     // TODO: the call to addHandler() above to add the sort handler is probably
     // wrong -- needs attention from someone who understands it.
-    // In the meantime, this works, but with a leap of faith...
+    // In the meantime, this works, but with a leap of faith.
     $orders = &$subquery->getOrderBy();
     foreach ($orders as $order_key => $order) {
       // But if we're using a whole view, we don't know what we have!

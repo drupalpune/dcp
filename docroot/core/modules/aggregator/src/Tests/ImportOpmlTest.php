@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\aggregator\Tests\ImportOpmlTest.
- */
-
 namespace Drupal\aggregator\Tests;
 
 /**
@@ -125,4 +120,5 @@ class ImportOpmlTest extends AggregatorTestBase {
     $this->validateImportFormFields();
     $this->submitImportForm();
   }
+
 }

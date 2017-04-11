@@ -9,8 +9,8 @@ namespace Drupal\Tests\Core\Access;
 
 use Drupal\Core\Access\AccessCheckInterface;
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Access\AccessManagerInterface;
 use Drupal\Core\Access\CheckProvider;
+use Drupal\Core\Cache\Context\CacheContextsManager;
 use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Access\AccessManager;
 use Drupal\Core\Access\DefaultAccessCheck;
@@ -94,6 +94,9 @@ class AccessManagerTest extends UnitTestCase {
     parent::setUp();
 
     $this->container = new ContainerBuilder();
+    $cache_contexts_manager = $this->prophesize(CacheContextsManager::class)->reveal();
+    $this->container->set('cache_contexts_manager', $cache_contexts_manager);
+    \Drupal::setContainer($this->container);
 
     $this->routeCollection = new RouteCollection();
     $this->routeCollection->add('test_route_1', new Route('/test-route-1'));
@@ -214,8 +217,8 @@ class AccessManagerTest extends UnitTestCase {
     $this->assertEquals(TRUE, $this->accessManager->check($route_matches['test_route_4'], $this->account));
     $this->assertEquals(AccessResult::neutral(), $this->accessManager->check($route_matches['test_route_1'], $this->account, NULL, TRUE));
     $this->assertEquals(AccessResult::allowed(), $this->accessManager->check($route_matches['test_route_2'], $this->account, NULL, TRUE));
-    $this->assertEquals(AccessResult::forbidden(), $this->accessManager->check($route_matches['test_route_3'],  $this->account, NULL, TRUE));
-    $this->assertEquals(AccessResult::allowed(), $this->accessManager->check($route_matches['test_route_4'],  $this->account, NULL, TRUE));
+    $this->assertEquals(AccessResult::forbidden(), $this->accessManager->check($route_matches['test_route_3'], $this->account, NULL, TRUE));
+    $this->assertEquals(AccessResult::allowed(), $this->accessManager->check($route_matches['test_route_4'], $this->account, NULL, TRUE));
   }
 
   /**
@@ -565,4 +568,5 @@ class AccessManagerTest extends UnitTestCase {
  */
 interface TestAccessCheckInterface extends AccessCheckInterface {
   public function access();
+
 }

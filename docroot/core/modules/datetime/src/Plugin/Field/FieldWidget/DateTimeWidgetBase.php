@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\datetime\Plugin\Field\FieldWidget\DateTimeWidgetBase.
- */
-
 namespace Drupal\datetime\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -39,16 +34,22 @@ class DateTimeWidgetBase extends WidgetBase {
       '#required' => $element['#required'],
     );
 
+    if ($this->getFieldSetting('datetime_type') == DateTimeItem::DATETIME_TYPE_DATE) {
+      // A date-only field should have no timezone conversion performed, so
+      // use the same timezone as for storage.
+      $element['value']['#date_timezone'] = DATETIME_STORAGE_TIMEZONE;
+    }
+
     if ($items[$delta]->date) {
       $date = $items[$delta]->date;
       // The date was created and verified during field_load(), so it is safe to
       // use without further inspection.
-      $date->setTimezone(new \DateTimeZone($element['value']['#date_timezone']));
       if ($this->getFieldSetting('datetime_type') == DateTimeItem::DATETIME_TYPE_DATE) {
         // A date without time will pick up the current time, use the default
         // time.
         datetime_date_default_time($date);
       }
+      $date->setTimezone(new \DateTimeZone($element['value']['#date_timezone']));
       $element['value']['#default_value'] = $date;
     }
 

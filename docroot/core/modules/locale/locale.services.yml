@@ -5,7 +5,7 @@ services:
     public: false
   locale.config_manager:
     class: Drupal\locale\LocaleConfigManager
-    arguments: ['@config.storage', '@locale.storage', '@config.factory', '@config.typed', '@language_manager', '@locale.default.config.storage']
+    arguments: ['@config.storage', '@locale.storage', '@config.factory', '@config.typed', '@language_manager', '@locale.default.config.storage', '@config.manager']
   locale.storage:
     class: Drupal\locale\StringDatabaseStorage
     arguments: ['@database']
@@ -14,6 +14,9 @@ services:
   locale.project:
     class: Drupal\locale\LocaleProjectStorage
     arguments: ['@keyvalue']
+  locale.plural.formula:
+    class: Drupal\locale\PluralFormula
+    arguments: ['@language_manager', '@state']
   string_translator.locale.lookup:
     class: Drupal\locale\LocaleTranslation
     arguments: ['@locale.storage', '@cache.default', '@lock', '@config.factory', '@language_manager', '@request_stack']

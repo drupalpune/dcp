@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\contact\Tests\ContactPersonalTest.
- */
-
 namespace Drupal\contact\Tests;
 
 use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\simpletest\WebTestBase;
 use Drupal\user\RoleInterface;
@@ -63,8 +59,13 @@ class ContactPersonalTest extends WebTestBase {
    * Tests that mails for contact messages are correctly sent.
    */
   function testSendPersonalContactMessage() {
+    // Ensure that the web user's email needs escaping.
+    $mail = $this->webUser->getUsername() . '&escaped@example.com';
+    $this->webUser->setEmail($mail)->save();
     $this->drupalLogin($this->webUser);
 
+    $this->drupalGet('user/' . $this->contactUser->id() . '/contact');
+    $this->assertEscaped($mail);
     $message = $this->submitPersonalContact($this->contactUser);
     $mails = $this->drupalGetMails();
     $this->assertEqual(1, count($mails));
@@ -74,13 +75,14 @@ class ContactPersonalTest extends WebTestBase {
     $this->assertEqual($mail['reply-to'], $this->webUser->getEmail());
     $this->assertEqual($mail['key'], 'user_mail');
     $variables = array(
-      '!site-name' => $this->config('system.site')->get('name'),
-      '!subject' => $message['subject[0][value]'],
-      '!recipient-name' => $this->contactUser->getUsername(),
+      '@site-name' => $this->config('system.site')->get('name'),
+      '@subject' => $message['subject[0][value]'],
+      '@recipient-name' => $this->contactUser->getDisplayName(),
     );
-    $this->assertEqual($mail['subject'], t('[!site-name] !subject', $variables), 'Subject is in sent message.');
-    $this->assertTrue(strpos($mail['body'], t('Hello !recipient-name,', $variables)) !== FALSE, 'Recipient name is in sent message.');
-    $this->assertTrue(strpos($mail['body'], $this->webUser->getUsername()) !== FALSE, 'Sender name is in sent message.');
+    $subject = PlainTextOutput::renderFromHtml(t('[@site-name] @subject', $variables));
+    $this->assertEqual($mail['subject'], $subject, 'Subject is in sent message.');
+    $this->assertTrue(strpos($mail['body'], 'Hello ' . $variables['@recipient-name']) !== FALSE, 'Recipient name is in sent message.');
+    $this->assertTrue(strpos($mail['body'], $this->webUser->getDisplayName()) !== FALSE, 'Sender name is in sent message.');
     $this->assertTrue(strpos($mail['body'], $message['message[0][value]']) !== FALSE, 'Message body is in sent message.');
 
     // Check there was no problems raised during sending.
@@ -93,7 +95,9 @@ class ContactPersonalTest extends WebTestBase {
       '@sender_email' => $this->webUser->getEmail(),
       '@recipient_name' => $this->contactUser->getUsername()
     );
-    $this->assertText(SafeMarkup::format('@sender_name (@sender_email) sent @recipient_name an email.', $placeholders));
+    $this->assertRaw(SafeMarkup::format('@sender_name (@sender_email) sent @recipient_name an email.', $placeholders));
+    // Ensure an unescaped version of the email does not exist anywhere.
+    $this->assertNoRaw($this->webUser->getEmail());
   }
 
   /**
@@ -105,7 +109,7 @@ class ContactPersonalTest extends WebTestBase {
     $this->drupalGet('user/' . $this->adminUser->id() . '/contact');
     $this->assertResponse(200);
     // Check the page title is properly displayed.
-    $this->assertRaw(t('Contact @username', array('@username' => $this->adminUser->getUsername())));
+    $this->assertRaw(t('Contact @username', array('@username' => $this->adminUser->getDisplayName())));
 
     // Test denied access to admin user's own contact form.
     $this->drupalLogout();
@@ -222,11 +226,6 @@ class ContactPersonalTest extends WebTestBase {
   function testPersonalContactFlood() {
     $flood_limit = 3;
     $this->config('contact.settings')->set('flood.limit', $flood_limit)->save();
-
-    // Clear flood table in preparation for flood test and allow other checks to complete.
-    db_delete('flood')->execute();
-    $num_records_flood = db_query("SELECT COUNT(*) FROM {flood}")->fetchField();
-    $this->assertIdentical($num_records_flood, '0', 'Flood table emptied.');
 
     $this->drupalLogin($this->webUser);
 

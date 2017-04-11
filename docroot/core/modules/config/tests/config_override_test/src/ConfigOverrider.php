@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config_override_test\ConfigOverrider.
- */
-
 namespace Drupal\config_override_test;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryOverrideInterface;
 
 /**
@@ -44,5 +40,11 @@ class ConfigOverrider implements ConfigFactoryOverrideInterface {
     return NULL;
   }
 
-}
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheableMetadata($name) {
+    return new CacheableMetadata();
+  }
 
+}

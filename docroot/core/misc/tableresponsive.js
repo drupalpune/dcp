@@ -1,9 +1,19 @@
+/**
+ * @file
+ * Responsive table functionality.
+ */
+
 (function ($, Drupal, window) {
 
-  "use strict";
+  'use strict';
 
   /**
-   * Attach the tableResponsive function to Drupal.behaviors.
+   * Attach the tableResponsive function to {@link Drupal.behaviors}.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches tableResponsive functionality.
    */
   Drupal.behaviors.tableResponsive = {
     attach: function (context, settings) {
@@ -18,14 +28,19 @@
   };
 
   /**
-   * The TableResponsive object optimizes table presentation for all screen sizes.
+   * The TableResponsive object optimizes table presentation for screen size.
    *
    * A responsive table hides columns at small screen sizes, leaving the most
-   * important columns visible to the end user. Users should not be prevented from
-   * accessing all columns, however. This class adds a toggle to a table with
-   * hidden columns that exposes the columns. Exposing the columns will likely
-   * break layouts, but it provides the user with a means to access data, which
-   * is a guiding principle of responsive design.
+   * important columns visible to the end user. Users should not be prevented
+   * from accessing all columns, however. This class adds a toggle to a table
+   * with hidden columns that exposes the columns. Exposing the columns will
+   * likely break layouts, but it provides the user with a means to access
+   * data, which is a guiding principle of responsive design.
+   *
+   * @constructor Drupal.TableResponsive
+   *
+   * @param {HTMLElement} table
+   *   The table element to initialize the responsive table on.
    */
   function TableResponsive(table) {
     this.table = table;
@@ -51,7 +66,13 @@
   /**
    * Extend the TableResponsive function with a list of managed tables.
    */
-  $.extend(TableResponsive, {
+  $.extend(TableResponsive, /** @lends Drupal.TableResponsive */{
+
+    /**
+     * Store all created instances.
+     *
+     * @type {Array.<Drupal.TableResponsive>}
+     */
     tables: []
   });
 
@@ -61,24 +82,36 @@
    * Columns are assumed to be hidden if their header has the class priority-low
    * or priority-medium.
    */
-  $.extend(TableResponsive.prototype, {
+  $.extend(TableResponsive.prototype, /** @lends Drupal.TableResponsive# */{
+
+    /**
+     * @param {jQuery.Event} e
+     *   The event triggered.
+     */
     eventhandlerEvaluateColumnVisibility: function (e) {
       var pegged = parseInt(this.$link.data('pegged'), 10);
       var hiddenLength = this.$headers.filter('.priority-medium:hidden, .priority-low:hidden').length;
-      // If the table has hidden columns, associate an action link with the table
-      // to show the columns.
+      // If the table has hidden columns, associate an action link with the
+      // table to show the columns.
       if (hiddenLength > 0) {
         this.$link.show().text(this.showText);
       }
       // When the toggle is pegged, its presence is maintained because the user
-      // has interacted with it. This is necessary to keep the link visible if the
-      // user adjusts screen size and changes the visibility of columns.
+      // has interacted with it. This is necessary to keep the link visible if
+      // the user adjusts screen size and changes the visibility of columns.
       if (!pegged && hiddenLength === 0) {
         this.$link.hide().text(this.hideText);
       }
     },
-    // Toggle the visibility of columns classed with either 'priority-low' or
-    // 'priority-medium'.
+
+    /**
+     * Toggle the visibility of columns based on their priority.
+     *
+     * Columns are classed with either 'priority-low' or 'priority-medium'.
+     *
+     * @param {jQuery.Event} e
+     *   The event triggered.
+     */
     eventhandlerToggleColumns: function (e) {
       e.preventDefault();
       var self = this;
@@ -110,10 +143,10 @@
           var $cell = $(this);
           var properties = $cell.attr('style').split(';');
           var newProps = [];
-          // The hide method adds display none to the element. The element should
-          // be returned to the same state it was in before the columns were
-          // revealed, so it is necessary to remove the display none
-          // value from the style attribute.
+          // The hide method adds display none to the element. The element
+          // should be returned to the same state it was in before the columns
+          // were revealed, so it is necessary to remove the display none value
+          // from the style attribute.
           var match = /^display\s*\:\s*none$/;
           for (var i = 0; i < properties.length; i++) {
             var prop = properties[i];
@@ -134,6 +167,7 @@
       }
     }
   });
+
   // Make the TableResponsive object available in the Drupal namespace.
   Drupal.TableResponsive = TableResponsive;
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\path\Plugin\Field\FieldWidget\PathWidget.
- */
-
 namespace Drupal\path\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
@@ -33,7 +28,7 @@ class PathWidget extends WidgetBase {
     $entity = $items->getEntity();
     $path = array();
     if (!$entity->isNew()) {
-      $conditions = array('source' => $entity->urlInfo()->getInternalPath());
+      $conditions = array('source' => '/' . $entity->urlInfo()->getInternalPath());
       if ($items->getLangcode() != LanguageInterface::LANGCODE_NOT_SPECIFIED) {
         $conditions['langcode'] = $items->getLangcode();
       }
@@ -44,7 +39,7 @@ class PathWidget extends WidgetBase {
     }
     $path += array(
       'pid' => NULL,
-      'source' => !$entity->isNew() ? $entity->urlInfo()->getInternalPath() : NULL,
+      'source' => !$entity->isNew() ? '/' . $entity->urlInfo()->getInternalPath() : NULL,
       'alias' => '',
       'langcode' => $items->getLangcode(),
     );
@@ -58,7 +53,7 @@ class PathWidget extends WidgetBase {
       '#default_value' => $path['alias'],
       '#required' => $element['#required'],
       '#maxlength' => 255,
-      '#description' => $this->t('The alternative URL for this content. Use a relative path. For example, enter "about" for the about page.'),
+      '#description' => $this->t('Specify an alternative path by which this data can be accessed. For example, type "/about" when writing an about page.'),
     );
     $element['pid'] = array(
       '#type' => 'value',
@@ -85,7 +80,7 @@ class PathWidget extends WidgetBase {
    */
   public static function validateFormElement(array &$element, FormStateInterface $form_state) {
     // Trim the submitted value of whitespace and slashes.
-    $alias = trim(trim($element['alias']['#value']), " \\/");
+    $alias = rtrim(trim($element['alias']['#value']), " \\/");
     if (!empty($alias)) {
       $form_state->setValueForElement($element['alias'], $alias);
 
@@ -94,6 +89,10 @@ class PathWidget extends WidgetBase {
       if ($is_exists) {
         $form_state->setError($element, t('The alias is already in use.'));
       }
+    }
+
+    if ($alias && $alias[0] !== '/') {
+      $form_state->setError($element, t('The alias needs to start with a slash.'));
     }
   }
 

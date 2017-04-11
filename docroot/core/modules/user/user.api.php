@@ -1,7 +1,5 @@
 <?php
 
-use Drupal\Core\Entity\EntityInterface;
-
 /**
  * @file
  * Hooks provided by the User module.
@@ -44,7 +42,7 @@ function hook_user_cancel($edit, $account, $method) {
       // Unpublish nodes (current revisions).
       module_load_include('inc', 'node', 'node.admin');
       $nodes = \Drupal::entityQuery('node')
-        ->condition('uid', $user->id())
+        ->condition('uid', $account->id())
         ->execute();
       node_mass_update($nodes, array('status' => 0), NULL, TRUE);
       break;
@@ -53,7 +51,7 @@ function hook_user_cancel($edit, $account, $method) {
       // Anonymize nodes (current revisions).
       module_load_include('inc', 'node', 'node.admin');
       $nodes = \Drupal::entityQuery('node')
-        ->condition('uid', $user->id())
+        ->condition('uid', $account->id())
         ->execute();
       node_mass_update($nodes, array('uid' => 0), NULL, TRUE);
       // Anonymize old revisions.
@@ -107,22 +105,25 @@ function hook_user_cancel_methods_alter(&$methods) {
 /**
  * Alter the username that is displayed for a user.
  *
- * Called by user_format_name() to allow modules to alter the username that's
- * displayed. Can be used to ensure user privacy in situations where
- * $account->name is too revealing.
+ * Called by $account->getDisplayName() to allow modules to alter the username
+ * that is displayed. Can be used to ensure user privacy in situations where
+ * $account->getDisplayName() is too revealing.
  *
- * @param string $name
- *   The string that user_format_name() will return.
+ * @param string|Drupal\Component\Render\MarkupInterface $name
+ *   The username that is displayed for a user. If a hook implementation changes
+ *   this to an object implementing MarkupInterface it is the responsibility of
+ *   the implementation to ensure the user's name is escaped properly. String
+ *   values will be autoescaped.
+ * @param \Drupal\Core\Session\AccountInterface $account
+ *   The user object on which the operation is being performed.
  *
- * @param object $account
- *   The account object passed to user_format_name().
- *
- * @see user_format_name()
+ * @see \Drupal\Core\Session\AccountInterface::getDisplayName()
+ * @see sanitization
  */
 function hook_user_format_name_alter(&$name, $account) {
   // Display the user's uid instead of name.
   if ($account->id()) {
-    $name = t('User !uid', array('!uid' => $account->id()));
+    $name = t('User @uid', array('@uid' => $account->id()));
   }
 }
 
@@ -136,7 +137,7 @@ function hook_user_login($account) {
   $config = \Drupal::config('system.date');
   // If the user has a NULL time zone, notify them to set a time zone.
   if (!$account->getTimezone() && $config->get('timezone.user.configurable') && $config->get('timezone.user.warn')) {
-    drupal_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => $account->url('edit-form', array('query' => \Drupal::destination()->getAsArray(), 'fragment' => 'edit-timezone')))));
+    drupal_set_message(t('Configure your <a href=":user-edit">account time zone setting</a>.', array(':user-edit' => $account->url('edit-form', array('query' => \Drupal::destination()->getAsArray(), 'fragment' => 'edit-timezone')))));
   }
 }
 

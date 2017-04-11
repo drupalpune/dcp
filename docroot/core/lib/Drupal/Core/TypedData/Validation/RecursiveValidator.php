@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\TypedData\Validation\RecursiveValidator.
- */
-
 namespace Drupal\Core\TypedData\Validation;
 
 use Drupal\Core\TypedData\TypedDataInterface;
-use Drupal\Core\TypedData\TypedDataManager;
+use Drupal\Core\TypedData\TypedDataManagerInterface;
 use Symfony\Component\Validator\ConstraintValidatorFactoryInterface;
 use Symfony\Component\Validator\Context\ExecutionContextFactoryInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -44,10 +39,10 @@ class RecursiveValidator implements ValidatorInterface {
    *   The factory for creating new contexts.
    * @param \Symfony\Component\Validator\ConstraintValidatorFactoryInterface $validator_factory
    *   The constraint validator factory.
-   * @param \Drupal\Core\TypedData\TypedDataManager $typed_data_manager
+   * @param \Drupal\Core\TypedData\TypedDataManagerInterface $typed_data_manager
    *   The typed data manager.
    */
-  public function __construct(ExecutionContextFactoryInterface $context_factory, ConstraintValidatorFactoryInterface $validator_factory, TypedDataManager $typed_data_manager) {
+  public function __construct(ExecutionContextFactoryInterface $context_factory, ConstraintValidatorFactoryInterface $validator_factory, TypedDataManagerInterface $typed_data_manager) {
     $this->contextFactory = $context_factory;
     $this->constraintValidatorFactory = $validator_factory;
     $this->typedDataManager = $typed_data_manager;
@@ -90,7 +85,7 @@ class RecursiveValidator implements ValidatorInterface {
   /**
    * {@inheritdoc}
    */
-  public function validate($value, $constraints = null, $groups = null) {
+  public function validate($value, $constraints = NULL, $groups = NULL) {
     return $this->startContext($value)
       ->validate($value, $constraints, $groups)
       ->getViolations();

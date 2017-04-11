@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Entity\MenuInterface.
- */
-
 namespace Drupal\system;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;

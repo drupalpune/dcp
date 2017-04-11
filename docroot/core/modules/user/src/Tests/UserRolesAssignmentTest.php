@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\user\Tests\UserRolesAssignmentTest.
- */
-
 namespace Drupal\user\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -58,7 +53,7 @@ class UserRolesAssignmentTest extends WebTestBase {
       "roles[$rid]" => $rid,
     );
     $this->drupalPostForm('admin/people/create', $edit, t('Create new account'));
-    $this->assertText(t('Created a new user account for !name.', array('!name' => $edit['name'])));
+    $this->assertText(t('Created a new user account for @name.', array('@name' => $edit['name'])));
     // Get the newly added user.
     $account = user_load_by_name($edit['name']);
 
@@ -95,4 +90,5 @@ class UserRolesAssignmentTest extends WebTestBase {
       $this->assertTrue(array_search($rid, $account->getRoles()) === FALSE, 'The role is not present in the user object.');
     }
   }
+
 }

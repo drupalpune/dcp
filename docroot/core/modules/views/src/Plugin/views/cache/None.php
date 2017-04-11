@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\cache\None.
- */
-
 namespace Drupal\views\Plugin\views\cache;
 
 /**
@@ -19,9 +14,6 @@ namespace Drupal\views\Plugin\views\cache;
  * )
  */
 class None extends CachePluginBase {
-
-  public function cacheStart() {
-  }
 
   public function summaryTitle() {
     return $this->t('None');

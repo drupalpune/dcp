@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\config\ConfigSubscriber.
- */
-
 namespace Drupal\config;
 
 use Drupal\Core\Config\ConfigEvents;
 use Drupal\Core\Config\ConfigImporterEvent;
-use Drupal\Core\Config\ConfigImporterException;
 use Drupal\Core\Config\ConfigImportValidateEventSubscriberBase;
 
 
@@ -39,4 +33,5 @@ class ConfigSubscriber extends ConfigImportValidateEventSubscriberBase {
     $events[ConfigEvents::IMPORT_VALIDATE][] = array('onConfigImporterValidate', 20);
     return $events;
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\EventSubscriber\ExceptionTestSiteSubscriber.
- */
-
 namespace Drupal\Core\EventSubscriber;
 
 use Drupal\Core\Utility\Error;
@@ -23,7 +18,7 @@ class ExceptionTestSiteSubscriber extends HttpExceptionSubscriberBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function getHandledFormats() {
     return ['html'];
@@ -51,7 +46,7 @@ class ExceptionTestSiteSubscriber extends HttpExceptionSubscriberBase {
       // as it uniquely identifies each PHP error.
       static $number = 0;
       $assertion = array(
-        $error['!message'],
+        $error['@message'],
         $error['%type'],
         array(
           'function' => $error['%function'],

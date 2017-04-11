@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Plugin\views\argument\Vid.
- */
-
 namespace Drupal\node\Plugin\views\argument;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Database\Connection;
 use Drupal\views\Plugin\views\argument\NumericArgument;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -45,7 +39,7 @@ class Vid extends NumericArgument {
    *   The plugin implementation definition.
    * @param \Drupal\Core\Database\Connection $database
    *   Database Service Object.
-   * @param \Drupal\node\NodeStorageInterface
+   * @param \Drupal\node\NodeStorageInterface $node_storage
    *   The node storage.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, Connection $database, NodeStorageInterface $node_storage) {
@@ -84,7 +78,7 @@ class Vid extends NumericArgument {
 
     foreach ($results as $result) {
       $nodes[$result['nid']]->set('title', $result['title']);
-      $titles[] = SafeMarkup::checkPlain($nodes[$result['nid']]->label());
+      $titles[] = $nodes[$result['nid']]->label();
     }
 
     return $titles;

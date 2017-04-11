@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\ViewExecutableFactory.
- */
-
 namespace Drupal\views;
 
 use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\views\ViewEntityInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**

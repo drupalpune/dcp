@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Component\Utility\Color.
- */
-
 namespace Drupal\Component\Utility;
 
 /**

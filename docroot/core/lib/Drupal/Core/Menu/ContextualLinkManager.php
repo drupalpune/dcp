@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Menu\ContextualLinkManager.
- */
-
 namespace Drupal\Core\Menu;
 
 use Drupal\Component\Plugin\Exception\PluginException;
@@ -103,10 +98,7 @@ class ContextualLinkManager extends DefaultPluginManager implements ContextualLi
    *   The request stack.
    */
   public function __construct(ControllerResolverInterface $controller_resolver, ModuleHandlerInterface $module_handler, CacheBackendInterface $cache_backend, LanguageManagerInterface $language_manager, AccessManagerInterface $access_manager, AccountInterface $account, RequestStack $request_stack) {
-    $this->discovery = new YamlDiscovery('links.contextual', $module_handler->getModuleDirectories());
-    $this->discovery = new ContainerDerivativeDiscoveryDecorator($this->discovery);
     $this->factory = new ContainerFactory($this, '\Drupal\Core\Menu\ContextualLinkInterface');
-
     $this->controllerResolver = $controller_resolver;
     $this->accessManager = $access_manager;
     $this->account = $account;
@@ -119,14 +111,26 @@ class ContextualLinkManager extends DefaultPluginManager implements ContextualLi
   /**
    * {@inheritdoc}
    */
+  protected function getDiscovery() {
+    if (!isset($this->discovery)) {
+      $yaml_discovery = new YamlDiscovery('links.contextual', $this->moduleHandler->getModuleDirectories());
+      $yaml_discovery->addTranslatableProperty('title', 'title_context');
+      $this->discovery = new ContainerDerivativeDiscoveryDecorator($yaml_discovery);
+    }
+    return $this->discovery;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function processDefinition(&$definition, $plugin_id) {
     parent::processDefinition($definition, $plugin_id);
 
-     // If there is no route name, this is a broken definition.
+    // If there is no route name, this is a broken definition.
     if (empty($definition['route_name'])) {
       throw new PluginException(sprintf('Contextual link plugin (%s) definition must include "route_name".', $plugin_id));
     }
-     // If there is no group name, this is a broken definition.
+    // If there is no group name, this is a broken definition.
     if (empty($definition['group'])) {
       throw new PluginException(sprintf('Contextual link plugin (%s) definition must include "group".', $plugin_id));
     }

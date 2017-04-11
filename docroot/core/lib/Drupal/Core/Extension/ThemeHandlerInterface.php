@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Extension\ThemeHandlerInterface.
- */
-
 namespace Drupal\Core\Extension;
 
 /**
@@ -26,7 +21,7 @@ interface ThemeHandlerInterface {
    *   Whether any of the given themes have been installed.
    *
    * @throws \Drupal\Core\Extension\ExtensionNameLengthException
-   *   Thrown when the theme name is to long
+   *   Thrown when the theme name is to long.
    *
    * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
    *   Use the theme_installer service instead.
@@ -52,7 +47,7 @@ interface ThemeHandlerInterface {
    * @deprecated in Drupal 8.0.x-dev and will be removed before Drupal 9.0.0.
    *   Use the theme_installer service instead.
    *
-   * @see \Drupal\Core\Extension\ThemeInstallerInterface::install
+   * @see \Drupal\Core\Extension\ThemeInstallerInterface::uninstall
    */
   public function uninstall(array $theme_list);
 
@@ -207,5 +202,19 @@ interface ThemeHandlerInterface {
    *   Thrown when the requested theme does not exist.
    */
   public function getTheme($name);
+
+  /**
+   * Determines if a theme should be shown in the user interface.
+   *
+   * To be shown in the UI the theme has to be installed. If the theme is hidden
+   * it will not be shown unless it is the default or admin theme.
+   *
+   * @param string $name
+   *   The name of the theme to check.
+   *
+   * @return bool
+   *   TRUE if the theme should be shown in the UI, FALSE if not.
+   */
+  public function hasUi($name);
 
 }

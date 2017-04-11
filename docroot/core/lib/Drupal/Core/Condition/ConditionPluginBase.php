@@ -1,14 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Condition\ConditionPluginBase.
- */
-
 namespace Drupal\Core\Condition;
 
+use Drupal\Core\Executable\ExecutableManagerInterface;
 use Drupal\Core\Executable\ExecutablePluginBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformStateInterface;
 use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 
 /**
@@ -23,6 +20,13 @@ use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 abstract class ConditionPluginBase extends ExecutablePluginBase implements ConditionInterface {
 
   use ContextAwarePluginAssignmentTrait;
+
+  /**
+   * The condition manager to proxy execute calls through.
+   *
+   * @var \Drupal\Core\Executable\ExecutableInterface
+   */
+  protected $executableManager;
 
   /**
    * {@inheritdoc}
@@ -44,6 +48,9 @@ abstract class ConditionPluginBase extends ExecutablePluginBase implements Condi
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    if ($form_state instanceof SubformStateInterface) {
+      $form_state = $form_state->getCompleteFormState();
+    }
     $contexts = $form_state->getTemporaryValue('gathered_contexts') ?: [];
     $form['context_mapping'] = $this->addContextAssignmentElement($this, $contexts);
     $form['negate'] = array(
@@ -65,6 +72,9 @@ abstract class ConditionPluginBase extends ExecutablePluginBase implements Condi
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $this->configuration['negate'] = $form_state->getValue('negate');
+    if ($form_state->hasValue('context_mapping')) {
+      $this->setContextMapping($form_state->getValue('context_mapping'));
+    }
   }
 
   /**
@@ -105,6 +115,14 @@ abstract class ConditionPluginBase extends ExecutablePluginBase implements Condi
    */
   public function calculateDependencies() {
     return array();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setExecutableManager(ExecutableManagerInterface $executableManager) {
+    $this->executableManager = $executableManager;
+    return $this;
   }
 
 }

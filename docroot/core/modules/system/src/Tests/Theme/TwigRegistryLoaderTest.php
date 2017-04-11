@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Theme\TwigRegistryLoaderTest.
- */
-
 namespace Drupal\system\Tests\Theme;
 
 use Drupal\simpletest\WebTestBase;
@@ -75,7 +70,7 @@ class TwigRegistryLoaderTest extends WebTestBase {
     $this->assertText('This line is from test_theme_twig_registry_loader_theme/templates/twig-registry-loader-test-extend.html.twig');
     $this->assertText('This line is from test_theme_twig_registry_loader_theme/templates/twig-registry-loader-test-include.html.twig');
 
-    // Enable a subtheme for the theme that doesnt have any overrides to make
+    // Enable a subtheme for the theme that doesn't have any overrides to make
     // sure that templates are being loaded from the first parent which has the
     // templates.
     $this->config('system.theme')

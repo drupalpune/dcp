@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\form_test\Form\FormTestDisabledElementsForm.
- */
-
 namespace Drupal\form_test\Form;
 
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -139,6 +134,15 @@ class FormTestDisabledElementsForm extends FormBase {
       '#default_value' => $date,
       '#expected_value' => $expected,
       '#test_hijack_value' => new DrupalDateTime('1978-12-02 11:30:00', 'Europe/Berlin'),
+      '#date_timezone' => 'Europe/Berlin',
+    );
+
+    $form['disabled_container']['disabled_container_date'] = array(
+      '#type' => 'date',
+      '#title' => 'date',
+      '#default_value' => '2001-01-13',
+      '#expected_value' => '2001-01-13',
+      '#test_hijack_value' => '2013-01-01',
       '#date_timezone' => 'Europe/Berlin',
     );
 

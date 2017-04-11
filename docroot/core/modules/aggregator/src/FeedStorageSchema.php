@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\FeedStorageSchema.
- */
-
 namespace Drupal\aggregator;
 
 use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
@@ -33,7 +28,7 @@ class FeedStorageSchema extends SqlContentEntityStorageSchema {
           break;
 
         case 'title':
-          $this->addSharedTableFieldUniqueKey($storage_definition, $schema);
+          $this->addSharedTableFieldIndex($storage_definition, $schema, TRUE);
           break;
       }
     }

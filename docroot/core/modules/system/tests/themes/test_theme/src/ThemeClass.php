@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\test_theme\ThemeClass.
- */
-
 namespace Drupal\test_theme;
 
 /**

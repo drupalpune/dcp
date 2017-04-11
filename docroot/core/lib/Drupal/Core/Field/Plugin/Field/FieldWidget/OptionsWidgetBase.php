@@ -1,14 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsWidgetBase.
- */
-
 namespace Drupal\Core\Field\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -72,7 +68,7 @@ abstract class OptionsWidgetBase extends WidgetBase {
    */
   public static function validateElement(array $element, FormStateInterface $form_state) {
     if ($element['#required'] && $element['#value'] == '_none') {
-      $form_state->setError($element, t('!name field is required.', array('!name' => $element['#title'])));
+      $form_state->setError($element, t('@name field is required.', array('@name' => $element['#title'])));
     }
 
     // Massage submitted form values.
@@ -149,13 +145,11 @@ abstract class OptionsWidgetBase extends WidgetBase {
    *
    * @param \Drupal\Core\Field\FieldItemListInterface $items
    *   The field values.
-   * @param int $delta
-   *   (optional) The delta of the item to get options for. Defaults to 0.
    *
    * @return array
    *   The array of corresponding selected options.
    */
-  protected function getSelectedOptions(FieldItemListInterface $items, $delta = 0) {
+  protected function getSelectedOptions(FieldItemListInterface $items) {
     // We need to check against a flat list of options.
     $flat_options = OptGroup::flattenOptions($this->getOptions($items->getEntity()));
 
@@ -190,13 +184,13 @@ abstract class OptionsWidgetBase extends WidgetBase {
    */
   protected function sanitizeLabel(&$label) {
     // Allow a limited set of HTML tags.
-    $label = $this->fieldFilterXss($label);
+    $label = FieldFilteredMarkup::create($label);
   }
 
   /**
    * Returns the empty option label to add to the list of options, if any.
    *
-   * @return string|NULL
+   * @return string|null
    *   Either a label of the empty option, or NULL.
    */
   protected function getEmptyLabel() { }

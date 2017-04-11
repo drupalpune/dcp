@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\shortcut\Tests\ShortcutTestBase.
- */
-
 namespace Drupal\shortcut\Tests;
 
 use Drupal\shortcut\Entity\Shortcut;

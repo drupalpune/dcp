@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Definition of Drupal\Tests\views\Unit\PluginTypeListTest.
- */
 
 namespace Drupal\Tests\views\Unit;
 

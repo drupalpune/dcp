@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\comment\Tests\CommentThreadingTest.
- */
-
 namespace Drupal\comment\Tests;
 
 use Drupal\comment\CommentManagerInterface;

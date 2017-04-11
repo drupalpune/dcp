@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\rest\Annotation\RestResource.
- */
-
 namespace Drupal\rest\Annotation;
 
 use \Drupal\Component\Annotation\Plugin;
@@ -14,7 +9,7 @@ use \Drupal\Component\Annotation\Plugin;
  *
  * Plugin Namespace: Plugin\rest\resource
  *
- * For a working example, see \Drupal\rest\Plugin\rest\resource\DBLogResource
+ * For a working example, see \Drupal\dblog\Plugin\rest\resource\DBLogResource
  *
  * @see \Drupal\rest\Plugin\Type\ResourcePluginManager
  * @see \Drupal\rest\Plugin\ResourceBase
@@ -42,5 +37,12 @@ class RestResource extends Plugin {
    * @var \Drupal\Core\Annotation\Translation
    */
   public $label;
+
+  /**
+   * The serialization class to deserialize serialized data into.
+   *
+   * @var string (optional)
+   */
+  public $serialization_class;
 
 }

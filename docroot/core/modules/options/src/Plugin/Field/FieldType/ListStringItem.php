@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\options\Type\ListStringItem.
- */
-
 namespace Drupal\options\Plugin\Field\FieldType;
 
 use Drupal\Component\Utility\Unicode;

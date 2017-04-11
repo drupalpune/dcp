@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\menu_link_content\Plugin\Menu\MenuLinkContent.
- */
-
 namespace Drupal\menu_link_content\Plugin\Menu;
 
 use Drupal\Component\Plugin\Exception\PluginException;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Menu\MenuLinkBase;
@@ -138,7 +132,7 @@ class MenuLinkContent extends MenuLinkBase implements ContainerFactoryPluginInte
         $entity = reset($loaded_entities);
       }
       if (!$entity) {
-        throw new PluginException(SafeMarkup::format('Entity not found through the menu link plugin definition and could not fallback on UUID @uuid', array('@uuid' => $uuid)));
+        throw new PluginException("Entity not found through the menu link plugin definition and could not fallback on UUID '$uuid'");
       }
       // Clone the entity object to avoid tampering with the static cache.
       $this->entity = clone $entity;

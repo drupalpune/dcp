@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Installer\DistributionProfileTest.
- */
-
 namespace Drupal\system\Tests\Installer;
 
-use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Serialization\Yaml;
 use Drupal\simpletest\InstallerTestBase;
 
 /**
@@ -45,7 +40,7 @@ class DistributionProfileTest extends InstallerTestBase {
   }
 
   /**
-   * Overrides InstallerTest::setUpLanguage().
+   * {@inheritdoc}
    */
   protected function setUpLanguage() {
     // Verify that the distribution name appears.
@@ -59,7 +54,7 @@ class DistributionProfileTest extends InstallerTestBase {
   }
 
   /**
-   * Overrides InstallerTest::setUpProfile().
+   * {@inheritdoc}
    */
   protected function setUpProfile() {
     // This step is skipped, because there is a distribution profile.

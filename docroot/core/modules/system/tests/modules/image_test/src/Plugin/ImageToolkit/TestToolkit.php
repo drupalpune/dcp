@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\image_test\Plugin\ImageToolkit\TestToolkit.
- */
-
 namespace Drupal\image_test\Plugin\ImageToolkit;
 
 use Drupal\Component\Utility\Unicode;
@@ -138,7 +133,7 @@ class TestToolkit extends ImageToolkitBase {
    */
   public function parseFile() {
     $this->logCall('parseFile', func_get_args());
-    $data = @getimagesize($this->getImage()->getSource());
+    $data = @getimagesize($this->getSource());
     if ($data && in_array($data[2], static::supportedTypes())) {
       $this->setType($data[2]);
       $this->width = $data[0];

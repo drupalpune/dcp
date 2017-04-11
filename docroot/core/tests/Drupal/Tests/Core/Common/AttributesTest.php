@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Common\AttributesTest.
- */
-
 namespace Drupal\Tests\Core\Common;
 
 use Drupal\Core\Template\Attribute;
@@ -69,6 +64,22 @@ class AttributesTest extends UnitTestCase {
     foreach ($attribute as $value) {
       $this->assertSame((string) $value, 'value1', 'Iterate over attribute.');
     }
+  }
+
+  /**
+   * Test AttributeValueBase copy.
+   */
+  public function testAttributeValueBaseCopy() {
+    $original_attributes = new Attribute([
+      'checked' => TRUE,
+      'class' => ['who', 'is', 'on'],
+      'id' => 'first',
+    ]);
+    $attributes['selected'] = $original_attributes['checked'];
+    $attributes['id'] = $original_attributes['id'];
+    $attributes = new Attribute($attributes);
+    $this->assertSame((string) $original_attributes, ' checked class="who is on" id="first"', 'Original boolean value used with original name.');
+    $this->assertSame((string) $attributes, ' selected id="first"', 'Original boolean value used with new name.');
   }
 
 }

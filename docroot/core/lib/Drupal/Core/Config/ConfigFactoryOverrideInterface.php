@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\ConfigFactoryOverrideInterface.
- */
-
 namespace Drupal\Core\Config;
 
 /**
@@ -57,5 +52,16 @@ interface ConfigFactoryOverrideInterface {
    *   The configuration object for the provided name and collection.
    */
   public function createConfigObject($name, $collection = StorageInterface::DEFAULT_COLLECTION);
+
+  /**
+   * Gets the cacheability metadata associated with the config factory override.
+   *
+   * @param string $name
+   *   The name of the configuration override to get metadata for.
+   *
+   * @return \Drupal\Core\Cache\CacheableMetadata
+   *   A cacheable metadata object.
+   */
+  public function getCacheableMetadata($name);
 
 }

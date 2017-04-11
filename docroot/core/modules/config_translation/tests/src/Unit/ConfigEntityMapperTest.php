@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\config_translation\Unit\ConfigEntityMapperTest.
- */
-
 namespace Drupal\Tests\config_translation\Unit;
 
 use Drupal\config_translation\ConfigEntityMapper;
@@ -57,7 +52,7 @@ class ConfigEntityMapperTest extends UnitTestCase {
   protected function setUp() {
     $this->entityManager = $this->getMock('Drupal\Core\Entity\EntityManagerInterface');
 
-    $this->entity = $this->getMock('Drupal\Core\Entity\EntityInterface');
+    $this->entity = $this->getMock('Drupal\Core\Config\Entity\ConfigEntityInterface');
 
     $this->routeProvider = $this->getMock('Drupal\Core\Routing\RouteProviderInterface');
 
@@ -70,7 +65,7 @@ class ConfigEntityMapperTest extends UnitTestCase {
     $definition = array(
       'class' => '\Drupal\config_translation\ConfigEntityMapper',
       'base_route_name' => 'entity.configurable_language.edit_form',
-      'title' => '!label language',
+      'title' => '@label language',
       'names' => array(),
       'entity_type' => 'configurable_language',
       'route_name' => 'config_translation.item.overview.entity.configurable_language.edit_form',
@@ -99,9 +94,9 @@ class ConfigEntityMapperTest extends UnitTestCase {
   }
 
   /**
-   * Tests ConfigEntityMapper::setEntity().
+   * Tests ConfigEntityMapper::setEntity() and ConfigEntityMapper::getEntity().
    */
-  public function testSetEntity() {
+  public function testEntityGetterAndSetter() {
     $this->entity
       ->expects($this->once())
       ->method('id')
@@ -109,14 +104,28 @@ class ConfigEntityMapperTest extends UnitTestCase {
       ->will($this->returnValue('entity_id'));
 
     $entity_type = $this->getMock('Drupal\Core\Config\Entity\ConfigEntityTypeInterface');
+    $entity_type
+      ->expects($this->any())
+      ->method('getConfigPrefix')
+      ->will($this->returnValue('config_prefix'));
     $this->entityManager
       ->expects($this->once())
       ->method('getDefinition')
       ->with('configurable_language')
       ->will($this->returnValue($entity_type));
 
+    // No entity is set.
+    $this->assertNull($this->configEntityMapper->getEntity());
+
     $result = $this->configEntityMapper->setEntity($this->entity);
     $this->assertTrue($result);
+
+    // Ensure that the getter provides the entity.
+    $this->assertEquals($this->entity, $this->configEntityMapper->getEntity());
+
+    // Ensure that the configuration name was added to the mapper.
+    $plugin_definition = $this->configEntityMapper->getPluginDefinition();
+    $this->assertTrue(in_array('config_prefix.entity_id', $plugin_definition['names']));
 
     // Make sure setEntity() returns FALSE when called a second time.
     $result = $this->configEntityMapper->setEntity($this->entity);

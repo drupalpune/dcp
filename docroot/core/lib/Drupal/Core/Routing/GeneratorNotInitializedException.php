@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Definition of Drupal\Core\Routing\GeneratorNotInitializedException.
- */
 
 namespace Drupal\Core\Routing;
 

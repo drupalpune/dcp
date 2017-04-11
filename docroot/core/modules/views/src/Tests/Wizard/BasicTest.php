@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Tests\Wizard\BasicTest.
- */
-
 namespace Drupal\views\Tests\Wizard;
 
 use Drupal\Component\Serialization\Json;
@@ -19,13 +14,19 @@ use Drupal\views\Views;
  */
 class BasicTest extends WizardTestBase {
 
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('page_title_block');
+  }
+
   function testViewsWizardAndListing() {
     $this->drupalCreateContentType(array('type' => 'article'));
     $this->drupalCreateContentType(array('type' => 'page'));
 
     // Check if we can access the main views admin page.
     $this->drupalGet('admin/structure/views');
-    $this->assertText(t('Add new view'));
+    $this->assertText(t('Add view'));
 
     // Create a simple and not at all useful view.
     $view1 = array();
@@ -79,7 +80,7 @@ class BasicTest extends WizardTestBase {
     $elements = $this->cssSelect('link[href="' . Url::fromRoute('view.' . $view2['id'] . '.feed_1', [], ['absolute' => TRUE])->toString() . '"]');
     $this->assertEqual(count($elements), 1, 'Feed found.');
     $this->drupalGet($view2['page[feed_properties][path]']);
-    $this->assertRaw('<rss version="2.0"');
+    $this->assertTrue(!empty($this->cssSelect('rss[version="2.0"]')));
     // The feed should have the same title and nodes as the page.
     $this->assertText($view2['page[title]']);
     $this->assertRaw($node1->url('canonical', ['absolute' => TRUE]));
@@ -133,6 +134,7 @@ class BasicTest extends WizardTestBase {
 
     // Confirm that the block is available in the block administration UI.
     $this->drupalGet('admin/structure/block/list/' . $this->config('system.theme')->get('default'));
+    $this->clickLinkPartialName('Place block');
     $this->assertText($view3['label']);
 
     // Place the block.
@@ -157,6 +159,7 @@ class BasicTest extends WizardTestBase {
     $view4['rest_export[create]'] = 1;
     $view4['rest_export[path]'] = $this->randomMachineName(16);
     $this->drupalPostForm('admin/structure/views/add', $view4, t('Save and edit'));
+    $this->assertRaw(t('The view %view has been saved.', array('%view' => $view4['label'])));
 
     // Check that the REST export path works.
     $this->drupalGet($view4['rest_export[path]']);
@@ -168,26 +171,9 @@ class BasicTest extends WizardTestBase {
   }
 
   /**
-   * Tests the actual wizard form.
-   *
-   * @see \Drupal\views_ui\ViewAddForm::form()
-   */
-  public function testWizardForm() {
-    $this->drupalGet('admin/structure/views/add');
-
-    $result = $this->xpath('//small[@id = "edit-label-machine-name-suffix"]');
-    $this->assertTrue(count($result), 'Ensure that the machine name is applied to the name field.');
-
-    $this->drupalPostAjaxForm(NULL, array('show[wizard_key]' => 'users'), 'show[wizard_key]');
-    $this->assertNoFieldByName('show[type]', NULL, 'The "of type" filter is not added for users.');
-    $this->drupalPostAjaxForm(NULL, array('show[wizard_key]' => 'node'), 'show[wizard_key]');
-    $this->assertFieldByName('show[type]', 'all', 'The "of type" filter is added for nodes.');
-  }
-
-  /**
    * Tests default plugin values are populated from the wizard form.
    *
-   * @see \Drupal\views\Plugin\views\display\DisplayPluginBase::mergeDefaults().
+   * @see \Drupal\views\Plugin\views\display\DisplayPluginBase::mergeDefaults()
    */
   public function testWizardDefaultValues() {
     $random_id = strtolower($this->randomMachineName(16));
@@ -201,7 +187,7 @@ class BasicTest extends WizardTestBase {
 
     // Make sure the plugin types that should not have empty options don't have.
     // Test against all values is unit tested.
-    // @see \Drupal\views\Tests\Plugin\DisplayUnitTest
+    // @see \Drupal\Tests\views\Kernel\Plugin\DisplayKernelTest
     $view = Views::getView($random_id);
     $displays = $view->storage->get('display');
 

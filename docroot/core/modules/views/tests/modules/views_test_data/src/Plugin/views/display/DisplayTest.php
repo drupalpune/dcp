@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views_test_data\Plugin\views\display\DisplayTest.
- */
-
 namespace Drupal\views_test_data\Plugin\views\display;
 
 use Drupal\Component\Utility\Xss;
@@ -33,15 +28,14 @@ class DisplayTest extends DisplayPluginBase {
   protected $usesAttachments = TRUE;
 
   /**
-   * Overrides \Drupal\views\Plugin\views\display\DisplayPluginBase::getType().
+   * {@inheritdoc}
    */
-  protected function getType() {
+  public function getType() {
     return 'test';
   }
 
   /**
-   * Overrides
-   * Drupal\views\Plugin\views\display\DisplayPluginBase::defineOptions().
+   * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();

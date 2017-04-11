@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\entity_test\Entity\EntityTestUpdate.
- */
-
 namespace Drupal\entity_test\Entity;
 
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -23,7 +18,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
  *   },
  *   base_table = "entity_test_update",
  *   revision_table = "entity_test_update_revision",
- *   fieldable = TRUE,
  *   persistent_cache = FALSE,
  *   entity_keys = {
  *     "id" = "id",

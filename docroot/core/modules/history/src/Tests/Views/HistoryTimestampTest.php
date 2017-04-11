@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\history\Tests\Views\HistoryTimestampTest.
- */
-
 namespace Drupal\history\Tests\Views;
 
 use Drupal\views\Views;
@@ -70,7 +65,7 @@ class HistoryTimestampTest extends ViewTestBase {
     $this->executeView($view);
     $this->assertEqual(count($view->result), 2);
     $output = $view->preview();
-    $this->setRawContent(drupal_render($output));
+    $this->setRawContent(\Drupal::service('renderer')->renderRoot($output));
     $result = $this->xpath('//span[@class=:class]', array(':class' => 'marker'));
     $this->assertEqual(count($result), 1, 'Just one node is marked as new');
 
@@ -80,5 +75,15 @@ class HistoryTimestampTest extends ViewTestBase {
     $this->executeView($view);
     $this->assertEqual(count($view->result), 1);
     $this->assertIdenticalResultset($view, array(array('nid' => $nodes[0]->id())), $column_map);
+
+    // Install Comment module and make sure that content types without comment
+    // field will not break the view.
+    // See \Drupal\history\Plugin\views\filter\HistoryUserTimestamp::query()
+    \Drupal::service('module_installer')->install(['comment']);
+    $view = Views::getView('test_history');
+    $view->setDisplay('page_2');
+    $this->executeView($view);
+
   }
+
 }

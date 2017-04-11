@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\paramconverter_test\TestControllers.
- */
-
 namespace Drupal\paramconverter_test;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -25,6 +20,9 @@ class TestControllers {
   }
 
   public function testEntityLanguage(NodeInterface $node) {
-    return ['#markup' => $node->label()];
+    $build = ['#markup' => $node->label()];
+    \Drupal::service('renderer')->addCacheableDependency($build, $node);
+    return $build;
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\Form\EmailTest.
- */
-
 namespace Drupal\system\Tests\Form;
 
 use Drupal\Component\Serialization\Json;
@@ -35,7 +30,7 @@ class EmailTest extends WebTestBase {
     $edit['email_required'] = ' ';
     $this->drupalPostForm('form-test/email', $edit, 'Submit');
     $this->assertRaw(t('The email address %mail is not valid.', array('%mail' => 'invalid')));
-    $this->assertRaw(t('!name field is required.', array('!name' => 'Address')));
+    $this->assertRaw(t('@name field is required.', array('@name' => 'Address')));
 
     $edit = array();
     $edit['email_required'] = '  foo.bar@example.com ';
@@ -50,4 +45,5 @@ class EmailTest extends WebTestBase {
     $this->assertEqual($values['email'], 'foo@example.com');
     $this->assertEqual($values['email_required'], 'example@drupal.org');
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Enhancer\ParamConversionEnhancerTest.
- */
-
 namespace Drupal\Tests\Core\Enhancer;
 
 use Drupal\Core\Routing\Enhancer\ParamConversionEnhancer;
@@ -59,12 +54,18 @@ class ParamConversionEnhancerTest extends UnitTestCase {
     $expected['id'] = 'something_better!';
     $expected['_raw_variables'] = new ParameterBag($raw_variables);
 
-    $this->paramConverterManager->expects($this->any())
+    $this->paramConverterManager->expects($this->once())
       ->method('convert')
       ->with($this->isType('array'))
       ->will($this->returnValue($expected));
 
     $result = $this->paramConversionEnhancer->enhance($defaults, new Request());
+
+    $this->assertEquals($expected, $result);
+
+    // Now run with the results as the new defaults to ensure that the
+    // conversion is just run once.
+    $result = $this->paramConversionEnhancer->enhance($result, new Request());
 
     $this->assertEquals($expected, $result);
   }

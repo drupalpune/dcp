@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\forum\Form\ForumForm.
- */
-
 namespace Drupal\forum\Form;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -83,9 +78,10 @@ class ForumForm extends TermForm {
     $route_name = $this->urlStub == 'container' ? 'entity.taxonomy_term.forum_edit_container_form' : 'entity.taxonomy_term.forum_edit_form';
     $route_parameters  = ['taxonomy_term' => $term->id()];
     $link = $this->l($this->t('Edit'), new Url($route_name, $route_parameters));
+    $view_link = $term->link($term->getName());
     switch ($status) {
       case SAVED_NEW:
-        drupal_set_message($this->t('Created new @type %term.', array('%term' => $term->getName(), '@type' => $this->forumFormType)));
+        drupal_set_message($this->t('Created new @type %term.', array('%term' => $view_link, '@type' => $this->forumFormType)));
         $this->logger('forum')->notice('Created new @type %term.', array('%term' => $term->getName(), '@type' => $this->forumFormType, 'link' => $link));
         $form_state->setValue('tid', $term->id());
         break;
@@ -128,8 +124,8 @@ class ForumForm extends TermForm {
    *   A select form element.
    */
   protected function forumParentSelect($tid, $title) {
-    // @todo Inject a taxonomy service when one exists.
-    $parents = taxonomy_term_load_parents($tid);
+    $taxonomy_storage = $this->entityManager->getStorage('taxonomy_term');
+    $parents = $taxonomy_storage->loadParents($tid);
     if ($parents) {
       $parent = array_shift($parents);
       $parent = $parent->id();
@@ -139,8 +135,7 @@ class ForumForm extends TermForm {
     }
 
     $vid = $this->config('forum.settings')->get('vocabulary');
-    // @todo Inject a taxonomy service when one exists.
-    $children = taxonomy_get_tree($vid, $tid, NULL, TRUE);
+    $children = $taxonomy_storage->loadTree($vid, $tid, NULL, TRUE);
 
     // A term can't be the child of itself, nor of its children.
     foreach ($children as $child) {
@@ -148,8 +143,7 @@ class ForumForm extends TermForm {
     }
     $exclude[] = $tid;
 
-    // @todo Inject a taxonomy service when one exists.
-    $tree = taxonomy_get_tree($vid, 0, NULL, TRUE);
+    $tree = $taxonomy_storage->loadTree($vid, 0, NULL, TRUE);
     $options[0] = '<' . $this->t('root') . '>';
     if ($tree) {
       foreach ($tree as $term) {

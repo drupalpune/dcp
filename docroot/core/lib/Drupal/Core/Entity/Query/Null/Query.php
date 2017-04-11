@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\Query\Null\Query.
- */
-
 namespace Drupal\Core\Entity\Query\Null;
 
 use Drupal\Core\Entity\Query\QueryAggregateInterface;
@@ -18,7 +13,7 @@ use Drupal\Core\Entity\Query\Sql\ConditionAggregate;
 class Query extends QueryBase implements QueryInterface, QueryAggregateInterface {
 
   /**
-   * Implements \Drupal\Core\Entity\Query\QueryInterface::execute().
+   * {@inheritdoc}
    */
   public function execute() {
     if ($this->count) {
@@ -47,4 +42,5 @@ class Query extends QueryBase implements QueryInterface, QueryAggregateInterface
   public function conditionAggregateGroupFactory($conjunction = 'AND') {
     return new ConditionAggregate($conjunction, $this);
   }
+
 }

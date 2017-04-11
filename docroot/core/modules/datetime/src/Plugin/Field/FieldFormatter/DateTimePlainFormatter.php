@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\datetime\Plugin\Field\FieldFormatter\DateTimePlainFormatter.
- */
-
 namespace Drupal\datetime\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 
 /**
- * Plugin implementation of the 'datetime_plain' formatter.
+ * Plugin implementation of the 'Plain' formatter for 'datetime' fields.
  *
  * @FieldFormatter(
  *   id = "datetime_plain",
@@ -21,30 +16,27 @@ use Drupal\Core\Field\FieldItemListInterface;
  *   }
  *)
  */
-class DateTimePlainFormatter extends FormatterBase {
+class DateTimePlainFormatter extends DateTimeFormatterBase {
 
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
-
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = array();
 
     foreach ($items as $delta => $item) {
-
       $output = '';
       if (!empty($item->date)) {
-        // The date was created and verified during field_load(), so it is safe
-        // to use without further inspection.
+        /** @var \Drupal\Core\Datetime\DrupalDateTime $date */
         $date = $item->date;
-        $date->setTimeZone(timezone_open(drupal_get_user_timezone()));
-        $format = DATETIME_DATETIME_STORAGE_FORMAT;
+
         if ($this->getFieldSetting('datetime_type') == 'date') {
           // A date without time will pick up the current time, use the default.
           datetime_date_default_time($date);
-          $format = DATETIME_DATE_STORAGE_FORMAT;
         }
-        $output = $date->format($format);
+        $this->setTimeZone($date);
+
+        $output = $this->formatDate($date);
       }
       $elements[$delta] = [
         '#cache' => [
@@ -57,6 +49,15 @@ class DateTimePlainFormatter extends FormatterBase {
     }
 
     return $elements;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function formatDate($date) {
+    $format = $this->getFieldSetting('datetime_type') == DateTimeItem::DATETIME_TYPE_DATE ? DATETIME_DATE_STORAGE_FORMAT : DATETIME_DATETIME_STORAGE_FORMAT;
+    $timezone = $this->getSetting('timezone_override');
+    return $this->dateFormatter->format($date->getTimestamp(), 'custom', $format, $timezone != '' ? $timezone : NULL);
   }
 
 }

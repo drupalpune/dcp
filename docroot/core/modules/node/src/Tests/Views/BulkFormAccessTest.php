@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\node\Tests\Views\BulkFormAccessTest.
- */
-
 namespace Drupal\node\Tests\Views;
 
 use Drupal\Component\Utility\SafeMarkup;
@@ -85,14 +80,14 @@ class BulkFormAccessTest extends NodeTestBase {
     $this->assertTrue($node->isPublished(), 'Node is initially published.');
 
     // Ensure that the node can not be edited.
-    $this->assertEqual(FALSE, $this->accessHandler->access($node, 'update', $node->prepareLangcode(), $account), 'The node may not be edited.');
+    $this->assertEqual(FALSE, $this->accessHandler->access($node, 'update', $account), 'The node may not be edited.');
 
     // Test editing the node using the bulk form.
     $edit = array(
       'node_bulk_form[0]' => TRUE,
       'action' => 'node_unpublish_action',
     );
-    $this->drupalPostForm('test-node-bulk-form', $edit, t('Apply'));
+    $this->drupalPostForm('test-node-bulk-form', $edit, t('Apply to selected items'));
     $this->assertRaw(SafeMarkup::format('No access to execute %action on the @entity_type_label %entity_label.', [
       '%action' => 'Unpublish content',
       '@entity_type_label' => 'Content',
@@ -120,7 +115,11 @@ class BulkFormAccessTest extends NodeTestBase {
       'node_bulk_form[0]' => TRUE,
       'action' => 'node_unpublish_action',
     );
-    $this->drupalPostForm('test-node-bulk-form', $edit, t('Apply'));
+    $this->drupalPostForm('test-node-bulk-form', $edit, t('Apply to selected items'));
+    // Test that the action message isn't shown.
+    $this->assertNoRaw(SafeMarkup::format('%action was applied to 1 item.', [
+      '%action' => 'Unpublish content',
+    ]));
     // Re-load the node and check the status.
     $node = Node::load($node->id());
     $this->assertTrue($node->isPublished(), 'The node is still published.');
@@ -155,9 +154,9 @@ class BulkFormAccessTest extends NodeTestBase {
     $this->drupalLogin($account);
 
     // Ensure that the private node can not be deleted.
-    $this->assertEqual(FALSE, $this->accessHandler->access($private_node, 'delete', $private_node->prepareLangcode(), $account), 'The private node may not be deleted.');
+    $this->assertEqual(FALSE, $this->accessHandler->access($private_node, 'delete', $account), 'The private node may not be deleted.');
     // Ensure that the public node may be deleted.
-    $this->assertEqual(TRUE, $this->accessHandler->access($own_node, 'delete', $own_node->prepareLangcode(), $account), 'The own node may be deleted.');
+    $this->assertEqual(TRUE, $this->accessHandler->access($own_node, 'delete', $account), 'The own node may be deleted.');
 
     // Try to delete the node using the bulk form.
     $edit = array(
@@ -165,7 +164,7 @@ class BulkFormAccessTest extends NodeTestBase {
       'node_bulk_form[1]' => TRUE,
       'action' => 'node_delete_action',
     );
-    $this->drupalPostForm('test-node-bulk-form', $edit, t('Apply'));
+    $this->drupalPostForm('test-node-bulk-form', $edit, t('Apply to selected items'));
     $this->drupalPostForm(NULL, array(), t('Delete'));
     // Ensure the private node still exists.
     $private_node = Node::load($private_node->id());
@@ -174,4 +173,5 @@ class BulkFormAccessTest extends NodeTestBase {
     $own_node = Node::load($own_node->id());
     $this->assertNull($own_node, 'The own node is deleted.');
   }
+
 }

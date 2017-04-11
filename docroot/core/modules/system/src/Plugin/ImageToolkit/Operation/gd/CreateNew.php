@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Plugin\ImageToolkit\Operation\gd\CreateNew.
- */
-
 namespace Drupal\system\Plugin\ImageToolkit\Operation\gd;
 
 use Drupal\Component\Utility\Color;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Defines GD2 create_new image operation.
@@ -44,6 +38,11 @@ class CreateNew extends GDImageToolkitOperationBase {
         'required' => FALSE,
         'default' => '#ffffff',
       ),
+      'is_temp' => array(
+        'description' => 'If TRUE, this operation is being used to create a temporary image by another GD operation. After performing its function, the caller is responsible for destroying the original GD resource.',
+        'required' => FALSE,
+        'default' => FALSE,
+      ),
     );
   }
 
@@ -53,7 +52,7 @@ class CreateNew extends GDImageToolkitOperationBase {
   protected function validateArguments(array $arguments) {
     // Assure extension is supported.
     if (!in_array($arguments['extension'], $this->getToolkit()->getSupportedExtensions())) {
-      throw new \InvalidArgumentException(SafeMarkup::format("Invalid extension (@value) specified for the image 'convert' operation", array('@value' => $arguments['extension'])));
+      throw new \InvalidArgumentException("Invalid extension ('{$arguments['extension']}') specified for the image 'convert' operation");
     }
 
     // Assure integers for width and height.
@@ -62,15 +61,15 @@ class CreateNew extends GDImageToolkitOperationBase {
 
     // Fail when width or height are 0 or negative.
     if ($arguments['width'] <= 0) {
-      throw new \InvalidArgumentException(SafeMarkup::format("Invalid width (@value) specified for the image 'create_new' operation", array('@value' => $arguments['width'])));
+      throw new \InvalidArgumentException("Invalid width ('{$arguments['width']}') specified for the image 'create_new' operation");
     }
     if ($arguments['height'] <= 0) {
-      throw new \InvalidArgumentException(SafeMarkup::format("Invalid height (@value) specified for the image 'create_new' operation", array('@value' => $arguments['height'])));
+      throw new \InvalidArgumentException("Invalid height ({$arguments['height']}) specified for the image 'create_new' operation");
     }
 
     // Assure transparent color is a valid hex string.
     if ($arguments['transparent_color'] && !Color::validateHex($arguments['transparent_color'])) {
-      throw new \InvalidArgumentException(SafeMarkup::format("Invalid transparent color (@value) specified for the image 'create_new' operation", array('@value' => $arguments['transparent_color'])));
+      throw new \InvalidArgumentException("Invalid transparent color ({$arguments['transparent_color']}) specified for the image 'create_new' operation");
     }
 
     return $arguments;
@@ -82,6 +81,9 @@ class CreateNew extends GDImageToolkitOperationBase {
   protected function execute(array $arguments) {
     // Get the image type.
     $type = $this->getToolkit()->extensionToImageType($arguments['extension']);
+
+    // Store the original GD resource.
+    $original_res = $this->getToolkit()->getResource();
 
     // Create the resource.
     if (!$res = imagecreatetruecolor($arguments['width'], $arguments['height'])) {
@@ -100,12 +102,12 @@ class CreateNew extends GDImageToolkitOperationBase {
 
       case IMAGETYPE_GIF:
         if (empty($arguments['transparent_color'])) {
-          // No transparency color specified, fill white.
-          $fill_color = imagecolorallocate($res, 255, 255, 255);
+          // No transparency color specified, fill white transparent.
+          $fill_color = imagecolorallocatealpha($res, 255, 255, 255, 127);
         }
         else {
           $fill_rgb = Color::hexToRgb($arguments['transparent_color']);
-          $fill_color = imagecolorallocate($res, $fill_rgb['red'], $fill_rgb['green'], $fill_rgb['blue']);
+          $fill_color = imagecolorallocatealpha($res, $fill_rgb['red'], $fill_rgb['green'], $fill_rgb['blue'], 127);
           imagecolortransparent($res, $fill_color);
         }
         imagefill($res, 0, 0, $fill_color);
@@ -120,6 +122,12 @@ class CreateNew extends GDImageToolkitOperationBase {
     // Update the toolkit properties.
     $this->getToolkit()->setType($type);
     $this->getToolkit()->setResource($res);
+
+    // Destroy the original resource if it is not needed by other operations.
+    if (!$arguments['is_temp'] && is_resource($original_res)) {
+      imagedestroy($original_res);
+    }
+
     return TRUE;
   }
 

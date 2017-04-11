@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views_ui\Tests\DuplicateTest.
- */
-
 namespace Drupal\views_ui\Tests;
 
 /**
@@ -13,6 +8,12 @@ namespace Drupal\views_ui\Tests;
  * @group views_ui
  */
 class DuplicateTest extends UITestBase {
+
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('page_title_block');
+  }
 
   /**
    * Checks if duplicated view exists and has correct label.
@@ -38,4 +39,5 @@ class DuplicateTest extends UITestBase {
     // Assert that the page title is correctly displayed.
     $this->assertText($view['label']);
   }
+
 }

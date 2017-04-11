@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Component\FileCache\FileCache.
- */
-
 namespace Drupal\Component\FileCache;
 
 /**
@@ -151,6 +146,15 @@ class FileCache implements FileCacheInterface {
     if ($this->cache) {
       $this->cache->delete($cid);
     }
+  }
+
+  /**
+   * Resets the static cache.
+   *
+   * @todo Replace this once https://www.drupal.org/node/2260187 is in.
+   */
+  public static function reset() {
+    static::$cached = [];
   }
 
 }

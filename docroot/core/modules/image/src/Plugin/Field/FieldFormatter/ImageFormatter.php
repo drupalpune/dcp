@@ -1,20 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\image\Plugin\field\formatter\ImageFormatter.
- */
-
 namespace Drupal\image\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
-use Drupal\Core\Utility\LinkGeneratorInterface;
+use Drupal\image\Entity\ImageStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Cache\Cache;
@@ -40,16 +35,9 @@ class ImageFormatter extends ImageFormatterBase implements ContainerFactoryPlugi
   protected $currentUser;
 
   /**
-   * The link generator.
-   *
-   * @var \Drupal\Core\Utility\LinkGeneratorInterface
-   */
-  protected $linkGenerator;
-
-  /**
    * The image style entity storage.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\image\ImageStyleStorageInterface
    */
   protected $imageStyleStorage;
 
@@ -72,13 +60,10 @@ class ImageFormatter extends ImageFormatterBase implements ContainerFactoryPlugi
    *   Any third party settings settings.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The current user.
-   * @param \Drupal\Core\Utility\LinkGeneratorInterface $link_generator
-   *   The link generator service.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, AccountInterface $current_user, LinkGeneratorInterface $link_generator, EntityStorageInterface $image_style_storage) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, AccountInterface $current_user, EntityStorageInterface $image_style_storage) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
     $this->currentUser = $current_user;
-    $this->linkGenerator = $link_generator;
     $this->imageStyleStorage = $image_style_storage;
   }
 
@@ -95,7 +80,6 @@ class ImageFormatter extends ImageFormatterBase implements ContainerFactoryPlugi
       $configuration['view_mode'],
       $configuration['third_party_settings'],
       $container->get('current_user'),
-      $container->get('link_generator'),
       $container->get('entity.manager')->getStorage('image_style')
     );
   }
@@ -115,17 +99,20 @@ class ImageFormatter extends ImageFormatterBase implements ContainerFactoryPlugi
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $image_styles = image_style_options(FALSE);
-    $element['image_style'] = array(
+    $description_link = Link::fromTextAndUrl(
+      $this->t('Configure Image Styles'),
+      Url::fromRoute('entity.image_style.collection')
+    );
+    $element['image_style'] = [
       '#title' => t('Image style'),
       '#type' => 'select',
       '#default_value' => $this->getSetting('image_style'),
       '#empty_option' => t('None (original image)'),
       '#options' => $image_styles,
-      '#description' => array(
-        '#markup' => $this->linkGenerator->generate($this->t('Configure Image Styles'), new Url('entity.image_style.collection')),
-        '#access' => $this->currentUser->hasPermission('administer image styles'),
-      ),
-    );
+      '#description' => $description_link->toRenderable() + [
+        '#access' => $this->currentUser->hasPermission('administer image styles')
+      ],
+    ];
     $link_types = array(
       'content' => t('Content'),
       'file' => t('File'),
@@ -176,9 +163,9 @@ class ImageFormatter extends ImageFormatterBase implements ContainerFactoryPlugi
   /**
    * {@inheritdoc}
    */
-  public function viewElements(FieldItemListInterface $items) {
+  public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = array();
-    $files = $this->getEntitiesToView($items);
+    $files = $this->getEntitiesToView($items, $langcode);
 
     // Early opt-out if the field is empty.
     if (empty($files)) {
@@ -201,18 +188,25 @@ class ImageFormatter extends ImageFormatterBase implements ContainerFactoryPlugi
     $image_style_setting = $this->getSetting('image_style');
 
     // Collect cache tags to be added for each item in the field.
-    $cache_tags = array();
+    $base_cache_tags = [];
     if (!empty($image_style_setting)) {
       $image_style = $this->imageStyleStorage->load($image_style_setting);
-      $cache_tags = $image_style->getCacheTags();
+      $base_cache_tags = $image_style->getCacheTags();
     }
 
     foreach ($files as $delta => $file) {
+      $cache_contexts = [];
       if (isset($link_file)) {
         $image_uri = $file->getFileUri();
+        // @todo Wrap in file_url_transform_relative(). This is currently
+        // impossible. As a work-around, we currently add the 'url.site' cache
+        // context to ensure different file URLs are generated for different
+        // sites in a multisite setup, including HTTP and HTTPS versions of the
+        // same site. Fix in https://www.drupal.org/node/2646744.
         $url = Url::fromUri(file_create_url($image_uri));
+        $cache_contexts[] = 'url.site';
       }
-      $cache_tags = Cache::mergeTags($cache_tags, $file->getCacheTags());
+      $cache_tags = Cache::mergeTags($base_cache_tags, $file->getCacheTags());
 
       // Extract field item attributes for the theme function, and unset them
       // from the $item so that the field template does not re-render them.
@@ -228,11 +222,49 @@ class ImageFormatter extends ImageFormatterBase implements ContainerFactoryPlugi
         '#url' => $url,
         '#cache' => array(
           'tags' => $cache_tags,
+          'contexts' => $cache_contexts,
         ),
       );
     }
 
     return $elements;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    $dependencies = parent::calculateDependencies();
+    $style_id = $this->getSetting('image_style');
+    /** @var \Drupal\image\ImageStyleInterface $style */
+    if ($style_id && $style = ImageStyle::load($style_id)) {
+      // If this formatter uses a valid image style to display the image, add
+      // the image style configuration entity as dependency of this formatter.
+      $dependencies[$style->getConfigDependencyKey()][] = $style->getConfigDependencyName();
+    }
+    return $dependencies;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function onDependencyRemoval(array $dependencies) {
+    $changed = parent::onDependencyRemoval($dependencies);
+    $style_id = $this->getSetting('image_style');
+    /** @var \Drupal\image\ImageStyleInterface $style */
+    if ($style_id && $style = ImageStyle::load($style_id)) {
+      if (!empty($dependencies[$style->getConfigDependencyKey()][$style->getConfigDependencyName()])) {
+        $replacement_id = $this->imageStyleStorage->getReplacementId($style_id);
+        // If a valid replacement has been provided in the storage, replace the
+        // image style with the replacement and signal that the formatter plugin
+        // settings were updated.
+        if ($replacement_id && ImageStyle::load($replacement_id)) {
+          $this->setSetting('image_style', $replacement_id);
+          $changed = TRUE;
+        }
+      }
+    }
+    return $changed;
   }
 
 }

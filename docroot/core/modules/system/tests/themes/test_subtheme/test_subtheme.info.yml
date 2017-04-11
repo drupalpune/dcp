@@ -10,8 +10,12 @@ stylesheets-remove:
   - '@theme_test/css/sub-remove.css'
   - '@test_basetheme/base-add.sub-remove.css'
 
-# Information added by Drupal.org packaging script on 2015-05-27
-version: '8.0.0-beta11'
+libraries-extend:
+  classy/base:
+    - test_subtheme/global-styling
+
+# Information added by Drupal.org packaging script on 2017-03-15
+version: '8.2.7'
 core: '8.x'
 project: 'drupal'
-datestamp: 1432759049
+datestamp: 1489609681

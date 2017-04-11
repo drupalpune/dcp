@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\path\Form\PathFormBase.
- */
-
 namespace Drupal\path\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -13,6 +8,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Path\AliasManagerInterface;
 use Drupal\Core\Path\AliasStorageInterface;
 use Drupal\Core\Path\PathValidatorInterface;
+use Drupal\Core\Routing\RequestContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -49,6 +45,13 @@ abstract class PathFormBase extends FormBase {
   protected $pathValidator;
 
   /**
+   * The request context.
+   *
+   * @var \Drupal\Core\Routing\RequestContext
+   */
+  protected $requestContext;
+
+  /**
    * Constructs a new PathController.
    *
    * @param \Drupal\Core\Path\AliasStorageInterface $alias_storage
@@ -57,11 +60,14 @@ abstract class PathFormBase extends FormBase {
    *   The path alias manager.
    * @param \Drupal\Core\Path\PathValidatorInterface $path_validator
    *   The path validator.
+   * @param \Drupal\Core\Routing\RequestContext $request_context
+   *   The request context.
    */
-  public function __construct(AliasStorageInterface $alias_storage, AliasManagerInterface $alias_manager, PathValidatorInterface $path_validator) {
+  public function __construct(AliasStorageInterface $alias_storage, AliasManagerInterface $alias_manager, PathValidatorInterface $path_validator, RequestContext $request_context) {
     $this->aliasStorage = $alias_storage;
     $this->aliasManager = $alias_manager;
     $this->pathValidator = $path_validator;
+    $this->requestContext = $request_context;
   }
 
   /**
@@ -71,7 +77,8 @@ abstract class PathFormBase extends FormBase {
     return new static(
       $container->get('path.alias_storage'),
       $container->get('path.alias_manager'),
-      $container->get('path.validator')
+      $container->get('path.validator'),
+      $container->get('router.request_context')
     );
   }
 
@@ -94,8 +101,8 @@ abstract class PathFormBase extends FormBase {
       '#default_value' => $this->path['source'],
       '#maxlength' => 255,
       '#size' => 45,
-      '#description' => $this->t('Specify the existing path you wish to alias. For example: node/28, forum/1, taxonomy/term/1.'),
-      '#field_prefix' => $this->url('<none>', [], ['absolute' => TRUE]),
+      '#description' => $this->t('Specify the existing path you wish to alias. For example: /node/28, /forum/1, /taxonomy/term/1.'),
+      '#field_prefix' => $this->requestContext->getCompleteBaseUrl(),
       '#required' => TRUE,
     );
     $form['alias'] = array(
@@ -104,8 +111,8 @@ abstract class PathFormBase extends FormBase {
       '#default_value' => $this->path['alias'],
       '#maxlength' => 255,
       '#size' => 45,
-      '#description' => $this->t('Specify an alternative path by which this data can be accessed. For example, type "about" when writing an about page. Use a relative path.'),
-      '#field_prefix' => $this->url('<none>', [], ['absolute' => TRUE]),
+      '#description' => $this->t('Specify an alternative path by which this data can be accessed. For example, type "/about" when writing an about page.'),
+      '#field_prefix' => $this->requestContext->getCompleteBaseUrl(),
       '#required' => TRUE,
     );
 
@@ -139,6 +146,7 @@ abstract class PathFormBase extends FormBase {
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Save'),
+      '#button_type' => 'primary',
     );
 
     return $form;
@@ -151,16 +159,40 @@ abstract class PathFormBase extends FormBase {
     $source = &$form_state->getValue('source');
     $source = $this->aliasManager->getPathByAlias($source);
     $alias = &$form_state->getValue('alias');
-    // Trim the submitted value of whitespace and slashes.
-    $alias = trim(trim($alias), " \\/");
+
+    // Trim the submitted value of whitespace and slashes. Ensure to not trim
+    // the slash on the left side.
+    $alias = rtrim(trim(trim($alias), ''), "\\/");
+
+    if ($source[0] !== '/') {
+      $form_state->setErrorByName('source', 'The source path has to start with a slash.');
+    }
+    if ($alias[0] !== '/') {
+      $form_state->setErrorByName('alias', 'The alias path has to start with a slash.');
+    }
+
     // Language is only set if language.module is enabled, otherwise save for all
     // languages.
     $langcode = $form_state->getValue('langcode', LanguageInterface::LANGCODE_NOT_SPECIFIED);
 
     if ($this->aliasStorage->aliasExists($alias, $langcode, $this->path['source'])) {
-      $form_state->setErrorByName('alias', t('The alias %alias is already in use in this language.', array('%alias' => $alias)));
+      $stored_alias = $this->aliasStorage->load(['alias' => $alias, 'langcode' => $langcode]);
+      if ($stored_alias['alias'] !== $alias) {
+        // The alias already exists with different capitalization as the default
+        // implementation of AliasStorageInterface::aliasExists is
+        // case-insensitive.
+        $form_state->setErrorByName('alias', t('The alias %alias could not be added because it is already in use in this language with different capitalization: %stored_alias.', [
+          '%alias' => $alias,
+          '%stored_alias' => $stored_alias['alias'],
+        ]));
+      }
+      else {
+        $form_state->setErrorByName('alias', t('The alias %alias is already in use in this language.', ['%alias' => $alias]));
+      }
     }
-    if (!$this->pathValidator->isValid($source)) {
+
+
+    if (!$this->pathValidator->isValid(trim($source, '/'))) {
       $form_state->setErrorByName('source', t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $source)));
     }
   }

@@ -1,7 +1,11 @@
 <?php
 
+/**
+ * @file
+ * Database test module.
+ */
+
 use Drupal\Core\Database\Query\AlterableInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Implements hook_query_alter().
@@ -43,4 +47,3 @@ function database_test_query_alter(AlterableInterface $query) {
 function database_test_query_database_test_alter_remove_range_alter(AlterableInterface $query) {
   $query->range();
 }
-

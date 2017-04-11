@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\DrupalTest.
- */
-
 namespace Drupal\Tests\Core;
 
 use Drupal\Tests\UnitTestCase;
@@ -84,6 +79,16 @@ class DrupalTest extends UnitTestCase {
   public function testEntityManager() {
     $this->setMockContainerService('entity.manager');
     $this->assertNotNull(\Drupal::entityManager());
+  }
+
+  /**
+   * Tests the entityTypeManager() method.
+   *
+   * @covers ::entityTypeManager
+   */
+  public function testEntityTypeManager() {
+    $this->setMockContainerService('entity_type.manager');
+    $this->assertNotNull(\Drupal::entityTypeManager());
   }
 
   /**

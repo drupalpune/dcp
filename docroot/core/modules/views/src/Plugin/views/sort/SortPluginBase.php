@@ -1,14 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\sort\SortPluginBase.
- */
-
 namespace Drupal\views\Plugin\views\sort;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\views\Plugin\CacheablePluginInterface;
 use Drupal\views\Plugin\views\HandlerBase;
 
 /**
@@ -27,7 +23,7 @@ use Drupal\views\Plugin\views\HandlerBase;
 /**
  * Base sort handler that has no options and performs a simple sort.
  */
-abstract class SortPluginBase extends HandlerBase implements CacheablePluginInterface {
+abstract class SortPluginBase extends HandlerBase implements CacheableDependencyInterface {
 
   /**
    * Determine if a sort can be exposed.
@@ -68,11 +64,10 @@ abstract class SortPluginBase extends HandlerBase implements CacheablePluginInte
       case 'asc':
       default:
         return $this->t('asc');
-        break;
+
       case 'DESC';
       case 'desc';
         return $this->t('desc');
-        break;
     }
   }
 
@@ -124,7 +119,6 @@ abstract class SortPluginBase extends HandlerBase implements CacheablePluginInte
         '#type' => 'submit',
         '#value' => $this->t('Expose sort'),
         '#submit' => array(array($this, 'displayExposedForm')),
-        '#attributes' => array('class' => array('use-ajax-submit')),
       );
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 0;
     }
@@ -137,7 +131,6 @@ abstract class SortPluginBase extends HandlerBase implements CacheablePluginInte
         '#type' => 'submit',
         '#value' => $this->t('Hide sort'),
         '#submit' => array(array($this, 'displayExposedForm')),
-        '#attributes' => array('class' => array('use-ajax-submit')),
       );
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 1;
     }
@@ -220,7 +213,6 @@ abstract class SortPluginBase extends HandlerBase implements CacheablePluginInte
    */
   public function defaultExposeOptions() {
     $this->options['expose'] = array(
-      'order' => $this->options['order'],
       'label' => $this->definition['title'],
     );
   }
@@ -228,10 +220,10 @@ abstract class SortPluginBase extends HandlerBase implements CacheablePluginInte
   /**
    * {@inheritdoc}
    */
-  public function isCacheable() {
+  public function getCacheMaxAge() {
     // The result of a sort does not depend on outside information, so by
     // default it is cacheable.
-    return TRUE;
+    return Cache::PERMANENT;
   }
 
   /**
@@ -244,6 +236,13 @@ abstract class SortPluginBase extends HandlerBase implements CacheablePluginInte
       $cache_contexts[] = 'url.query_args:sort_by';
     }
     return $cache_contexts;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTags() {
+    return [];
   }
 
 }

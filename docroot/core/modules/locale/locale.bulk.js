@@ -1,11 +1,21 @@
+/**
+ * @file
+ * Locale behavior.
+ */
+
 (function ($, Drupal) {
 
-  "use strict";
+  'use strict';
 
   /**
    * Select the language code of an imported file based on its filename.
    *
    * This only works if the file name ends with "LANGCODE.po".
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches behavior for preselecting language code based on filename.
    */
   Drupal.behaviors.importLanguageCodeSelector = {
     attach: function (context, settings) {

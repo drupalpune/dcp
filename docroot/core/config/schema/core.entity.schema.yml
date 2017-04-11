@@ -160,6 +160,17 @@ field.widget.settings.string_textarea:
       type: label
       label: 'Placeholder'
 
+field.widget.settings.uri:
+  type: mapping
+  label: 'URI field'
+  mapping:
+    size:
+      type: integer
+      label: 'Size of URI field'
+    placeholder:
+      type: label
+      label: 'Placeholder'
+
 field.widget.settings.email_default:
   type: mapping
   label: 'Email field display format settings'
@@ -167,6 +178,9 @@ field.widget.settings.email_default:
     placeholder:
       type: label
       label: 'Placeholder'
+    size:
+      type: integer
+      label: 'Size of email field'
 
 field.widget.settings.datetime_timestamp:
   type: mapping
@@ -241,19 +255,6 @@ field.formatter.settings.boolean:
       type: string
       label: 'Custom output for TRUE'
 
-field.formatter.settings.boolean:
-  type: mapping
-  mapping:
-    format:
-      type: string
-      label: 'Output format'
-    format_custom_false:
-      type: string
-      label: 'Custom output for FALSE'
-    format_custom_true:
-      type: string
-      label: 'Custom output for TRUE'
-
 field.formatter.settings.string:
   type: mapping
   mapping:
@@ -304,9 +305,33 @@ field.formatter.settings.uri_link:
   type: mapping
   label: 'URI as link display format settings'
 
+field.formatter.settings.timestamp:
+  type: mapping
+  label: 'Timestamp display format settings'
+  mapping:
+    date_format:
+      type: string
+      label: 'Date format'
+    custom_date_format:
+      type: string
+      label: 'Custom date format'
+    timezone:
+      type: string
+      label: 'Time zone'
+
 field.formatter.settings.timestamp_ago:
   type: mapping
   label: 'Timestamp ago display format settings'
+  mapping:
+    future_format:
+      type: string
+      label: 'Future format'
+    past_format:
+      type: string
+      label: 'Past format'
+    granularity:
+      type: integer
+      label: 'Granularity'
 
 field.formatter.settings.entity_reference_entity_view:
   type: mapping

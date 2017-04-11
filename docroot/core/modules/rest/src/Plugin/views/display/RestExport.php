@@ -1,19 +1,16 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\rest\Plugin\views\display\RestExport.
- */
-
 namespace Drupal\rest\Plugin\views\display;
 
-use Drupal\Component\Utility\SafeMarkup;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\CacheableResponse;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\State\StateInterface;
 use Drupal\Core\Routing\RouteProviderInterface;
+use Drupal\Core\State\StateInterface;
+use Drupal\views\Plugin\views\display\ResponseDisplayPluginInterface;
+use Drupal\views\Render\ViewsRenderPipelineMarkup;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\PathPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -33,30 +30,30 @@ use Symfony\Component\Routing\RouteCollection;
  *   returns_response = TRUE
  * )
  */
-class RestExport extends PathPluginBase {
+class RestExport extends PathPluginBase implements ResponseDisplayPluginInterface {
 
   /**
-   * Overrides \Drupal\views\Plugin\views\display\DisplayPluginBase::$usesAJAX.
+   * {@inheritdoc}
    */
   protected $usesAJAX = FALSE;
 
   /**
-   * Overrides \Drupal\views\Plugin\views\display\DisplayPluginBase::$usesPager.
+   * {@inheritdoc}
    */
   protected $usesPager = FALSE;
 
   /**
-   * Overrides \Drupal\views\Plugin\views\display\DisplayPluginBase::$usesMore.
+   * {@inheritdoc}
    */
   protected $usesMore = FALSE;
 
   /**
-   * Overrides \Drupal\views\Plugin\views\display\DisplayPluginBase::$usesAreas.
+   * {@inheritdoc}
    */
   protected $usesAreas = FALSE;
 
   /**
-   * Overrides \Drupal\views\Plugin\views\display\DisplayPluginBase::$usesAreas.
+   * {@inheritdoc}
    */
   protected $usesOptions = FALSE;
 
@@ -75,14 +72,28 @@ class RestExport extends PathPluginBase {
   protected $mimeType;
 
   /**
-   * The renderer
+   * The renderer.
    *
    * @var \Drupal\Core\Render\RendererInterface
    */
   protected $renderer;
 
   /**
-   * Constructs a Drupal\rest\Plugin\ResourceBase object.
+   * The collector of authentication providers.
+   *
+   * @var \Drupal\Core\Authentication\AuthenticationCollectorInterface
+   */
+  protected $authenticationCollector;
+
+  /**
+   * The authentication providers, keyed by ID.
+   *
+   * @var string[]
+   */
+  protected $authenticationProviders;
+
+  /**
+   * Constructs a RestExport object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -91,16 +102,19 @@ class RestExport extends PathPluginBase {
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
-   *   The route provider
+   *   The route provider.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state key value store.
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
+   * @param string[] $authentication_providers
+   *   The authentication providers, keyed by ID.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteProviderInterface $route_provider, StateInterface $state, RendererInterface $renderer) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteProviderInterface $route_provider, StateInterface $state, RendererInterface $renderer, array $authentication_providers) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $route_provider, $state);
 
     $this->renderer = $renderer;
+    $this->authenticationProviders = $authentication_providers;
   }
 
   /**
@@ -113,10 +127,11 @@ class RestExport extends PathPluginBase {
       $plugin_definition,
       $container->get('router.route_provider'),
       $container->get('state'),
-      $container->get('renderer')
+      $container->get('renderer'),
+      $container->getParameter('authentication_providers')
+
     );
   }
-
   /**
    * {@inheritdoc}
    */
@@ -143,7 +158,7 @@ class RestExport extends PathPluginBase {
   /**
    * {@inheritdoc}
    */
-  protected function getType() {
+  public function getType() {
     return 'data';
   }
 
@@ -151,7 +166,7 @@ class RestExport extends PathPluginBase {
    * {@inheritdoc}
    */
   public function usesExposed() {
-    return FALSE;
+    return TRUE;
   }
 
   /**
@@ -205,10 +220,23 @@ class RestExport extends PathPluginBase {
   }
 
   /**
+   * Gets the auth options available.
+   *
+   * @return string[]
+   *   An array to use as value for "#options" in the form element.
+   */
+  public function getAuthOptions() {
+    return array_combine($this->authenticationProviders, $this->authenticationProviders);
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
+
+    // Options for REST authentication.
+    $options['auth'] = ['default' => []];
 
     // Set the default style plugin to 'json'.
     $options['style']['contains']['type']['default'] = 'serializer';
@@ -230,6 +258,9 @@ class RestExport extends PathPluginBase {
   public function optionsSummary(&$categories, &$options) {
     parent::optionsSummary($categories, $options);
 
+    // Authentication.
+    $auth = $this->getOption('auth') ? implode(', ', $this->getOption('auth')) : $this->t('No authentication is set');
+
     unset($categories['page'], $categories['exposed']);
     // Hide some settings, as they aren't useful for pure data output.
     unset($options['show_admin_links'], $options['analyze-theme']);
@@ -244,12 +275,45 @@ class RestExport extends PathPluginBase {
 
     $options['path']['category'] = 'path';
     $options['path']['title'] = $this->t('Path');
+    $options['auth'] = array(
+      'category' => 'path',
+      'title' => $this->t('Authentication'),
+      'value' => views_ui_truncate($auth, 24),
+    );
 
     // Remove css/exposed form settings, as they are not used for the data
     // display.
     unset($options['exposed_form']);
     unset($options['exposed_block']);
     unset($options['css_class']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
+    parent::buildOptionsForm($form, $form_state);
+    if ($form_state->get('section') === 'auth') {
+      $form['#title'] .= $this->t('The supported authentication methods for this view');
+      $form['auth'] = array(
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Authentication methods'),
+        '#description' => $this->t('These are the supported authentication providers for this view. When this view is requested, the client will be forced to authenticate with one of the selected providers. Make sure you set the appropiate requirements at the <em>Access</em> section since the Authentication System will fallback to the anonymous user if it fails to authenticate. For example: require Access: Role | Authenticated User.'),
+        '#options' => $this->getAuthOptions(),
+        '#default_value' => $this->getOption('auth'),
+      );
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitOptionsForm(&$form, FormStateInterface $form_state) {
+    parent::submitOptionsForm($form, $form_state);
+
+    if ($form_state->get('section') == 'auth') {
+      $this->setOption('auth', array_keys(array_filter($form_state->getValue('auth'))));
+    }
   }
 
   /**
@@ -263,14 +327,49 @@ class RestExport extends PathPluginBase {
     if ($route = $collection->get("view.$view_id.$display_id")) {
       $style_plugin = $this->getPlugin('style');
       // REST exports should only respond to get methods.
-      $requirements = array('_method' => 'GET');
+      $route->setMethods(['GET']);
 
       // Format as a string using pipes as a delimiter.
-      $requirements['_format'] = implode('|', $style_plugin->getFormats());
-
-      // Add the new requirements to the route.
-      $route->addRequirements($requirements);
+      if ($formats = $style_plugin->getFormats()) {
+        // Allow a REST Export View to be returned with an HTML-only accept
+        // format. That allows browsers or other non-compliant systems to access
+        // the view, as it is unlikely to have a conflicting HTML representation
+        // anyway.
+        $route->setRequirement('_format', implode('|', $formats + ['html']));
+      }
+      // Add authentication to the route if it was set. If no authentication was
+      // set, the default authentication will be used, which is cookie based by
+      // default.
+      $auth = $this->getOption('auth');
+      if (!empty($auth)) {
+        $route->setOption('_auth', $auth);
+      }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function buildResponse($view_id, $display_id, array $args = []) {
+    $build = static::buildBasicRenderable($view_id, $display_id, $args);
+
+    // Setup an empty response so headers can be added as needed during views
+    // rendering and processing.
+    $response = new CacheableResponse('', 200);
+    $build['#response'] = $response;
+
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+
+    $output = (string) $renderer->renderRoot($build);
+
+    $response->setContent($output);
+    $cache_metadata = CacheableMetadata::createFromRenderArray($build);
+    $response->addCacheableDependency($cache_metadata);
+
+    $response->headers->set('Content-type', $build['#content_type']);
+
+    return $response;
   }
 
   /**
@@ -279,17 +378,7 @@ class RestExport extends PathPluginBase {
   public function execute() {
     parent::execute();
 
-    $output = $this->view->render();
-
-    $header = [];
-    $header['Content-type'] = $this->getMimeType();
-
-    $response = new CacheableResponse($this->renderer->renderRoot($output), 200);
-    $cache_metadata = CacheableMetadata::createFromRenderArray($output);
-
-    $response->addCacheableDependency($cache_metadata);
-
-    return $response;
+    return $this->view->render();
   }
 
   /**
@@ -297,24 +386,35 @@ class RestExport extends PathPluginBase {
    */
   public function render() {
     $build = array();
-    $build['#markup'] = $this->view->style_plugin->render();
+    $build['#markup'] = $this->renderer->executeInRenderContext(new RenderContext(), function() {
+      return $this->view->style_plugin->render();
+    });
 
-    // Wrap the output in a pre tag if this is for a live preview.
+    $this->view->element['#content_type'] = $this->getMimeType();
+    $this->view->element['#cache_properties'][] = '#content_type';
+
+    // Encode and wrap the output in a pre tag if this is for a live preview.
     if (!empty($this->view->live_preview)) {
       $build['#prefix'] = '<pre>';
-      $build['#markup'] = SafeMarkup::checkPlain($build['#markup']);
+      $build['#plain_text'] = $build['#markup'];
       $build['#suffix'] = '</pre>';
+      unset($build['#markup']);
+    }
+    elseif ($this->view->getRequest()->getFormat($this->view->element['#content_type']) !== 'html') {
+      // This display plugin is primarily for returning non-HTML formats.
+      // However, we still invoke the renderer to collect cacheability metadata.
+      // Because the renderer is designed for HTML rendering, it filters
+      // #markup for XSS unless it is already known to be safe, but that filter
+      // only works for HTML. Therefore, we mark the contents as safe to bypass
+      // the filter. So long as we are returning this in a non-HTML response
+      // (checked above), this is safe, because an XSS attack only works when
+      // executed by an HTML agent.
+      // @todo Decide how to support non-HTML in the render API in
+      //   https://www.drupal.org/node/2501313.
+      $build['#markup'] = ViewsRenderPipelineMarkup::create($build['#markup']);
     }
 
-    // Defaults for bubbleable rendering metadata.
-    $build['#cache']['tags'] = isset($build['#cache']['tags']) ? $build['#cache']['tags'] : array();
-    $build['#cache']['max-age'] = isset($build['#cache']['max-age']) ? $build['#cache']['max-age'] : Cache::PERMANENT;
-
-    /** @var \Drupal\views\Plugin\views\cache\CachePluginBase $cache */
-    $cache = $this->getPlugin('cache');
-
-    $build['#cache']['tags'] = Cache::mergeTags($build['#cache']['tags'], $cache->getCacheTags());
-    $build['#cache']['max-age'] = Cache::mergeMaxAges($build['#cache']['max-age'], $cache->getCacheMaxAge());
+    parent::applyDisplayCachablityMetadata($build);
 
     return $build;
   }
@@ -327,6 +427,21 @@ class RestExport extends PathPluginBase {
    */
   public function preview() {
     return $this->view->render();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    $dependencies = parent::calculateDependencies();
+
+    $dependencies += ['module' => []];
+    $modules = array_map(function ($authentication_provider) {
+      return $this->authenticationProviders[$authentication_provider];
+    }, $this->getOption('auth'));
+    $dependencies['module'] = array_merge($dependencies['module'], $modules);
+
+    return $dependencies;
   }
 
 }

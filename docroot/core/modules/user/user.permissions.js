@@ -1,19 +1,29 @@
-(function ($) {
+/**
+ * @file
+ * User permission page behaviors.
+ */
 
-  "use strict";
+(function ($, Drupal) {
+
+  'use strict';
 
   /**
    * Shows checked and disabled checkboxes for inherited permissions.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches functionality to the permissions table.
    */
   Drupal.behaviors.permissions = {
     attach: function (context) {
       var self = this;
       $('table#permissions').once('permissions').each(function () {
-        // On a site with many roles and permissions, this behavior initially has
-        // to perform thousands of DOM manipulations to inject checkboxes and hide
-        // them. By detaching the table from the DOM, all operations can be
-        // performed without triggering internal layout and re-rendering processes
-        // in the browser.
+        // On a site with many roles and permissions, this behavior initially
+        // has to perform thousands of DOM manipulations to inject checkboxes
+        // and hide them. By detaching the table from the DOM, all operations
+        // can be performed without triggering internal layout and re-rendering
+        // processes in the browser.
         var $table = $(this);
         var $ancestor;
         var method;
@@ -33,7 +43,7 @@
         // permission table would be polluted with redundant entries. This
         // is deliberate, but desirable when we automatically check them.
         var $dummy = $('<input type="checkbox" class="dummy-checkbox js-dummy-checkbox" disabled="disabled" checked="checked" />')
-          .attr('title', Drupal.t("This permission is inherited from the authenticated user role."))
+          .attr('title', Drupal.t('This permission is inherited from the authenticated user role.'))
           .hide();
 
         $table
@@ -75,4 +85,4 @@
     }
   };
 
-})(jQuery);
+})(jQuery, Drupal);

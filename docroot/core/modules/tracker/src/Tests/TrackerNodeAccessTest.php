@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\tracker\Tests\TrackerNodeAccessTest.
- */
-
 namespace Drupal\tracker\Tests;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
@@ -45,7 +40,7 @@ class TrackerNodeAccessTest extends WebTestBase {
     $access_user = $this->drupalCreateUser(array('node test view', 'access user profiles'));
 
     // Create user without node test view permission.
-    $no_access_user = $this->drupalCreateuser(array('access user profiles'));
+    $no_access_user = $this->drupalCreateUser(array('access user profiles'));
 
     $this->drupalLogin($access_user);
 
@@ -76,4 +71,5 @@ class TrackerNodeAccessTest extends WebTestBase {
     $this->assertNoText($private_node->getTitle(), 'Private node is not visible to user without private access.');
     $this->assertText($public_node->getTitle(), 'Public node is visible to user without private access.');
   }
+
 }

@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\file\FileUsage\DatabaseFileUsageBackend.
- */
-
 namespace Drupal\file\FileUsage;
 
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\file\FileInterface;
 
 /**
@@ -46,7 +40,7 @@ class DatabaseFileUsageBackend extends FileUsageBase {
   }
 
   /**
-   * Implements Drupal\file\FileUsage\FileUsageInterface::add().
+   * {@inheritdoc}
    */
   public function add(FileInterface $file, $module, $type, $id, $count = 1) {
     $this->connection->merge($this->tableName)
@@ -64,7 +58,7 @@ class DatabaseFileUsageBackend extends FileUsageBase {
   }
 
   /**
-   * Implements Drupal\file\FileUsage\FileUsageInterface::delete().
+   * {@inheritdoc}
    */
   public function delete(FileInterface $file, $module, $type = NULL, $id = NULL, $count = 1) {
     // Delete rows that have a exact or less value to prevent empty rows.
@@ -99,7 +93,7 @@ class DatabaseFileUsageBackend extends FileUsageBase {
   }
 
   /**
-   * Implements Drupal\file\FileUsage\FileUsageInterface::listUsage().
+   * {@inheritdoc}
    */
   public function listUsage(FileInterface $file) {
     $result = $this->connection->select($this->tableName, 'f')
@@ -113,4 +107,5 @@ class DatabaseFileUsageBackend extends FileUsageBase {
     }
     return $references;
   }
+
 }

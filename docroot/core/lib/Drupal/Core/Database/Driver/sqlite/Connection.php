@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Driver\sqlite\Connection
- */
-
 namespace Drupal\Core\Database\Driver\sqlite;
 
 use Drupal\Core\Database\Database;
@@ -12,7 +7,7 @@ use Drupal\Core\Database\DatabaseNotFoundException;
 use Drupal\Core\Database\Connection as DatabaseConnection;
 
 /**
- * Specific SQLite implementation of DatabaseConnection.
+ * SQLite implementation of \Drupal\Core\Database\Connection.
  */
 class Connection extends DatabaseConnection {
 
@@ -46,7 +41,7 @@ class Connection extends DatabaseConnection {
    *
    * @var bool
    */
-  var $tableDropped = FALSE;
+  public $tableDropped = FALSE;
 
   /**
    * Constructs a \Drupal\Core\Database\Driver\sqlite\Connection object.
@@ -71,7 +66,15 @@ class Connection extends DatabaseConnection {
         // Only attach the database once.
         if (!isset($this->attachedDatabases[$prefix])) {
           $this->attachedDatabases[$prefix] = $prefix;
-          $this->query('ATTACH DATABASE :database AS :prefix', array(':database' => $connection_options['database'] . '-' . $prefix, ':prefix' => $prefix));
+          if ($connection_options['database'] === ':memory:') {
+            // In memory database use ':memory:' as database name. According to
+            // http://www.sqlite.org/inmemorydb.html it will open a unique
+            // database so attaching it twice is not a problem.
+            $this->query('ATTACH DATABASE :database AS :prefix', array(':database' => $connection_options['database'], ':prefix' => $prefix));
+          }
+          else {
+            $this->query('ATTACH DATABASE :database AS :prefix', array(':database' => $connection_options['database'] . '-' . $prefix, ':prefix' => $prefix));
+          }
         }
 
         // Add a ., so queries become prefix.table, which is proper syntax for
@@ -121,6 +124,16 @@ class Connection extends DatabaseConnection {
     // Create a user-space case-insensitive collation with UTF-8 support.
     $pdo->sqliteCreateCollation('NOCASE_UTF8', array('Drupal\Component\Utility\Unicode', 'strcasecmp'));
 
+    // Set SQLite init_commands if not already defined. Enable the Write-Ahead
+    // Logging (WAL) for SQLite. See https://www.drupal.org/node/2348137 and
+    // https://www.sqlite.org/wal.html.
+    $connection_options += array(
+      'init_commands' => array(),
+    );
+    $connection_options['init_commands'] += array(
+      'wal' => "PRAGMA journal_mode=WAL",
+    );
+
     // Execute sqlite init_commands.
     if (isset($connection_options['init_commands'])) {
       $pdo->exec(implode('; ', $connection_options['init_commands']));
@@ -146,9 +159,9 @@ class Connection extends DatabaseConnection {
 
           // We can prune the database file if it doesn't have any tables.
           if ($count == 0) {
-            // Detach the database.
-            $this->query('DETACH DATABASE :schema', array(':schema' => $prefix));
-            // Destroy the database file.
+            // Detaching the database fails at this point, but no other queries
+            // are executed after the connection is destructed so we can simply
+            // remove the database file.
             unlink($this->connectionOptions['database'] . '-' . $prefix);
           }
         }
@@ -158,6 +171,18 @@ class Connection extends DatabaseConnection {
         }
       }
     }
+  }
+
+  /**
+   * Gets all the attached databases.
+   *
+   * @return array
+   *   An array of attached database names.
+   *
+   * @see \Drupal\Core\Database\Driver\sqlite\Connection::__construct()
+   */
+  public function getAttachedDatabases() {
+    return $this->attachedDatabases;
   }
 
   /**

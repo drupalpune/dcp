@@ -1,17 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\relationship\RelationshipPluginBase.
- */
-
 namespace Drupal\views\Plugin\views\relationship;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\HandlerBase;
-use Drupal\views\Join;
 use Drupal\views\Views;
 
 /**
@@ -97,7 +91,7 @@ abstract class RelationshipPluginBase extends HandlerBase {
     // aren't get another default value.
     if (!empty($this->definition['label'])) {
       // Cast the label to a string since it is an object.
-      // @see \Drupal\Core\StringTranslation\TranslationWrapper
+      // @see \Drupal\Core\StringTranslation\TranslatableMarkup
       $label = (string) $this->definition['label'];
     }
     else {

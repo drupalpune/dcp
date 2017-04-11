@@ -1,10 +1,21 @@
+/**
+ * @file
+ * User behaviors.
+ */
+
 (function ($, Drupal, drupalSettings) {
 
-  "use strict";
+  'use strict';
 
   /**
-   * Attach handlers to evaluate the strength of any password fields and to check
-   * that its confirmation is correct.
+   * Attach handlers to evaluate the strength of any password fields and to
+   * check that its confirmation is correct.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches password strength indicator and other relevant validation to
+   *   password fields.
    */
   Drupal.behaviors.password = {
     attach: function (context, settings) {
@@ -24,7 +35,7 @@
         $passwordInputParentWrapper
           .find('input.js-password-confirm')
           .parent()
-          .append('<div class="password-confirm js-password-confirm">' + translate.confirmTitle + ' <span></span></div>')
+          .append('<div aria-live="polite" aria-atomic="true" class="password-confirm js-password-confirm">' + translate.confirmTitle + ' <span></span></div>')
           .addClass('confirm-parent');
 
         var $confirmInput = $passwordInputParentWrapper.find('input.js-password-confirm');
@@ -33,7 +44,7 @@
 
         // If the password strength indicator is enabled, add its markup.
         if (settings.password.showStrengthIndicator) {
-          var passwordMeter = '<div class="password-strength"><div class="password-strength__meter"><div class="password-strength__indicator js-password-strength__indicator"></div></div><div class="password-strength__title">' + translate.strengthTitle + ' </div><div class="password-strength__text js-password-strength__text" aria-live="assertive"></div></div>';
+          var passwordMeter = '<div class="password-strength"><div class="password-strength__meter"><div class="password-strength__indicator js-password-strength__indicator"></div></div><div aria-live="polite" aria-atomic="true" class="password-strength__title">' + translate.strengthTitle + ' <span class="password-strength__text js-password-strength__text"></span></div></div>';
           $confirmInput.parent().after('<div class="password-suggestions description"></div>');
           $passwordInputParent.append(passwordMeter);
           $passwordSuggestions = $passwordInputParentWrapper.find('div.password-suggestions').hide();
@@ -60,7 +71,8 @@
               $passwordSuggestions.html(result.message);
             }
 
-            // Only show the description box if a weakness exists in the password.
+            // Only show the description box if a weakness exists in the
+            // password.
             $passwordSuggestions.toggle(result.strength !== 100);
 
             // Adjust the length of the strength indicator.
@@ -94,8 +106,17 @@
    * Evaluate the strength of a user's password.
    *
    * Returns the estimated strength and the relevant output message.
+   *
+   * @param {string} password
+   *   The password to evaluate.
+   * @param {object} translate
+   *   An object containing the text to display for each strength level.
+   *
+   * @return {object}
+   *   An object containing strength, message, indicatorText and indicatorClass.
    */
   Drupal.evaluatePasswordStrength = function (password, translate) {
+    password = password.trim();
     var indicatorText;
     var indicatorClass;
     var weaknesses = 0;
@@ -107,15 +128,15 @@
     var hasNumbers = /[0-9]/.test(password);
     var hasPunctuation = /[^a-zA-Z0-9]/.test(password);
 
-    // If there is a username edit box on the page, compare password to that, otherwise
-    // use value from the database.
+    // If there is a username edit box on the page, compare password to that,
+    // otherwise use value from the database.
     var $usernameBox = $('input.username');
     var username = ($usernameBox.length > 0) ? $usernameBox.val() : translate.username;
 
-    // Lose 5 points for every character less than 6, plus a 30 point penalty.
-    if (password.length < 6) {
+    // Lose 5 points for every character less than 12, plus a 30 point penalty.
+    if (password.length < 12) {
       msg.push(translate.tooShort);
-      strength -= ((6 - password.length) * 5) + 30;
+      strength -= ((12 - password.length) * 5) + 30;
     }
 
     // Count weaknesses.
@@ -162,7 +183,8 @@
       strength = 5;
     }
 
-    // Based on the strength, work out what text should be shown by the password strength meter.
+    // Based on the strength, work out what text should be shown by the
+    // password strength meter.
     if (strength < 60) {
       indicatorText = translate.weak;
       indicatorClass = 'is-weak';

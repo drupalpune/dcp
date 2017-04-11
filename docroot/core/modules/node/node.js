@@ -5,20 +5,29 @@
 
 (function ($, Drupal, drupalSettings) {
 
-  "use strict";
+  'use strict';
 
+  /**
+   * Behaviors for tabs in the node edit form.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches summary behavior for tabs in the node edit form.
+   */
   Drupal.behaviors.nodeDetailsSummaries = {
     attach: function (context) {
       var $context = $(context);
       $context.find('.node-form-revision-information').drupalSetSummary(function (context) {
         var $revisionContext = $(context);
-        var revisionCheckbox = $revisionContext.find('.form-item-revision input');
+        var revisionCheckbox = $revisionContext.find('.js-form-item-revision input');
 
-        // Return 'New revision' if the 'Create new revision' checkbox is checked,
-        // or if the checkbox doesn't exist, but the revision log does. For users
-        // without the "Administer content" permission the checkbox won't appear,
-        // but the revision log will if the content type is set to auto-revision.
-        if (revisionCheckbox.is(':checked') || (!revisionCheckbox.length && $revisionContext.find('.form-item-revision-log textarea').length)) {
+          // Return 'New revision' if the 'Create new revision' checkbox is
+          // checked, or if the checkbox doesn't exist, but the revision log does.
+          // For users without the "Administer content" permission the checkbox
+          // won't appear, but the revision log will if the content type is set to
+          // auto-revision.
+        if (revisionCheckbox.is(':checked') || (!revisionCheckbox.length && $revisionContext.find('.js-form-item-revision-log textarea').length)) {
           return Drupal.t('New revision');
         }
 
@@ -27,11 +36,18 @@
 
       $context.find('.node-form-author').drupalSetSummary(function (context) {
         var $authorContext = $(context);
-        var name = $authorContext.find('.field-name-uid input').val();
-        var date = $authorContext.find('.field-name-created input').val();
-        return date ?
-          Drupal.t('By @name on @date', {'@name': name, '@date': date}) :
-          Drupal.t('By @name', {'@name': name});
+        var name = $authorContext.find('.field--name-uid input').val();
+        var date = $authorContext.find('.field--name-created input').val();
+
+        if (name && date) {
+          return Drupal.t('By @name on @date', {'@name': name, '@date': date});
+        }
+        else if (name) {
+          return Drupal.t('By @name', {'@name': name});
+        }
+        else if (date) {
+          return Drupal.t('Authored on @date', {'@date': date});
+        }
       });
 
       $context.find('.node-form-options').drupalSetSummary(function (context) {
@@ -52,13 +68,13 @@
       $context.find('fieldset.node-translation-options').drupalSetSummary(function (context) {
         var $translationContext = $(context);
         var translate;
-        var $checkbox = $translationContext.find('.form-item-translation-translate input');
+        var $checkbox = $translationContext.find('.js-form-item-translation-translate input');
 
         if ($checkbox.size()) {
           translate = $checkbox.is(':checked') ? Drupal.t('Needs to be updated') : Drupal.t('Does not need to be updated');
         }
         else {
-          $checkbox = $translationContext.find('.form-item-translation-retranslate input');
+          $checkbox = $translationContext.find('.js-form-item-translation-retranslate input');
           translate = $checkbox.is(':checked') ? Drupal.t('Flag other translations as outdated') : Drupal.t('Do not flag other translations as outdated');
         }
 

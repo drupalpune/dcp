@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Form\ConfirmFormTest.
- */
-
 namespace Drupal\system\Tests\Form;
 
 use Drupal\Component\Utility\SafeMarkup;
@@ -62,6 +57,11 @@ class ConfirmFormTest extends WebTestBase {
     $this->assertCancelLinkUrl(Url::fromUri('internal:/node'));
     $this->drupalGet('form-test/confirm-form', array('query' => array('destination' => 'http://example.com')));
     $this->assertCancelLinkUrl(Url::fromRoute('form_test.route8'));
+    $this->drupalGet('form-test/confirm-form', array('query' => array('destination' => '<front>')));
+    $this->assertCancelLinkUrl(Url::fromRoute('<front>'));
+    // Other invalid destinations, should fall back to the form default.
+    $this->drupalGet('form-test/confirm-form', array('query' => array('destination' => '/http://example.com')));
+    $this->assertCancelLinkUrl(Url::fromRoute('form_test.route8'));
   }
 
   /**
@@ -79,7 +79,7 @@ class ConfirmFormTest extends WebTestBase {
    */
   public function assertCancelLinkUrl(Url $url, $message = '', $group = 'Other') {
     $links = $this->xpath('//a[@href=:url]', [':url' => $url->toString()]);
-    $message = ($message ? $message : SafeMarkup::format('Cancel link with url %url found.', ['%url' => $url->toString()]));
+    $message = ($message ? $message : SafeMarkup::format('Cancel link with URL %url found.', ['%url' => $url->toString()]));
     return $this->assertTrue(isset($links[0]), $message, $group);
   }
 

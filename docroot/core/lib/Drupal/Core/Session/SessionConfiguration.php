@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Session\SessionConfiguration
- */
-
 namespace Drupal\Core\Session;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -129,12 +124,6 @@ class SessionConfiguration implements SessionConfigurationInterface {
     }
     else {
       $host = $request->getHost();
-
-      // Strip www. from hostname.
-      if (strpos($host, 'www.') === 0) {
-        $host = substr($host, 4);
-      }
-
       // To maximize compatibility and normalize the behavior across user
       // agents, the cookie domain should start with a dot.
       $cookie_domain = '.' . $host;
@@ -152,7 +141,7 @@ class SessionConfiguration implements SessionConfigurationInterface {
   /**
    * Wraps drupal_valid_test_ua().
    *
-   * @return string|FALSE
+   * @return string|false
    *   Either the simpletest prefix (the string "simpletest" followed by any
    *   number of digits) or FALSE if the user agent does not contain a valid
    *   HMAC and timestamp.

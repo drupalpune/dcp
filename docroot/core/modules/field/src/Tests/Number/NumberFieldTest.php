@@ -1,14 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\field\Tests\Number\NumberFieldTest.
- */
-
 namespace Drupal\field\Tests\Number;
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\node\Entity\Node;
 use Drupal\simpletest\WebTestBase;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests the creation of numeric fields.
@@ -43,7 +41,7 @@ class NumberFieldTest extends WebTestBase {
   function testNumberDecimalField() {
     // Create a field with settings to validate.
     $field_name = Unicode::strtolower($this->randomMachineName());
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'type' => 'decimal',
@@ -51,11 +49,11 @@ class NumberFieldTest extends WebTestBase {
         'precision' => 8, 'scale' => 4,
       )
     ))->save();
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'bundle' => 'entity_test',
-    ))->save();
+    ])->save();
 
     entity_get_form_display('entity_test', 'entity_test', 'default')
       ->setComponent($field_name, array(
@@ -133,21 +131,21 @@ class NumberFieldTest extends WebTestBase {
 
     // Create a field with settings to validate.
     $field_name = Unicode::strtolower($this->randomMachineName());
-    $storage = entity_create('field_storage_config', array(
+    $storage = FieldStorageConfig::create(array(
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'type' => 'integer',
     ));
     $storage->save();
 
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'bundle' => 'entity_test',
       'settings' => array(
-        'min' => $minimum, 'max' => $maximum,
+        'min' => $minimum, 'max' => $maximum, 'prefix' => 'ThePrefix',
       )
-    ))->save();
+    ])->save();
 
     entity_get_form_display('entity_test', 'entity_test', 'default')
       ->setComponent($field_name, array(
@@ -160,6 +158,9 @@ class NumberFieldTest extends WebTestBase {
     entity_get_display('entity_test', 'entity_test', 'default')
       ->setComponent($field_name, array(
         'type' => 'number_integer',
+        'settings' => array(
+          'prefix_suffix' => FALSE,
+        ),
       ))
       ->save();
 
@@ -217,6 +218,14 @@ class NumberFieldTest extends WebTestBase {
     $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('%name must be lower than or equal to %maximum.', array('%name' => $field_name, '%maximum' => $maximum)), 'Correctly failed to save integer value greater than maximum allowed value.');
 
+    // Try to set a wrong integer value.
+    $this->drupalGet('entity_test/add');
+    $edit = array(
+      "{$field_name}[0][value]" => '20-40',
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->assertRaw(t('%name must be a number.', array('%name' => $field_name)), 'Correctly failed to save wrong integer value.');
+
     // Test with valid entries.
     $valid_entries = array(
       '-1234',
@@ -234,7 +243,29 @@ class NumberFieldTest extends WebTestBase {
       $id = $match[1];
       $this->assertText(t('entity_test @id has been created.', array('@id' => $id)), 'Entity was created');
       $this->assertRaw($valid_entry, 'Value is displayed.');
+      $this->assertNoFieldByXpath('//div[@content="' . $valid_entry . '"]', NULL, 'The "content" attribute is not present since the Prefix is not being displayed');
     }
+
+    // Test for the content attribute when a Prefix is displayed. Presumably this also tests for the attribute when a Suffix is displayed.
+    entity_get_display('entity_test', 'entity_test', 'default')
+      ->setComponent($field_name, array(
+        'type' => 'number_integer',
+        'settings' => array(
+          'prefix_suffix' => TRUE,
+        ),
+      ))
+      ->save();
+    $integer_value = '123';
+    $this->drupalGet('entity_test/add');
+    $edit = array(
+      "{$field_name}[0][value]" => $integer_value,
+    );
+    $this->drupalPostForm(NULL, $edit, t('Save'));
+    preg_match('|entity_test/manage/(\d+)|', $this->url, $match);
+    $id = $match[1];
+    $this->assertText(t('entity_test @id has been created.', array('@id' => $id)), 'Entity was created');
+    $this->drupalGet('entity_test/' . $id);
+    $this->assertFieldByXPath('//div[@content="' . $integer_value . '"]', 'ThePrefix' . $integer_value, 'The "content" attribute has been set to the value of the field, and the prefix is being displayed.');
   }
 
   /**
@@ -243,17 +274,17 @@ class NumberFieldTest extends WebTestBase {
   function testNumberFloatField() {
     // Create a field with settings to validate.
     $field_name = Unicode::strtolower($this->randomMachineName());
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'type' => 'float',
     ))->save();
 
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'bundle' => 'entity_test',
-    ))->save();
+    ])->save();
 
     entity_get_form_display('entity_test', 'entity_test', 'default')
       ->setComponent($field_name, array(
@@ -284,7 +315,11 @@ class NumberFieldTest extends WebTestBase {
     preg_match('|entity_test/manage/(\d+)|', $this->url, $match);
     $id = $match[1];
     $this->assertText(t('entity_test @id has been created.', array('@id' => $id)), 'Entity was created');
-    $this->assertRaw(round($value, 2), 'Value is displayed.');
+
+    // Ensure that the 'number_decimal' formatter displays the number with the
+    // expected rounding.
+    $this->drupalGet('entity_test/' . $id);
+    $this->assertRaw(round($value, 2));
 
     // Try to create entries with more than one decimal separator; assert fail.
     $wrong_entries = array(
@@ -334,25 +369,25 @@ class NumberFieldTest extends WebTestBase {
     $decimal_separators = array('.', ',');
     $prefix = $this->randomMachineName();
     $suffix = $this->randomMachineName();
-    $random_float = rand(0,pow(10,6));
-    $random_integer = rand(0, pow(10,6));
+    $random_float = rand(0, pow(10, 6));
+    $random_integer = rand(0, pow(10, 6));
 
     // Create a content type containing float and integer fields.
     $this->drupalCreateContentType(array('type' => $type));
 
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'field_name' => $float_field,
       'entity_type' => 'node',
       'type' => 'float',
     ))->save();
 
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'field_name' => $integer_field,
       'entity_type' => 'node',
       'type' => 'integer',
     ))->save();
 
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_name' => $float_field,
       'entity_type' => 'node',
       'bundle' => $type,
@@ -360,9 +395,9 @@ class NumberFieldTest extends WebTestBase {
         'prefix' => $prefix,
         'suffix' => $suffix
       ),
-    ))->save();
+    ])->save();
 
-    entity_create('field_config', array(
+    FieldConfig::create([
       'field_name' => $integer_field,
       'entity_type' => 'node',
       'bundle' => $type,
@@ -370,7 +405,7 @@ class NumberFieldTest extends WebTestBase {
         'prefix' => $prefix,
         'suffix' => $suffix
       ),
-    ))->save();
+    ])->save();
 
     entity_get_form_display('node', $type, 'default')
       ->setComponent($float_field, array(
@@ -397,16 +432,12 @@ class NumberFieldTest extends WebTestBase {
       ->save();
 
     // Create a node to test formatters.
-    $node = entity_create('node', array(
+    $node = Node::create([
       'type' => $type,
       'title' => $this->randomMachineName(),
-      $float_field => array(
-        'value' => $random_float,
-      ),
-      $integer_field => array(
-        'value' => $random_integer,
-      ),
-    ));
+      $float_field => ['value' => $random_float],
+      $integer_field => ['value' => $random_integer],
+    ]);
     $node->save();
 
     // Go to manage display page.
@@ -464,17 +495,17 @@ class NumberFieldTest extends WebTestBase {
   function testCreateNumberFloatField() {
     // Create a float field.
     $field_name = Unicode::strtolower($this->randomMachineName());
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'type' => 'float',
     ))->save();
 
-    $field = entity_create('field_config', array(
+    $field = FieldConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'bundle' => 'entity_test',
-    ));
+    ]);
     $field->save();
 
     // Set the minimum value to a float value.
@@ -489,17 +520,17 @@ class NumberFieldTest extends WebTestBase {
   function testCreateNumberDecimalField() {
     // Create a decimal field.
     $field_name = Unicode::strtolower($this->randomMachineName());
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'type' => 'decimal',
     ))->save();
 
-    $field = entity_create('field_config', array(
+    $field = FieldConfig::create([
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'bundle' => 'entity_test',
-    ));
+    ]);
     $field->save();
 
     // Set the minimum value to a decimal value.
@@ -520,11 +551,12 @@ class NumberFieldTest extends WebTestBase {
     );
     $this->drupalPostForm($field_configuration_url, $edit, t('Save settings'));
     // Check if an error message is shown.
-    $this->assertNoRaw(t('%name is not a valid number.', array('%name' => t('Minimum'))), 'Saved ' . gettype($minimum_value) .'  value as minimal value on a ' . $field->getType() . ' field');
+    $this->assertNoRaw(t('%name is not a valid number.', array('%name' => t('Minimum'))), 'Saved ' . gettype($minimum_value) . '  value as minimal value on a ' . $field->getType() . ' field');
     // Check if a success message is shown.
     $this->assertRaw(t('Saved %label configuration.', array('%label' => $field->getLabel())));
     // Check if the minimum value was actually set.
     $this->drupalGet($field_configuration_url);
-    $this->assertFieldById('edit-settings-min', $minimum_value, 'Minimal ' . gettype($minimum_value) .'  value was set on a ' . $field->getType() . ' field.');
+    $this->assertFieldById('edit-settings-min', $minimum_value, 'Minimal ' . gettype($minimum_value) . '  value was set on a ' . $field->getType() . ' field.');
   }
+
 }

@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Utility\UnroutedUrlAssemblerTest.
- */
-
 namespace Drupal\Tests\Core\Utility;
 
-use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\GeneratedUrl;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Utility\UnroutedUrlAssembler;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -55,9 +50,8 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
     parent::setUp();
 
     $this->requestStack = new RequestStack();
-    $this->configFactory = $this->getConfigFactoryStub(['system.filter' => []]);
     $this->pathProcessor = $this->getMock('Drupal\Core\PathProcessor\OutboundPathProcessorInterface');
-    $this->unroutedUrlAssembler = new UnroutedUrlAssembler($this->requestStack, $this->configFactory, $this->pathProcessor);
+    $this->unroutedUrlAssembler = new UnroutedUrlAssembler($this->requestStack, $this->pathProcessor);
   }
 
   /**
@@ -83,11 +77,11 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
    * @dataProvider providerTestAssembleWithExternalUrl
    */
   public function testAssembleWithExternalUrl($uri, array $options, $expected) {
-   $this->setupRequestStack(FALSE);
-   $this->assertEquals($expected, $this->unroutedUrlAssembler->assemble($uri, $options));
-   $generated_url = $this->unroutedUrlAssembler->assemble($uri, $options, TRUE);
-   $this->assertEquals($expected, $generated_url->getGeneratedUrl());
-   $this->assertInstanceOf('\Drupal\Core\Cache\CacheableMetadata', $generated_url);
+    $this->setupRequestStack(FALSE);
+    $this->assertEquals($expected, $this->unroutedUrlAssembler->assemble($uri, $options));
+    $generated_url = $this->unroutedUrlAssembler->assemble($uri, $options, TRUE);
+    $this->assertEquals($expected, $generated_url->getGeneratedUrl());
+    $this->assertInstanceOf('\Drupal\Core\Render\BubbleableMetadata', $generated_url);
   }
 
   /**
@@ -125,6 +119,8 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
     return [
       ['base:example', [], FALSE, '/example'],
       ['base:example', ['query' => ['foo' => 'bar']], FALSE, '/example?foo=bar'],
+      ['base:example', ['query' => ['foo' => '"bar"']], FALSE, '/example?foo=%22bar%22'],
+      ['base:example', ['query' => ['foo' => '"bar"', 'zoo' => 'baz']], FALSE, '/example?foo=%22bar%22&zoo=baz'],
       ['base:example', ['fragment' => 'example', ], FALSE, '/example#example'],
       ['base:example', [], TRUE, '/subdir/example'],
       ['base:example', ['query' => ['foo' => 'bar']], TRUE, '/subdir/example?foo=bar'],
@@ -151,9 +147,9 @@ class UnroutedUrlAssemblerTest extends UnitTestCase {
     $this->setupRequestStack(FALSE);
     $this->pathProcessor->expects($this->exactly(2))
       ->method('processOutbound')
-      ->willReturnCallback(function($path, &$options = [], Request $request = NULL, CacheableMetadata $cacheable_metadata = NULL) {
-        if ($cacheable_metadata) {
-          $cacheable_metadata->setCacheContexts(['some-cache-context']);
+      ->willReturnCallback(function($path, &$options = [], Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
+        if ($bubbleable_metadata) {
+          $bubbleable_metadata->setCacheContexts(['some-cache-context']);
         }
         return 'test-other-uri';
       });

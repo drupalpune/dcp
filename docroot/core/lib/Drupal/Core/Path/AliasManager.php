@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\Path\AliasManager.
- */
-
 namespace Drupal\Core\Path;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -12,6 +7,9 @@ use Drupal\Core\CacheDecorator\CacheDecoratorInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 
+/**
+ * The default alias manager implementation.
+ */
 class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
 
   /**
@@ -142,10 +140,8 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
         }
       }
 
-      if (!empty($path_lookups)) {
-        $twenty_four_hours = 60 * 60 * 24;
-        $this->cache->set($this->cacheKey, $path_lookups, $this->getRequestTime() + $twenty_four_hours);
-      }
+      $twenty_four_hours = 60 * 60 * 24;
+      $this->cache->set($this->cacheKey, $path_lookups, $this->getRequestTime() + $twenty_four_hours);
     }
   }
 
@@ -172,7 +168,6 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
     // Look for path in storage.
     if ($path = $this->storage->lookupPathSource($alias, $langcode)) {
       $this->lookupMap[$langcode][$path] = $alias;
-      $this->cacheNeedsWriting = TRUE;
       return $path;
     }
 
@@ -187,6 +182,9 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
    * {@inheritdoc}
    */
   public function getAliasByPath($path, $langcode = NULL) {
+    if ($path[0] !== '/') {
+      throw new \InvalidArgumentException(sprintf('Source path %s has to start with a slash.', $path));
+    }
     // If no language is explicitly specified we default to the current URL
     // language. If we used a language different from the one conveyed by the
     // requested URL, we might end up being unable to check if there is a path
@@ -196,7 +194,7 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
     // Check the path whitelist, if the top-level part before the first /
     // is not in the list, then there is no need to do anything further,
     // it is not in the database.
-    if (empty($path) || !$this->whitelist->get(strtok($path, '/'))) {
+    if ($path === '/' || !$this->whitelist->get(strtok(trim($path, '/'), '/'))) {
       return $path;
     }
 
@@ -210,8 +208,13 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
       // happens if a cache key has been set.
       if ($this->preloadedPathLookups === FALSE) {
         $this->preloadedPathLookups = array();
-        if ($this->cacheKey && $cached = $this->cache->get($this->cacheKey)) {
-          $this->preloadedPathLookups = $cached->data;
+        if ($this->cacheKey) {
+          if ($cached = $this->cache->get($this->cacheKey)) {
+            $this->preloadedPathLookups = $cached->data;
+          }
+          else {
+            $this->cacheNeedsWriting = TRUE;
+          }
         }
       }
 
@@ -236,19 +239,17 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
     // Try to load alias from storage.
     if ($alias = $this->storage->lookupPathAlias($path, $langcode)) {
       $this->lookupMap[$langcode][$path] = $alias;
-      $this->cacheNeedsWriting = TRUE;
       return $alias;
     }
 
     // We can't record anything into $this->lookupMap because we didn't find any
     // aliases for this path. Thus cache to $this->noAlias.
     $this->noAlias[$langcode][$path] = TRUE;
-    $this->cacheNeedsWriting = TRUE;
     return $path;
   }
 
   /**
-   * Implements \Drupal\Core\Path\AliasManagerInterface::cacheClear().
+   * {@inheritdoc}
    */
   public function cacheClear($source = NULL) {
     if ($source) {
@@ -282,7 +283,7 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
     if (!empty($path)) {
       if ($this->whitelist->get(strtok($path, '/'))) {
         return;
-     }
+      }
     }
     $this->whitelist->clear();
   }
@@ -295,4 +296,5 @@ class AliasManager implements AliasManagerInterface, CacheDecoratorInterface {
   protected function getRequestTime() {
     return defined('REQUEST_TIME') ? REQUEST_TIME : (int) $_SERVER['REQUEST_TIME'];
   }
+
 }

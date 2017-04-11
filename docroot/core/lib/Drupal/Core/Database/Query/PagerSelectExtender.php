@@ -1,15 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Query\PagerSelectExtender
- */
-
 namespace Drupal\Core\Database\Query;
 
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Database\Query\SelectExtender;
-use Drupal\Core\Database\Query\SelectInterface;
 
 /**
  * Query extender for pager queries.
@@ -28,7 +21,7 @@ class PagerSelectExtender extends SelectExtender {
    *
    * @var int
    */
-  static $maxElement = 0;
+  public static $maxElement = 0;
 
   /**
    * The number of elements per page to allow.
@@ -66,10 +59,9 @@ class PagerSelectExtender extends SelectExtender {
    * to it.
    */
   public function execute() {
-
-    // Add convenience tag to mark that this is an extended query. We have to
-    // do this in the constructor to ensure that it is set before preExecute()
-    // gets called.
+    // By calling preExecute() here, we force it to preprocess the extender
+    // object rather than just the base query object. That means
+    // hook_query_alter() gets access to the extended object.
     if (!$this->preExecute($this)) {
       return NULL;
     }
@@ -174,4 +166,5 @@ class PagerSelectExtender extends SelectExtender {
     }
     return $this;
   }
+
 }

@@ -4,12 +4,26 @@ description: 'A base theme with sensible default CSS classes added. Learn how to
 package: Core
 # version: VERSION
 # core: 8.x
+hidden: true
 
 libraries:
   - classy/base
+  - core/normalize
 
-# Information added by Drupal.org packaging script on 2015-05-27
-version: '8.0.0-beta11'
+libraries-extend:
+  user/drupal.user:
+    - classy/user
+  core/drupal.dropbutton:
+    - classy/dropbutton
+  core/drupal.dialog:
+    - classy/dialog
+  file/drupal.file:
+    - classy/file
+  core/drupal.progress:
+    - classy/progress
+
+# Information added by Drupal.org packaging script on 2017-03-15
+version: '8.2.7'
 core: '8.x'
 project: 'drupal'
-datestamp: 1432759049
+datestamp: 1489609681

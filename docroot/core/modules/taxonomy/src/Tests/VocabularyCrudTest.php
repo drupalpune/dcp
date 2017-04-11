@@ -1,15 +1,11 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\taxonomy\Tests\VocabularyCrudTest.
- */
-
 namespace Drupal\taxonomy\Tests;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Tests loading, saving and deleting vocabularies.
@@ -143,37 +139,6 @@ class VocabularyCrudTest extends TaxonomyTestBase {
   }
 
   /**
-   * Tests that machine name changes are properly reflected.
-   */
-  function testTaxonomyVocabularyChangeMachineName() {
-    // Add a field to the vocabulary.
-    entity_create('field_storage_config', array(
-      'field_name' => 'field_test',
-      'entity_type' => 'taxonomy_term',
-      'type' => 'test_field',
-    ))->save();
-    entity_create('field_config', array(
-      'field_name' => 'field_test',
-      'entity_type' => 'taxonomy_term',
-      'bundle' => $this->vocabulary->id(),
-    ))->save();
-
-    // Change the machine name.
-    $old_name = $this->vocabulary->id();
-    $new_name = Unicode::strtolower($this->randomMachineName());
-    $this->vocabulary->set('vid', $new_name);
-    $this->vocabulary->save();
-
-    // Check that entity bundles are properly updated.
-    $info = entity_get_bundles('taxonomy_term');
-    $this->assertFalse(isset($info[$old_name]), 'The old bundle name does not appear in entity_get_bundles().');
-    $this->assertTrue(isset($info[$new_name]), 'The new bundle name appears in entity_get_bundles().');
-
-    // Check that the field is still attached to the vocabulary.
-    $this->assertTrue(FieldConfig::loadByName('taxonomy_term', $new_name, 'field_test'), 'The bundle name was updated correctly.');
-  }
-
-  /**
    * Test uninstall and reinstall of the taxonomy module.
    */
   function testUninstallReinstall() {
@@ -186,14 +151,14 @@ class VocabularyCrudTest extends TaxonomyTestBase {
       'type' => 'text',
       'cardinality' => 4
     );
-    entity_create('field_storage_config', $storage_definition)->save();
+    FieldStorageConfig::create($storage_definition)->save();
     $field_definition = array(
       'field_name' => $field_name,
       'entity_type' => 'taxonomy_term',
       'bundle' => $this->vocabulary->id(),
       'label' => $this->randomMachineName() . '_label',
     );
-    entity_create('field_config', $field_definition)->save();
+    FieldConfig::create($field_definition)->save();
 
     // Remove the third party setting from the memory copy of the vocabulary.
     // We keep this invalid copy around while the taxonomy module is not even
@@ -210,7 +175,8 @@ class VocabularyCrudTest extends TaxonomyTestBase {
     // an instance of this field on the same bundle name should be successful.
     $this->vocabulary->enforceIsNew();
     $this->vocabulary->save();
-    entity_create('field_storage_config', $storage_definition)->save();
-    entity_create('field_config', $field_definition)->save();
+    FieldStorageConfig::create($storage_definition)->save();
+    FieldConfig::create($field_definition)->save();
   }
+
 }

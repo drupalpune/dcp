@@ -1,18 +1,10 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\rest\Plugin\Deriver\EntityDerivative.
- */
-
 namespace Drupal\rest\Plugin\Deriver;
 
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
-use Drupal\Core\Routing\RouteBuilderInterface;
-use Drupal\Core\Routing\RouteProviderInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 /**
  * Provides a resource plugin definition for every entity type.
@@ -36,7 +28,7 @@ class EntityDeriver implements ContainerDeriverInterface {
   protected $entityManager;
 
   /**
-   * Constructs an EntityDerivative object.
+   * Constructs an EntityDeriver object.
    *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
@@ -55,7 +47,7 @@ class EntityDeriver implements ContainerDeriverInterface {
   }
 
   /**
-   * Implements DerivativeInterface::getDerivativeDefinition().
+   * {@inheritdoc}
    */
   public function getDerivativeDefinition($derivative_id, $base_plugin_definition) {
     if (!isset($this->derivatives)) {
@@ -67,7 +59,7 @@ class EntityDeriver implements ContainerDeriverInterface {
   }
 
   /**
-   * Implements DerivativeInterface::getDerivativeDefinitions().
+   * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
     if (!isset($this->derivatives)) {
@@ -89,7 +81,7 @@ class EntityDeriver implements ContainerDeriverInterface {
           // Check if there are link templates defined for the entity type and
           // use the path from the route instead of the default.
           if ($link_template = $entity_type->getLinkTemplate($link_relation)) {
-            $this->derivatives[$entity_type_id]['uri_paths'][$link_relation] = '/' . $link_template;
+            $this->derivatives[$entity_type_id]['uri_paths'][$link_relation] = $link_template;
           }
           else {
             $this->derivatives[$entity_type_id]['uri_paths'][$link_relation] = $default_uri;
@@ -101,4 +93,5 @@ class EntityDeriver implements ContainerDeriverInterface {
     }
     return $this->derivatives;
   }
+
 }

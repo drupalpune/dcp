@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\views_ui\ViewAddForm.
- */
-
 namespace Drupal\views_ui;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -162,7 +157,7 @@ class ViewAddForm extends ViewFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     $wizard_type = $form_state->getValue(array('show', 'wizard_key'));
     $wizard_instance = $this->wizardManager->createInstance($wizard_type);
     $form_state->set('wizard', $wizard_instance->getPluginDefinition());
@@ -192,7 +187,7 @@ class ViewAddForm extends ViewFormBase {
       return;
     }
     $this->entity->save();
-
+    drupal_set_message($this->t('The view %name has been saved.', array('%name' => $form_state->getValue('label'))));
     $form_state->setRedirectUrl($this->entity->urlInfo('edit-form'));
   }
 

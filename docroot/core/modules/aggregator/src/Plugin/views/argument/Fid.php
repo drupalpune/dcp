@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\aggregator\Plugin\views\argument\Fid.
- */
-
 namespace Drupal\aggregator\Plugin\views\argument;
 
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\views\Plugin\views\argument\NumericArgument;
-use Drupal\Component\Utility\SafeMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -60,7 +54,7 @@ class Fid extends NumericArgument {
 
     $feeds = $this->entityManager->getStorage('aggregator_feed')->loadMultiple($this->value);
     foreach ($feeds as $feed) {
-      $titles[] = SafeMarkup::checkPlain($feed->label());
+      $titles[] = $feed->label();
     }
     return $titles;
   }

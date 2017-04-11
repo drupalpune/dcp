@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\file\FileStorageSchema.
- */
-
 namespace Drupal\file;
 
 use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
@@ -30,7 +25,7 @@ class FileStorageSchema extends SqlContentEntityStorageSchema {
           break;
 
         case 'uri':
-          $this->addSharedTableFieldUniqueKey($storage_definition, $schema, TRUE);
+          $this->addSharedTableFieldIndex($storage_definition, $schema, TRUE);
           break;
       }
     }

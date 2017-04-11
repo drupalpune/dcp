@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of \Drupal\simpletest\Tests\BrowserTest.
- */
-
 namespace Drupal\simpletest\Tests;
 
 use Drupal\simpletest\WebTestBase;
@@ -22,6 +17,22 @@ class BrowserTest extends WebTestBase {
    * @var bool
    */
   protected static $cookieSet = FALSE;
+
+  /**
+   * Modules to enable.
+   *
+   * @var string[]
+   */
+  public static $modules = ['block'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('local_tasks_block');
+  }
 
   /**
    * Test \Drupal\simpletest\WebTestBase::getAbsoluteUrl().

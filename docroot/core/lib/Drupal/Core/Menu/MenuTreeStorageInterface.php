@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Menu\MenuTreeStorageInterface.
- */
-
 namespace Drupal\Core\Menu;
 
 /**
@@ -37,7 +32,6 @@ interface MenuTreeStorageInterface {
    *
    * @param array $definitions
    *   The new menu link definitions.
-   *
    */
   public function rebuild(array $definitions);
 
@@ -47,7 +41,7 @@ interface MenuTreeStorageInterface {
    * @param string $id
    *   The menu link plugin ID.
    *
-   * @return array|FALSE
+   * @return array|false
    *   The plugin definition, or FALSE if no definition was found for the ID.
    */
   public function load($id);
@@ -71,11 +65,11 @@ interface MenuTreeStorageInterface {
    * @param array $properties
    *   The properties to filter by.
    *
-   * @throws \InvalidArgumentException
-   *   Thrown if an invalid property name is specified in $properties.
-   *
    * @return array
    *   An array of menu link definition arrays.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown if an invalid property name is specified in $properties.
    */
   public function loadByProperties(array $properties);
 

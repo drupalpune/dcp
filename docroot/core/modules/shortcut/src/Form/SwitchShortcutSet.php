@@ -1,16 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\shortcut\Form\SwitchShortcutSet.
- */
-
 namespace Drupal\shortcut\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\shortcut\Entity\ShortcutSet;
 use Drupal\shortcut\ShortcutSetStorageInterface;
 use Drupal\user\UserInterface;
@@ -71,7 +64,7 @@ class SwitchShortcutSet extends FormBase {
 
     // Prepare the list of shortcut sets.
     $options = array_map(function (ShortcutSet $set) {
-      return SafeMarkup::checkPlain($set->label());
+      return $set->label();
     }, $this->shortcutSetStorage->loadMultiple());
 
     $current_set = shortcut_current_displayed_set($this->user);
@@ -188,12 +181,12 @@ class SwitchShortcutSet extends FormBase {
       $replacements = array(
         '%user' => $this->user->label(),
         '%set_name' => $set->label(),
-        '@switch-url' => $this->url('<current>'),
+        ':switch-url' => $this->url('<current>'),
       );
       if ($account_is_user) {
         // Only administrators can create new shortcut sets, so we know they have
         // access to switch back.
-        drupal_set_message($this->t('You are now using the new %set_name shortcut set. You can edit it from this page or <a href="@switch-url">switch back to a different one.</a>', $replacements));
+        drupal_set_message($this->t('You are now using the new %set_name shortcut set. You can edit it from this page or <a href=":switch-url">switch back to a different one.</a>', $replacements));
       }
       else {
         drupal_set_message($this->t('%user is now using a new shortcut set called %set_name. You can edit it from this page.', $replacements));
@@ -208,7 +201,7 @@ class SwitchShortcutSet extends FormBase {
       /* @var \Drupal\shortcut\Entity\ShortcutSet $set */
       $set = $this->shortcutSetStorage->load($form_state->getValue('set'));
       $replacements = array(
-        '%user' => $this->user->label(),
+        '%user' => $this->user->getDisplayName(),
         '%set_name' => $set->label(),
       );
       drupal_set_message($account_is_user ? $this->t('You are now using the %set_name shortcut set.', $replacements) : $this->t('%user is now using the %set_name shortcut set.', $replacements));

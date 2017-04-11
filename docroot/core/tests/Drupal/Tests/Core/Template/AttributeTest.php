@@ -1,16 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Template\AttributeTest.
- */
-
 namespace Drupal\Tests\Core\Template;
 
+use Drupal\Component\Utility\Html;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Template\AttributeArray;
 use Drupal\Core\Template\AttributeString;
 use Drupal\Tests\UnitTestCase;
+use Drupal\Component\Render\MarkupInterface;
 
 /**
  * @coversDefaultClass \Drupal\Core\Template\Attribute
@@ -30,6 +28,18 @@ class AttributeTest extends UnitTestCase {
     $attribute = new Attribute(['selected' => TRUE, 'checked' => FALSE]);
     $this->assertTrue($attribute['selected']->value());
     $this->assertFalse($attribute['checked']->value());
+
+    // Test that non-array values with name "class" are cast to array.
+    $attribute = new Attribute(array('class' => 'example-class'));
+    $this->assertTrue(isset($attribute['class']));
+    $this->assertEquals(new AttributeArray('class', array('example-class')), $attribute['class']);
+
+    // Test that safe string objects work correctly.
+    $safe_string = $this->prophesize(MarkupInterface::class);
+    $safe_string->__toString()->willReturn('example-class');
+    $attribute = new Attribute(array('class' => $safe_string->reveal()));
+    $this->assertTrue(isset($attribute['class']));
+    $this->assertEquals(new AttributeArray('class', array('example-class')), $attribute['class']);
   }
 
   /**
@@ -341,6 +351,27 @@ class AttributeTest extends UnitTestCase {
   }
 
   /**
+   * @covers ::createAttributeValue
+   * @dataProvider providerTestAttributeValues
+   */
+  public function testAttributeValues(array $attributes, $expected) {
+    $this->assertEquals($expected, (new Attribute($attributes))->__toString());
+  }
+
+  public function providerTestAttributeValues() {
+    $data = [];
+
+    $string = '"> <script>alert(123)</script>"';
+    $data['safe-object-xss1'] = [['title' => Markup::create($string)], ' title="&quot;&gt; alert(123)&quot;"'];
+    $data['non-safe-object-xss1'] = [['title' => $string], ' title="' . Html::escape($string) . '"'];
+    $string = '&quot;><script>alert(123)</script>';
+    $data['safe-object-xss2'] = [['title' => Markup::create($string)], ' title="&quot;&gt;alert(123)"'];
+    $data['non-safe-object-xss2'] = [['title' => $string], ' title="' . Html::escape($string) . '"'];
+
+    return $data;
+  }
+
+  /**
    * Checks that the given CSS class is present in the given HTML snippet.
    *
    * @param string $class
@@ -404,7 +435,7 @@ class AttributeTest extends UnitTestCase {
    *   The number of results that are found.
    */
   protected function getXPathResultCount($query, $html) {
-    $document = new \DOMDocument;
+    $document = new \DOMDocument();
     $document->loadHTML($html);
     $xpath = new \DOMXPath($document);
 

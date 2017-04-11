@@ -1,15 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system_test\Controller\SystemTestController.
- */
-
 namespace Drupal\system_test\Controller;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -101,7 +98,7 @@ class SystemTestController extends ControllerBase {
   public function drupalSetMessageTest() {
     // Set two messages.
     drupal_set_message('First message (removed).');
-    drupal_set_message('Second message (not removed).');
+    drupal_set_message(t('Second message with <em>markup!</em> (not removed).'));
 
     // Remove the first.
     unset($_SESSION['messages']['status'][0]);
@@ -112,6 +109,23 @@ class SystemTestController extends ControllerBase {
 
     drupal_set_message('Duplicated message', 'status', TRUE);
     drupal_set_message('Duplicated message', 'status', TRUE);
+
+    // Add a Markup message.
+    drupal_set_message(Markup::create('Markup with <em>markup!</em>'));
+    // Test duplicate Markup messages.
+    drupal_set_message(Markup::create('Markup with <em>markup!</em>'));
+    // Ensure that multiple Markup messages work.
+    drupal_set_message(Markup::create('Markup2 with <em>markup!</em>'));
+
+    // Test mixing of types.
+    drupal_set_message(Markup::create('Non duplicate Markup / string.'));
+    drupal_set_message('Non duplicate Markup / string.');
+    drupal_set_message(Markup::create('Duplicate Markup / string.'), 'status', TRUE);
+    drupal_set_message('Duplicate Markup / string.', 'status', TRUE);
+
+    // Test auto-escape of non safe strings.
+    drupal_set_message('<em>This<span>markup will be</span> escaped</em>.');
+
     return [];
   }
 
@@ -228,11 +242,11 @@ class SystemTestController extends ControllerBase {
   /**
    * Initialize authorize.php during testing.
    *
-   * @see system_authorized_init().
+   * @see system_authorized_init()
    */
   public function authorizeInit($page_title) {
     $authorize_url = Url::fromUri('base:core/authorize.php', array('absolute' => TRUE))->toString();
-    system_authorized_init('system_test_authorize_run', drupal_get_path('module', 'system_test') . '/system_test.module', array(), $page_title);
+    system_authorized_init('system_test_authorize_run', __DIR__ . '/../../system_test.module', array(), $page_title);
     return new RedirectResponse($authorize_url);
   }
 
@@ -241,11 +255,33 @@ class SystemTestController extends ControllerBase {
    */
   public function setHeader(Request $request) {
     $query = $request->query->all();
-    $response = new Response();
+    $response = new CacheableResponse();
     $response->headers->set($query['name'], $query['value']);
+    $response->getCacheableMetadata()->addCacheContexts(['url.query_args:name', 'url.query_args:value']);
     $response->setContent($this->t('The following header was set: %name: %value', array('%name' => $query['name'], '%value' => $query['value'])));
 
     return $response;
+  }
+
+  /**
+   * A simple page callback that uses a plain Symfony response object.
+   */
+  public function respondWithReponse(Request $request) {
+    return new Response('test');
+  }
+
+  /**
+   * A plain Symfony reponse with Cache-Control: public, max-age=60.
+   */
+  public function respondWithPublicResponse() {
+    return (new Response('test'))->setPublic()->setMaxAge(60);
+  }
+
+  /**
+   * A simple page callback that uses a CacheableResponse object.
+   */
+  public function respondWithCacheableReponse(Request $request) {
+    return new CacheableResponse('test');
   }
 
   /**
@@ -298,6 +334,30 @@ class SystemTestController extends ControllerBase {
     }
 
     return $build;
+  }
+
+  /**
+   * Returns the current date.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response $response
+   *   A Response object containing the current date.
+   */
+  public function getCurrentDate() {
+    // Uses specific time to test that the right timezone is used.
+    $response = new Response(\Drupal::service('date.formatter')->format(1452702549));
+    return $response;
+  }
+
+  /**
+   * Returns a response with a test header set from the request.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response $response
+   *   A Response object containing the test header.
+   */
+  public function getTestHeader(Request $request) {
+    $response = new Response();
+    $response->headers->set('Test-Header', $request->headers->get('Test-Header'));
+    return $response;
   }
 
 }

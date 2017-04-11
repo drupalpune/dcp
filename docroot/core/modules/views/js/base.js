@@ -2,14 +2,24 @@
  * @file
  * Some basic behaviors and utility functions for Views.
  */
+
 (function ($, Drupal, drupalSettings) {
 
-  "use strict";
+  'use strict';
 
+  /**
+   * @namespace
+   */
   Drupal.Views = {};
 
   /**
    * Helper function to parse a querystring.
+   *
+   * @param {string} query
+   *   The querystring to parse.
+   *
+   * @return {object}
+   *   A map of query parameters.
    */
   Drupal.Views.parseQueryString = function (query) {
     var args = {};
@@ -31,14 +41,23 @@
 
   /**
    * Helper function to return a view's arguments based on a path.
+   *
+   * @param {string} href
+   *   The href to check.
+   * @param {string} viewPath
+   *   The views path to check.
+   *
+   * @return {object}
+   *   An object containing `view_args` and `view_path`.
    */
   Drupal.Views.parseViewArgs = function (href, viewPath) {
     var returnObj = {};
     var path = Drupal.Views.getPath(href);
+    // Get viewPath url without baseUrl portion.
+    var viewHref = Drupal.url(viewPath).substring(drupalSettings.path.baseUrl.length);
     // Ensure we have a correct path.
-    if (viewPath && path.substring(0, viewPath.length + 1) === viewPath + '/') {
-      var args = decodeURIComponent(path.substring(viewPath.length + 1, path.length));
-      returnObj.view_args = args;
+    if (viewHref && path.substring(0, viewHref.length + 1) === viewHref + '/') {
+      returnObj.view_args = decodeURIComponent(path.substring(viewHref.length + 1, path.length));
       returnObj.view_path = path;
     }
     return returnObj;
@@ -46,12 +65,18 @@
 
   /**
    * Strip off the protocol plus domain from an href.
+   *
+   * @param {string} href
+   *   The href to strip.
+   *
+   * @return {string}
+   *   The href without the protocol and domain.
    */
   Drupal.Views.pathPortion = function (href) {
     // Remove e.g. http://example.com if present.
     var protocol = window.location.protocol;
     if (href.substring(0, protocol.length) === protocol) {
-      // 2 is the length of the '//' that normally follows the protocol
+      // 2 is the length of the '//' that normally follows the protocol.
       href = href.substring(href.indexOf('/', protocol.length + 2));
     }
     return href;
@@ -59,6 +84,12 @@
 
   /**
    * Return the Drupal path portion of an href.
+   *
+   * @param {string} href
+   *   The href to check.
+   *
+   * @return {string}
+   *   An internal path.
    */
   Drupal.Views.getPath = function (href) {
     href = Drupal.Views.pathPortion(href);

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Installer\InstallerServiceProvider.
- */
-
 namespace Drupal\Core\Installer;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -47,6 +42,8 @@ class InstallerServiceProvider implements ServiceProviderInterface, ServiceModif
       ->register('url_generator', 'Drupal\Core\Routing\NullGenerator')
       ->addArgument(new Reference('request_stack'));
     $container
+      ->register('path_processor_manager', 'Drupal\Core\PathProcessor\NullPathProcessorManager');
+    $container
       ->register('router.dumper', 'Drupal\Core\Routing\NullMatcherDumper');
 
     // Remove the cache tags invalidator tag from the cache tags storage, so
@@ -58,7 +55,10 @@ class InstallerServiceProvider implements ServiceProviderInterface, ServiceModif
     // Replace the route builder with an empty implementation.
     // @todo Convert installer steps into routes; add an installer.routing.yml.
     $definition = $container->getDefinition('router.builder');
-    $definition->setClass('Drupal\Core\Installer\InstallerRouteBuilder');
+    $definition->setClass('Drupal\Core\Installer\InstallerRouteBuilder')
+      // The core router builder, but there is no reason here to be lazy, so
+      // we don't need to ship with a custom proxy class.
+      ->setLazy(FALSE);
   }
 
   /**
@@ -73,7 +73,7 @@ class InstallerServiceProvider implements ServiceProviderInterface, ServiceModif
     // No service may persist when the early installer kernel is rebooted into
     // the production environment.
     // @todo The DrupalKernel reboot performed by drupal_install_system() is
-    //   actually not a "regular" reboot (like ModuleHandler::install()), so
+    //   actually not a "regular" reboot (like ModuleInstaller::install()), so
     //   services are not actually persisted.
     foreach ($container->findTaggedServiceIds('persist') as $id => $tags) {
       $definition = $container->getDefinition($id);

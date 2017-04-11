@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Validation\Plugin\Validation\Constraint\UniqueFieldValueValidator.
- */
-
 namespace Drupal\Core\Validation\Plugin\Validation\Constraint;
 
+use Drupal\Component\Utility\Unicode;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -37,7 +33,12 @@ class UniqueFieldValueValidator extends ConstraintValidator {
       ->execute();
 
     if ($value_taken) {
-      $this->context->addViolation($constraint->message, array("%value" => $item->value));
+      $this->context->addViolation($constraint->message, [
+        '%value' => $item->value,
+        '@entity_type' => $entity->getEntityType()->getLowercaseLabel(),
+        '@field_name' => Unicode::strtolower($items->getFieldDefinition()->getLabel()),
+      ]);
     }
   }
+
 }

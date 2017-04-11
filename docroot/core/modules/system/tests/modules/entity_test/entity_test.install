@@ -5,25 +5,29 @@
  * Install, update and uninstall functions for the entity_test module.
  */
 
+use Drupal\system\Tests\Update\DbUpdatesTrait;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+
 /**
  * Implements hook_install().
  */
 function entity_test_install() {
   foreach (entity_test_entity_types() as $entity_type) {
     // Auto-create fields for testing.
-    entity_create('field_storage_config', array(
+    FieldStorageConfig::create(array(
       'entity_type' => $entity_type,
       'field_name' => 'field_test_text',
       'type' => 'text',
       'cardinality' => 1,
     ))->save();
-    entity_create('field_config', array(
+    FieldConfig::create([
       'entity_type' => $entity_type,
       'field_name' => 'field_test_text',
       'bundle' => $entity_type,
       'label' => 'Test text-field',
       'translatable' => FALSE,
-    ))->save();
+    ])->save();
 
     entity_get_form_display($entity_type, $entity_type, 'default')
       ->setComponent('field_test_text', array('type' => 'text_textfield'))
@@ -49,3 +53,6 @@ function entity_test_schema() {
   );
   return $schema;
 }
+
+DbUpdatesTrait::includeUpdates('entity_test', 'entity_definition_updates');
+DbUpdatesTrait::includeUpdates('entity_test', 'status_report');

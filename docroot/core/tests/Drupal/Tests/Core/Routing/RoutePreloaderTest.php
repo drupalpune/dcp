@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Routing\RoutePreloaderTest.
- */
-
 namespace Drupal\Tests\Core\Routing;
 
 use Drupal\Core\Routing\RoutePreloader;
@@ -42,12 +37,20 @@ class RoutePreloaderTest extends UnitTestCase {
   protected $preloader;
 
   /**
+   * The mocked cache.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $cache;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
     $this->routeProvider = $this->getMock('Drupal\Core\Routing\PreloadableRouteProviderInterface');
     $this->state = $this->getMock('\Drupal\Core\State\StateInterface');
-    $this->preloader = new RoutePreloader($this->routeProvider, $this->state);
+    $this->cache = $this->getMock('Drupal\Core\Cache\CacheBackendInterface');
+    $this->preloader = new RoutePreloader($this->routeProvider, $this->state, $this->cache);
   }
 
   /**

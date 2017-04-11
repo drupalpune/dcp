@@ -1,14 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\PathBasedBreadcrumbBuilder.
- */
-
 namespace Drupal\system;
 
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Access\AccessManagerInterface;
+use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\TitleResolverInterface;
@@ -125,6 +121,7 @@ class PathBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
    * {@inheritdoc}
    */
   public function build(RouteMatchInterface $route_match) {
+    $breadcrumb = new Breadcrumb();
     $links = array();
 
     // General path-based breadcrumbs. Use the actual request path, prior to
@@ -138,18 +135,22 @@ class PathBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $exclude[$front] = TRUE;
     // /user is just a redirect, so skip it.
     // @todo Find a better way to deal with /user.
-    $exclude['user'] = TRUE;
+    $exclude['/user'] = TRUE;
+    // Add the url.path.parent cache context. This code ignores the last path
+    // part so the result only depends on the path parents.
+    $breadcrumb->addCacheContexts(['url.path.parent']);
     while (count($path_elements) > 1) {
       array_pop($path_elements);
       // Copy the path elements for up-casting.
-      $route_request = $this->getRequestForPath(implode('/', $path_elements), $exclude);
+      $route_request = $this->getRequestForPath('/' . implode('/', $path_elements), $exclude);
       if ($route_request) {
         $route_match = RouteMatch::createFromRequest($route_request);
-        $access = $this->accessManager->check($route_match, $this->currentUser);
-        if ($access) {
+        $access = $this->accessManager->check($route_match, $this->currentUser, NULL, TRUE);
+        // The set of breadcrumb links depends on the access result, so merge
+        // the access result's cacheability metadata.
+        $breadcrumb = $breadcrumb->addCacheableDependency($access);
+        if ($access->isAllowed()) {
           $title = $this->titleResolver->getTitle($route_request, $route_match->getRouteObject());
-        }
-        if ($access) {
           if (!isset($title)) {
             // Fallback to using the raw path component as the title if the
             // route is missing a _title or _title_callback attribute.
@@ -161,18 +162,19 @@ class PathBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
       }
 
     }
-    if ($path && $path != $front) {
+    if ($path && '/' . $path != $front) {
       // Add the Home link, except for the front page.
       $links[] = Link::createFromRoute($this->t('Home'), '<front>');
     }
-    return array_reverse($links);
+
+    return $breadcrumb->setLinks(array_reverse($links));
   }
 
   /**
    * Matches a path in the router.
    *
    * @param string $path
-   *   The request path.
+   *   The request path with a leading slash.
    * @param array $exclude
    *   An array of paths or system paths to skip.
    *
@@ -185,7 +187,7 @@ class PathBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     }
     // @todo Use the RequestHelper once https://www.drupal.org/node/2090293 is
     //   fixed.
-    $request = Request::create($this->context->getCompleteBaseUrl() . '/' . $path);
+    $request = Request::create($path);
     // Performance optimization: set a short accept header to reduce overhead in
     // AcceptHeaderMatcher when matching the request.
     $request->headers->set('Accept', 'text/html');
@@ -195,7 +197,7 @@ class PathBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
       // This resolves to the front page, which we already add.
       return NULL;
     }
-    $this->currentPath->setPath('/' . $processed, $request);
+    $this->currentPath->setPath($processed, $request);
     // Attempt to match this path to provide a fully built request.
     try {
       $request->attributes->add($this->router->matchRequest($request));

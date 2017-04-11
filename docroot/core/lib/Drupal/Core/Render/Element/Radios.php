@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Radios.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -13,8 +8,23 @@ use Drupal\Component\Utility\Html as HtmlUtility;
 /**
  * Provides a form element for a set of radio buttons.
  *
+ * Properties:
+ * - #options: An associative array, where the keys are the returned values for
+ *   each radio button, and the values are the labels next to each radio button.
+ *
+ * Usage example:
+ * @code
+ * $form['settings']['active'] = array(
+ *   '#type' => 'radios',
+ *   '#title' => $this->t('Poll status'),
+ *   '#default_value' => 1,
+ *   '#options' => array(0 => $this->t('Closed'), 1 => $this->t('Active')),
+ * );
+ * @endcode
+ *
  * @see \Drupal\Core\Render\Element\Checkboxes
  * @see \Drupal\Core\Render\Element\Radio
+ * @see \Drupal\Core\Render\Element\Select
  *
  * @FormElement("radios")
  */
@@ -68,6 +78,8 @@ class Radios extends FormElement {
           '#parents' => $element['#parents'],
           '#id' => HtmlUtility::getUniqueId('edit-' . implode('-', $parents_for_id)),
           '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
+          // Errors should only be shown on the parent radios element.
+          '#error_no_message' => TRUE,
           '#weight' => $weight,
         );
       }

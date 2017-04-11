@@ -1,12 +1,7 @@
 <?php
 
-/**
- * Contains \Drupal\Core\Asset\AssetDumper.
- */
-
 namespace Drupal\Core\Asset;
 
-use Drupal\Core\Asset\AssetDumperInterface;
 use Drupal\Component\Utility\Crypt;
 
 /**
@@ -24,7 +19,7 @@ class AssetDumper implements AssetDumperInterface {
   public function dump($data, $file_extension) {
     // Prefix filename to prevent blocking by firewalls which reject files
     // starting with "ad*".
-    $filename = $file_extension. '_' . Crypt::hashBase64($data) . '.' . $file_extension;
+    $filename = $file_extension . '_' . Crypt::hashBase64($data) . '.' . $file_extension;
     // Create the css/ or js/ path within the files folder.
     $path = 'public://' . $file_extension;
     $uri = $path . '/' . $filename;

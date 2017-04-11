@@ -1,16 +1,11 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\System\MainContentFallbackTest.
- */
-
 namespace Drupal\system\Tests\System;
 
 use Drupal\simpletest\WebTestBase;
 
 /**
- *  Test SimplePageVariant main content rendering fallback page display variant.
+ * Test SimplePageVariant main content rendering fallback page display variant.
  *
  * @group system
  */
@@ -29,7 +24,7 @@ class MainContentFallbackTest extends WebTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Create and login admin user.
+    // Create and log in admin user.
     $this->adminUser = $this->drupalCreateUser(array(
       'access administration pages',
       'administer site configuration',
@@ -70,9 +65,10 @@ class MainContentFallbackTest extends WebTestBase {
     $this->drupalLogin($this->adminUser);
     $edit = array();
     $edit['modules[Core][block][enable]'] = 'block';
-    $this->drupalPostForm('admin/modules', $edit, t('Save configuration'));
-    $this->assertText(t('The configuration options have been saved.'), 'Modules status has been updated.');
+    $this->drupalPostForm('admin/modules', $edit, t('Install'));
+    $this->assertText(t('Module Block has been enabled.'), 'Modules status has been updated.');
     $this->rebuildContainer();
     $this->assertTrue(\Drupal::moduleHandler()->moduleExists('block'), 'Block module re-enabled.');
   }
+
 }

@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\menu_ui\MenuListBuilder.
- */
-
 namespace Drupal\menu_ui;
 
-use Drupal\Component\Utility\Xss;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 
@@ -36,10 +30,10 @@ class MenuListBuilder extends ConfigEntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     $row['title'] = array(
-      'data' => $this->getLabel($entity),
+      'data' => $entity->label(),
       'class' => array('menu-label'),
     );
-    $row['description'] = Xss::filterAdmin($entity->getDescription());
+    $row['description']['data'] = ['#markup' => $entity->getDescription()];
     return $row + parent::buildRow($entity);
   }
 

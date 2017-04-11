@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Plugin\views\HandlerBase.
- */
-
 namespace Drupal\views\Plugin\views;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\Utility\Xss;
@@ -16,8 +11,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
+use Drupal\views\Render\ViewsRenderPipelineMarkup;
 use Drupal\views\ViewExecutable;
-use Drupal\Core\Database\Database;
 use Drupal\views\Views;
 use Drupal\views\ViewsData;
 
@@ -50,13 +45,6 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
   public $tableAlias;
 
   /**
-   * When a table has been moved this property is set.
-   *
-   * @var string
-   */
-  public $actualTable;
-
-  /**
    * The actual field in the database table, maybe different
    * on other kind of query plugins/special handlers.
    *
@@ -70,13 +58,6 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
    * @var string
    */
   public $field;
-
-  /**
-   * When a field has been moved this property is set.
-   *
-   * @var string
-   */
-  public $actualField;
 
   /**
    * The relationship used for this field.
@@ -123,15 +104,6 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
     // Check to see if this handler type is defaulted. Note that
     // we have to do a lookup because the type is singular but the
     // option is stored as the plural.
-
-    // If the 'moved to' keyword moved our handler, let's fix that now.
-    if (isset($this->actualTable)) {
-      $options['table'] = $this->actualTable;
-    }
-
-    if (isset($this->actualField)) {
-      $options['field'] = $this->actualField;
-    }
 
     $this->unpackOptions($this->options, $options);
 
@@ -181,11 +153,10 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
    */
   public function adminLabel($short = FALSE) {
     if (!empty($this->options['admin_label'])) {
-      $title = SafeMarkup::checkPlain($this->options['admin_label']);
-      return $title;
+      return $this->options['admin_label'];
     }
     $title = ($short && isset($this->definition['title short'])) ? $this->definition['title short'] : $this->definition['title'];
-    return $this->t('!group: !title', array('!group' => $this->definition['group'], '!title' => $title));
+    return $this->t('@group: @title', array('@group' => $this->definition['group'], '@title' => $title));
   }
 
   /**
@@ -230,13 +201,13 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
         $value = Xss::filterAdmin($value);
         break;
       case 'url':
-        $value = SafeMarkup::checkPlain(UrlHelper::stripDangerousProtocols($value));
+        $value = Html::escape(UrlHelper::stripDangerousProtocols($value));
         break;
       default:
-        $value = SafeMarkup::checkPlain($value);
+        $value = Html::escape($value);
         break;
     }
-    return $value;
+    return ViewsRenderPipelineMarkup::create($value);
   }
 
   /**
@@ -288,7 +259,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
     $form['admin_label'] = array(
       '#type' => 'details',
-      '#title' =>$this->t('Administrative title'),
+      '#title' => $this->t('Administrative title'),
       '#weight' => 150,
     );
     $form['admin_label']['admin_label'] = array(
@@ -305,7 +276,9 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
       '#type' => 'details',
       '#title' => $this->t('More'),
       '#weight' => 200,
+      '#optional' => TRUE,
     );
+
     // Allow to alter the default values brought into the form.
     // @todo Do we really want to keep this hook.
     $this->getModuleHandler()->alter('views_handler_options', $this->options, $this->view);
@@ -721,7 +694,7 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
       return $views_data['table']['entity type'];
     }
     else {
-      throw new \Exception(SafeMarkup::format('No entity type for field @field on view @view', array('@field' => $this->options['id'], '@view' => $this->view->storage->id())));
+      throw new \Exception("No entity type for field {$this->options['id']} on view {$this->view->storage->id()}");
     }
   }
 
@@ -734,12 +707,12 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
 
     // Determine if the string has 'or' operators (plus signs) or 'and'
     // operators (commas) and split the string accordingly.
-    if (preg_match('/^([\w0-9-_]+[+ ]+)+[\w0-9-_]+$/u', $str)) {
+    if (preg_match('/^([\w0-9-_\.]+[+ ]+)+[\w0-9-_\.]+$/u', $str)) {
       // The '+' character in a query string may be parsed as ' '.
       $operator = 'or';
       $value = preg_split('/[+ ]/', $str);
     }
-    elseif (preg_match('/^([\w0-9-_]+[, ]+)*[\w0-9-_]+$/u', $str)) {
+    elseif (preg_match('/^([\w0-9-_\.]+[, ]+)*[\w0-9-_\.]+$/u', $str)) {
       $operator = 'and';
       $value = explode(',', $str);
     }
@@ -842,4 +815,20 @@ abstract class HandlerBase extends PluginBase implements ViewsHandlerInterface {
     // Write to cache
     $view->cacheSet();
   }
+
+  /**
+   * Calculates options stored on the handler
+   *
+   * @param array $options
+   *   The options stored in the handler
+   * @param array $form_state_options
+   *   The newly submitted form state options.
+   *
+   * @return array
+   *   The new options
+   */
+  public function submitFormCalculateOptions(array $options, array $form_state_options) {
+    return $form_state_options + $options;
+  }
+
 }

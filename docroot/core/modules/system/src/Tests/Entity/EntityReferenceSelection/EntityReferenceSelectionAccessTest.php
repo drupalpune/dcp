@@ -1,18 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Entity\EntityReferenceSelection\EntityReferenceSelectionAccessTest.
- */
-
 namespace Drupal\system\Tests\Entity\EntityReferenceSelection;
 
 use Drupal\comment\Tests\CommentTestTrait;
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\comment\CommentInterface;
+use Drupal\node\Entity\Node;
 use Drupal\simpletest\WebTestBase;
 use Drupal\user\Entity\User;
+use Drupal\comment\Entity\Comment;
 
 /**
  * Tests for the base handlers provided by Entity Reference.
@@ -77,7 +74,7 @@ class EntityReferenceSelectionAccessTest extends WebTestBase {
       'target_type' => 'node',
       'handler' => 'default',
       'handler_settings' => array(
-        'target_bundles' => array(),
+        'target_bundles' => NULL,
       ),
     );
 
@@ -107,10 +104,10 @@ class EntityReferenceSelectionAccessTest extends WebTestBase {
     $nodes = array();
     $node_labels = array();
     foreach ($node_values as $key => $values) {
-      $node = entity_create('node', $values);
+      $node = Node::create($values);
       $node->save();
       $nodes[$key] = $node;
-      $node_labels[$key] = SafeMarkup::checkPlain($node->label());
+      $node_labels[$key] = Html::escape($node->label());
     }
 
     // Test as a non-admin.
@@ -203,7 +200,7 @@ class EntityReferenceSelectionAccessTest extends WebTestBase {
       'target_type' => 'user',
       'handler' => 'default',
       'handler_settings' => array(
-        'target_bundles' => array(),
+        'target_bundles' => NULL,
         'include_anonymous' => TRUE,
       ),
     );
@@ -234,14 +231,14 @@ class EntityReferenceSelectionAccessTest extends WebTestBase {
     $user_labels = array();
     foreach ($user_values as $key => $values) {
       if (is_array($values)) {
-        $account = entity_create('user', $values);
+        $account = User::create($values);
         $account->save();
       }
       else {
         $account = $values;
       }
       $users[$key] = $account;
-      $user_labels[$key] = SafeMarkup::checkPlain($account->getUsername());
+      $user_labels[$key] = Html::escape($account->getUsername());
     }
 
     // Test as a non-admin.
@@ -335,6 +332,25 @@ class EntityReferenceSelectionAccessTest extends WebTestBase {
       ),
     );
     $this->assertReferenceable($selection_options, $referenceable_tests, 'User handler (does not include anonymous)');
+
+    // Check that the Anonymous user is not included in the results when no
+    // label matching is done, for example when using the 'options_select'
+    // widget.
+    $referenceable_tests = array(
+      array(
+        'arguments' => array(
+          array(NULL),
+        ),
+        'result' => array(
+          'user' => array(
+            $users['admin']->id() => $user_labels['admin'],
+            $users['non_admin']->id() => $user_labels['non_admin'],
+            $users['blocked']->id() => $user_labels['blocked'],
+          ),
+        ),
+      ),
+    );
+    $this->assertReferenceable($selection_options, $referenceable_tests, 'User handler (does not include anonymous)');
   }
 
   /**
@@ -345,7 +361,7 @@ class EntityReferenceSelectionAccessTest extends WebTestBase {
       'target_type' => 'comment',
       'handler' => 'default',
       'handler_settings' => array(
-        'target_bundles' => array(),
+        'target_bundles' => NULL,
       ),
     );
 
@@ -366,7 +382,7 @@ class EntityReferenceSelectionAccessTest extends WebTestBase {
     );
     $nodes = array();
     foreach ($node_values as $key => $values) {
-      $node = entity_create('node', $values);
+      $node = Node::create($values);
       $node->save();
       $nodes[$key] = $node;
     }
@@ -413,10 +429,10 @@ class EntityReferenceSelectionAccessTest extends WebTestBase {
     $comments = array();
     $comment_labels = array();
     foreach ($comment_values as $key => $values) {
-      $comment = entity_create('comment', $values);
+      $comment = Comment::create($values);
       $comment->save();
       $comments[$key] = $comment;
-      $comment_labels[$key] = SafeMarkup::checkPlain($comment->label());
+      $comment_labels[$key] = Html::escape($comment->label());
     }
 
     // Test as a non-admin.

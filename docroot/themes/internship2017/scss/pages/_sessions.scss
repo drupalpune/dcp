@@ -1,0 +1,160 @@
+/*------------------------------------*\
+    * @file
+    * Sessions Page.
+\*------------------------------------*/
+
+#block-sessionbanner-2 {
+    position:relative;
+    .session-banner {
+        position: absolute;
+        left: 150px;
+        bottom: 100px;
+        z-index: 500;
+        @include breakpoint(tablet) {
+            left: 100px;
+            bottom: 50px;
+        }
+        @include breakpoint(mobileonly) {
+            left: 50px;
+            bottom: 20px;
+        }
+        h1 {
+            color: #fff;
+            font-size: 32px;
+            word-spacing: 5px;
+            font-family: $title-font;
+            @include breakpoint(phablet) {
+                font-size: 24px;
+            }
+            @include breakpoint(mobileonly) {
+                font-size: 14px;
+            }
+        }
+        a {
+            @include abutton($medred);
+            color: #fff;
+            margin-top: 20px;
+            @include breakpoint(phablet) {
+                padding: 15px 30px;
+                margin-top: 10px;
+            }
+            @include breakpoint(mobileonly) {
+                padding: 10px 25px;
+                margin-top: 5px;
+                font-size: 14px;
+            }
+        }
+    }
+}
+
+.session-main {
+    background-color: $lightblue;
+    padding: 20px;
+    margin: 0 auto;
+    font-family: $body-font;
+    h2 {
+        @include heading($blue, 32px);
+    }
+    p {
+        padding: 0 150px;
+        color: $grey;
+        text-align: center;
+        @include breakpoint(laptop) {
+            padding: 0px;
+        }
+    }
+    a {
+        display: inline-block;
+        width: 20%;
+        height: 40px;
+        background-color: $medred;
+        color: #fff;
+        text-decoration: none;
+        margin-top: 10px;
+        @include breakpoint(phablet) {
+            width: 30%;
+        }
+        @include breakpoint(mobileonly) {
+            width: 50%;
+        }
+    }
+    .session-wrapper {
+        @include container($container-width, 20px);
+        @include breakpoint(mobileonly) {
+            padding: 0px;
+        }
+        .flex-session {
+            margin-top: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            a {
+                margin: 20px 20px;
+                text-align: center;
+                line-height: 40px;
+            }
+        }
+    }
+}
+
+#block-internship2017-selectioncommitteeblock {
+    font-family: $body-font;
+    @include container($container-width, 20px);
+    @include breakpoint(mobileonly) {
+        padding: 0px;
+    }
+    h2 {
+        @include heading($blue, 32px);
+    }
+    p {
+        color: $grey;
+        padding: 0 50px;
+        text-align: center;
+        line-height: 20px;
+        @include breakpoint(phablet) {
+            padding: 0px;
+        }
+    }
+    ul {
+        margin-top: 50px;
+        display: flex;
+        justify-content: space-between;
+        @include breakpoint(phablet) {
+            flex-direction: column;
+        }
+        li {
+            width: 24%;
+            @include breakpoint(phablet) {
+                width: 100%;
+                margin-top: 20px;
+            }
+            img {
+                border-top-right-radius: 5px;
+                border-top-left-radius: 5px;
+                width: 100%;
+                height: 200px;
+                @include breakpoint(phablet) {
+                    height: 400px;
+                }
+                @include breakpoint(mobileonly) {
+                    height: 200px;
+                }
+            }
+            h3 {
+                padding: 10px 0;
+                color: $blue;
+                font-size: 18px;
+                text-transform: uppercase;
+            }
+            p {
+                padding-left: 0px;
+                padding-right: 50px;
+                margin-top: 10px;
+                text-align: left;
+                @include breakpoint(laptop) {
+                    padding: 0px;
+                }
+            }
+        }
+    }
+}

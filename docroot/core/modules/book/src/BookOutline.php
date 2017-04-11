@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\book\BookOutline.
- */
-
 namespace Drupal\book;
 
 /**
@@ -126,8 +121,7 @@ class BookOutline {
     }
 
     if ($children) {
-      $elements = $this->bookManager->bookTreeOutput($children);
-      return drupal_render($elements);
+      return $this->bookManager->bookTreeOutput($children);
     }
     return '';
   }

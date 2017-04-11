@@ -11,10 +11,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
-use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Language\Language;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -467,6 +464,42 @@ class SqlContentEntityStorageTest extends UnitTestCase {
         'uuid' => 'test_uuid',
       )),
     );
+  }
+
+  /**
+   * Tests getTableMapping() with a base field that requires a dedicated table.
+   *
+   * @covers ::__construct
+   * @covers ::getTableMapping
+   */
+  public function testGetTableMappingSimpleWithDedicatedStorageFields() {
+    $base_field_names = ['multi_valued_base_field'];
+
+    // Set up one entity key in order to have a base table.
+    $this->fieldDefinitions = $this->mockFieldDefinitions(['test_id']);
+
+    // Set up the multi-valued base field.
+    $this->fieldDefinitions += $this->mockFieldDefinitions($base_field_names, [
+      'hasCustomStorage' => FALSE,
+      'isMultiple' => TRUE,
+      'getTargetEntityTypeId' => 'entity_test',
+    ]);
+
+    $this->setUpEntityStorage();
+
+    $mapping = $this->entityStorage->getTableMapping();
+    $this->assertEquals(['entity_test', 'entity_test__multi_valued_base_field'], $mapping->getTableNames());
+    $this->assertEquals($base_field_names, $mapping->getFieldNames('entity_test__multi_valued_base_field'));
+
+    $extra_columns = array(
+      'bundle',
+      'deleted',
+      'entity_id',
+      'revision_id',
+      'langcode',
+      'delta',
+    );
+    $this->assertEquals($extra_columns, $mapping->getExtraColumns('entity_test__multi_valued_base_field'));
   }
 
   /**
@@ -1130,8 +1163,10 @@ class SqlContentEntityStorageTest extends UnitTestCase {
 
     $entity_storage = $this->getMockBuilder('Drupal\Core\Entity\Sql\SqlContentEntityStorage')
       ->setConstructorArgs(array($this->entityType, $this->connection, $this->entityManager, $this->cache, $this->languageManager))
-      ->setMethods(array('getFromStorage'))
+      ->setMethods(array('getFromStorage', 'invokeStorageLoadHook'))
       ->getMock();
+    $entity_storage->method('invokeStorageLoadHook')
+      ->willReturn(NULL);
     $entity_storage->expects($this->once())
       ->method('getFromStorage')
       ->with(array($id))
@@ -1180,8 +1215,10 @@ class SqlContentEntityStorageTest extends UnitTestCase {
 
     $entity_storage = $this->getMockBuilder('Drupal\Core\Entity\Sql\SqlContentEntityStorage')
       ->setConstructorArgs(array($this->entityType, $this->connection, $this->entityManager, $this->cache, $this->languageManager))
-      ->setMethods(array('getFromStorage'))
+      ->setMethods(array('getFromStorage', 'invokeStorageLoadHook'))
       ->getMock();
+    $entity_storage->method('invokeStorageLoadHook')
+      ->willReturn(NULL);
     $entity_storage->expects($this->once())
       ->method('getFromStorage')
       ->with(array($id))
@@ -1277,16 +1314,16 @@ class SqlContentEntityStorageTest extends UnitTestCase {
 
     $this->fieldDefinitions = $this->mockFieldDefinitions(array('id'));
     $this->fieldDefinitions['id']->expects($this->any())
-    ->method('getType')
-    ->will($this->returnValue('integer'));
+      ->method('getType')
+      ->will($this->returnValue('integer'));
 
     $this->setUpEntityStorage();
 
     $this->entityType->expects($this->any())
-    ->method('getKey')
-    ->will($this->returnValueMap(array(
-      array('id', 'id'),
-    )));
+      ->method('getKey')
+      ->will($this->returnValueMap(
+        array(array('id', 'id'))
+      ));
 
     $method = new \ReflectionMethod($this->entityStorage, 'cleanIds');
     $method->setAccessible(TRUE);

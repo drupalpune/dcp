@@ -56,6 +56,11 @@ label:
   label: 'Label'
   translatable: true
 
+# String containing plural variants, separated by EXT.
+plural_label:
+  type: label
+  label: 'Plural variants'
+
 # Internal Drupal path
 path:
   type: string
@@ -82,12 +87,22 @@ color_hex:
 # Complex extended data types:
 
 # Root of a configuration object.
+
+_core_config_info:
+  type: mapping
+  mapping:
+    default_config_hash:
+      type: string
+      label: 'Default configuration hash'
+
 config_object:
   type: mapping
   mapping:
     langcode:
       type: string
       label: 'Language code'
+    _core:
+      type: _core_config_info
 
 # Mail text with subject and body parts.
 mail:
@@ -276,6 +291,8 @@ config_entity:
       label: 'Third party settings'
       sequence:
         type: '[%parent.%parent.%type].third_party.[%key]'
+    _core:
+      type: _core_config_info
 
 block_settings:
   type: mapping
@@ -290,13 +307,6 @@ block_settings:
     label_display:
       type: string
       label: 'Display title'
-    cache:
-      type: mapping
-      label: 'Cache settings'
-      mapping:
-        max_age:
-          type: integer
-          label: 'Maximum age'
     status:
       type: boolean
       label: 'Status'
@@ -309,6 +319,11 @@ block_settings:
     provider:
       type: string
       label: 'Provider'
+    context_mapping:
+      type: sequence
+      label: 'Context assignments'
+      sequence:
+        type: string
 
 condition.plugin:
   type: mapping
@@ -352,9 +367,6 @@ base_entity_reference_field_settings:
     target_type:
       type: string
       label: 'Type of item to reference'
-    target_bundle:
-      type: string
-      label: 'Bundle of item to reference'
 
 field_config_base:
   type: config_entity
@@ -416,8 +428,18 @@ core.date_format.*:
       type: boolean
       label: 'Locked'
     pattern:
-      type: date_format
+      type: core_date_format_pattern.[%parent.locked]
       label: 'PHP date format'
+
+# Unlocked date formats should use the translatable type.
+core_date_format_pattern.0:
+  type: date_format
+  label: 'Date format'
+
+# Locked date formats are just used to transport the value.
+core_date_format_pattern.1:
+  type: string
+  label: 'Date format'
 
 # Generic field settings schemas.
 
@@ -486,7 +508,7 @@ field.value.string_long:
 # Schema for the configuration of the URI field type.
 
 field.storage_settings.uri:
-  type: mapping
+  type: field.storage_settings.string
   label: 'URI settings'
   mapping:
     max_length:
@@ -583,10 +605,10 @@ field.field_settings.boolean:
   type: mapping
   mapping:
     on_label:
-      type: string
+      type: label
       label: 'On label'
     off_label:
-      type: string
+      type: label
       label: 'Off label'
 
 field.value.boolean:
@@ -641,10 +663,10 @@ field.field_settings.integer:
       type: integer
       label: 'Maximum'
     prefix:
-      type: string
+      type: label
       label: 'Prefix'
     suffix:
-      type: string
+      type: label
       label: 'Suffix'
 
 field.value.integer:
@@ -679,10 +701,10 @@ field.field_settings.decimal:
       type: float
       label: 'Maximum'
     prefix:
-      type: string
+      type: label
       label: 'Prefix'
     suffix:
-      type: string
+      type: label
       label: 'Suffix'
 
 field.value.decimal:
@@ -710,10 +732,10 @@ field.field_settings.float:
       type: float
       label: 'Maximum'
     prefix:
-      type: string
+      type: label
       label: 'Prefix'
     suffix:
-      type: string
+      type: label
       label: 'Suffix'
 
 field.value.float:
@@ -756,6 +778,7 @@ entity_reference_selection:
     target_bundles:
       type: sequence
       label: 'types'
+      nullable: true
       sequence:
         type: string
         label: 'Type'
@@ -772,6 +795,9 @@ entity_reference_selection:
     auto_create:
       type: boolean
       label: 'Create referenced entities if they don''t already exist'
+    auto_create_bundle:
+      type: string
+      label: 'Bundle assigned to the auto-created entities.'
 
 entity_reference_selection.*:
   type: entity_reference_selection

@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\file\Tests\FileManagedTestBase.
- */
-
 namespace Drupal\file\Tests;
 
+use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\simpletest\WebTestBase;
 
@@ -33,9 +29,9 @@ abstract class FileManagedTestBase extends WebTestBase {
    * Assert that all of the specified hook_file_* hooks were called once, other
    * values result in failure.
    *
-   * @param $expected
-   *   Array with string containing with the hook name, e.g. 'load', 'save',
-   *   'insert', etc.
+   * @param string[] $expected
+   *   An array of strings containing with the hook name; for example, 'load',
+   *   'save', 'insert', etc.
    */
   function assertFileHooksCalled($expected) {
     \Drupal::state()->resetCache();
@@ -65,11 +61,11 @@ abstract class FileManagedTestBase extends WebTestBase {
   /**
    * Assert that a hook_file_* hook was called a certain number of times.
    *
-   * @param $hook
-   *   String with the hook name, e.g. 'load', 'save', 'insert', etc.
-   * @param $expected_count
+   * @param string $hook
+   *   String with the hook name; for instance, 'load', 'save', 'insert', etc.
+   * @param int $expected_count
    *   Optional integer count.
-   * @param $message
+   * @param string|null $message
    *   Optional translated string message.
    */
   function assertFileHookCalled($hook, $expected_count = 1, $message = NULL) {
@@ -137,13 +133,13 @@ abstract class FileManagedTestBase extends WebTestBase {
    * Create a file and save it to the files table and assert that it occurs
    * correctly.
    *
-   * @param $filepath
+   * @param string $filepath
    *   Optional string specifying the file path. If none is provided then a
    *   randomly named file will be created in the site's files directory.
-   * @param $contents
+   * @param string $contents
    *   Optional contents to save into the file. If a NULL value is provided an
    *   arbitrary string will be used.
-   * @param $scheme
+   * @param string $scheme
    *   Optional string indicating the stream scheme to use. Drupal core includes
    *   public, private, and temporary. The public wrapper is the default.
    * @return \Drupal\file\FileInterface
@@ -152,10 +148,10 @@ abstract class FileManagedTestBase extends WebTestBase {
   function createFile($filepath = NULL, $contents = NULL, $scheme = NULL) {
     // Don't count hook invocations caused by creating the file.
     \Drupal::state()->set('file_test.count_hook_invocations', FALSE);
-    $file = entity_create('file', array(
+    $file = File::create([
       'uri' => $this->createUri($filepath, $contents, $scheme),
       'uid' => 1,
-    ));
+    ]);
     $file->save();
     // Write the record directly rather than using the API so we don't invoke
     // the hooks.

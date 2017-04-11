@@ -1,11 +1,7 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\shortcut\Tests\ShortcutSetsTest.
- */
-
 namespace Drupal\shortcut\Tests;
+
 use Drupal\shortcut\Entity\ShortcutSet;
 
 /**
@@ -14,6 +10,22 @@ use Drupal\shortcut\Entity\ShortcutSet;
  * @group shortcut
  */
 class ShortcutSetsTest extends ShortcutTestBase {
+
+  /**
+   * Modules to enable.
+   *
+   * @var string[]
+   */
+  public static $modules = ['block'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('local_actions_block');
+  }
 
   /**
    * Tests creating a shortcut set.
@@ -56,7 +68,7 @@ class ShortcutSetsTest extends ShortcutTestBase {
     // Test the contents of each th cell.
     $expected_items = array(t('Name'), t('Weight'), t('Operations'));
     foreach ($elements as $key => $element) {
-      $this->assertIdentical((string) $element[0], $expected_items[$key]);
+      $this->assertEqual((string) $element[0], $expected_items[$key]);
     }
 
     // Look for test shortcuts in the table.
@@ -76,7 +88,7 @@ class ShortcutSetsTest extends ShortcutTestBase {
       $weight--;
     }
 
-    $this->drupalPostForm(NULL, $edit, t('Save changes'));
+    $this->drupalPostForm(NULL, $edit, t('Save'));
     $this->assertRaw(t('The shortcut set has been updated.'));
 
     \Drupal::entityManager()->getStorage('shortcut')->resetCache();
@@ -195,4 +207,5 @@ class ShortcutSetsTest extends ShortcutTestBase {
     $this->drupalGet('user/' . $this->adminUser->id() . '/shortcuts');
     $this->assertText($new_set->label(), 'Generated shortcut set was listed as a choice on the user account page.');
   }
+
 }

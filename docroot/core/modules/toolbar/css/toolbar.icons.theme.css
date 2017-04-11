@@ -145,12 +145,9 @@
 .toolbar-icon-help-main.is-active:before {
   background-image: url(../../../misc/icons/000000/questionmark-disc.svg);
 }
-.toolbar .toolbar-bar .toolbar-icon:before {
-  min-height: 3em;
-}
 
 @media only screen and (min-width: 16.5em) {
-  .toolbar .toolbar-bar .toolbar-icon {
+  .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon {
     margin-left: 0;
     margin-right: 0;
     padding-left: 0;
@@ -158,36 +155,42 @@
     text-indent: -9999px;
     width: 4em;
   }
-  .toolbar .toolbar-bar .toolbar-icon:before {
+  .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:before {
     background-size: 42% auto;
     left: 0; /* LTR */
     width: 100%;
   }
-  [dir="rtl"] .toolbar .toolbar-bar .toolbar-icon:before {
+  .no-svg .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:before {
+    background-size: auto auto;
+  }
+  [dir="rtl"] .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:before {
     left: auto;
     right: 0;
   }
 }
 
 @media only screen and (min-width: 36em) {
-  .toolbar .toolbar-bar .toolbar-icon {
+  .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon {
     background-position: left center; /* LTR */
     padding-left: 2.75em; /* LTR */
     padding-right: 1.3333em; /* LTR */
     text-indent: 0;
     width: auto;
   }
-  [dir="rtl"] .toolbar .toolbar-bar .toolbar-icon {
+  [dir="rtl"] .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon {
     background-position: right center;
     padding-left: 1.3333em;
     padding-right: 2.75em;
   }
-  .toolbar .toolbar-bar .toolbar-icon:before {
+  .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:before {
     background-size: 100% auto;
     left: 0.6667em; /* LTR */
     width: 20px;
   }
-  [dir="rtl"] .toolbar .toolbar-bar .toolbar-icon:before {
+  .no-svg .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:before {
+    background-size: auto auto;
+  }
+  [dir="rtl"] .toolbar .toolbar-bar .toolbar-tab > .toolbar-icon:before {
     left: 0;
     right: 0.6667em;
   }
@@ -255,20 +258,18 @@
  * Orientation toggle.
  */
 .toolbar .toolbar-toggle-orientation button {
-  height: 16px;
+  height: 39px;
   padding: 0;
   text-indent: -999em;
-  width: 20px;
+  width: 39px;
 }
 .toolbar .toolbar-toggle-orientation button:before {
-  left: 0; /* LTR */
-}
-[dir="rtl"] .toolbar .toolbar-toggle-orientation button:before {
-  left: auto;
+  left: 0;
   right: 0;
+  margin: 0 auto;
 }
 [dir="rtl"] .toolbar .toolbar-toggle-orientation .toolbar-icon {
-  padding-right: 0;
+  padding: 0;
 }
 /**
  * In order to support a hover effect on the SVG images, while also supporting
@@ -293,7 +294,7 @@
 .toolbar .toolbar-toggle-orientation [value="horizontal"]:before {
   background-image: url(../../../misc/icons/bebebe/push-up.svg);
 }
-.toolbar .toolbar-toggle-orientation [value="horizontal"]:hover:before {
+.toolbar .toolbar-toggle-orientation [value="horizontal"]:hover:before,
+.toolbar .toolbar-toggle-orientation [value="horizontal"]:focus:before {
   background-image: url(../../../misc/icons/787878/push-up.svg);
 }
-

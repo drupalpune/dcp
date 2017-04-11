@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\tour\Tests\TourTest.
- */
-
 namespace Drupal\tour\Tests;
 
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\tour\Entity\Tour;
 
 /**
  * Tests the functionality of tour tips.
@@ -21,7 +17,7 @@ class TourTest extends TourTestBasic {
    *
    * @var array
    */
-  public static $modules = array('tour', 'locale', 'language', 'tour_test');
+  public static $modules = ['block', 'tour', 'locale', 'language', 'tour_test'];
 
   /**
    * The permissions required for a logged in user to test tour tips.
@@ -42,6 +38,18 @@ class TourTest extends TourTestBasic {
   );
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('local_actions_block', [
+      'theme' => 'seven',
+      'region' => 'content'
+    ]);
+  }
+
+  /**
    * Test tour functionality.
    */
   public function testTourFunctionality() {
@@ -58,7 +66,7 @@ class TourTest extends TourTestBasic {
     $elements = $this->xpath('//li[@data-id=:data_id and @class=:classes and ./p//a[@href=:href and contains(., :text)]]', array(
       ':classes' => 'tip-module-tour-test tip-type-text tip-tour-test-1',
       ':data_id' => 'tour-test-1',
-      ':href' =>  \Drupal::url('<front>', [], ['absolute' => TRUE]),
+      ':href' => \Drupal::url('<front>', [], ['absolute' => TRUE]),
       ':text' => 'Drupal',
     ));
     $this->assertEqual(count($elements), 1, 'Found Token replacement.');
@@ -96,7 +104,7 @@ class TourTest extends TourTestBasic {
     $this->assertNotEqual(count($elements), 1, 'Did not find English variant of tip 1.');
 
     // Programmatically create a tour for use through the remainder of the test.
-    $tour = entity_create('tour', array(
+    $tour = Tour::create(array(
       'id' => 'tour-entity-create-test-en',
       'label' => 'Tour test english',
       'langcode' => 'en',
@@ -131,13 +139,13 @@ class TourTest extends TourTestBasic {
 
     // Ensure that a tour entity has the expected dependencies based on plugin
     // providers and the module named in the configuration entity.
-    $dependencies = $tour->calculateDependencies();
+    $dependencies = $tour->calculateDependencies()->getDependencies();
     $this->assertEqual($dependencies['module'], array('system', 'tour_test'));
 
     $this->drupalGet('tour-test-1');
 
     // Load it back from the database and verify storage worked.
-    $entity_save_tip = entity_load('tour', 'tour-entity-create-test-en');
+    $entity_save_tip = Tour::load('tour-entity-create-test-en');
     // Verify that hook_ENTITY_TYPE_load() integration worked.
     $this->assertEqual($entity_save_tip->loaded, 'Load hooks work');
     // Verify that hook_ENTITY_TYPE_presave() integration worked.
@@ -176,4 +184,5 @@ class TourTest extends TourTestBasic {
     ));
     $this->assertEqual(count($elements), 0, 'Did not find English variant of tip 1.');
   }
+
 }

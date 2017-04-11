@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\contextual\ContextualController.
- */
-
 namespace Drupal\contextual;
 
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -12,7 +7,6 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Returns responses for Contextual module routes.
@@ -44,7 +38,7 @@ class ContextualController implements ContainerAwareInterface {
         '#type' => 'contextual_links',
         '#contextual_links' => _contextual_id_to_links($id),
       );
-      $rendered[$id] = drupal_render($element);
+      $rendered[$id] = $this->container->get('renderer')->renderRoot($element);
     }
 
     return new JsonResponse($rendered);

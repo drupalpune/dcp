@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\language\Form\ContentLanguageSettingsForm.
- */
-
 namespace Drupal\language\Form;
 
 use Drupal\Core\Entity\ContentEntityTypeInterface;
@@ -63,7 +58,7 @@ class ContentLanguageSettingsForm extends FormBase {
     $bundles = $this->entityManager->getAllBundleInfo();
     $language_configuration = array();
     foreach ($entity_types as $entity_type_id => $entity_type) {
-      if (!$entity_type instanceof ContentEntityTypeInterface || !$entity_type->hasKey('langcode')) {
+      if (!$entity_type instanceof ContentEntityTypeInterface || !$entity_type->hasKey('langcode') || !isset($bundles[$entity_type_id])) {
         continue;
       }
       $labels[$entity_type_id] = $entity_type->getLabel() ?: $entity_type_id;
@@ -87,6 +82,9 @@ class ContentLanguageSettingsForm extends FormBase {
         'library' => array(
           'language/drupal.language.admin',
         ),
+      ),
+      '#attributes' => array(
+        'class' => 'language-content-settings-form',
       ),
     );
 

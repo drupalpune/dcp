@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Core\PathProcessor\InboundPathProcessorInterface.
- */
-
 namespace Drupal\Core\PathProcessor;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -18,8 +13,7 @@ interface InboundPathProcessorInterface {
    * Processes the inbound path.
    *
    * @param string $path
-   *   The path to process.
-   *
+   *   The path to process, with a leading slash.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The HttpRequest object representing the current request.
    *

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\node\Tests\NodeTypeInitialLanguageTest.
- */
-
 namespace Drupal\node\Tests;
 
 use Drupal\Core\Language\LanguageInterface;

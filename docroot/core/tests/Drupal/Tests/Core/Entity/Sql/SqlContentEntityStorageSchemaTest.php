@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Entity\Sql\SqlContentEntityStorageSchemaTest.
- */
-
 namespace Drupal\Tests\Core\Entity\Sql;
 
 use Drupal\Core\Entity\ContentEntityType;
@@ -17,6 +12,13 @@ use Drupal\Tests\UnitTestCase;
  * @group Entity
  */
 class SqlContentEntityStorageSchemaTest extends UnitTestCase {
+
+  /**
+   * The mocked DB schema handler.
+   *
+   * @var \Drupal\Core\Database\Schema|\PHPUnit_Framework_MockObject_MockObject
+   */
+  protected $dbSchemaHandler;
 
   /**
    * The mocked entity manager used in this test.
@@ -502,6 +504,15 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
       ),
     ));
 
+    $this->setUpStorageDefinition('default_langcode', array(
+      'columns' => array(
+        'value' => array(
+          'type' => 'int',
+          'size' => 'tiny',
+        ),
+      ),
+    ));
+
     $expected = array(
       'entity_test' => array(
         'description' => 'The base table for entity_test entities.',
@@ -531,10 +542,21 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
             'type' => 'varchar',
             'not null' => TRUE,
           ),
+          'default_langcode' => array(
+            'type' => 'int',
+            'size' => 'tiny',
+            'not null' => TRUE,
+          ),
         ),
         'primary key' => array('id', 'langcode'),
         'unique keys' => array(),
-        'indexes' => array(),
+        'indexes' => array(
+          'entity_test__id__default_langcode__langcode' => array(
+            0 => 'id',
+            1 => 'default_langcode',
+            2 => 'langcode',
+          ),
+        ),
         'foreign keys' => array(
           'entity_test' => array(
             'table' => 'entity_test',
@@ -547,7 +569,9 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
     $this->setUpStorageSchema($expected);
 
     $table_mapping = new DefaultTableMapping($this->entityType, $this->storageDefinitions);
-    $table_mapping->setFieldNames('entity_test', array_keys($this->storageDefinitions));
+    $non_data_fields = array_keys($this->storageDefinitions);
+    unset($non_data_fields[array_search('default_langcode', $non_data_fields)]);
+    $table_mapping->setFieldNames('entity_test', $non_data_fields);
     $table_mapping->setFieldNames('entity_test_field_data', array_keys($this->storageDefinitions));
 
     $this->storage->expects($this->any())
@@ -601,6 +625,14 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
       'columns' => array(
         'value' => array(
           'type' => 'varchar',
+        ),
+      ),
+    ));
+    $this->setUpStorageDefinition('default_langcode', array(
+      'columns' => array(
+        'value' => array(
+          'type' => 'int',
+          'size' => 'tiny',
         ),
       ),
     ));
@@ -677,11 +709,21 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
             'type' => 'varchar',
             'not null' => TRUE,
           ),
+          'default_langcode' => array(
+            'type' => 'int',
+            'size' => 'tiny',
+            'not null' => TRUE,
+          ),
         ),
         'primary key' => array('id', 'langcode'),
         'unique keys' => array(),
         'indexes' => array(
           'entity_test__revision_id' => array('revision_id'),
+          'entity_test__id__default_langcode__langcode' => array(
+            0 => 'id',
+            1 => 'default_langcode',
+            2 => 'langcode',
+          ),
         ),
         'foreign keys' => array(
           'entity_test' => array(
@@ -705,10 +747,21 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
             'type' => 'varchar',
             'not null' => TRUE,
           ),
+          'default_langcode' => array(
+            'type' => 'int',
+            'size' => 'tiny',
+            'not null' => TRUE,
+          ),
         ),
         'primary key' => array('revision_id', 'langcode'),
         'unique keys' => array(),
-        'indexes' => array(),
+        'indexes' => array(
+          'entity_test__id__default_langcode__langcode' => array(
+            0 => 'id',
+            1 => 'default_langcode',
+            2 => 'langcode',
+          ),
+        ),
         'foreign keys' => array(
           'entity_test' => array(
             'table' => 'entity_test',
@@ -725,8 +778,10 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
     $this->setUpStorageSchema($expected);
 
     $table_mapping = new DefaultTableMapping($this->entityType, $this->storageDefinitions);
-    $table_mapping->setFieldNames('entity_test', array_keys($this->storageDefinitions));
-    $table_mapping->setFieldNames('entity_test_revision', array_keys($this->storageDefinitions));
+    $non_data_fields = array_keys($this->storageDefinitions);
+    unset($non_data_fields[array_search('default_langcode', $non_data_fields)]);
+    $table_mapping->setFieldNames('entity_test', $non_data_fields);
+    $table_mapping->setFieldNames('entity_test_revision', $non_data_fields);
     $table_mapping->setFieldNames('entity_test_field_data', array_keys($this->storageDefinitions));
     $table_mapping->setFieldNames('entity_test_revision_field_data', array_keys($this->storageDefinitions));
 
@@ -765,6 +820,16 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
           'length' => 32,
           'not null' => FALSE,
         ),
+        'area' => array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'depth' => array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
       ),
       'foreign keys' => array(
         'color' => array(
@@ -774,8 +839,14 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
           ),
         ),
       ),
-      'unique keys' => array(),
-      'indexes' => array(),
+      'unique keys' => array(
+        'area' => array('area'),
+        'shape' => array(array('shape', 10)),
+      ),
+      'indexes' => array(
+        'depth' => array('depth'),
+        'color' => array(array('color', 3)),
+      ),
     ));
 
     $field_storage = $this->storageDefinitions[$field_name];
@@ -804,57 +875,73 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
           'bundle' => array(
             'type' => 'varchar_ascii',
             'length' => 128,
-            'not null' => true,
+            'not null' => TRUE,
             'default' => '',
             'description' => 'The field instance bundle to which this row belongs, used when deleting a field instance',
           ),
           'deleted' => array(
             'type' => 'int',
             'size' => 'tiny',
-            'not null' => true,
+            'not null' => TRUE,
             'default' => 0,
             'description' => 'A boolean indicating whether this data item has been deleted',
           ),
           'entity_id' => array(
             'type' => 'int',
-            'unsigned' => true,
-            'not null' => true,
+            'unsigned' => TRUE,
+            'not null' => TRUE,
             'description' => 'The entity id this data is attached to',
           ),
           'revision_id' => array(
             'type' => 'int',
-            'unsigned' => true,
-            'not null' => true,
+            'unsigned' => TRUE,
+            'not null' => TRUE,
             'description' => 'The entity revision id this data is attached to, which for an unversioned entity type is the same as the entity id',
           ),
           'langcode' => array(
             'type' => 'varchar_ascii',
             'length' => 32,
-            'not null' => true,
+            'not null' => TRUE,
             'default' => '',
             'description' => 'The language code for this data item.',
           ),
           'delta' => array(
             'type' => 'int',
-            'unsigned' => true,
-            'not null' => true,
+            'unsigned' => TRUE,
+            'not null' => TRUE,
             'description' => 'The sequence number for this data item, used for multi-value fields',
           ),
           $field_name . '_shape' => array(
             'type' => 'varchar',
             'length' => 32,
-            'not null' => false,
+            'not null' => FALSE,
           ),
           $field_name . '_color' => array(
             'type' => 'varchar',
             'length' => 32,
-            'not null' => false,
+            'not null' => FALSE,
+          ),
+          $field_name . '_area' => array(
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
+          ),
+          $field_name . '_depth' => array(
+            'type' => 'int',
+            'unsigned' => TRUE,
+            'not null' => TRUE,
           ),
         ),
         'primary key' => array('entity_id', 'deleted', 'delta', 'langcode'),
         'indexes' => array(
           'bundle' => array('bundle'),
           'revision_id' => array('revision_id'),
+          $field_name . '_depth' => array($field_name . '_depth'),
+          $field_name . '_color' => array(array($field_name . '_color', 3)),
+        ),
+        'unique keys' => array(
+           $field_name . '_area' => array($field_name . '_area'),
+           $field_name . '_shape' => array(array($field_name . '_shape', 10)),
         ),
         'foreign keys' => array(
           $field_name . '_color' => array(
@@ -949,51 +1036,51 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
           'bundle' => array(
             'type' => 'varchar_ascii',
             'length' => 128,
-            'not null' => true,
+            'not null' => TRUE,
             'default' => '',
             'description' => 'The field instance bundle to which this row belongs, used when deleting a field instance',
           ),
           'deleted' => array(
             'type' => 'int',
             'size' => 'tiny',
-            'not null' => true,
+            'not null' => TRUE,
             'default' => 0,
             'description' => 'A boolean indicating whether this data item has been deleted',
           ),
           'entity_id' => array(
             'type' => 'varchar_ascii',
             'length' => 128,
-            'not null' => true,
+            'not null' => TRUE,
             'description' => 'The entity id this data is attached to',
           ),
           'revision_id' => array(
             'type' => 'varchar_ascii',
             'length' => 128,
-            'not null' => true,
+            'not null' => TRUE,
             'description' => 'The entity revision id this data is attached to, which for an unversioned entity type is the same as the entity id',
           ),
           'langcode' => array(
             'type' => 'varchar_ascii',
             'length' => 32,
-            'not null' => true,
+            'not null' => TRUE,
             'default' => '',
             'description' => 'The language code for this data item.',
           ),
           'delta' => array(
             'type' => 'int',
-            'unsigned' => true,
-            'not null' => true,
+            'unsigned' => TRUE,
+            'not null' => TRUE,
             'description' => 'The sequence number for this data item, used for multi-value fields',
           ),
           $field_name . '_shape' => array(
             'type' => 'varchar',
             'length' => 32,
-            'not null' => false,
+            'not null' => FALSE,
           ),
           $field_name . '_color' => array(
             'type' => 'varchar',
             'length' => 32,
-            'not null' => false,
+            'not null' => FALSE,
           ),
         ),
         'primary key' => array('entity_id', 'deleted', 'delta', 'langcode'),
@@ -1245,7 +1332,7 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
       ->with($this->entityType->id())
       ->will($this->returnValue($this->storageDefinitions));
 
-    $db_schema_handler = $this->getMockBuilder('Drupal\Core\Database\Schema')
+    $this->dbSchemaHandler = $this->getMockBuilder('Drupal\Core\Database\Schema')
       ->disableOriginalConstructor()
       ->getMock();
 
@@ -1254,7 +1341,7 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
       $expected_table_names = array_keys($expected);
       $expected_table_schemas = array_values($expected);
 
-      $db_schema_handler->expects($this->any())
+      $this->dbSchemaHandler->expects($this->any())
         ->method('createTable')
         ->with(
           $this->callback(function($table_name) use (&$invocation_count, $expected_table_names) {
@@ -1274,17 +1361,21 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
       ->getMock();
     $connection->expects($this->any())
       ->method('schema')
-      ->will($this->returnValue($db_schema_handler));
+      ->will($this->returnValue($this->dbSchemaHandler));
 
     $key_value = $this->getMock('Drupal\Core\KeyValueStore\KeyValueStoreInterface');
     $this->storageSchema = $this->getMockBuilder('Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema')
       ->setConstructorArgs(array($this->entityManager, $this->entityType, $this->storage, $connection))
-      ->setMethods(array('installedStorageSchema', 'loadEntitySchemaData', 'hasSharedTableNameChanges'))
+      ->setMethods(array('installedStorageSchema', 'loadEntitySchemaData', 'hasSharedTableNameChanges', 'isTableEmpty'))
       ->getMock();
     $this->storageSchema
       ->expects($this->any())
       ->method('installedStorageSchema')
       ->will($this->returnValue($key_value));
+    $this->storageSchema
+      ->expects($this->any())
+      ->method('isTableEmpty')
+      ->willReturn(FALSE);
   }
 
   /**
@@ -1325,6 +1416,97 @@ class SqlContentEntityStorageSchemaTest extends UnitTestCase {
         ->method('getPropertyDefinitions')
         ->will($this->returnValue($property_definitions));
     }
+  }
+
+  /**
+   * ::onEntityTypeUpdate
+   */
+  public function testonEntityTypeUpdateWithNewIndex() {
+    $this->entityType = $original_entity_type = new ContentEntityType(array(
+      'id' => 'entity_test',
+      'entity_keys' => array('id' => 'id'),
+    ));
+
+    // Add a field with a really long index.
+    $this->setUpStorageDefinition('long_index_name', array(
+      'columns' => array(
+        'long_index_name' => array(
+          'type' => 'int',
+        ),
+      ),
+      'indexes' => array(
+        'long_index_name_really_long_long_name' => array(array('long_index_name', 10)),
+      ),
+    ));
+
+    $expected = array(
+      'entity_test' => array(
+        'description' => 'The base table for entity_test entities.',
+        'fields' => array(
+          'id' => array(
+            'type' => 'serial',
+            'not null' => TRUE,
+          ),
+          'long_index_name' => array(
+            'type' => 'int',
+            'not null' => FALSE,
+          ),
+        ),
+        'indexes' => array(
+          'entity_test__b588603cb9' => array(
+            array('long_index_name', 10),
+          ),
+        ),
+      ),
+    );
+
+    $this->setUpStorageSchema($expected);
+
+    $table_mapping = new DefaultTableMapping($this->entityType, $this->storageDefinitions);
+    $table_mapping->setFieldNames('entity_test', array_keys($this->storageDefinitions));
+    $table_mapping->setExtraColumns('entity_test', array('default_langcode'));
+
+    $this->storage->expects($this->any())
+      ->method('getTableMapping')
+      ->will($this->returnValue($table_mapping));
+
+    $this->storageSchema->expects($this->any())
+      ->method('loadEntitySchemaData')
+      ->willReturn([
+        'entity_test' => [
+          'indexes' => [
+            // A changed index definition.
+            'entity_test__b588603cb9' => ['longer_index_name'],
+            // An index that has been removed.
+            'entity_test__removed_field' => ['removed_field'],
+          ],
+        ],
+      ]);
+
+    // The original indexes should be dropped before the new one is added.
+    $this->dbSchemaHandler->expects($this->at(0))
+      ->method('dropIndex')
+      ->with('entity_test', 'entity_test__b588603cb9');
+    $this->dbSchemaHandler->expects($this->at(1))
+      ->method('dropIndex')
+      ->with('entity_test', 'entity_test__removed_field');
+
+    $this->dbSchemaHandler->expects($this->atLeastOnce())
+      ->method('fieldExists')
+      ->willReturn(TRUE);
+    $this->dbSchemaHandler->expects($this->atLeastOnce())
+      ->method('addIndex')
+      ->with('entity_test', 'entity_test__b588603cb9', [['long_index_name', 10]], $this->callback(function($actual_value) use ($expected)  {
+        $this->assertEquals($expected['entity_test']['indexes'], $actual_value['indexes']);
+        $this->assertEquals($expected['entity_test']['fields'], $actual_value['fields']);
+        // If the parameters don't match, the assertions above will throw an
+        // exception.
+        return TRUE;
+      }));
+
+    $this->assertNull(
+      $this->storageSchema->onEntityTypeUpdate($this->entityType, $original_entity_type)
+    );
   }
 
 }

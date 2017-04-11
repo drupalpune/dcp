@@ -1,14 +1,9 @@
 <?php
 
-/**
- * @file
- * Definition of \Drupal\views\Plugin\views\filter\Bundle.
- */
-
 namespace Drupal\views\Plugin\views\filter;
 
-use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -44,6 +39,13 @@ class Bundle extends InOperator {
   protected $entityManager;
 
   /**
+   * The bundle info service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   */
+  protected $bundleInfoService;
+
+  /**
    * Constructs a Bundle object.
    *
    * @param array $configuration
@@ -55,10 +57,11 @@ class Bundle extends InOperator {
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, EntityTypeBundleInfoInterface $bundle_info_service) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->entityManager = $entity_manager;
+    $this->bundleInfoService = $bundle_info_service;
   }
 
   /**
@@ -69,12 +72,13 @@ class Bundle extends InOperator {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity.manager')
+      $container->get('entity.manager'),
+      $container->get('entity_type.bundle.info')
     );
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\filter\InOperator::init().
+   * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
@@ -85,11 +89,11 @@ class Bundle extends InOperator {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\filter\InOperator::getValueOptions().
+   * {@inheritdoc}
    */
   public function getValueOptions() {
     if (!isset($this->valueOptions)) {
-      $types = entity_get_bundles($this->entityTypeId);
+      $types = $this->bundleInfoService->getBundleInfo($this->entityTypeId);
       $this->valueTitle = $this->t('@entity types', array('@entity' => $this->entityType->getLabel()));
 
       $options = array();
@@ -105,7 +109,7 @@ class Bundle extends InOperator {
   }
 
   /**
-   * Overrides \Drupal\views\Plugin\views\filter\InOperator::query().
+   * {@inheritdoc}
    */
   public function query() {
     // Make sure that the entity base table is in the query.

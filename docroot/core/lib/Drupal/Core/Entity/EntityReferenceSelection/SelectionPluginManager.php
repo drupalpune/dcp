@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManager.
- */
-
 namespace Drupal\Core\Entity\EntityReferenceSelection;
 
 use Drupal\Component\Plugin\FallbackPluginManagerInterface;
@@ -19,8 +14,6 @@ use Drupal\Core\Plugin\DefaultPluginManager;
  *
  * @see \Drupal\Core\Entity\Annotation\EntityReferenceSelection
  * @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface
- * @see \Drupal\Core\Entity\Plugin\EntityReferenceSelection\SelectionBase
- * @see \Drupal\Core\Entity\Plugin\Derivative\SelectionBase
  * @see plugin_api
  */
 class SelectionPluginManager extends DefaultPluginManager implements SelectionPluginManagerInterface, FallbackPluginManagerInterface {

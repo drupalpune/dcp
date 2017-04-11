@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\link\Plugin\Validation\Constraint\LinkAccessConstraint.
- */
-
 namespace Drupal\link\Plugin\Validation\Constraint;
 
 use Symfony\Component\Validator\Constraint;
@@ -12,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * Defines an access validation constraint for links.
  *
- * @Plugin(
+ * @Constraint(
  *   id = "LinkAccess",
  *   label = @Translation("Link URI can be accessed by the user.", context = "Validation"),
  * )

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Ajax\FormValuesTest.
- */
-
 namespace Drupal\system\Tests\Ajax;
 
 use Drupal\Core\Ajax\DataCommand;
@@ -48,6 +43,9 @@ class FormValuesTest extends AjaxTestBase {
     // Verify that AJAX elements with invalid callbacks return error code 500.
     // Ensure the test error log is empty before these tests.
     $this->assertNoErrorsLogged();
+    // We don't need to check for the X-Drupal-Ajax-Token header with these
+    // invalid requests.
+    $this->assertAjaxHeader = FALSE;
     foreach (array('null', 'empty', 'nonexistent') as $key) {
       $element_name = 'select_' . $key . '_callback';
       $edit = array(
@@ -56,8 +54,11 @@ class FormValuesTest extends AjaxTestBase {
       $commands = $this->drupalPostAjaxForm('ajax_forms_test_get_form', $edit, $element_name);
       $this->assertResponse(500);
     }
+    // Switch this back to the default.
+    $this->assertAjaxHeader = TRUE;
     // The exceptions are expected. Do not interpret them as a test failure.
     // Not using File API; a potential error must trigger a PHP warning.
     unlink(\Drupal::root() . '/' . $this->siteDirectory . '/error.log');
   }
+
 }

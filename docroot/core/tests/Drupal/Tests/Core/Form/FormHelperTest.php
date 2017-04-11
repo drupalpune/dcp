@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Form\FormHelperTest.
- */
-
 namespace Drupal\Tests\Core\Form;
 
 use Drupal\Core\Form\FormHelper;

@@ -1,13 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Template\AttributeArray.
- */
-
 namespace Drupal\Core\Template;
 
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Utility\Html;
 
 /**
  * A class that defines a type of Attribute that can be added to as an array.
@@ -38,14 +33,14 @@ class AttributeArray extends AttributeValueBase implements \ArrayAccess, \Iterat
   const RENDER_EMPTY_ATTRIBUTE = FALSE;
 
   /**
-   * Implements ArrayAccess::offsetGet().
+   * {@inheritdoc}
    */
   public function offsetGet($offset) {
     return $this->value[$offset];
   }
 
   /**
-   * Implements ArrayAccess::offsetSet().
+   * {@inheritdoc}
    */
   public function offsetSet($offset, $value) {
     if (isset($offset)) {
@@ -57,14 +52,14 @@ class AttributeArray extends AttributeValueBase implements \ArrayAccess, \Iterat
   }
 
   /**
-   * Implements ArrayAccess::offsetUnset().
+   * {@inheritdoc}
    */
   public function offsetUnset($offset) {
     unset($this->value[$offset]);
   }
 
   /**
-   * Implements ArrayAccess::offsetExists().
+   * {@inheritdoc}
    */
   public function offsetExists($offset) {
     return isset($this->value[$offset]);
@@ -76,11 +71,11 @@ class AttributeArray extends AttributeValueBase implements \ArrayAccess, \Iterat
   public function __toString() {
     // Filter out any empty values before printing.
     $this->value = array_unique(array_filter($this->value));
-    return SafeMarkup::checkPlain(implode(' ', $this->value));
+    return Html::escape(implode(' ', $this->value));
   }
 
   /**
-   * Implements IteratorAggregate::getIterator().
+   * {@inheritdoc}
    */
   public function getIterator() {
     return new \ArrayIterator($this->value);

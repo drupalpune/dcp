@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Render\Element\Weight.
- */
-
 namespace Drupal\Core\Render\Element;
 
 use Drupal\Core\Form\FormStateInterface;
@@ -12,8 +7,22 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Provides a form element for input of a weight.
  *
- * Weights are integers used to indicate ordering, with larger numbers later
- * in the order.
+ * Weights are integers used to indicate ordering, with larger numbers later in
+ * the order.
+ *
+ * Properties:
+ * - #delta: The range of possible weight values used. A delta of 10 would
+ *   indicate possible weight values between -10 and 10.
+ *
+ * Usage example:
+ * @code
+ * $form['weight'] = array(
+ *   '#type' => 'weight',
+ *   '#title' => $this->t('Weight'),
+ *   '#default_value' => $edit['weight'],
+ *   '#delta' => 10,
+ * );
+ * @endcode
  *
  * @FormElement("weight")
  */

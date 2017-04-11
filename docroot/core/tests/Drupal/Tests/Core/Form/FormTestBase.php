@@ -1,22 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\Form\FormTestBase.
- */
-
-namespace Drupal\Tests\Core\Form {
+namespace Drupal\Tests\Core\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormBuilder;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Provides a base class for testing form functionality.
@@ -120,7 +113,6 @@ abstract class FormTestBase extends UnitTestCase {
   protected $elementInfo;
 
   /**
-   *
    * The event dispatcher.
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|\PHPUnit_Framework_MockObject_MockObject
@@ -149,7 +141,15 @@ abstract class FormTestBase extends UnitTestCase {
    */
   protected $themeManager;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
+    parent::setUp();
+
+    // Add functions to the global namespace for testing.
+    require_once __DIR__ . '/fixtures/form_base_test.inc';
+
     $this->moduleHandler = $this->getMock('Drupal\Core\Extension\ModuleHandlerInterface');
 
     $this->formCache = $this->getMock('Drupal\Core\Form\FormCacheInterface');
@@ -178,9 +178,10 @@ abstract class FormTestBase extends UnitTestCase {
     $this->requestStack = new RequestStack();
     $this->requestStack->push($this->request);
     $this->logger = $this->getMock('Drupal\Core\Logger\LoggerChannelInterface');
+    $form_error_handler = $this->getMock('Drupal\Core\Form\FormErrorHandlerInterface');
     $this->formValidator = $this->getMockBuilder('Drupal\Core\Form\FormValidator')
-      ->setConstructorArgs(array($this->requestStack, $this->getStringTranslationStub(), $this->csrfToken, $this->logger))
-      ->setMethods(array('drupalSetMessage'))
+      ->setConstructorArgs([$this->requestStack, $this->getStringTranslationStub(), $this->csrfToken, $this->logger, $form_error_handler])
+      ->setMethods(NULL)
       ->getMock();
     $this->formSubmitter = $this->getMockBuilder('Drupal\Core\Form\FormSubmitter')
       ->setConstructorArgs(array($this->requestStack, $this->urlGenerator))
@@ -188,7 +189,7 @@ abstract class FormTestBase extends UnitTestCase {
       ->getMock();
     $this->root = dirname(dirname(substr(__DIR__, 0, -strlen(__NAMESPACE__))));
 
-    $this->formBuilder = new FormBuilder($this->formValidator, $this->formSubmitter, $this->formCache, $this->moduleHandler, $this->eventDispatcher, $this->requestStack, $this->classResolver, $this->elementInfo, $this->themeManager, $this->csrfToken, $this->kernel);
+    $this->formBuilder = new FormBuilder($this->formValidator, $this->formSubmitter, $this->formCache, $this->moduleHandler, $this->eventDispatcher, $this->requestStack, $this->classResolver, $this->elementInfo, $this->themeManager, $this->csrfToken);
   }
 
   /**
@@ -203,8 +204,7 @@ abstract class FormTestBase extends UnitTestCase {
    * Provides a mocked form object.
    *
    * @param string $form_id
-   *   (optional) The form ID to be used. If none is provided, the form will be
-   *   set with no expectation about getFormId().
+   *   The form ID to be used.
    * @param mixed $expected_form
    *   (optional) If provided, the expected form response for buildForm() to
    *   return. Defaults to NULL.
@@ -311,38 +311,6 @@ abstract class FormTestBase extends UnitTestCase {
       $types[$type] = array();
     }
     return $types[$type];
-  }
-
-}
-
-}
-
-namespace {
-
-  function test_form_id() {
-    $form['test'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Test',
-    );
-    $form['options'] = array(
-      '#type' => 'radios',
-      '#options' => array(
-        'foo' => 'foo',
-        'bar' => 'bar',
-      ),
-    );
-    $form['value'] = array(
-      '#type' => 'value',
-      '#value' => 'bananas',
-    );
-    $form['actions'] = array(
-      '#type' => 'actions',
-    );
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => 'Submit',
-    );
-    return $form;
   }
 
 }

@@ -1,14 +1,7 @@
 <?php
-/**
- * @file
- * Contains \Drupal\Tests\language\Unit\ConfigurableLanguageUnitTest.
- */
 
 namespace Drupal\Tests\language\Unit;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Entity\EntityType;
-use Drupal\Core\Language\Language;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\UnitTestCase;
 

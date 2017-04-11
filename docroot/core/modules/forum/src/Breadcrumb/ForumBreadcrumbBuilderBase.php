@@ -1,18 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\forum\Breadcrumb\ForumBreadcrumbBuilderBase.
- */
-
 namespace Drupal\forum\Breadcrumb;
 
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
+use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\forum\ForumManagerInterface;
 
 /**
@@ -21,7 +18,7 @@ use Drupal\forum\ForumManagerInterface;
  * This just holds the dependency-injected config, entity manager, and forum
  * manager objects.
  */
-abstract class ForumBreadcrumbBuilderBase  implements BreadcrumbBuilderInterface {
+abstract class ForumBreadcrumbBuilderBase implements BreadcrumbBuilderInterface {
   use StringTranslationTrait;
 
   /**
@@ -54,25 +51,32 @@ abstract class ForumBreadcrumbBuilderBase  implements BreadcrumbBuilderInterface
    *   The configuration factory.
    * @param \Drupal\forum\ForumManagerInterface $forum_manager
    *   The forum manager service.
+   * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
+   *   The string translation service.
    */
-  public function __construct(EntityManagerInterface $entity_manager, ConfigFactoryInterface $config_factory, ForumManagerInterface $forum_manager) {
+  public function __construct(EntityManagerInterface $entity_manager, ConfigFactoryInterface $config_factory, ForumManagerInterface $forum_manager, TranslationInterface $string_translation) {
     $this->entityManager = $entity_manager;
     $this->config = $config_factory->get('forum.settings');
     $this->forumManager = $forum_manager;
+    $this->setStringTranslation($string_translation);
   }
 
   /**
    * {@inheritdoc}
    */
   public function build(RouteMatchInterface $route_match) {
-    $breadcrumb[] = Link::createFromRoute($this->t('Home'), '<front>');
+    $breadcrumb = new Breadcrumb();
+    $breadcrumb->addCacheContexts(['route']);
+
+    $links[] = Link::createFromRoute($this->t('Home'), '<front>');
 
     $vocabulary = $this->entityManager
       ->getStorage('taxonomy_vocabulary')
       ->load($this->config->get('vocabulary'));
-    $breadcrumb[] = Link::createFromRoute($vocabulary->label(), 'forum.index');
+    $breadcrumb->addCacheableDependency($vocabulary);
+    $links[] = Link::createFromRoute($vocabulary->label(), 'forum.index');
 
-    return $breadcrumb;
+    return $breadcrumb->setLinks($links);
   }
 
 }

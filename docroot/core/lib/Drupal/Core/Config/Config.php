@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\Config.
- */
-
 namespace Drupal\Core\Config;
 
 use Drupal\Component\Utility\NestedArray;
@@ -108,8 +103,8 @@ class Config extends StorableConfigBase {
   /**
    * {@inheritdoc}
    */
-  public function setData(array $data, $validate_keys = TRUE) {
-    parent::setData($data, $validate_keys);
+  public function setData(array $data) {
+    parent::setData($data);
     $this->resetOverriddenData();
     return $this;
   }

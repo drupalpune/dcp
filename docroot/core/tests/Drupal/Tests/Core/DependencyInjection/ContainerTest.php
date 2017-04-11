@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\Core\DependencyInjection\ContainerTest.
- */
-
 namespace Drupal\Tests\Core\DependencyInjection;
 
 use Drupal\Core\DependencyInjection\Container;
@@ -20,7 +15,7 @@ class ContainerTest extends UnitTestCase {
   /**
    * Tests serialization.
    *
-   * @expectedException \PHPUnit_Framework_Error
+   * @expectedException \AssertionError
    */
   public function testSerialize() {
     $container = new Container();

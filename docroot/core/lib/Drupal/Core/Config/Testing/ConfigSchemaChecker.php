@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Config\Testing\ConfigSchemaChecker.
- */
-
 namespace Drupal\Core\Config\Testing;
 
 use Drupal\Component\Utility\SafeMarkup;
@@ -24,7 +19,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * is invalid.
  *
  * @see \Drupal\simpletest\WebTestBase::setUp()
- * @see \Drupal\simpletest\KernelTestBase::containerBuild()
+ * @see \Drupal\KernelTests\KernelTestBase::register()
  */
 class ConfigSchemaChecker implements EventSubscriberInterface {
   use SchemaCheckTrait;
@@ -44,13 +39,23 @@ class ConfigSchemaChecker implements EventSubscriberInterface {
   protected $checked = array();
 
   /**
+   * An array of config object names that are excluded from schema checking.
+   *
+   * @var string[]
+   */
+  protected $exclude = array();
+
+  /**
    * Constructs the ConfigSchemaChecker object.
    *
    * @param \Drupal\Core\Config\TypedConfigManagerInterface $typed_manager
    *   The typed config manager.
+   * @param string[] $exclude
+   *   An array of config object names that are excluded from schema checking.
    */
-  public function __construct(TypedConfigManagerInterface $typed_manager) {
+  public function __construct(TypedConfigManagerInterface $typed_manager, array $exclude = array()) {
     $this->typedManager = $typed_manager;
+    $this->exclude = $exclude;
   }
 
   /**
@@ -73,29 +78,19 @@ class ConfigSchemaChecker implements EventSubscriberInterface {
 
     $name = $saved_config->getName();
     $data = $saved_config->get();
-    $checksum = crc32(serialize($data));
-    $exceptions = array(
-      // Following are used to test lack of or partial schema. Where partial
-      // schema is provided, that is explicitly tested in specific tests.
-      'config_schema_test.noschema',
-      'config_schema_test.someschema',
-      'config_schema_test.schema_data_types',
-      'config_schema_test.no_schema_data_types',
-      // Used to test application of schema to filtering of configuration.
-      'config_test.dynamic.system',
-    );
-    if (!in_array($name, $exceptions) && !isset($this->checked[$name . ':' . $checksum])) {
+    $checksum = hash('crc32b', serialize($data));
+    if (!in_array($name, $this->exclude) && !isset($this->checked[$name . ':' . $checksum])) {
       $this->checked[$name . ':' . $checksum] = TRUE;
       $errors = $this->checkConfigSchema($this->typedManager, $name, $data);
       if ($errors === FALSE) {
-        throw new SchemaIncompleteException(SafeMarkup::format('No schema for @config_name', array('@config_name' => $name)));
+        throw new SchemaIncompleteException("No schema for $name");
       }
       elseif (is_array($errors)) {
         $text_errors = [];
         foreach ($errors as $key => $error) {
           $text_errors[] = SafeMarkup::format('@key @error', array('@key' => $key, '@error' => $error));
         }
-        throw new SchemaIncompleteException(SafeMarkup::format('Schema errors for @config_name with the following errors: @errors', array('@config_name' => $name, '@errors' => implode(', ', $text_errors))));
+        throw new SchemaIncompleteException("Schema errors for $name with the following errors: " . implode(', ', $text_errors));
       }
     }
   }

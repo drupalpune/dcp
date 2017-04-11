@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\locale\Form\ImportForm.
- */
-
 namespace Drupal\locale\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -94,8 +89,8 @@ class ImportForm extends FormBase {
     else {
       $default = key($existing_languages);
       $language_options = array(
-        $this->t('Existing languages') => $existing_languages,
-        $this->t('Languages not yet added') => $this->languageManager->getStandardLanguageListWithoutConfigured(),
+        (string) $this->t('Existing languages') => $existing_languages,
+        (string) $this->t('Languages not yet added') => $this->languageManager->getStandardLanguageListWithoutConfigured(),
       );
     }
 
@@ -197,4 +192,5 @@ class ImportForm extends FormBase {
 
     $form_state->setRedirect('locale.translate_page');
   }
+
 }

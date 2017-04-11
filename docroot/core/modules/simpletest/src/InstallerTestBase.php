@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\simpletest\InstallerTestBase.
- */
-
 namespace Drupal\simpletest;
 
 use Drupal\Core\DrupalKernel;
@@ -72,7 +67,7 @@ abstract class InstallerTestBase extends WebTestBase {
   protected $isInstalled = FALSE;
 
   /**
-   * Overrides WebTestBase::setUp().
+   * {@inheritdoc}
    */
   protected function setUp() {
     $this->isInstalled = FALSE;
@@ -98,9 +93,10 @@ abstract class InstallerTestBase extends WebTestBase {
     // @see WebTestBase::translatePostValues()
     $this->parameters = $this->installParameters();
 
-    // Set up a minimal container (required by WebTestBase).
+    // Set up a minimal container (required by WebTestBase). Set cookie and
+    // server information so that XDebug works.
     // @see install_begin_request()
-    $request = Request::create($GLOBALS['base_url'] . '/core/install.php');
+    $request = Request::create($GLOBALS['base_url'] . '/core/install.php', 'GET', [], $_COOKIE, [], $_SERVER);
     $this->container = new ContainerBuilder();
     $request_stack = new RequestStack();
     $request_stack->push($request);
@@ -112,16 +108,13 @@ abstract class InstallerTestBase extends WebTestBase {
       ->register('language.default', 'Drupal\Core\Language\LanguageDefault')
       ->addArgument('%language.default_values%');
     $this->container
-      ->register('language_manager', 'Drupal\Core\Language\LanguageManager')
-      ->addArgument(new Reference('language.default'));
-    $this->container
       ->register('string_translation', 'Drupal\Core\StringTranslation\TranslationManager')
-      ->addArgument(new Reference('language_manager'));
+      ->addArgument(new Reference('language.default'));
     $this->container
       ->set('app.root', DRUPAL_ROOT);
     \Drupal::setContainer($this->container);
 
-    $this->drupalGet($GLOBALS['base_url'] . '/core/install.php');
+    $this->visitInstaller();
 
     // Select language.
     $this->setUpLanguage();
@@ -138,33 +131,40 @@ abstract class InstallerTestBase extends WebTestBase {
     // Configure site.
     $this->setUpSite();
 
-    // Import new settings.php written by the installer.
-    $request = Request::createFromGlobals();
-    $class_loader = require $this->container->get('app.root') . '/autoload.php';
-    Settings::initialize($this->container->get('app.root'), DrupalKernel::findSitePath($request), $class_loader);
-    foreach ($GLOBALS['config_directories'] as $type => $path) {
-      $this->configDirectories[$type] = $path;
+    if ($this->isInstalled) {
+      // Import new settings.php written by the installer.
+      $request = Request::createFromGlobals();
+      $class_loader = require $this->container->get('app.root') . '/autoload.php';
+      Settings::initialize($this->container->get('app.root'), DrupalKernel::findSitePath($request), $class_loader);
+      foreach ($GLOBALS['config_directories'] as $type => $path) {
+        $this->configDirectories[$type] = $path;
+      }
+
+      // After writing settings.php, the installer removes write permissions
+      // from the site directory. To allow drupal_generate_test_ua() to write
+      // a file containing the private key for drupal_valid_test_ua(), the site
+      // directory has to be writable.
+      // WebTestBase::tearDown() will delete the entire test site directory.
+      // Not using File API; a potential error must trigger a PHP warning.
+      chmod($this->container->get('app.root') . '/' . $this->siteDirectory, 0777);
+      $this->kernel = DrupalKernel::createFromRequest($request, $class_loader, 'prod', FALSE);
+      $this->kernel->prepareLegacyRequest($request);
+      $this->container = $this->kernel->getContainer();
+
+      // Manually configure the test mail collector implementation to prevent
+      // tests from sending out emails and collect them in state instead.
+      $this->container->get('config.factory')
+        ->getEditable('system.mail')
+        ->set('interface.default', 'test_mail_collector')
+        ->save();
     }
+  }
 
-    // After writing settings.php, the installer removes write permissions
-    // from the site directory. To allow drupal_generate_test_ua() to write
-    // a file containing the private key for drupal_valid_test_ua(), the site
-    // directory has to be writable.
-    // WebTestBase::tearDown() will delete the entire test site directory.
-    // Not using File API; a potential error must trigger a PHP warning.
-    chmod($this->container->get('app.root') . '/' . $this->siteDirectory, 0777);
-    $this->kernel = DrupalKernel::createFromRequest($request, $class_loader, 'prod', FALSE);
-    $this->kernel->prepareLegacyRequest($request);
-    $this->container = $this->kernel->getContainer();
-    $config = $this->container->get('config.factory');
-
-    // Manually configure the test mail collector implementation to prevent
-    // tests from sending out e-mails and collect them in state instead.
-    $config->getEditable('system.mail')
-      ->set('interface.default', 'test_mail_collector')
-      ->save();
-
-    $this->isInstalled = TRUE;
+  /**
+   * Visits the interactive installer.
+   */
+  protected function visitInstaller() {
+    $this->drupalGet($GLOBALS['base_url'] . '/core/install.php');
   }
 
   /**
@@ -196,11 +196,14 @@ abstract class InstallerTestBase extends WebTestBase {
   }
 
   /**
-   * Installer step: Configure site.
+   * Final installer step: Configure site.
    */
   protected function setUpSite() {
     $edit = $this->translatePostValues($this->parameters['forms']['install_configure_form']);
     $this->drupalPostForm(NULL, $edit, $this->translations['Save and continue']);
+    // If we've got to this point the site is installed using the regular
+    // installation workflow.
+    $this->isInstalled = TRUE;
   }
 
   /**

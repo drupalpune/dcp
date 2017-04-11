@@ -1,13 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Template\TwigTransTokenParser.
- *
- * @see http://twig.sensiolabs.org/doc/extensions/i18n.html
- * @see https://github.com/fabpot/Twig-extensions
- */
-
 namespace Drupal\Core\Template;
 
 /**
@@ -18,6 +10,8 @@ namespace Drupal\Core\Template;
  * into PHP code usable for runtime execution of the template.
  *
  * @see \Twig_TokenParser
+ * @see http://twig.sensiolabs.org/doc/extensions/i18n.html
+ * @see https://github.com/fabpot/Twig-extensions
  */
 class TwigTransTokenParser extends \Twig_TokenParser {
 
@@ -82,14 +76,14 @@ class TwigTransTokenParser extends \Twig_TokenParser {
   /**
    * Ensure that any nodes that are parsed are only of allowed types.
    *
-   * @param \Twig_NodeInterface $body
+   * @param \Twig_Node $body
    *   The expression to check.
-   * @param integer $lineno
+   * @param int $lineno
    *   The source line.
    *
    * @throws \Twig_Error_Syntax
    */
-  protected function checkTransString(\Twig_NodeInterface $body, $lineno) {
+  protected function checkTransString(\Twig_Node $body, $lineno) {
     foreach ($body as $node) {
       if (
         $node instanceof \Twig_Node_Text

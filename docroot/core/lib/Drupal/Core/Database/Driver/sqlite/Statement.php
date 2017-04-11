@@ -1,17 +1,12 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\Core\Database\Driver\sqlite\Statement
- */
-
 namespace Drupal\Core\Database\Driver\sqlite;
 
 use Drupal\Core\Database\StatementPrefetch;
 use Drupal\Core\Database\StatementInterface;
 
 /**
- * Specific SQLite implementation of DatabaseConnection.
+ * SQLite implementation of \Drupal\Core\Database\Statement.
  *
  * The PDO SQLite driver only closes SELECT statements when the PDOStatement
  * destructor is called and SQLite does not allow data change (INSERT,
@@ -22,7 +17,7 @@ use Drupal\Core\Database\StatementInterface;
 class Statement extends StatementPrefetch implements StatementInterface {
 
   /**
-   * SQLite specific implementation of getStatement().
+   * {@inheritdoc}
    *
    * The PDO SQLite layer doesn't replace numeric placeholders in queries
    * correctly, and this makes numeric expressions (such as COUNT(*) >= :count)
@@ -87,6 +82,9 @@ class Statement extends StatementPrefetch implements StatementInterface {
     return $this->pdoConnection->prepare($query);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function execute($args = array(), $options = array()) {
     try {
       $return = parent::execute($args, $options);
@@ -143,4 +141,5 @@ class Statement extends StatementPrefetch implements StatementInterface {
 
     return $return;
   }
+
 }

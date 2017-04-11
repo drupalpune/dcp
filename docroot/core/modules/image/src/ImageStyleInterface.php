@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\image\ImageStyleInterface.
- */
-
 namespace Drupal\image;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
@@ -17,8 +12,14 @@ interface ImageStyleInterface extends ConfigEntityInterface {
   /**
    * Returns the replacement ID.
    *
-   * @return string
-   *   The name of the image style to use as replacement upon delete.
+   * @return string|null
+   *   The replacement image style ID or NULL if no replacement has been
+   *   selected.
+   *
+   * @deprecated in Drupal 8.0.x, will be removed before Drupal 9.0.x. Use
+   *   \Drupal\image\ImageStyleStorageInterface::getReplacementId() instead.
+   *
+   * @see \Drupal\image\ImageStyleStorageInterface::getReplacementId()
    */
   public function getReplacementID();
 
@@ -70,6 +71,7 @@ interface ImageStyleInterface extends ConfigEntityInterface {
    *   in an <img> tag. Requesting the URL will cause the image to be created.
    *
    * @see \Drupal\image\Controller\ImageStyleDownloadController::deliver()
+   * @see file_url_transform_relative()
    */
   public function buildUrl($path, $clean_urls = NULL);
 
@@ -127,8 +129,18 @@ interface ImageStyleInterface extends ConfigEntityInterface {
    * @param array $dimensions
    *   Associative array passed by reference. Implementations have to store the
    *   resulting width and height, in pixels.
+   * @param string $uri
+   *   Original image file URI. It is passed in to allow effects to
+   *   optionally use this information to retrieve additional image metadata
+   *   to determine dimensions of the styled image.
+   *   ImageStyleInterface::transformDimensions key objective is to calculate
+   *   styled image dimensions without performing actual image operations, so
+   *   be aware that performing IO on the URI may lead to decrease in
+   *   performance.
+   *
+   * @see ImageEffectInterface::transformDimensions
    */
-  public function transformDimensions(array &$dimensions);
+  public function transformDimensions(array &$dimensions, $uri);
 
   /**
    * Determines the extension of the derivative without generating it.

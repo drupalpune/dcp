@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\system\Tests\Entity\EntityListBuilderTest.
-*/
-
 namespace Drupal\system\Tests\Entity;
 
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -28,7 +24,7 @@ class EntityListBuilderTest extends WebTestBase {
   protected function setUp() {
     parent::setUp();
 
-    // Create and login user.
+    // Create and log in user.
     $this->webUser = $this->drupalCreateUser(array(
       'administer entity_test content',
     ));
@@ -41,7 +37,7 @@ class EntityListBuilderTest extends WebTestBase {
   public function testPager() {
     // Create 51 test entities.
     for ($i = 1; $i < 52; $i++) {
-      entity_create('entity_test', array('name' => 'Test entity ' . $i))->save();
+      EntityTest::create(array('name' => 'Test entity ' . $i))->save();
     }
 
     // Load the listing page.
@@ -67,7 +63,15 @@ class EntityListBuilderTest extends WebTestBase {
     $build = $list_builder->render();
     $this->container->get('renderer')->renderRoot($build);
 
-    $this->assertEqual(['entity_test_view_grants', 'languages:' . LanguageInterface::TYPE_INTERFACE, 'theme', 'url.query_args.pagers:0'], $build['#cache']['contexts']);
+    $this->assertEqual(['entity_test_view_grants', 'languages:' . LanguageInterface::TYPE_INTERFACE, 'theme', 'url.query_args.pagers:0', 'user.permissions'], $build['#cache']['contexts']);
+  }
+
+  /**
+   * Tests if the list cache tags are set.
+   */
+  public function testCacheTags() {
+    $this->drupalGet('entity_test/list');
+    $this->assertCacheTag('entity_test_list');
   }
 
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Datetime\Element\DateElementBase.
- */
-
 namespace Drupal\Core\Datetime\Element;
 
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -66,7 +61,7 @@ abstract class DateElementBase extends FormElement {
       $min_year = $temp;
     }
     // If there is a current value, stretch the range to include it.
-    $value_year = $date instanceOf DrupalDateTime ? $date->format('Y') : '';
+    $value_year = $date instanceof DrupalDateTime ? $date->format('Y') : '';
     if (!empty($value_year)) {
       $min_year = min($value_year, $min_year);
       $max_year = max($value_year, $max_year);
@@ -75,4 +70,3 @@ abstract class DateElementBase extends FormElement {
   }
 
 }
-

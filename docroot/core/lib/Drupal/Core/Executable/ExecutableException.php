@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Definition of \Drupal\Core\Executable\ExecutableException.
- */
 
 namespace Drupal\Core\Executable;
 

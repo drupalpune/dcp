@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\views\Tests\Wizard\SortingTest.
- */
-
 namespace Drupal\views\Tests\Wizard;
 
 /**
@@ -13,6 +8,12 @@ namespace Drupal\views\Tests\Wizard;
  * @group views
  */
 class SortingTest extends WizardTestBase {
+
+  protected function setUp() {
+    parent::setUp();
+
+    $this->drupalPlaceBlock('page_title_block');
+  }
 
   /**
    * Tests the sorting functionality.

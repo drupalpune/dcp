@@ -1,11 +1,19 @@
+/**
+ * @file
+ * Progress bar.
+ */
+
 (function ($, Drupal) {
 
-  "use strict";
+  'use strict';
 
   /**
    * Theme function for the progress bar.
    *
-   * @return
+   * @param {string} id
+   *   The id for the progress bar.
+   *
+   * @return {string}
    *   The HTML for the progress bar.
    */
   Drupal.theme.progressBar = function (id) {
@@ -21,11 +29,23 @@
    * A progressbar object. Initialized with the given id. Must be inserted into
    * the DOM afterwards through progressBar.element.
    *
-   * method is the function which will perform the HTTP request to get the
+   * Method is the function which will perform the HTTP request to get the
    * progress bar state. Either "GET" or "POST".
    *
-   * e.g. pb = new Drupal.ProgressBar('myProgressBar');
-   *      some_element.appendChild(pb.element);
+   * @example
+   * pb = new Drupal.ProgressBar('myProgressBar');
+   * some_element.appendChild(pb.element);
+   *
+   * @constructor
+   *
+   * @param {string} id
+   *   The id for the progressbar.
+   * @param {function} updateCallback
+   *   Callback to run on update.
+   * @param {string} method
+   *   HTTP method to use.
+   * @param {function} errorCallback
+   *   Callback to call on error.
    */
   Drupal.ProgressBar = function (id, updateCallback, method, errorCallback) {
     this.id = id;
@@ -33,14 +53,24 @@
     this.updateCallback = updateCallback;
     this.errorCallback = errorCallback;
 
-    // The WAI-ARIA setting aria-live="polite" will announce changes after users
-    // have completed their current activity and not interrupt the screen reader.
+    // The WAI-ARIA setting aria-live="polite" will announce changes after
+    // users
+    // have completed their current activity and not interrupt the screen
+    // reader.
     this.element = $(Drupal.theme('progressBar', id));
   };
 
-  $.extend(Drupal.ProgressBar.prototype, {
+  $.extend(Drupal.ProgressBar.prototype, /** @lends Drupal.ProgressBar# */{
+
     /**
      * Set the percentage and status message for the progressbar.
+     *
+     * @param {number} percentage
+     *   The progress percentage.
+     * @param {string} message
+     *   The message to show the user.
+     * @param {string} label
+     *   The text for the progressbar label.
      */
     setProgress: function (percentage, message, label) {
       if (percentage >= 0 && percentage <= 100) {
@@ -56,6 +86,11 @@
 
     /**
      * Start monitoring progress via Ajax.
+     *
+     * @param {string} uri
+     *   The URI to use for monitoring.
+     * @param {number} delay
+     *   The delay for calling the monitoring URI.
      */
     startMonitoring: function (uri, delay) {
       this.delay = delay;
@@ -83,9 +118,17 @@
         var pb = this;
         // When doing a post request, you need non-null data. Otherwise a
         // HTTP 411 or HTTP 406 (with Apache mod_security) error may result.
+        var uri = this.uri;
+        if (uri.indexOf('?') === -1) {
+          uri += '?';
+        }
+        else {
+          uri += '&';
+        }
+        uri += '_format=json';
         $.ajax({
           type: this.method,
-          url: this.uri,
+          url: uri,
           data: '',
           dataType: 'json',
           success: function (progress) {
@@ -109,6 +152,9 @@
 
     /**
      * Display errors on the page.
+     *
+     * @param {string} string
+     *   The error message to show the user.
      */
     displayError: function (string) {
       var error = $('<div class="messages messages--error"></div>').html(string);

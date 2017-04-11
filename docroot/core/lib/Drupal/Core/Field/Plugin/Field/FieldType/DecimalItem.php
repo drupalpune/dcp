@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Field\Plugin\Field\FieldType\DecimalItem.
- */
-
 namespace Drupal\Core\Field\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -38,7 +33,6 @@ class DecimalItem extends NumericItemBase {
 
   /**
    * {@inheritdoc}
-
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['value'] = DataDefinition::create('string')
@@ -70,20 +64,21 @@ class DecimalItem extends NumericItemBase {
     $element = array();
     $settings = $this->getSettings();
 
-    $range = range(10, 32);
     $element['precision'] = array(
-      '#type' => 'select',
+      '#type' => 'number',
       '#title' => t('Precision'),
-      '#options' => array_combine($range, $range),
+      '#min' => 10,
+      '#max' => 32,
       '#default_value' => $settings['precision'],
       '#description' => t('The total number of digits to store in the database, including those to the right of the decimal.'),
       '#disabled' => $has_data,
     );
-    $range = range(0, 10);
+
     $element['scale'] = array(
-      '#type' => 'select',
-      '#title' => t('Scale', array(), array('decimal places')),
-      '#options' => array_combine($range, $range),
+      '#type' => 'number',
+      '#title' => t('Scale', array(), array('context' => 'decimal places')),
+      '#min' => 0,
+      '#max' => 10,
       '#default_value' => $settings['scale'],
       '#description' => t('The number of digits to the right of the decimal.'),
       '#disabled' => $has_data,
@@ -91,6 +86,25 @@ class DecimalItem extends NumericItemBase {
 
     return $element;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConstraints() {
+    $constraint_manager = \Drupal::typedDataManager()->getValidationConstraintManager();
+    $constraints = parent::getConstraints();
+
+    $constraints[] = $constraint_manager->create('ComplexData', array(
+      'value' => array(
+        'Regex' => array(
+          'pattern' => '/^[+-]?((\d+(\.\d*)?)|(\.\d+))$/i',
+        )
+      ),
+    ));
+
+    return $constraints;
+  }
+
 
   /**
    * {@inheritdoc}
@@ -134,7 +148,7 @@ class DecimalItem extends NumericItemBase {
     $scale = rand($decimal_digits, $scale);
 
     // @see "Example #1 Calculate a random floating-point number" in
-    // http://php.net/manual/en/function.mt-getrandmax.php
+    // http://php.net/manual/function.mt-getrandmax.php
     $random_decimal = $min + mt_rand() / mt_getrandmax() * ($max - $min);
     $values['value'] = self::truncateDecimal($random_decimal, $scale);
     return $values;

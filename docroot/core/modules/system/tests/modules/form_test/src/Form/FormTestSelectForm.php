@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\form_test\Form\FormTestSelectForm.
- */
-
 namespace Drupal\form_test\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -29,7 +24,7 @@ class FormTestSelectForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $base = array(
       '#type' => 'select',
-      '#options' => array('one' => 'one', 'two' => 'two', 'three' => 'three'),
+      '#options' => array('one' => 'one', 'two' => 'two', 'three' => 'three', 'four' => '<strong>four</strong>'),
     );
 
     $form['select'] = $base + array(

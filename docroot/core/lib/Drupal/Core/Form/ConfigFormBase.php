@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Form\ConfigFormBase.
- */
-
 namespace Drupal\Core\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Form\FormBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -47,7 +41,7 @@ abstract class ConfigFormBase extends FormBase {
       '#button_type' => 'primary',
     );
 
-    // By default, render the form using theme_system_config_form().
+    // By default, render the form using system-config-form.html.twig.
     $form['#theme'] = 'system_config_form';
 
     return $form;

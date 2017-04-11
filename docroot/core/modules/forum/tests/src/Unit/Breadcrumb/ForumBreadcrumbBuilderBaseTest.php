@@ -1,20 +1,32 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Tests\forum\Unit\Breadcrumb\ForumBreadcrumbBuilderBaseTest.
- */
-
 namespace Drupal\Tests\forum\Unit\Breadcrumb;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Link;
 use Drupal\Tests\UnitTestCase;
+use Symfony\Component\DependencyInjection\Container;
 
 /**
  * @coversDefaultClass \Drupal\forum\Breadcrumb\ForumBreadcrumbBuilderBase
  * @group forum
  */
 class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $cache_contexts_manager = $this->getMockBuilder('Drupal\Core\Cache\Context\CacheContextsManager')
+      ->disableOriginalConstructor()
+      ->getMock();
+    $cache_contexts_manager->method('assertValidTokens')->willReturn(TRUE);
+    $container = new Container();
+    $container->set('cache_contexts_manager', $cache_contexts_manager);
+    \Drupal::setContainer($container);
+  }
 
   /**
    * Tests ForumBreadcrumbBuilderBase::__construct().
@@ -30,6 +42,7 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
       )
     );
     $forum_manager = $this->getMock('Drupal\forum\ForumManagerInterface');
+    $translation_manager = $this->getMock('Drupal\Core\StringTranslation\TranslationInterface');
 
     // Make an object to test.
     $builder = $this->getMockForAbstractClass(
@@ -39,6 +52,7 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
         $entity_manager,
         $config_factory,
         $forum_manager,
+        $translation_manager,
       )
     );
 
@@ -46,6 +60,7 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
     $property_names = array(
       'entityManager' => $entity_manager,
       'forumManager' => $forum_manager,
+      'stringTranslation' => $translation_manager,
     );
     foreach ($property_names as $property_name => $property_value) {
       $this->assertAttributeEquals(
@@ -70,20 +85,26 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
    */
   public function testBuild() {
     // Build all our dependencies, backwards.
+    $translation_manager = $this->getMockBuilder('Drupal\Core\StringTranslation\TranslationInterface')
+      ->disableOriginalConstructor()
+      ->getMock();
+
     $forum_manager = $this->getMockBuilder('Drupal\forum\ForumManagerInterface')
       ->disableOriginalConstructor()
       ->getMock();
 
-    $vocab_item = $this->getMock('Drupal\taxonomy\VocabularyInterface');
-    $vocab_item->expects($this->any())
-      ->method('label')
-      ->will($this->returnValue('Fora_is_the_plural_of_forum'));
+    $prophecy = $this->prophesize('Drupal\taxonomy\VocabularyInterface');
+    $prophecy->label()->willReturn('Fora_is_the_plural_of_forum');
+    $prophecy->id()->willReturn(5);
+    $prophecy->getCacheTags()->willReturn(['taxonomy_vocabulary:5']);
+    $prophecy->getCacheContexts()->willReturn([]);
+    $prophecy->getCacheMaxAge()->willReturn(Cache::PERMANENT);
 
     $vocab_storage = $this->getMock('Drupal\Core\Entity\EntityStorageInterface');
     $vocab_storage->expects($this->any())
       ->method('load')
       ->will($this->returnValueMap(array(
-        array('forums', $vocab_item),
+        array('forums', $prophecy->reveal()),
       )));
 
     $entity_manager = $this->getMockBuilder('Drupal\Core\Entity\EntityManagerInterface')
@@ -111,6 +132,7 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
         $entity_manager,
         $config_factory,
         $forum_manager,
+        $translation_manager,
       )
     );
 
@@ -128,7 +150,11 @@ class ForumBreadcrumbBuilderBaseTest extends UnitTestCase {
     );
 
     // And finally, the test.
-    $this->assertEquals($expected, $breadcrumb_builder->build($route_match));
+    $breadcrumb = $breadcrumb_builder->build($route_match);
+    $this->assertEquals($expected, $breadcrumb->getLinks());
+    $this->assertEquals(['route'], $breadcrumb->getCacheContexts());
+    $this->assertEquals(['taxonomy_vocabulary:5'], $breadcrumb->getCacheTags());
+    $this->assertEquals(Cache::PERMANENT, $breadcrumb->getCacheMaxAge());
   }
 
 }

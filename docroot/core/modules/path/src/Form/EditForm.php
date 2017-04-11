@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\path\Form\EditForm.
- */
-
 namespace Drupal\path\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
@@ -36,33 +30,30 @@ class EditForm extends PathFormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $pid = NULL) {
     $form = parent::buildForm($form, $form_state, $pid);
 
-    $form['#title'] = SafeMarkup::checkPlain($this->path['alias']);
+    $form['#title'] = $this->path['alias'];
     $form['pid'] = array(
       '#type' => 'hidden',
       '#value' => $this->path['pid'],
     );
-    $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => $this->t('Delete'),
-      '#submit' => array('::deleteSubmit'),
-    );
-    return $form;
-  }
 
-  /**
-   * Submits the delete form.
-   */
-  public function deleteSubmit(array &$form, FormStateInterface $form_state) {
     $url = new Url('path.delete', array(
-      'pid' => $form_state->getValue('pid'),
+      'pid' => $this->path['pid'],
     ));
 
     if ($this->getRequest()->query->has('destination')) {
       $url->setOption('query', $this->getDestinationArray());
-      $this->getRequest()->query->remove('destination');
     }
 
-    $form_state->setRedirectUrl($url);
+    $form['actions']['delete'] = array(
+      '#type' => 'link',
+      '#title' => $this->t('Delete'),
+      '#url' => $url,
+      '#attributes' => array(
+        'class' => array('button', 'button--danger'),
+      ),
+    );
+
+    return $form;
   }
 
 }

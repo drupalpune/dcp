@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Core\Menu\MenuLinkInterface.
- */
-
 namespace Drupal\Core\Menu;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
@@ -131,7 +126,7 @@ interface MenuLinkInterface extends PluginInspectionInterface, DerivativeInspect
    *   the description is not empty.
    *
    * @return \Drupal\Core\Url
-   *   A a URL object containing either the external path or route.
+   *   A URL object containing either the external path or route.
    */
   public function getUrlObject($title_attribute = TRUE);
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\system\Tests\Database\FakeRecord.
- */
-
 namespace Drupal\system\Tests\Database;
 
 /**

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\comment\Tests\CommentFieldsTest.
- */
-
 namespace Drupal\comment\Tests;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
@@ -60,8 +55,8 @@ class CommentFieldsTest extends CommentTestBase {
 
     // Test adding a field that defaults to CommentItemInterface::CLOSED.
     $this->addDefaultCommentField('node', 'test_node_type', 'who_likes_ponies', CommentItemInterface::CLOSED, 'who_likes_ponies');
-    $field = FieldConfig::load('node.test_node_type.who_likes_ponies');
-    $this->assertEqual($field->default_value[0]['status'], CommentItemInterface::CLOSED);
+    $field = FieldConfig::load('node.test_node_type.who_likes_ponies');;
+    $this->assertEqual($field->getDefaultValueLiteral()[0]['status'], CommentItemInterface::CLOSED);
   }
 
   /**
@@ -84,14 +79,63 @@ class CommentFieldsTest extends CommentTestBase {
     $this->drupalLogin($this->webUser);
 
     $this->drupalGet('node/' . $node->nid->value);
-    $elements = $this->cssSelect('.field-type-comment');
+    $elements = $this->cssSelect('.field--type-comment');
     $this->assertEqual(2, count($elements), 'There are two comment fields on the node.');
 
     // Delete the first comment field.
     FieldStorageConfig::loadByName('node', 'comment')->delete();
     $this->drupalGet('node/' . $node->nid->value);
-    $elements = $this->cssSelect('.field-type-comment');
+    $elements = $this->cssSelect('.field--type-comment');
     $this->assertEqual(1, count($elements), 'There is one comment field on the node.');
+  }
+
+  /**
+   * Tests link building with non-default comment field names.
+   */
+  public function testCommentFieldLinksNonDefaultName() {
+    $this->drupalCreateContentType(['type' => 'test_node_type']);
+    $this->addDefaultCommentField('node', 'test_node_type', 'comment2');
+
+    $web_user2 = $this->drupalCreateUser([
+      'access comments',
+      'post comments',
+      'create article content',
+      'edit own comments',
+      'skip comment approval',
+      'access content',
+    ]);
+
+    // Create a sample node.
+    $node = $this->drupalCreateNode([
+      'title' => 'Baloney',
+      'type' => 'test_node_type',
+    ]);
+
+    // Go to the node first so that webuser2 see new comments.
+    $this->drupalLogin($web_user2);
+    $this->drupalGet($node->urlInfo());
+    $this->drupalLogout();
+
+    // Test that buildCommentedEntityLinks() does not break when the 'comment'
+    // field does not exist. Requires at least one comment.
+    $this->drupalLogin($this->webUser);
+    $this->postComment($node, 'Here is a comment', '', NULL, 'comment2');
+    $this->drupalLogout();
+
+    $this->drupalLogin($web_user2);
+
+    // We want to check the attached drupalSettings of
+    // \Drupal\comment\CommentLinkBuilder::buildCommentedEntityLinks. Therefore
+    // we need a node listing, let's use views for that.
+    $this->container->get('module_installer')->install(['views'], TRUE);
+    // We also need a router rebuild, as the router is lazily rebuild in the
+    // module installer.
+    \Drupal::service('router.builder')->rebuild();
+    $this->drupalGet('node');
+
+    $link_info = $this->getDrupalSettings()['comment']['newCommentsLinks']['node']['comment2']['2'];
+    $this->assertIdentical($link_info['new_comment_count'], 1);
+    $this->assertIdentical($link_info['first_new_comment_link'], $node->url('canonical', ['fragment' => 'new']));
   }
 
   /**
@@ -165,12 +209,12 @@ class CommentFieldsTest extends CommentTestBase {
     // Install core content type module (book).
     $edit = array();
     $edit['modules[Core][book][enable]'] = 'book';
-    $this->drupalPostForm('admin/modules', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/modules', $edit, t('Install'));
 
     // Now install the comment module.
     $edit = array();
     $edit['modules[Core][comment][enable]'] = 'comment';
-    $this->drupalPostForm('admin/modules', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/modules', $edit, t('Install'));
     $this->rebuildContainer();
     $this->assertTrue($this->container->get('module_handler')->moduleExists('comment'), 'Comment module enabled.');
 

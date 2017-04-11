@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\views\Plugin\views\display\Block.
- */
-
 namespace Drupal\views\Plugin\views\display;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\Block\ViewsBlock;
@@ -29,7 +23,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   admin = @Translation("Block")
  * )
  *
- * @see \Drupal\views\Plugin\block\block\ViewsBlock
+ * @see \Drupal\views\Plugin\Block\ViewsBlock
  * @see \Drupal\views\Plugin\Derivative\ViewsBlock
  */
 class Block extends DisplayPluginBase {
@@ -149,7 +143,7 @@ class Block extends DisplayPluginBase {
     if (empty($block_description)) {
       $block_description = $this->t('None');
     }
-    $block_category = SafeMarkup::checkPlain($this->getOption('block_category'));
+    $block_category = $this->getOption('block_category');
 
     $options['block_description'] = array(
       'category' => 'block',
@@ -197,7 +191,7 @@ class Block extends DisplayPluginBase {
         $form['block_category'] = array(
           '#type' => 'textfield',
           '#autocomplete_route_name' => 'block.category_autocomplete',
-          '#description' => $this->t('The category this block will appear under on the <a href="@href">blocks placement page</a>.', array('@href' => \Drupal::url('block.admin_display'))),
+          '#description' => $this->t('The category this block will appear under on the <a href=":href">blocks placement page</a>.', array(':href' => \Drupal::url('block.admin_display'))),
           '#default_value' => $this->getOption('block_category'),
         );
         break;
@@ -326,7 +320,7 @@ class Block extends DisplayPluginBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    *
-   * * @see \Drupal\views\Plugin\Block\ViewsBlock::blockSubmit()
+   * @see \Drupal\views\Plugin\Block\ViewsBlock::blockSubmit()
    */
   public function blockSubmit(ViewsBlock $block, $form, FormStateInterface $form_state) {
     if ($items_per_page = $form_state->getValue(array('override', 'items_per_page'))) {
@@ -352,11 +346,11 @@ class Block extends DisplayPluginBase {
    * Block views use exposed widgets only if AJAX is set.
    */
   public function usesExposed() {
-      if ($this->ajaxEnabled()) {
-        return parent::usesExposed();
-      }
-      return FALSE;
+    if ($this->ajaxEnabled()) {
+      return parent::usesExposed();
     }
+    return FALSE;
+  }
 
   /**
    * {@inheritdoc}
