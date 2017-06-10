@@ -251,25 +251,21 @@
     @include breakpoint(phablet) {
         padding: 5px 0px;
     }
-    background-color: #fff;
     p {
         @include container($container-width, 0px);
+        // width:100%;
         text-align: right;
         font-family: $body-font;
         color: $grey;
     }
 }
-
-.path-frontpage #block-internship2017-madewithlovebyqed42 {
-    background-color: $lightblue;
-}
-
 #block-internship2017-followus {
     color: #fff;
     font-family: $body-font;
     background-color: $black;
     .footer-logo {
         display: flex;
+        padding-bottom: 2px;
         width: $container-width;
         justify-content: space-between;
         margin: 0 auto;
@@ -279,11 +275,14 @@
         margin-top: 20px;
     }
     p:first-child {
-        padding: 0 0 10px 0;
+        padding: 0px;
         text-align: left;
         margin-top: -20px;
-        line-height: 10px;
+        line-height: 2px;
         width: 50%;
+        @include breakpoint(phablet) {
+            font-size: 0px;
+        }
     }
     img {
         margin-left: 5px;

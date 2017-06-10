@@ -1,0 +1,74 @@
+/*------------------------------------*\
+    * @file
+    * Block.
+\*------------------------------------*/
+
+#block-callforpapper {
+    .field {
+        width: 65%;
+        margin: 0 auto;
+        padding: 10px;
+        h2 {
+            font-size: 18px;
+            padding: 20px 0;
+            strong {
+                font-size: 30px;
+                color: $blue;
+                font-family: $title-font;
+            }
+        }
+        p {
+            padding: 8px 0;
+            font-family: $body-font;
+            line-height: 2;
+            margin-left: 0 0 10px;
+            color: $dark-grey;
+        }
+        h3 {
+            font-size: 22px;
+            padding: 15px 0;
+            color: $dark-grey;
+            font-weight: $light;
+            font-family: $title-font;
+        }
+        p {
+            a {
+                box-shadow: 2px 1px 2px #888888;
+                text-decoration: none;
+                border: 1px solid $medred;
+                padding: 7px;
+                background: $medred;
+                padding:10px;
+                color: white;
+                font-size: 16px;
+                border-radius: 5px;
+                &:hover {
+                    box-shadow: 3px 3px 2px #888888;
+                    background: $dark-grey;
+                    border-color: $dark-grey;
+                }
+            }
+        }
+        @include breakpoint(phablet) {
+            width: 80%;
+        }
+        @include breakpoint(mobileonly) {
+            width: 95%;
+        }
+    }
+}
+
+
+/**
+* Site logo show when user add node
+*/
+
+#block-sitelogo {
+    height: 90px;
+    padding-top: 14px;
+    text-align: center;
+    background-color: #607db5;
+    @include breakpoint(phablet) {
+        display: none;
+    }
+}

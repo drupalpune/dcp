@@ -2,4 +2,6 @@
 docroot/files
 docroot/sites/*/files
 docroot/sites/*/private
-
+node_modules
+vendor
+docroot/themes/internship2017/.sass-cache

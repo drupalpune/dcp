@@ -1,0 +1,80 @@
+.node-preview-container {
+    position: absolute;
+    margin-top: 169px;
+    label {
+        font-size: 22px;
+        color: $medred;
+        @include breakpoint (phablet) {
+            width: 19%;
+        }
+    }
+    .form-type-select {
+        display: block;
+        text-align: center;
+        padding: 10px 0px;
+        margin: 0px;
+        .form-select {
+            height: 30px;
+            width: 114px;
+            font-size: 15px;
+            margin: 20px;
+            border-color: $dark-grey;
+        }
+    }
+    .node-preview-backlink {
+        text-decoration: none;
+        font-size: 22px;
+        margin-left: 10px;
+    }
+}
+
+.node--unpublished {
+    height: 100%;
+    min-height: 652px;
+    width: 80%;
+    margin: 0 auto;
+    background-color: #fff !important;
+    padding: 264px 10px 10px 10px;
+    color: $dark-grey;
+    .field {
+        font-style: $title-font;
+        padding: 10px;
+        .field__label {
+            width: 279px;
+            display: inline-block;
+            font-size: 22px;
+            padding: 10px;
+            color: $blue;
+            @include breakpoint (phablet) {
+                font-size: 19px;
+            }
+        }
+        .field__item {
+            display: inline-block;
+            font-size: 21px;
+            padding: 10px;
+            font-style: $body-font;
+            @include breakpoint (phablet) {
+                font-size: 18px;
+            }
+        }
+    }
+    p {
+        display: inline-block;
+        font-size: 21px;
+    }
+    @include breakpoint (tablet) {
+        width: 90%;
+    }
+}
+
+#block-pagetitle {
+    text-align: center;
+    margin-top: 70px;
+    font-size: 35px;
+    color: $blue;
+    font-style: $title-font;
+    @include breakpoint (tablet) {
+        font-size: 30px;
+    }
+}

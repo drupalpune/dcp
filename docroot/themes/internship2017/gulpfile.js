@@ -21,7 +21,7 @@ gulp.task('jshint', function() {
 
 gulp.task('browserSync', function() {
     browserSync.init(null, {
-        proxy: 'http://internship.new'
+        proxy: 'http://qedcamp.dev/'
     })
 })
 
@@ -58,7 +58,7 @@ gulp.task('minifycss', function() {
 });
 
 
-gulp.task('default', ['compass', 'browserSync', 'styles', 'images'], function() {
+gulp.task('default', ['compass', 'styles', 'images'], function() {
     gulp.watch("scss/**/*.scss", ['compass']);
     gulp.watch("js/*.js", ['jshint']);
     gulp.watch("css/*.css", ['styles']);

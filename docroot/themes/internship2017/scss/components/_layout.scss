@@ -6,7 +6,9 @@
 body,
 html {
     width: 100%;
+    margin: 0 auto;
     height: 100%;
+    max-width: 1920px;
 }
 
 body p {
@@ -28,4 +30,16 @@ body p {
     padding: 0px;
     border-bottom: 1px solid grey;
     box-shadow: 0 1px 0 grey;
+}
+
+.mm-page {
+    height: 100%;
+    .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        .content {
+            flex: 1;
+        }
+    }
 }

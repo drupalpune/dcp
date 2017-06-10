@@ -1,72 +1,101 @@
-/*------------------------------------*\
+    /*------------------------------------*\
     * @file
     * Login.
 \*------------------------------------*/
 
-.path-user {
-    .form-item .description {
-        font-size: 18px;
-    }
-    label {
-        font-size: 24px;
-    }
-    .main-content {
-        width: $container-width;
-        margin: 0 auto;
-        padding: 50px 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .region-content {
-        border: 1px solid #34495e;
-        -webkit-appearance: none;
-        background-color: rgba(7, 6, 11, 0.63);
-        color: #fff;
-    }
-    ul.tabs {
-        color: #fff;
-        background-color: #34495e;
-        height: 60px;
-        a {
-            padding: 0 3em;
-            color: #fff;
-            line-height: 60px;
+    .path-user {
+        .content {
+            background-color: #f7f9fb;
         }
-        a.is-active {
-            background: #e74c3c;
-        }
-        a:hover {
-            background: none;
+        .main-content {
+            width: $container-width;
+            margin: 50px auto;
+            padding: 50px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     }
-}
 
-.path-user .content {
-    background: url(http://i.imgur.com/M5SuNj8.jpg) no-repeat 0px 0px;
-    background-size: cover;
-    #block-internship2017-content {
-        padding: 10px;
-        .js-form-item {
-            margin: 30px 0 30px 0;
-            input[type=text],
-            input[type=password],
-            input[type=email] {
-                border-radius: 10px;
-                line-height: 30px;
-                color: black;
-                font-size: 18px;
-            }
-            input[type=text]:focus,
-            input[type=password]:focus {
-                outline: none;
-            }
+    .path-user .login-new-form {
+        background-color: #fff;
+        padding: 30px;
+        color: #717580;
+        h2 {
+            padding: 20px 0px;
+            font-size: 24px;
+            font-family: $title-font;
+            font-weight: 800;
         }
-        input[type=submit] {
-            background-color: #e74c3c;
-            color: #fff;
-            padding: 10px 30px;
-            border: none;
+        a {
+            color: #717580;
+            text-decoration: none;
+            margin-top: 15px;
+            display: block;
         }
     }
-}
+
+    .path-user form {
+        border-top: 1px solid #f7f9fb;
+        border-bottom: 1px solid #f7f9fb;
+        .js-form-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .description {
+            display: none;
+        }
+        label {
+            margin: 5px 0px;
+            font-family: $title-font;
+        }
+        label::after {
+            content: unset;
+        }
+    }
+
+    .path-user input:focus {
+        outline: none;
+    }
+
+    .path-user input[type="text"],
+    .path-user input[type="password"],
+    .path-user input[type="email"] {
+        font-size: 1em;
+        color: #fff;
+        width: 100%;
+        display: block;
+        border: none;
+        border-radius: 2px;
+        padding: 1em;
+        border-bottom: solid 1px #fff;
+        -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+        transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+        background-color: #f7f9fb;
+        color: #717580;
+    }
+
+    input[type=submit] {
+        background-color: #fd1f58;
+        color: #fff;
+        padding: 10px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .path-user .form-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .new-account {
+        display:flex;
+        justify-content: center;
+        margin-top:20px;
+        color:#717580;
+        a{
+            text-decoration:none;
+            color:#fd1f58;
+        }
+    }

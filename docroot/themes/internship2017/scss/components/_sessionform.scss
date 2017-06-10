@@ -1,0 +1,92 @@
+/*------------------------------------*\
+    * @file
+    * session content type.
+\*------------------------------------*/
+
+.node-session-form {
+    width: 60%;
+    margin: 0 auto;
+    padding: 20px 40px;
+    border-radius: 10px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    @include breakpoint(laptop) {
+        width: 80%;
+    }
+    @include breakpoint(phablet) {
+        width: 90%;
+    }
+    label,
+    // .description,
+    #edit-body-0-format,
+    .link-edit-summary {
+        color: #5e6675;
+        display: inline-block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-family: $title-font;
+        font-weight: $light;
+        @include breakpoint(mobileonly) {
+            font-size: 14px;
+        }
+        a {
+            text-decoration: none;
+            color: $blue;
+        }
+    }
+    #edit-body-0-format,
+    {
+        color: grey;
+    }
+    .description {
+        margin-top: 5px;
+    }
+    .text-full,
+    .form-text,
+    .form-file {
+        color: #5e6675;
+        display: block;
+        width: 100%;
+        height: 40px;
+        padding: 6px 12px;
+        font-size: 16px;
+        line-height: 1.42857143;
+        background-color: #fff;
+        border: 1px solid #cecece;
+        border-radius: 2px;
+        // box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        @include breakpoint(mobileonly) {
+            font-size: 14px;
+        }
+    }
+    #edit-body-0-value {
+        height: 160px;
+    }
+    #edit-submit,
+    #edit-preview {
+        cursor: pointer;
+        display: inline-block;
+        padding: 6px 15px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: $light;
+        line-height: 1.42857143;
+        text-align: center;
+        vertical-align: middle;
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        color: #fff;
+        background-color: #2a67a5;
+        &:hover {
+            box-shadow: 3px 3px 2px #888888;
+        }
+    }
+    img {
+        @include breakpoint(mobileonly) {
+            width: 80%;
+            height: auto;
+        }
+    }
+}
