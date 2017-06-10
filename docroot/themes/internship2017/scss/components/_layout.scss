@@ -48,6 +48,7 @@ body p {
     font-size: 18px;
     font-family: $body-font;
     color: #5d686b;
+    margin-top: 40px;
     @include container($container-width, 20px);
     @include breakpoint(mobileonly) {
         padding: 0px;
