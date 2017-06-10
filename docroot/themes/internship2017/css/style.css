@@ -220,6 +220,7 @@ body p {
   list-style: initial;
   line-height: 25px;
   margin: 20px 0px;
+  padding: 0px 20px;
 }
 .node__content ul li {
   padding: 5px 0px;

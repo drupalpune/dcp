@@ -48,21 +48,21 @@ body p {
     font-size: 18px;
     font-family: $body-font;
     color: #5d686b;
-
     @include container($container-width, 20px);
     margin-top: 40px;
     @include breakpoint(mobileonly) {
         padding: 0px;
     }
     p {
-        line-height:25px;
+        line-height: 25px;
     }
     ul {
         list-style: initial;
-        line-height:25px;
+        line-height: 25px;
         margin: 20px 0px;
+        padding: 0px 20px;
         li {
-            padding:5px 0px;
+            padding: 5px 0px;
         }
     }
 }
