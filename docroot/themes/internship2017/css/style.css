@@ -200,6 +200,9 @@ body p {
 }
 
 .node__content {
+  font-size: 18px;
+  font-family: "Ubuntu", sans-serif;
+  color: #5d686b;
   width: 95%;
   margin: 0 auto;
   padding: 20px;
@@ -210,13 +213,15 @@ body p {
   }
 }
 .node__content p {
-  font-size: 18px;
-  font-family: "Ubuntu", sans-serif;
-  color: #5d686b;
+  line-height: 25px;
 }
 .node__content ul {
   list-style: initial;
+  line-height: 25px;
   margin: 20px 0px;
+}
+.node__content ul li {
+  padding: 5px 0px;
 }
 
 /*------------------------------------*\

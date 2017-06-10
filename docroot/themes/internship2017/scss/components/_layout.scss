@@ -45,18 +45,22 @@ body p {
 }
 
 .node__content {
+    font-size: 18px;
+    font-family: $body-font;
+    color: #5d686b;
     @include container($container-width, 20px);
     @include breakpoint(mobileonly) {
         padding: 0px;
     }
     p {
-        font-size: 18px;
-        font-family: $body-font;
-        color: #5d686b;
+        line-height:25px;
     }
-
     ul {
         list-style: initial;
+        line-height:25px;
         margin: 20px 0px;
+        li {
+            padding:5px 0px;
+        }
     }
 }
