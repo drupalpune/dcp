@@ -18,7 +18,7 @@
     p {
         margin: 10px 0;
         color: $grey;
-        line-height: 20px;
+        line-height: 25px;
         font-family: $body-font;
     }
     strong {
@@ -36,6 +36,13 @@
     padding-bottom: 50px;
     .about-block {
         display: flex;
+            .block-left {
+                width:90%;
+            }
+.block-right {
+                width:90%;
+            }
+
         @include container($container-width, 20px);
         @include breakpoint(laptop) {
             width: 85%;

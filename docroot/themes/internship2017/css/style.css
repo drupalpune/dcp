@@ -159,7 +159,7 @@ html {
 }
 
 body p {
-  line-height: 20px;
+  line-height: 25px;
 }
 
 .page-wrapper {
@@ -1228,7 +1228,7 @@ div.responsive-menu-toggle {
 .about-wrapper p {
   margin: 10px 0;
   color: #92969e;
-  line-height: 20px;
+  line-height: 25px;
   font-family: "Ubuntu", sans-serif;
 }
 .about-wrapper strong {
@@ -1251,6 +1251,12 @@ div.responsive-menu-toggle {
   width: 95%;
   margin: 0 auto;
   padding: 20px;
+}
+#block-whatshouldibringinpunedrupalcamp .about-block .block-left {
+  width: 90%;
+}
+#block-whatshouldibringinpunedrupalcamp .about-block .block-right {
+  width: 90%;
 }
 @media screen and (max-width: 1200px) {
   #block-whatshouldibringinpunedrupalcamp .about-block {
