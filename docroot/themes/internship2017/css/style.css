@@ -199,6 +199,26 @@ body p {
   flex: 1;
 }
 
+.node__content {
+  width: 95%;
+  margin: 0 auto;
+  padding: 20px;
+}
+@media screen and (max-width: 480px) {
+  .node__content {
+    padding: 0px;
+  }
+}
+.node__content p {
+  font-size: 18px;
+  font-family: "Ubuntu", sans-serif;
+  color: #5d686b;
+}
+.node__content ul {
+  list-style: initial;
+  margin: 20px 0px;
+}
+
 /*------------------------------------*\
     * @file
     * Menu Navigation.

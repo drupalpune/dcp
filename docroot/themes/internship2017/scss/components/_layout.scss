@@ -43,3 +43,20 @@ body p {
         }
     }
 }
+
+.node__content {
+    @include container($container-width, 20px);
+    @include breakpoint(mobileonly) {
+        padding: 0px;
+    }
+    p {
+        font-size: 18px;
+        font-family: $body-font;
+        color: #5d686b;
+    }
+
+    ul {
+        list-style: initial;
+        margin: 20px 0px;
+    }
+}
