@@ -4,7 +4,7 @@
 \*------------------------------------*/
 
 #block-internship2017-aboutbanner {
-    @include banner(100%, 500px);
+    @include banner(100%, auto);
 }
 
 .about-wrapper {
@@ -36,13 +36,18 @@
     padding-bottom: 50px;
     .about-block {
         display: flex;
-            .block-left {
-                width:90%;
+        .block-left {
+            width: 90%;
+            @include breakpoint(phablet) {
+                width: 100%;
             }
-.block-right {
-                width:90%;
+        }
+        .block-right {
+            width: 90%;
+            @include breakpoint(phablet) {
+                width: 100%;
             }
-
+        }
         @include container($container-width, 20px);
         @include breakpoint(laptop) {
             width: 85%;

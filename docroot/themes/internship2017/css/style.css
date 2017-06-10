@@ -1203,7 +1203,7 @@ div.responsive-menu-toggle {
 \*------------------------------------*/
 #block-internship2017-aboutbanner img {
   width: 100%;
-  height: 500px;
+  height: auto;
 }
 
 .about-wrapper {
@@ -1255,8 +1255,18 @@ div.responsive-menu-toggle {
 #block-whatshouldibringinpunedrupalcamp .about-block .block-left {
   width: 90%;
 }
+@media screen and (max-width: 768px) {
+  #block-whatshouldibringinpunedrupalcamp .about-block .block-left {
+    width: 100%;
+  }
+}
 #block-whatshouldibringinpunedrupalcamp .about-block .block-right {
   width: 90%;
+}
+@media screen and (max-width: 768px) {
+  #block-whatshouldibringinpunedrupalcamp .about-block .block-right {
+    width: 100%;
+  }
 }
 @media screen and (max-width: 1200px) {
   #block-whatshouldibringinpunedrupalcamp .about-block {
