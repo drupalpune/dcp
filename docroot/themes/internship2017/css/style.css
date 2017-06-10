@@ -203,10 +203,10 @@ body p {
   font-size: 18px;
   font-family: "Ubuntu", sans-serif;
   color: #5d686b;
-  margin-top: 40px;
   width: 95%;
   margin: 0 auto;
   padding: 20px;
+  margin-top: 40px;
 }
 @media screen and (max-width: 480px) {
   .node__content {
