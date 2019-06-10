@@ -1,0 +1,22 @@
+uuid: 5e2453ce-26b4-4573-b4e9-c4a5dd40df2b
+langcode: en
+status: false
+dependencies:
+  module:
+    - help
+  theme:
+    - addweb_admin_theme
+_core:
+  default_config_hash: 8I8iACSa0sKO3k3jlvUG1ge52rfcKX7USJAQYnzuBgg
+id: addweb_admin_theme_help
+theme: addweb_admin_theme
+region: '-1'
+weight: -9
+provider: null
+plugin: help_block
+settings:
+  id: help_block
+  label: Help
+  provider: help
+  label_display: '0'
+visibility: {  }

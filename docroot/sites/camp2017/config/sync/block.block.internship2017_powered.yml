@@ -1,0 +1,22 @@
+uuid: 60b839c0-c5f5-4d47-ae49-fa5931f0f579
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - internship2017
+_core:
+  default_config_hash: jQQUUWN2Uxr5qZtc9zcJKBCxpKY8orN1u2HPqYYRQDI
+id: internship2017_powered
+theme: internship2017
+region: '-1'
+weight: -13
+provider: null
+plugin: system_powered_by_block
+settings:
+  id: system_powered_by_block
+  label: 'Powered by Drupal'
+  provider: system
+  label_display: '0'
+visibility: {  }

@@ -1,0 +1,22 @@
+uuid: 6a5f56ba-6540-4456-8d0e-d15aa448e383
+langcode: en
+status: true
+dependencies:
+  theme:
+    - internship2017
+_core:
+  default_config_hash: X9I1OB0W3WlWtrK-CNcg6hNWwa8wficanpH8pYnDZDE
+id: internship2017_local_tasks
+theme: internship2017
+region: content
+weight: -16
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  provider: core
+  label_display: '0'
+  primary: true
+  secondary: true
+visibility: {  }

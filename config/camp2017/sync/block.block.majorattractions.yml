@@ -1,0 +1,31 @@
+uuid: 979dbc9b-11ec-4c85-803b-0294020c41dd
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:69bbeff9-af21-4e2f-9b54-09ca6bf87e90'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: majorattractions
+theme: internship2017
+region: content_bottom
+weight: -15
+provider: null
+plugin: 'block_content:69bbeff9-af21-4e2f-9b54-09ca6bf87e90'
+settings:
+  id: 'block_content:69bbeff9-af21-4e2f-9b54-09ca6bf87e90'
+  label: 'Major attractions in and around pune'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /venue
+    negate: false
+    context_mapping: {  }

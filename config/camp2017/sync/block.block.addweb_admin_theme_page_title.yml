@@ -1,0 +1,20 @@
+uuid: 14b41336-c5a2-4a3e-a9e6-4b72e58c9339
+langcode: en
+status: false
+dependencies:
+  theme:
+    - addweb_admin_theme
+_core:
+  default_config_hash: 7rR9chwXvdM2H8OYMAYx9Zj3GGlPMrZp_M3ZA4thYTk
+id: addweb_admin_theme_page_title
+theme: addweb_admin_theme
+region: '-1'
+weight: -6
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  provider: core
+  label_display: '0'
+visibility: {  }

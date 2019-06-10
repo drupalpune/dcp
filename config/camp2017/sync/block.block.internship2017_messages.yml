@@ -1,0 +1,22 @@
+uuid: cdbdeac3-7762-4b24-9fa5-494d3b07c5c8
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - internship2017
+_core:
+  default_config_hash: KHQIJ7Vfl25lTjzIc7qIvnuistt-Mw2O0kG4jCofmkI
+id: internship2017_messages
+theme: internship2017
+region: '-1'
+weight: -9
+provider: null
+plugin: system_messages_block
+settings:
+  id: system_messages_block
+  label: 'Status messages'
+  provider: system
+  label_display: '0'
+visibility: {  }

@@ -1,0 +1,31 @@
+uuid: 8ad0f7fd-c7c7-4e04-888e-3066cb41346f
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:sponsors:e9180b22-6ebf-490b-9930-475a73dcf394'
+  module:
+    - block_content
+    - system
+  theme:
+    - bartik
+id: helpusmakethisanawesomeexperience.
+theme: bartik
+region: content
+weight: -3
+provider: null
+plugin: 'block_content:e9180b22-6ebf-490b-9930-475a73dcf394'
+settings:
+  id: 'block_content:e9180b22-6ebf-490b-9930-475a73dcf394'
+  label: 'Help us make this an awesome experience.'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /Sponsors
+    negate: false
+    context_mapping: {  }

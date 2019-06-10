@@ -1,0 +1,22 @@
+uuid: 360a0258-dee0-4578-8e0c-f7942a695b72
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.sponsors
+id: node.sponsors.promote
+field_name: promote
+entity_type: node
+bundle: sponsors
+label: 'Promoted to front page'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

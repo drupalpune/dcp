@@ -1,0 +1,8 @@
+uuid: c920b722-c2d4-4fa9-bdfa-a385c96966c9
+langcode: en
+status: true
+dependencies: {  }
+id: block_update_news
+label: block_update_news
+revision: 0
+description: 'showing the update block'

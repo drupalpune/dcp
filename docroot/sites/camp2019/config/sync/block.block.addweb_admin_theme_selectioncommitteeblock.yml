@@ -1,0 +1,31 @@
+uuid: 74a1ee38-ab1c-4ada-b29c-7a2de2d93bcb
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:884618a5-48f5-44ca-9b94-5390aa0ab05c'
+  module:
+    - block_content
+    - system
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_selectioncommitteeblock
+theme: addweb_admin_theme
+region: content
+weight: -7
+provider: null
+plugin: 'block_content:884618a5-48f5-44ca-9b94-5390aa0ab05c'
+settings:
+  id: 'block_content:884618a5-48f5-44ca-9b94-5390aa0ab05c'
+  label: 'selection committee block'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /session
+    negate: false
+    context_mapping: {  }

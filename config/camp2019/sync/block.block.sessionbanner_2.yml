@@ -1,0 +1,31 @@
+uuid: 6d0abd7b-f8ec-4c33-9f85-c67995928037
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:session_banner:b303440f-05f1-41d5-9953-e87713019a5d'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: sessionbanner_2
+theme: internship2017
+region: header_bottom
+weight: -14
+provider: null
+plugin: 'block_content:b303440f-05f1-41d5-9953-e87713019a5d'
+settings:
+  id: 'block_content:b303440f-05f1-41d5-9953-e87713019a5d'
+  label: 'Session Banner'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /session
+    negate: false
+    context_mapping: {  }

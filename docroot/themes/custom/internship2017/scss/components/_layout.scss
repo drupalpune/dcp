@@ -1,0 +1,82 @@
+/*------------------------------------*\
+    * @file
+    * Layouts.
+\*------------------------------------*/
+
+body,
+html {
+    width: 100%;
+    margin: 0 auto;
+    height: 100%;
+    max-width: 1920px;
+}
+
+body p {
+    line-height: 25px;
+}
+
+.page-wrapper {
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+.header {
+    width: 100%;
+    background-color: #fff;
+}
+
+.header-wrapper {
+    padding: 0px;
+    border-bottom: 1px solid grey;
+}
+
+.mm-page {
+    height: 100%;
+    .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        .content {
+            flex: 1;
+        }
+    }
+}
+
+.node__content {
+    font-size: 18px;
+    font-family: $body-font;
+    color: #5d686b;
+    @include container($container-width, 20px);
+    margin-top: 40px;
+    @include breakpoint(mobileonly) {
+        padding: 0px;
+    }
+    p {
+        line-height: 25px;
+    }
+    ul,ol {
+        list-style: initial;
+        line-height: 25px;
+        margin:10px 0px 30px 0px;
+        padding: 0px 20px;
+        li {
+            padding: 5px 0px;
+            vertical-align: middle;
+        }
+    }
+    h3 {
+        font-size:20px;
+        font-weight: 800;
+    }
+
+    h2 {
+        font-size:22px;
+        font-weight: 800;
+    }
+
+    h2 {
+        font-size:24px;
+        font-weight: 800;
+    }
+}

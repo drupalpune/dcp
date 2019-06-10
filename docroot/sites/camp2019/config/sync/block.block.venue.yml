@@ -1,0 +1,31 @@
+uuid: b8fe9292-4fd9-4538-84ef-bd58a7521ad8
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:e54ffdcb-06f4-4edc-b683-456a50d60f86'
+  module:
+    - block_content
+    - system
+  theme:
+    - bartik
+id: venue
+theme: bartik
+region: featured_bottom_first
+weight: 0
+provider: null
+plugin: 'block_content:e54ffdcb-06f4-4edc-b683-456a50d60f86'
+settings:
+  id: 'block_content:e54ffdcb-06f4-4edc-b683-456a50d60f86'
+  label: Venue
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /session
+    negate: false
+    context_mapping: {  }

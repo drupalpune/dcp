@@ -1,0 +1,28 @@
+uuid: 7b2a6454-bc36-47a6-95ad-eeb3313f2e80
+langcode: en
+status: false
+dependencies:
+  module:
+    - search
+    - system
+  theme:
+    - internship2017
+_core:
+  default_config_hash: za-39d5WDUg6XvbyqSnuVYEeq6QM4qKJxW8MnoAha5A
+id: internship2017_search
+theme: internship2017
+region: '-1'
+weight: -11
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: Search
+  provider: search
+  label_display: visible
+visibility:
+  request_path:
+    id: request_path
+    pages: /Sponsors
+    negate: true
+    context_mapping: {  }

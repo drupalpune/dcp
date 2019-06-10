@@ -1,0 +1,32 @@
+uuid: 8774add3-fff8-40be-bff7-e597a5e1d5a1
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.session_banner
+    - field.field.block_content.session_banner.field_banner_image
+    - field.field.block_content.session_banner.field_caption
+    - image.style.banner
+  module:
+    - image
+    - text
+id: block_content.session_banner.default
+targetEntityType: block_content
+bundle: session_banner
+mode: default
+content:
+  field_banner_image:
+    weight: 1
+    label: hidden
+    settings:
+      image_style: banner
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+  field_caption:
+    weight: 2
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: text_default
+hidden: {  }

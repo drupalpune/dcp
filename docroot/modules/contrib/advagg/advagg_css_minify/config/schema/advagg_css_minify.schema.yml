@@ -1,0 +1,7 @@
+advagg_css_minify.settings:
+  type: config_entity
+  label: Settings
+  mapping:
+    minifier:
+      type: integer
+      label: 'Which minifier to use. 0 is Disabled.'

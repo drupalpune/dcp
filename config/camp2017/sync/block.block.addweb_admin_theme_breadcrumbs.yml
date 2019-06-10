@@ -1,0 +1,22 @@
+uuid: 05fc2887-6845-470e-a048-6dd3d8550c72
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - addweb_admin_theme
+_core:
+  default_config_hash: oXUb3JZR2WW5VOdw4HrhRicCsq51mCgLfRyvheG68ck
+id: addweb_admin_theme_breadcrumbs
+theme: addweb_admin_theme
+region: '-1'
+weight: -8
+provider: null
+plugin: system_breadcrumb_block
+settings:
+  id: system_breadcrumb_block
+  label: Breadcrumbs
+  provider: system
+  label_display: '0'
+visibility: {  }

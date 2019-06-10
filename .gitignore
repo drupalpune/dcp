@@ -1,0 +1,8 @@
+# Ignore paths that contain user-generated content.
+docroot/files
+docroot/sites/*/files
+docroot/sites/*/private
+node_modules
+docroot/sites/default/settings.php
+docroot/sites/default/services.yml
+vendor

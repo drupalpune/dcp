@@ -1,0 +1,72 @@
+.node-preview-container {
+    position: absolute;
+    margin-top: 169px;
+    label {
+        font-size: 22px;
+        color: $medred;
+        @include breakpoint (phablet) {
+            width: 19%;
+        }
+    }
+    .form-type-select {
+        display: none;
+    }
+    .node-preview-backlink {
+        text-decoration: none;
+        font-size: 18px;
+        margin-left: 10px;
+        display:block;
+        margin-top: -15px;
+    }
+}
+
+.node--unpublished, .node__content {
+    height: 100%;
+    width: 90%;
+    margin: 40px auto;
+    margin-bottom:20px;
+    background-color: #fff !important;
+    color: $dark-grey;
+    .field {
+        font-family: $title-font;
+        padding: 10px;
+        .field__label {
+            font-size: 22px;
+            padding: 10px;
+            color: $blue;
+            @include breakpoint (phablet) {
+                font-size: 19px;
+            }
+        }
+        .field__item {
+            margin-left: 20px;
+            font-size: 21px;
+            padding: 10px;
+            font-family: $body-font;
+            @include breakpoint (phablet) {
+                font-size: 18px;
+            }
+        }
+    }
+    p {
+        font-size: 21px;
+        margin:10px 0px;
+            strong {
+                font-weight: 800;
+            }
+    }
+    @include breakpoint (tablet) {
+        width: 90%;
+    }
+}
+
+#block-pagetitle {
+    text-align: center;
+    margin-top: 100px;
+    font-size: 35px;
+    color: $blue;
+    font-family: $title-font;
+    @include breakpoint (tablet) {
+        font-size: 30px;
+    }
+}

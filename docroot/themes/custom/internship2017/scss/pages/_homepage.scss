@@ -1,0 +1,505 @@
+/*------------------------------------*\
+    * @file
+    * Home Page.
+\*------------------------------------*/
+
+.region-header-bottom {
+  @include banner(100%, auto);
+}
+
+.block-tickets {
+  @include container($container-width, 20px);
+  @include breakpoint(mobileonly) {
+    padding: 0px;
+  }
+}
+
+.region-content {
+  .main-div {
+    padding: 50px 10px;
+    display: flex;
+    justify-content: space-around;
+    @include breakpoint(phablet) {
+      flex-direction: column;
+    }
+  }
+}
+
+.homepage-button p {
+  color: $grey;
+  font-size: 18px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: $body-font;
+}
+
+.homepage-button a {
+  @include abutton($medred);
+  color: #fff;
+  width: 300px;
+  @include breakpoint(mobileonly) {
+    width: 250px;
+  }
+}
+
+#block-internship2017-keynotespeaker {
+  font-family: $body-font;
+  background-color: #f7f9fb;
+  padding: 40px 0px;
+  h1 {
+    @include heading($blue, 32px);
+    text-align: center;
+    margin-bottom: 50px;
+    padding: 0;
+  }
+  .keynote-first {
+    background-color: #f7f9fb;
+    @include breakpoint(phablet) {
+      flex-direction: column-reverse;
+    }
+    p {
+      padding-right: 50px;
+      padding-left: 0px;
+      line-height: 20px;
+      @include breakpoint(phablet) {
+        padding-right: 0px;
+      }
+    }
+  }
+  .tabs {
+    width: 80%;
+    float: none;
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    margin-top: 75px;
+    @include breakpoint(mobileonly) {
+      width: 90%;
+    }
+  }
+  .tabs:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+  .tabs input[type=radio] {
+    display: none;
+  }
+  .tabs label {
+    display: block;
+    float: left;
+    width: 50%;
+    color: #ccc;
+    font-size: 24px;
+    font-family: $body-font;
+    background: #ebf0f5;
+    font-weight: normal;
+    text-decoration: none;
+    text-align: center;
+    line-height: 2;
+    cursor: pointer;
+    transition: all 0.5s;
+  }
+  .tab-content {
+    display: none;
+    width: 100%;
+    float: left;
+    padding-top: 40px;
+    box-sizing: border-box;
+  }
+  .tab-content * {
+    -webkit-animation: scale 0.7s ease-in-out;
+    -moz-animation: scale 0.7s ease-in-out;
+    animation: scale 0.7s ease-in-out;
+  }
+  @keyframes scale {
+    0% {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.01);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  .tabs [id^="tab"]:checked+label {
+    background: #FFF;
+    box-shadow: inset 0px -4px 0px 0px $medred;
+    color: $medred;
+  }
+  #tab1:checked~#tab-content1,
+  #tab2:checked~#tab-content2 {
+    display: block;
+  }
+}
+
+.class-keynote {
+  width: 100%;
+  display: flex;
+  @include breakpoint(phablet) {
+    flex-direction: column;
+  }
+}
+
+.keynote-speaker {
+  width: 50%;
+  color: $grey;
+  margin-top: 50px;
+  padding-bottom: 40px;
+  text-align: left;
+  @include breakpoint(phablet) {
+    width: 100%;
+  }
+  p {
+    padding-left: 50px;
+    line-height: 20px;
+    @include breakpoint(phablet) {
+      padding-left: 0px;
+    }
+    strong {
+      color: #006dd5;
+      font-size: 24px;
+      text-transform: uppercase;
+    }
+  }
+  p.desc {
+    font-weight: 800;
+  }
+  p:last-child {
+    margin-top: 15px;
+  }
+  p:first-child {
+    margin-bottom: 10px;
+  }
+}
+
+.keynote-speaker-image {
+  display: flex;
+  align-items: center;
+  width: 50%;
+  img {
+    width: 100%;
+  }
+  @include breakpoint(phablet) {
+    width: 100%;
+  }
+}
+
+#block-internship2017-events {
+  background: #ebf0f5;
+  @include breakpoint(mobileonly) {
+    padding: 0px;
+  }
+  h2 {
+    @include heading($blue, 32px);
+  }
+}
+
+.events-wrapper {
+  width: 80%;
+  padding: 20px 0px 50px 0px;
+  margin: 0 auto;
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  @include breakpoint(phablet) {
+    flex-direction: column;
+  }
+  .event {
+    width: 24%;
+    @include breakpoint(phablet) {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .event-container {
+      position: relative;
+      width: 100%;
+
+    }
+    .event-container:hover img {
+      opacity: 0.3;
+    }
+
+
+    img {
+      width: 100%;
+      height: auto;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      transition: .5s ease;
+      backface-visibility: hidden;
+      opacity: 1;
+    }
+    h1 {
+      font-size: 18px;
+      text-align:center;
+      padding: 20px 0;
+      font-family: $title-font;
+      text-transform: uppercase;
+      a {
+        text-decoration:none;
+        color: $blue;
+      }
+    }
+    p {
+      color: $grey;
+      padding-right: 30px;
+      line-height: 20px;
+      font-family: $body-font;
+    }
+  }
+}
+
+#block-views-block-our-sponsors-block-2 {
+  @include container($container-width, 20px);
+  width: 80%;
+  h2 {
+    @include heading($blue, 32px);
+  }
+  .view-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    .views-row {
+      width: 200px;
+      height: 150px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 50px;
+      @include breakpoint(laptop) {
+        margin: 0px 28px;
+      }
+    }
+  }
+}
+
+#block-views-block-our-sponsors-block-1 {
+  @include container($container-width, 20px);
+  width: 100%;
+  background: #f7f7f7;
+  h2 {
+    @include heading($blue, 32px);
+  }
+  .view-content {
+    column-count: 3;
+    column-gap: .5em;
+    @include breakpoint(tablet) {
+      column-count: 2;
+    }
+    @include breakpoint(phablet) {
+      column-count: 1;
+    }
+    .views-row {
+      display: inline-block;
+      margin: 0 0 0.5em;
+      background-color: #fff;
+      width: 100%;
+      .views-field-body {
+        padding: 20px;
+        text-align: justify;
+        a {
+          text-decoration: none;
+          color: $blue;
+        }
+      }
+      .views-field-field-image {
+        text-align: center;
+        box-shadow: 0px 7px 10px -6px #EBEBEB;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  }
+}
+
+#block-internship2017-helpusmakethisanawesomeexperience,
+#block-joinustomake {
+  @include container($container-width, 20px);
+  h2 {
+    @include heading($grey, 18px);
+    text-transform: none;
+  }
+  p {
+    text-align: center;
+    font-family: $body-font;
+  }
+  a {
+    @include abutton($medred);
+    color: #fff;
+  }
+}
+
+#block-inassociationwith {
+  @include container($container-width, 20px);
+  text-align:center;
+  h2 {
+    @include heading($grey, 18px);
+    text-transform: none;
+    padding:20px 0px;
+    font-size:24px;
+    font-weight:800;
+  }
+  p {
+    text-align:center;
+    text-align:-webkit-center;
+  }
+  a {
+    margin:10px 0px;
+    display:block;
+    max-width: 300px;
+  }
+  img {
+    width:100%;
+  }
+}
+
+#block-internship2017-venue-2 {
+  background-color: $lightblue;
+  padding: 30px 0px;
+  h2 {
+    @include heading($blue, 32px);
+  }
+}
+
+.venue-main {
+  @include container($container-width, 20px);
+  @include breakpoint(tablet) {
+    padding: 0px;
+  }
+  @include breakpoint(phablet) {
+    padding: 20px;
+  }
+  display:flex;
+  flex-direction: row-reverse;
+  font-family: $body-font;
+  @include breakpoint(phablet) {
+    flex-direction: column-reverse;
+  }
+  .venue-map,
+  .venue-detail {
+    width: 50%;
+    @include breakpoint(phablet) {
+      width: 100%;
+      margin: 10px 0px;
+    }
+  }
+  .venue-map iframe {
+    width: 100%;
+  }
+  a {
+    @include abutton(#fff);
+    margin-top: 20px;
+    color: $grey;
+    box-shadow: 1px 2px 1px $grey;
+  }
+  p {
+    color: $grey;
+    line-height: 20px;
+    strong {
+      color: $black;
+      font-size: 24px;
+    }
+  }
+  p:first-child {
+    margin: 20px 0px;
+  }
+  p:nth-child(4) {
+    margin: 20px 0px;
+  }
+}
+
+#block-internship2017-madewithlovebyqed42 {
+  padding: 5px 20px;
+  @include breakpoint(phablet) {
+    padding: 5px 0px;
+  }
+  p {
+    @include container($container-width, 0px); // width:100%;
+    text-align: right;
+    font-family: $body-font;
+    color: $grey;
+  }
+}
+
+#block-internship2017-followus {
+  color: #fff;
+  font-family: $body-font;
+  background-color: $black;
+  .footer-logo {
+    display: flex;
+    padding-bottom: 4px;
+    width: $container-width;
+    justify-content: space-between;
+    margin: 0 auto;
+    @include breakpoint(phablet) {
+      flex-direction:column;
+    }
+  }
+  p {
+    text-align: right;
+    margin-top: 20px;
+    @include breakpoint(phablet) {
+      display:flex;
+      justify-content: center;
+    }
+      strong {
+        color:#fff;
+        font-weight:800;
+        font-size:18px;
+        a {
+          text-decoration:none;
+          color:inherit;
+          margin-left: 5px;
+        }
+      }
+  }
+  div {
+    display:flex;
+    @include breakpoint(phablet) {
+      justify-content: center;
+    }
+  }
+  img {
+    margin-left: 5px;
+    margin-top: -20px;
+  }
+}
+
+#block-callforpapper {
+  a {
+    display: inline-block;
+    padding: 20px 50px;
+    text-decoration: none;
+    border-radius: 5px;
+    background-color: #fd1f58;
+    color: #fff;
+    width: 276px;
+    text-align: center;
+  }
+}
+
+
+.partner-drupal {
+  padding-bottom:20px;
+  display:flex;
+  justify-content: space-evenly;
+    @include breakpoint(phablet) {
+      flex-direction: column;
+    }
+    .association-partner, .education-partner {
+      width:40%;
+      @include breakpoint(phablet) {
+      width:100%;
+    }
+      p {
+        color:$grey;
+      }
+    }
+}

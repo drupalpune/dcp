@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/docroot/core/lib/Drupal/Core/Composer" isTestSource="false" packagePrefix="Drupal\Core\Composer\" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/asm89/stack-cors" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/doctrine/annotations" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/doctrine/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/doctrine/collections" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/doctrine/common" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/doctrine/inflector" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/doctrine/lexer" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/easyrdf/easyrdf" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/egulias/email-validator" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/guzzlehttp/guzzle" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/guzzlehttp/promises" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/guzzlehttp/psr7" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/ircmaxell/password-compat" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/masterminds/html5" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/paragonie/random_compat" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/psr/http-message" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/psr/log" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/stack/builder" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony-cmf/routing" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/class-loader" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/console" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/debug" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/dependency-injection" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/http-foundation" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/http-kernel" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/polyfill-apcu" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/polyfill-iconv" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/polyfill-mbstring" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/polyfill-php54" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/polyfill-php55" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/process" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/psr-http-message-bridge" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/routing" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/serializer" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/translation" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/validator" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/twig/twig" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/wikimedia/composer-merge-plugin" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/zendframework/zend-diactoros" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/zendframework/zend-escaper" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/zendframework/zend-feed" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/zendframework/zend-hydrator" />
+      <excludeFolder url="file://$MODULE_DIR$/docroot/vendor/zendframework/zend-stdlib" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

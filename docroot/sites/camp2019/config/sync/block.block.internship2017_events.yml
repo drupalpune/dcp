@@ -1,0 +1,31 @@
+uuid: 8eb7d606-121f-43fa-aa08-6a1f9718a512
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:a4c9ee5a-131a-4cc8-8826-6bb8d5c0229b'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: internship2017_events
+theme: internship2017
+region: content
+weight: -12
+provider: null
+plugin: 'block_content:a4c9ee5a-131a-4cc8-8826-6bb8d5c0229b'
+settings:
+  id: 'block_content:a4c9ee5a-131a-4cc8-8826-6bb8d5c0229b'
+  label: Events
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

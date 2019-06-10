@@ -1,0 +1,31 @@
+uuid: 722e7a1a-6813-4661-a2fd-73ef7d1f6156
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:sponsor_benefits:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+  module:
+    - block_content
+    - system
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_benefitsofbeingasponsor
+theme: addweb_admin_theme
+region: content
+weight: -8
+provider: null
+plugin: 'block_content:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+settings:
+  id: 'block_content:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+  label: 'Benefits Of Being a Sponsor'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /Sponsors
+    negate: false
+    context_mapping: {  }

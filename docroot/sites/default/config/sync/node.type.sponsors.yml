@@ -1,0 +1,17 @@
+uuid: 746b1401-28a4-44b6-940e-13af0ff534e9
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus: {  }
+    parent: ''
+name: Sponsors
+type: sponsors
+description: 'Use <em>sponsors</em> to add Sponsors for the Drupal Camp.'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: false

@@ -1,0 +1,31 @@
+uuid: cf260bae-f644-4827-99fe-334d00208cd4
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:6ead2764-8757-40d3-808b-dad43c185e46'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: contactus
+theme: internship2017
+region: content_bottom
+weight: -16
+provider: null
+plugin: 'block_content:6ead2764-8757-40d3-808b-dad43c185e46'
+settings:
+  id: 'block_content:6ead2764-8757-40d3-808b-dad43c185e46'
+  label: 'Contact Us'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /venue
+    negate: false
+    context_mapping: {  }

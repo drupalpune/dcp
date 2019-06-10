@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpCodeSniffer">
+    <phpcs_settings>
+      <PhpCSConfiguration tool_path="/usr/local/bin/phpcs" />
+    </phpcs_settings>
+  </component>
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/docroot/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/docroot/vendor/stack/builder" />
+      <path value="$PROJECT_DIR$/docroot/vendor/asm89/stack-cors" />
+      <path value="$PROJECT_DIR$/docroot/vendor/twig/twig" />
+      <path value="$PROJECT_DIR$/docroot/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/console" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/polyfill-apcu" />
+      <path value="$PROJECT_DIR$/docroot/vendor/egulias/email-validator" />
+      <path value="$PROJECT_DIR$/docroot/vendor/easyrdf/easyrdf" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/polyfill-php54" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/debug" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/dependency-injection" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/process" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/serializer" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/validator" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/polyfill-iconv" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/polyfill-php55" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/translation" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/event-dispatcher" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/routing" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/http-kernel" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/http-foundation" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/psr-http-message-bridge" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/class-loader" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/polyfill-mbstring" />
+      <path value="$PROJECT_DIR$/docroot/vendor/doctrine/collections" />
+      <path value="$PROJECT_DIR$/docroot/vendor/doctrine/common" />
+      <path value="$PROJECT_DIR$/docroot/vendor/doctrine/cache" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony/yaml" />
+      <path value="$PROJECT_DIR$/docroot/vendor/ircmaxell/password-compat" />
+      <path value="$PROJECT_DIR$/docroot/vendor/doctrine/lexer" />
+      <path value="$PROJECT_DIR$/docroot/vendor/doctrine/annotations" />
+      <path value="$PROJECT_DIR$/docroot/vendor/doctrine/inflector" />
+      <path value="$PROJECT_DIR$/docroot/vendor/guzzlehttp/psr7" />
+      <path value="$PROJECT_DIR$/docroot/vendor/guzzlehttp/guzzle" />
+      <path value="$PROJECT_DIR$/docroot/vendor/wikimedia/composer-merge-plugin" />
+      <path value="$PROJECT_DIR$/docroot/vendor/paragonie/random_compat" />
+      <path value="$PROJECT_DIR$/docroot/vendor/zendframework/zend-escaper" />
+      <path value="$PROJECT_DIR$/docroot/vendor/symfony-cmf/routing" />
+      <path value="$PROJECT_DIR$/docroot/vendor/masterminds/html5" />
+      <path value="$PROJECT_DIR$/docroot/vendor/guzzlehttp/promises" />
+      <path value="$PROJECT_DIR$/docroot/vendor/zendframework/zend-diactoros" />
+      <path value="$PROJECT_DIR$/docroot/vendor/zendframework/zend-hydrator" />
+      <path value="$PROJECT_DIR$/docroot/vendor/zendframework/zend-stdlib" />
+      <path value="$PROJECT_DIR$/docroot/vendor/zendframework/zend-feed" />
+      <path value="$PROJECT_DIR$/docroot/vendor/composer" />
+    </include_path>
+  </component>
+</project>

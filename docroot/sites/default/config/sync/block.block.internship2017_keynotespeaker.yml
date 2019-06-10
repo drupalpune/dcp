@@ -1,0 +1,31 @@
+uuid: 9e1aab06-200f-42bd-bb19-2cebefd88297
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:ebffc4bf-f1df-4892-96f4-36fb24738e77'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: internship2017_keynotespeaker
+theme: internship2017
+region: content
+weight: -13
+provider: null
+plugin: 'block_content:ebffc4bf-f1df-4892-96f4-36fb24738e77'
+settings:
+  id: 'block_content:ebffc4bf-f1df-4892-96f4-36fb24738e77'
+  label: 'Keynote Speaker'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

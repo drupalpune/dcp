@@ -1,0 +1,31 @@
+uuid: ad3f724f-8c63-40cc-9512-ece2464274a5
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:sponsor_benefits:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: internship2017_benefitsofbeingasponsor
+theme: internship2017
+region: content
+weight: -9
+provider: null
+plugin: 'block_content:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+settings:
+  id: 'block_content:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+  label: 'Benefits Of Being a Sponsor'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /Sponsors
+    negate: false
+    context_mapping: {  }

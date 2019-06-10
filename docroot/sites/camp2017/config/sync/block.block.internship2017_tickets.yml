@@ -1,0 +1,31 @@
+uuid: 043127c0-06ce-43cb-8710-9372dffa9290
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:e0ac88c8-6909-4745-9bd0-f2c3a676fd41'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: internship2017_tickets
+theme: internship2017
+region: content
+weight: -14
+provider: null
+plugin: 'block_content:e0ac88c8-6909-4745-9bd0-f2c3a676fd41'
+settings:
+  id: 'block_content:e0ac88c8-6909-4745-9bd0-f2c3a676fd41'
+  label: Tickets
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

@@ -1,0 +1,22 @@
+uuid: b5f7f20e-c29f-4ed1-8965-c480baf65717
+langcode: en
+status: false
+dependencies:
+  module:
+    - help
+  theme:
+    - internship2017
+_core:
+  default_config_hash: 8I8iACSa0sKO3k3jlvUG1ge52rfcKX7USJAQYnzuBgg
+id: internship2017_help
+theme: internship2017
+region: '-1'
+weight: -15
+provider: null
+plugin: help_block
+settings:
+  id: help_block
+  label: Help
+  provider: help
+  label_display: '0'
+visibility: {  }

@@ -1,0 +1,31 @@
+uuid: 7ad53644-638c-42e2-842b-130cbcb8e81e
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:a4c9ee5a-131a-4cc8-8826-6bb8d5c0229b'
+  module:
+    - block_content
+    - system
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_events
+theme: addweb_admin_theme
+region: content
+weight: -4
+provider: null
+plugin: 'block_content:a4c9ee5a-131a-4cc8-8826-6bb8d5c0229b'
+settings:
+  id: 'block_content:a4c9ee5a-131a-4cc8-8826-6bb8d5c0229b'
+  label: Events
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

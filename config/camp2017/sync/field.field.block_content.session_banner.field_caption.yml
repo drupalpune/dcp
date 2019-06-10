@@ -1,0 +1,21 @@
+uuid: ad34ec43-6a8d-4c7b-9a32-49839bcfdbc1
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.session_banner
+    - field.storage.block_content.field_caption
+  module:
+    - text
+id: block_content.session_banner.field_caption
+field_name: field_caption
+entity_type: block_content
+bundle: session_banner
+label: Caption
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text

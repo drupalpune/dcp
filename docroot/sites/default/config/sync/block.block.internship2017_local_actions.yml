@@ -1,0 +1,20 @@
+uuid: 423e1f13-5ef3-4d33-a256-65ca4e09fc81
+langcode: en
+status: false
+dependencies:
+  theme:
+    - internship2017
+_core:
+  default_config_hash: 13GQpeITIJsp1kyPniXtWZfyFH87vb1xxJCHifL4UeE
+id: internship2017_local_actions
+theme: internship2017
+region: '-1'
+weight: -12
+provider: null
+plugin: local_actions_block
+settings:
+  id: local_actions_block
+  label: 'Primary admin actions'
+  provider: core
+  label_display: '0'
+visibility: {  }

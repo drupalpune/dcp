@@ -1,0 +1,32 @@
+uuid: 38635f33-f1d4-4b3b-9c16-dccac4439381
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.sponsors
+    - field.field.block_content.sponsors.body
+    - field.field.block_content.sponsors.field_title
+  module:
+    - text
+id: block_content.sponsors.default
+targetEntityType: block_content
+bundle: sponsors
+mode: default
+content:
+  body:
+    type: text_textarea_with_summary
+    weight: 1
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+    third_party_settings: {  }
+  field_title:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+hidden:
+  info: true

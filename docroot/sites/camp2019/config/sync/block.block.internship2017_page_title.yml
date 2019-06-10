@@ -1,0 +1,20 @@
+uuid: b6bde3bf-39da-4ef8-a8f3-3d3578f655fd
+langcode: en
+status: false
+dependencies:
+  theme:
+    - internship2017
+_core:
+  default_config_hash: 7rR9chwXvdM2H8OYMAYx9Zj3GGlPMrZp_M3ZA4thYTk
+id: internship2017_page_title
+theme: internship2017
+region: '-1'
+weight: -14
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  provider: core
+  label_display: '0'
+visibility: {  }

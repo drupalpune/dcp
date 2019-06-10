@@ -1,0 +1,30 @@
+uuid: b11df819-a7bf-4588-9fec-195057200df5
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.sponsor_benefits
+    - field.field.block_content.sponsor_benefits.body
+  module:
+    - text
+id: block_content.sponsor_benefits.default
+targetEntityType: block_content
+bundle: sponsor_benefits
+mode: default
+content:
+  body:
+    type: text_textarea_with_summary
+    weight: 3
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+    third_party_settings: {  }
+  info:
+    type: string_textfield
+    weight: -5
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden: {  }

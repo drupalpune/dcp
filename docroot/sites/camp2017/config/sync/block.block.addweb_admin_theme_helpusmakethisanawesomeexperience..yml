@@ -1,0 +1,31 @@
+uuid: 252a0b62-d09f-45ba-adbd-a97fbea67124
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:sponsors:e9180b22-6ebf-490b-9930-475a73dcf394'
+  module:
+    - block_content
+    - system
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_helpusmakethisanawesomeexperience.
+theme: addweb_admin_theme
+region: content
+weight: -2
+provider: null
+plugin: 'block_content:e9180b22-6ebf-490b-9930-475a73dcf394'
+settings:
+  id: 'block_content:e9180b22-6ebf-490b-9930-475a73dcf394'
+  label: 'Help us make this an awesome experience.'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

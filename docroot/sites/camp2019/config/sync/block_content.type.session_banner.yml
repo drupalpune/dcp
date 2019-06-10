@@ -1,0 +1,8 @@
+uuid: 171d0ff8-8872-4f6a-a4ed-ab35f4ad26c5
+langcode: en
+status: true
+dependencies: {  }
+id: session_banner
+label: Banner
+revision: 0
+description: ''

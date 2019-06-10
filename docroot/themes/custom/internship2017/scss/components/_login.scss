@@ -1,0 +1,148 @@
+    /*------------------------------------*\
+    * @file
+    * Login.
+\*------------------------------------*/
+
+    .path-user {
+        .content {
+            background-color: #f7f9fb;
+        }
+
+        .main-content {
+            width: $container-width;
+            margin: 50px auto;
+            padding: 50px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    .user-logged-in #edit-account {
+            background-color: #fff;
+            padding: 30px;
+            color: #717580;
+        }
+
+      .user-logged-in  .field--name-field-drupal-org-link {
+        background-color: #fff;
+        padding: 1px 30px;
+        color: #717580;
+      }
+
+      .user-logged-in .field--name-field-curr {
+         background-color: #fff;
+        padding: 1px 30px;
+        color: #717580;
+      }
+
+    .path-user .login-new-form {
+        background-color: #fff;
+        padding: 30px;
+        color: #717580;
+        h2 {
+            padding: 20px 0px;
+            font-size: 24px;
+            font-family: $title-font;
+            font-weight: 800;
+        }
+        a {
+            color: #717580;
+            text-decoration: none;
+            margin-top: 15px;
+            display: block;
+        }
+    }
+
+    .path-user form {
+        border-top: 1px solid #f7f9fb;
+        border-bottom: 1px solid #f7f9fb;
+        .js-form-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .description {
+            display: none;
+        }
+        label {
+            margin: 5px 0px;
+            font-family: $title-font;
+        }
+        label::after {
+            content: unset;
+        }
+    }
+
+    .path-user input:focus {
+        outline: none;
+    }
+
+    select#edit-field-curr {
+        font-size: 1em;
+        color: #fff;
+        width: 100%;
+        display: block;
+        border: none;
+        border-radius: 2px;
+        padding: 1em;
+        border-bottom: solid 1px #fff;
+        -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+        transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+        background-color: #f7f9fb;
+        color: #717580;
+        height: 50px;
+    }
+
+    .path-user input[type="text"],
+    .path-user input[type="password"],
+    .path-user input[type="email"],
+    .path-user input[type="url"] {
+        font-size: 1em;
+        color: #fff;
+        width: 100%;
+        display: block;
+        border: none;
+        border-radius: 2px;
+        padding: 1em;
+        border-bottom: solid 1px #fff;
+        -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+        transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+        background-color: #f7f9fb;
+        color: #717580;
+    }
+
+    input[type=submit] {
+        background-color: #fd1f58;
+        color: #fff;
+        padding: 10px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .path-user .form-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .new-account {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        color: #717580;
+        a {
+            text-decoration: none;
+            color: #fd1f58;
+        }
+    }
+
+#volunteer-field a {
+    display:inline-block;
+    color:#fd1f58;
+}
+
+#register-close {
+    font-size:32px;
+    padding:20px;
+    color:$grey;
+}

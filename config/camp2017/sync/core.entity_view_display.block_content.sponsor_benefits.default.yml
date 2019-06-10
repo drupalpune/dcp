@@ -1,0 +1,21 @@
+uuid: d1a7269f-e4c6-44cf-a1f9-cd07ceba2920
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.sponsor_benefits
+    - field.field.block_content.sponsor_benefits.body
+  module:
+    - text
+id: block_content.sponsor_benefits.default
+targetEntityType: block_content
+bundle: sponsor_benefits
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

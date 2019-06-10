@@ -1,0 +1,32 @@
+uuid: 30758ac3-6e6c-42cd-8506-d094742afd60
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.block_update_news
+    - field.field.block_content.block_update_news.body
+    - field.field.block_content.block_update_news.field_block_image
+    - image.style.thumbnail
+  module:
+    - image
+    - text
+id: block_content.block_update_news.default
+targetEntityType: block_content
+bundle: block_update_news
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+  field_block_image:
+    weight: 0
+    label: hidden
+    settings:
+      image_style: thumbnail
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+hidden: {  }

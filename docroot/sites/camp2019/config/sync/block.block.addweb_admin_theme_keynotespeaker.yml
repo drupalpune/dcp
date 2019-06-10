@@ -1,0 +1,31 @@
+uuid: a8af9325-ddc5-41c7-960a-1ab1ba95e34c
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:ebffc4bf-f1df-4892-96f4-36fb24738e77'
+  module:
+    - block_content
+    - system
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_keynotespeaker
+theme: addweb_admin_theme
+region: content
+weight: -5
+provider: null
+plugin: 'block_content:ebffc4bf-f1df-4892-96f4-36fb24738e77'
+settings:
+  id: 'block_content:ebffc4bf-f1df-4892-96f4-36fb24738e77'
+  label: 'Keynote Speaker'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

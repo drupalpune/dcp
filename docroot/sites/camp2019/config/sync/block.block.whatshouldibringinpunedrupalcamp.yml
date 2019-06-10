@@ -1,0 +1,31 @@
+uuid: 2a3b0153-d267-4fc6-b9d6-b3e03e779436
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:f02d3c15-f3a8-4c62-be69-a37aa44151a8'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: whatshouldibringinpunedrupalcamp
+theme: internship2017
+region: content
+weight: -7
+provider: null
+plugin: 'block_content:f02d3c15-f3a8-4c62-be69-a37aa44151a8'
+settings:
+  id: 'block_content:f02d3c15-f3a8-4c62-be69-a37aa44151a8'
+  label: 'What Should I Bring In Pune Drupal Camp ?'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /about
+    negate: false
+    context_mapping: {  }
