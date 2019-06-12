@@ -1,18 +1,17 @@
-uuid: d4f52816-3bb1-4a93-a592-d9b0baabd436
+uuid: 78fcc337-c46d-46ef-b179-8e3d26fcd482
 langcode: en
-status: false
+status: true
 dependencies:
   module:
     - search
-    - system
   theme:
     - bartik
 _core:
   default_config_hash: za-39d5WDUg6XvbyqSnuVYEeq6QM4qKJxW8MnoAha5A
 id: bartik_search
 theme: bartik
-region: '-1'
-weight: -7
+region: sidebar_first
+weight: -1
 provider: null
 plugin: search_form_block
 settings:
@@ -20,9 +19,4 @@ settings:
   label: Search
   provider: search
   label_display: visible
-visibility:
-  request_path:
-    id: request_path
-    pages: /Sponsors
-    negate: true
-    context_mapping: {  }
+visibility: {  }

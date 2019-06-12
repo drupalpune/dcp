@@ -1,4 +1,4 @@
-uuid: 063392f7-a4b8-4faa-b80e-590eb47eae83
+uuid: 73a191a7-47d0-4b6f-9340-0bae27213302
 langcode: en
 status: true
 dependencies:
@@ -9,7 +9,7 @@ dependencies:
     - image
     - user
 _core:
-  default_config_hash: LLAieeozVsoZDb-2PbFxRJpQqnKmpR7-4OoRJnduz-U
+  default_config_hash: K-1rBM8mTIkFp9RqOC2tMRUukOQ1xbRCfSKK8dEddnA
 id: user.user.default
 targetEntityType: user
 bundle: user
@@ -17,12 +17,16 @@ mode: default
 content:
   account:
     weight: -10
+    region: content
   contact:
     weight: 5
+    region: content
   language:
     weight: 0
+    region: content
   timezone:
     weight: 6
+    region: content
   user_picture:
     type: image_image
     settings:
@@ -30,4 +34,5 @@ content:
       preview_image_style: thumbnail
     third_party_settings: {  }
     weight: -1
+    region: content
 hidden: {  }

@@ -769,7 +769,7 @@ $databases['default']['default'] = array (
   'driver' => 'mysql',
 );
 $settings['install_profile'] = 'standard';
-$config_directories['sync'] = '../camp2019/config/sync';
+$config_directories['sync'] = '../config/camp2019/sync';
 
 // Appended by drush archive-restore command.
 
