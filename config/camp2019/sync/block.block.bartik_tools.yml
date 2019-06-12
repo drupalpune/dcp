@@ -1,6 +1,6 @@
-uuid: 2984e6f1-288d-4a50-a8bb-159c24bdd5cb
+uuid: 27a42b1c-bc61-485e-989c-f47d1372a401
 langcode: en
-status: false
+status: true
 dependencies:
   config:
     - system.menu.tools
@@ -9,11 +9,11 @@ dependencies:
   theme:
     - bartik
 _core:
-  default_config_hash: NeHSoqm4XFqA7_0bDmR429ZZQt3LRbZMNRJTMsFyOfI
+  default_config_hash: rH6PpAn7-RScha1rGkohGAYSSh_1OVeZzioJPzPw6O4
 id: bartik_tools
 theme: bartik
-region: '-1'
-weight: -6
+region: sidebar_first
+weight: 0
 provider: null
 plugin: 'system_menu_block:tools'
 settings:
@@ -23,9 +23,5 @@ settings:
   label_display: visible
   level: 1
   depth: 0
-visibility:
-  request_path:
-    id: request_path
-    pages: /Sponsors
-    negate: true
-    context_mapping: {  }
+  expand_all_items: false
+visibility: {  }

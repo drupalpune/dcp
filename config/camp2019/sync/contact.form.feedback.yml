@@ -1,4 +1,4 @@
-uuid: bd3fd7de-7654-4b21-82d1-d2d2072704a5
+uuid: b062a75b-13c8-4973-8503-996073cad4f7
 langcode: en
 status: true
 dependencies: {  }
@@ -7,7 +7,7 @@ _core:
 id: feedback
 label: 'Website feedback'
 recipients:
-  - admin@example.com
+  - drupalpune12@gmail.com
 reply: ''
 weight: 0
 message: 'Your message has been sent.'

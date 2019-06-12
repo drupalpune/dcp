@@ -1,6 +1,6 @@
-uuid: 11c9c967-228d-4541-af4b-f719bba584bf
-name: qed42
-mail: admin@example.com
+uuid: 9227c251-3c42-40b6-a5d7-ac888024312b
+name: 'DrupalCamp Pune 2019'
+mail: drupalpune12@gmail.com
 slogan: ''
 page:
   403: ''
@@ -11,4 +11,4 @@ weight_select_max: 100
 langcode: en
 default_langcode: en
 _core:
-  default_config_hash: AyT9s8OUcclfALRE_imByOMgtZ19eOlqdF6zI3p7yqo
+  default_config_hash: yTxtFqBHnEWxQswuWvkjE8mKw2t8oKuCL1q8KnfHuGE
