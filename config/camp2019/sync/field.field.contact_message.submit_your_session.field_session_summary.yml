@@ -1,0 +1,21 @@
+uuid: 25aa64f5-87a9-455c-9e14-d8470755e18e
+langcode: en
+status: true
+dependencies:
+  config:
+    - contact.form.submit_your_session
+    - field.storage.contact_message.field_session_summary
+  module:
+    - text
+id: contact_message.submit_your_session.field_session_summary
+field_name: field_session_summary
+entity_type: contact_message
+bundle: submit_your_session
+label: 'Session Summary'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long
