@@ -1,0 +1,19 @@
+uuid: 6d0190ec-6c57-4a08-bd3b-9aab16d902e7
+langcode: en
+status: true
+dependencies:
+  module:
+    - contact
+    - text
+id: contact_message.field_session_summary
+field_name: field_session_summary
+entity_type: contact_message
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
