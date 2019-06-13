@@ -1,0 +1,14 @@
+name: camp2019
+type: theme
+description: 'custom theme for drupal camp 2019 site'
+base theme: classy
+package: custom
+core: '8.x'
+
+libraries:
+  - camp2019/global-styling
+
+regions:
+  header: Header
+  content: Content
+  footer: Footer
