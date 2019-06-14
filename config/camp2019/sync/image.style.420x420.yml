@@ -1,0 +1,15 @@
+uuid: 9e3c978f-dbd9-4aa9-be96-acc7dab86490
+langcode: en
+status: true
+dependencies: {  }
+name: 420x420
+label: 420x420
+effects:
+  1060e7e6-aade-470d-81f3-7e240b635cbc:
+    uuid: 1060e7e6-aade-470d-81f3-7e240b635cbc
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 420
+      height: 420
+      anchor: center-center
