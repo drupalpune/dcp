@@ -1,0 +1,32 @@
+uuid: aa3cbc01-0440-486d-9701-a2f5a3e07d35
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.text_container.field_sub_description
+    - field.field.paragraph.text_container.field_text_container
+    - paragraphs.paragraphs_type.text_container
+  module:
+    - entity_reference_revisions
+id: paragraph.text_container.default
+targetEntityType: paragraph
+bundle: text_container
+mode: default
+content:
+  field_sub_description:
+    weight: 1
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_text_container:
+    type: entity_reference_revisions_entity_view
+    weight: 0
+    label: hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    region: content
+hidden: {  }

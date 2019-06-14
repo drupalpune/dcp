@@ -1,0 +1,8 @@
+uuid: f5fd1036-c1f9-40ff-aa06-26e3e78b2953
+langcode: en
+status: true
+dependencies: {  }
+id: image_with_text_and_link
+label: 'Image with text and link'
+revision: 0
+description: ''

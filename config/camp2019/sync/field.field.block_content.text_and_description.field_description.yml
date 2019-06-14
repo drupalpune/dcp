@@ -1,0 +1,34 @@
+uuid: 741c2caa-db82-455a-9504-c6ba6caf3b82
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.text_and_description
+    - field.storage.block_content.field_description
+    - paragraphs.paragraphs_type.text_container
+  module:
+    - entity_reference_revisions
+id: block_content.text_and_description.field_description
+field_name: field_description
+entity_type: block_content
+bundle: text_and_description
+label: Description
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      text_container: text_container
+    target_bundles_drag_drop:
+      text:
+        weight: 3
+        enabled: false
+      text_container:
+        enabled: true
+        weight: 4
+field_type: entity_reference_revisions
