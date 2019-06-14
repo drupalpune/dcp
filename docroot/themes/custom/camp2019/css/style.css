@@ -1,0 +1,58 @@
+/* css for header region content: sitebranding, description and image block, social media icons */
+.region-header {
+  background: linear-gradient(162.47deg,#1049B2 ,#0acaff);
+}
+.diwrapper .ditextwrap .dititle {
+  font-size: 40px;
+  color: white; 
+  font-weight: bold;
+}
+.diwrapper .ditextwrap .dibody {
+  font-size: 20px;
+  color: white;
+}
+.region-header .fa-2x {
+  color: white;
+  font-size: 20px;
+}
+.field--name-field-image img {
+    max-width: 100%;  
+}
+@media (min-width: 768px) {
+  .region-header {
+    padding: 60px 60px 80px 60px; 
+  }
+  .diwrapper {
+    display: flex;
+  }
+  .diwrapper .ditextwrap {
+    width: 50%;  
+  }
+  .diwrapper .ditextwrap .dititle {
+    font-size: 70px;
+    max-width: 500px;  
+  }
+  .diwrapper .ditextwrap .diimage {
+    width: 50%;
+  }
+  .field--name-field-image {
+    position: relative;
+    margin-top: -80px;
+  }
+  .field--name-field-image img {
+    max-width: 200px;  
+  }
+  .field__item:nth-child(2) {
+    position: absolute;
+    top:160px;  
+    left:140px;
+  }
+  .region-header .fa-2x {
+    font-size: 25px;
+  }
+}
+@media (min-width: 1281px) {
+  .field--name-field-image img {
+    max-width: 420px;  
+  }
+}

@@ -26,6 +26,7 @@
         "drupal/console": "^1.0.2",
         "drupal/contact_storage": "^1.0",
         "drupal/core": "^8.7.0",
+        "drupal/devel": "^2.1",
         "drupal/flag": "^4.0@alpha",
         "drupal/google_analytics": "^3.0",
         "drupal/r4032login": "^1.1",

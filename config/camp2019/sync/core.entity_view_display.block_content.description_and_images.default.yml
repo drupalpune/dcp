@@ -6,6 +6,7 @@ dependencies:
     - block_content.type.description_and_images
     - field.field.block_content.description_and_images.body
     - field.field.block_content.description_and_images.field_image
+    - image.style.420x420
   module:
     - image
     - text
@@ -23,9 +24,9 @@ content:
     region: content
   field_image:
     weight: 1
-    label: above
+    label: hidden
     settings:
-      image_style: ''
+      image_style: 420x420
       image_link: ''
     third_party_settings: {  }
     type: image
