@@ -1,0 +1,8 @@
+uuid: 574c5828-8241-406e-84a9-8c39c0b45761
+langcode: en
+status: true
+dependencies: {  }
+id: text_and_description
+label: 'Text and description'
+revision: 0
+description: ''

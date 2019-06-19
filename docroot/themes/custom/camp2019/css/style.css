@@ -4,7 +4,7 @@
 }
 .diwrapper .ditextwrap .dititle {
   font-size: 40px;
-  color: white; 
+  color: white;
   font-weight: bold;
 }
 .diwrapper .ditextwrap .dibody {
@@ -16,21 +16,21 @@
   font-size: 20px;
 }
 .field--name-field-image img {
-    max-width: 100%;  
+    max-width: 100%;
 }
 @media (min-width: 768px) {
   .region-header {
-    padding: 60px 60px 80px 60px; 
+    padding: 60px 60px 80px 60px;
   }
   .diwrapper {
     display: flex;
   }
   .diwrapper .ditextwrap {
-    width: 50%;  
+    width: 50%;
   }
   .diwrapper .ditextwrap .dititle {
     font-size: 70px;
-    max-width: 500px;  
+    max-width: 500px;
   }
   .diwrapper .ditextwrap .diimage {
     width: 50%;
@@ -40,11 +40,11 @@
     margin-top: -80px;
   }
   .field--name-field-image img {
-    max-width: 200px;  
+    max-width: 200px;
   }
   .field__item:nth-child(2) {
     position: absolute;
-    top:160px;  
+    top:160px;
     left:140px;
   }
   .region-header .fa-2x {
@@ -53,6 +53,130 @@
 }
 @media (min-width: 1281px) {
   .field--name-field-image img {
-    max-width: 420px;  
+    max-width: 420px;
   }
+}
+
+/* volunteer block */
+
+.image-with-text-and-link{
+    background-color:whitesmoke;
+    display: flex;
+}
+
+.image-with-text-and-link >div{
+    width: 50%;
+}
+
+.image-with-text-and-link
+.field--name-body{
+    padding-top: 100px;
+}
+
+.field--name-field__image >img{
+    max-width: 100%;
+    width: 100%;
+}
+.image-with-text-and-link
+.field--type-text-with-summary{
+    position: unset;
+}
+.image-with-text-and-link
+.field--type-text-with-summary
+p:first-child{
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.image-with-text-and-link
+.field--type-text-with-summary
+>*{
+   padding-left: 50px ;
+}
+
+.image-with-text-and-link
+.field--type-text-with-summary
+>h2{
+    color: #338AFF;
+    font-size: 70px;
+    letter-spacing: 1px;
+    margin: 0px;
+    padding-bottom: 20px;
+}
+
+.image-with-text-and-link
+.field--type-text-with-summary
+p >a{
+    background-color: #338AFF;
+    font-size: 20px;
+    padding: 10px;
+    text-decoration: none;
+    color: white;
+    letter-spacing: 1px;
+}
+.image-with-text-and-link
+.field--type-text-with-summary
+p > em{
+  color: grey;
+
+}
+.image-with-text-and-link
+.field--type-text-with-summary
+p{
+    font-size: 20px;
+    letter-spacing: 1px;
+}
+
+/*impact block*/
+.text-and-description
+>h2{
+    text-align: center;
+    font-size: 50px;
+    letter-spacing: 1px;
+    color: #338AFF;
+}
+
+.text-and-description
+.field--name-field-description
+.field--name-field-text-container{
+    display: flex;
+    justify-content: space-between;
+    padding: 100px;
+}
+.text-and-description
+.field--name-field-description
+.field--name-field-text-container
+.field__item:nth-child(2){
+    position: unset;
+}
+
+.text-and-description
+.field--name-field-sub-description{
+    padding-left: 100px;
+    padding-bottom: 100px;
+    font-style: italic;
+    font-size: 18px;
+    font-weight: 600;
+    color: grey;
+    letter-spacing: 2px;
+    position: unset;
+}
+
+
+.text-and-description
+.field--name-field-description
+.field--name-field-text-container
+.field__item
+>h2{
+    font-size: 32px;
+}
+.text-and-description
+.field--name-field-description
+.field--name-field-text-container
+.field__item
+>p{
+    font-size: 20px;
+    letter-spacing: 1px;
+    line-height: 1.8rem;
 }
