@@ -6,6 +6,7 @@ dependencies:
     - 'block_content:text_and_description:363f5f8c-b26e-4446-a50d-0f5ee57990bf'
   module:
     - block_content
+    - system
   theme:
     - camp2019
 id: theimpactwemadelastyear
@@ -22,4 +23,9 @@ settings:
   status: true
   info: ''
   view_mode: full
-visibility: {  }
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

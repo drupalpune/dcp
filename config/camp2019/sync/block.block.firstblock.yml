@@ -6,6 +6,7 @@ dependencies:
     - 'block_content:description_and_images:0b8712a0-2905-45c4-baa6-380232dbe071'
   module:
     - block_content
+    - system
   theme:
     - camp2019
 id: firstblock
@@ -22,4 +23,9 @@ settings:
   status: true
   info: ''
   view_mode: full
-visibility: {  }
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }
