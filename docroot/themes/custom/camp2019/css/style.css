@@ -69,9 +69,9 @@
       max-width: 250px;
       height: auto;
   }
-  .field__item:nth-child(2) {
+    .field--name-field-image > .field__item:nth-child(2) {
     position: absolute;
-    top: 50%;
+    top: 175px;
       right: 0;
   }
   .region-header .fa-2x {
@@ -100,45 +100,14 @@
 /* volunteer block */
 .image-with-text-and-link{
     background-color:whitesmoke;
-    display: flex;
+    padding: 30px 20px;
+    text-align: center;
 }
-
-.image-with-text-and-link >div{
-    width: 50%;
-}
-
-.image-with-text-and-link
-.field--name-body{
-    padding-top: 100px;
-}
-
-.field--name-field__image >img{
-    max-width: 100%;
-    width: 100%;
-}
-.image-with-text-and-link
-.field--type-text-with-summary{
-    position: unset;
-}
-.image-with-text-and-link
-.field--type-text-with-summary
-p:first-child{
-    font-size: 20px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.image-with-text-and-link
-.field--type-text-with-summary
->*{
-   padding-left: 50px ;
-}
-
 .image-with-text-and-link
 .field--type-text-with-summary
 >h2{
     color: #338AFF;
-    font-size: 70px;
+    font-size: 40px;
     letter-spacing: 1px;
     margin: 0px;
     padding-bottom: 20px;
@@ -157,7 +126,7 @@ p >a{
 .image-with-text-and-link
 .field--type-text-with-summary
 p > em{
-  color: grey;
+    color: grey;
 
 }
 .image-with-text-and-link
@@ -165,6 +134,44 @@ p > em{
 p{
     font-size: 20px;
     letter-spacing: 1px;
+    margin-top: 0;
+}
+.field--name-field__image >img{
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+}
+.image-with-text-and-link
+.field--type-text-with-summary
+p:first-child{
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+@media (min-width: 992px) {
+    .image-with-text-and-link{
+        display: flex;
+    }
+    .image-with-text-and-link >div{
+        width: 50%;
+    }
+    .image-with-text-and-link
+    .field--name-body{
+        padding: 100px 0;
+    }
+    .image-with-text-and-link
+    .field--name-body p:last-child {
+        margin: 0;
+    }
+    .image-with-text-and-link
+    .field--type-text-with-summary
+    >h2{
+        color: #338AFF;
+        font-size: 70px;
+        letter-spacing: 1px;
+        margin: 0px;
+        padding-bottom: 20px;
+    }
 }
 
 /*impact block*/
@@ -173,7 +180,7 @@ p{
 }
 .text-and-description > h2{
     text-align: center;
-    font-size: 0px;
+    font-size: 40px;
     letter-spacing: 1px;
     color: #338AFF;
 }
@@ -182,20 +189,20 @@ p{
     display: flex;
     flex-direction: column;
     text-align: center;
+    margin-bottom: 30px;
 }
 .text-and-description .field--name-field-description .field--name-field-text-container .field__item:nth-child(2){
     position: unset;
 }
 
-.text-and-description .field--name-field-sub-description{
-    padding-left: 100px;
-    padding-bottom: 100px;
+.field--name-field-sub-description{
     font-style: italic;
     font-size: 18px;
     font-weight: 600;
     color: grey;
     letter-spacing: 2px;
-    position: unset;
+    padding: 0;
+    text-align: center;
 }
 
 
@@ -206,41 +213,39 @@ p{
     font-size: 20px;
     letter-spacing: 1px;
     line-height: 1.8rem;
+    margin-top: 0;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
     .text-and-description
     >h2{
         text-align: center;
-        font-size: 0px;
+        font-size: 50px;
         letter-spacing: 1px;
         color: #338AFF;
+        margin: 0;
+    }
+
+    .text-and-description {
+        padding: 100px;
     }
 
     .text-and-description
     .field--name-field-description
     .field--name-field-text-container{
         display: flex;
+        flex-direction: row;
         justify-content: space-between;
-        padding: 100px;
+        text-align: left;
+        padding: 100px 0;
+        margin: 0;
     }
-    .text-and-description
-    .field--name-field-description
-    .field--name-field-text-container
-    .field__item:nth-child(2){
-        position: unset;
+    .field--name-field-sub-description{
+        text-align: left;
+    }
+    .text-and-description .field--name-field-text-container > .field__item {
+        flex: 0 1 25%;
     }
 
-    .text-and-description
-    .field--name-field-sub-description{
-        padding-left: 100px;
-        padding-bottom: 100px;
-        font-style: italic;
-        font-size: 18px;
-        font-weight: 600;
-        color: grey;
-        letter-spacing: 2px;
-        position: unset;
-    }
     .text-and-description
     .field--name-field-description
     .field--name-field-text-container
@@ -258,6 +263,7 @@ p{
         line-height: 1.8rem;
     }
 }
+
 
 /* Session form */
 .webform-submission-submit-session-form {
