@@ -1,6 +1,22 @@
 /* css for header region content: sitebranding, description and image block, social media icons */
 .region-header {
   background: linear-gradient(162.47deg,#1049B2 ,#0acaff);
+    position: relative;
+    padding: 30px 20px;
+}
+
+.block-system-branding-block img{
+    width: 210px;
+    height: auto;
+}
+.dititle {
+    font-size: 36px;
+}
+.diimage-wrapper {
+    display: none;
+}
+.diwrapper .ditextwrap {
+    margin-top: 30px;
 }
 .diwrapper .ditextwrap .dititle {
   font-size: 40px;
@@ -20,41 +36,60 @@
 }
 @media (min-width: 768px) {
   .region-header {
-    padding: 60px 60px 80px 60px;
+    padding: 80px 20px 80px 20px;
   }
   .diwrapper {
     display: flex;
   }
   .diwrapper .ditextwrap {
     width: 50%;
+      padding-right: 30px;
+      margin-top: 50px;
   }
-  .diwrapper .ditextwrap .dititle {
-    font-size: 70px;
-    max-width: 500px;
+  .diimage {
+      position: absolute;
+      top: -113px;
+      right: 0;
+      width: 100%;
   }
-  .diwrapper .ditextwrap .diimage {
-    width: 50%;
-  }
+    .diimage-wrapper {
+        display: block;
+        width: 50%;
+        position: relative;
+    }
   .field--name-field-image {
     position: relative;
-    margin-top: -80px;
   }
   .field--name-field-image img {
-    max-width: 200px;
+      max-width: 250px;
+      height: auto;
   }
   .field__item:nth-child(2) {
     position: absolute;
-    top:160px;
-    left:140px;
+    top: 50%;
+      right: 0;
   }
   .region-header .fa-2x {
     font-size: 25px;
   }
 }
-@media (min-width: 1281px) {
+@media (min-width: 992px) {
   .field--name-field-image img {
-    max-width: 420px;
+    max-width: 350px;
   }
+    .region-header {
+        padding: 60px 60px 80px 60px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .diwrapper .ditextwrap .dititle {
+        font-size: 66px;
+        max-width: 500px;
+    }
+    .field--name-field-image img {
+        max-width: 100%;
+    }
 }
 
 /* volunteer block */
@@ -129,30 +164,26 @@ p{
 }
 
 /*impact block*/
-.text-and-description
->h2{
+.text-and-description {
+    padding: 30px 20px;
+}
+.text-and-description > h2{
     text-align: center;
-    font-size: 50px;
+    font-size: 0px;
     letter-spacing: 1px;
     color: #338AFF;
 }
 
-.text-and-description
-.field--name-field-description
-.field--name-field-text-container{
+.text-and-description .field--name-field-description .field--name-field-text-container{
     display: flex;
-    justify-content: space-between;
-    padding: 100px;
+    flex-direction: column;
+    text-align: center;
 }
-.text-and-description
-.field--name-field-description
-.field--name-field-text-container
-.field__item:nth-child(2){
+.text-and-description .field--name-field-description .field--name-field-text-container .field__item:nth-child(2){
     position: unset;
 }
 
-.text-and-description
-.field--name-field-sub-description{
+.text-and-description .field--name-field-sub-description{
     padding-left: 100px;
     padding-bottom: 100px;
     font-style: italic;
@@ -164,19 +195,64 @@ p{
 }
 
 
-.text-and-description
-.field--name-field-description
-.field--name-field-text-container
-.field__item
->h2{
+.text-and-description .field--name-field-description .field--name-field-text-container .field__item >h2{
     font-size: 32px;
 }
-.text-and-description
-.field--name-field-description
-.field--name-field-text-container
-.field__item
->p{
+.text-and-description .field--name-field-description .field--name-field-text-container .field__item >p{
     font-size: 20px;
     letter-spacing: 1px;
     line-height: 1.8rem;
+}
+@media (min-width: 768px) {
+    .text-and-description
+    >h2{
+        text-align: center;
+        font-size: 0px;
+        letter-spacing: 1px;
+        color: #338AFF;
+    }
+
+    .text-and-description
+    .field--name-field-description
+    .field--name-field-text-container{
+        display: flex;
+        justify-content: space-between;
+        padding: 100px;
+    }
+    .text-and-description
+    .field--name-field-description
+    .field--name-field-text-container
+    .field__item:nth-child(2){
+        position: unset;
+    }
+
+    .text-and-description
+    .field--name-field-sub-description{
+        padding-left: 100px;
+        padding-bottom: 100px;
+        font-style: italic;
+        font-size: 18px;
+        font-weight: 600;
+        color: grey;
+        letter-spacing: 2px;
+        position: unset;
+    }
+
+
+    .text-and-description
+    .field--name-field-description
+    .field--name-field-text-container
+    .field__item
+    >h2{
+        font-size: 32px;
+    }
+    .text-and-description
+    .field--name-field-description
+    .field--name-field-text-container
+    .field__item
+    >p{
+        font-size: 20px;
+        letter-spacing: 1px;
+        line-height: 1.8rem;
+    }
 }
