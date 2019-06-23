@@ -12,7 +12,7 @@ dependencies:
 id: internship2017_events
 theme: internship2017
 region: content
-weight: -12
+weight: -1
 provider: null
 plugin: 'block_content:a4c9ee5a-131a-4cc8-8826-6bb8d5c0229b'
 settings:
