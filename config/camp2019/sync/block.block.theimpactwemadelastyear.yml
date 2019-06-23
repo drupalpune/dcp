@@ -1,0 +1,25 @@
+uuid: 5f960ca4-2cc8-4dce-8f34-d55c55f9bbcc
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:text_and_description:363f5f8c-b26e-4446-a50d-0f5ee57990bf'
+  module:
+    - block_content
+  theme:
+    - camp2019
+id: theimpactwemadelastyear
+theme: camp2019
+region: content
+weight: -2
+provider: null
+plugin: 'block_content:363f5f8c-b26e-4446-a50d-0f5ee57990bf'
+settings:
+  id: 'block_content:363f5f8c-b26e-4446-a50d-0f5ee57990bf'
+  label: 'The impact we made last year'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

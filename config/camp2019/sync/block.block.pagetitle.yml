@@ -1,4 +1,4 @@
-uuid: 0e1804d5-47c7-481e-9aba-1e4247fe3cea
+uuid: b00e7cec-3976-4902-b9c6-82814a72d110
 langcode: en
 status: true
 dependencies:
@@ -9,7 +9,7 @@ dependencies:
 id: pagetitle
 theme: camp2019
 region: content
-weight: -2
+weight: 0
 provider: null
 plugin: page_title_block
 settings:

@@ -1,0 +1,5 @@
+name: DrupalCamp 2019 blocks
+description: DrupalCamp 2019 blocks
+package: DrupalCamp 2019
+type: module
+core: 8.x

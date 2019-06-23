@@ -781,7 +781,7 @@ $databases = array (
       'driver' => 'mysql',
       'username' => 'root',
       'password' => 'root',
-      'host' => 'localhost',
+      'host' => '127.0.0.1',
       'port' => '',
       'database' => 'Drupalpune',
     ),
