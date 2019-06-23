@@ -8,9 +8,7 @@ dependencies:
     - field.field.user.user.field_organization
     - field.field.user.user.field_role
     - field.field.user.user.user_picture
-    - image.style.thumbnail
   module:
-    - image
     - user
 _core:
   default_config_hash: K-1rBM8mTIkFp9RqOC2tMRUukOQ1xbRCfSKK8dEddnA
@@ -46,15 +44,8 @@ content:
     third_party_settings: {  }
     type: options_select
     region: content
-  user_picture:
-    type: image_image
-    weight: 4
-    region: content
-    settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
-    third_party_settings: {  }
 hidden:
   contact: true
   language: true
   timezone: true
+  user_picture: true
