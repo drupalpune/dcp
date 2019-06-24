@@ -5,4 +5,3 @@ docroot/sites/*/private
 node_modules
 docroot/sites/default/settings.php
 docroot/sites/default/services.yml
-vendor
