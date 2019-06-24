@@ -1,0 +1,40 @@
+uuid: 2ee36fd5-1477-4efb-9819-28c5dcc94b54
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.block_update_news
+    - field.field.block_content.block_update_news.body
+    - field.field.block_content.block_update_news.field_block_image
+    - image.style.thumbnail
+  module:
+    - image
+    - text
+id: block_content.block_update_news.default
+targetEntityType: block_content
+bundle: block_update_news
+mode: default
+content:
+  body:
+    type: text_textarea_with_summary
+    weight: 2
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+    third_party_settings: {  }
+  field_block_image:
+    weight: 0
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
+  info:
+    type: string_textfield
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden: {  }

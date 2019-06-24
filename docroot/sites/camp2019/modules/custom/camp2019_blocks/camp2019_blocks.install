@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ * Installation hooks for camp2019_blocks module.
+ */
+
+use Drupal\taxonomy\Entity\Term;
+
+/**
+ * Implements hook_install().
+ */
+function camp2019_blocks_install()
+{
+  for ($i = 8001; $i <= 8100; $i++) {
+    if (function_exists('camp2019_blocks_update_' . $i)) {
+      $update = 'camp2019_blocks_update_' . $i;
+      $update();
+    }
+  }
+}
+
+/**
+ * Create Compliance block.
+ */
+function camp2019_blocks_update_8001()
+{
+  // Bring people together.
+  $values1 = [
+    'uuid' => '989d5682-f86d-48ea-85d6-6d511aec1a93',
+    'info' => 'Bring people together',
+    'type' => 'image_with_text_and_link',
+  ];
+
+  $block_content1 = \Drupal::entityTypeManager()->getStorage('block_content')->create($values1);
+  $block_content1->save();
+  // Header block.
+  $values2 = [
+    'uuid' => '0b8712a0-2905-45c4-baa6-380232dbe071',
+    'info' => 'Header block',
+    'type' => 'description_and_images',
+  ];
+
+  $block_content2 = \Drupal::entityTypeManager()->getStorage('block_content')->create($values2);
+  $block_content2->save();
+  // The impact we made last year.
+  $values2 = [
+    'uuid' => '363f5f8c-b26e-4446-a50d-0f5ee57990bf',
+    'info' => 'The impact we made last year',
+    'type' => 'text_and_description',
+  ];
+
+  $block_content2 = \Drupal::entityTypeManager()->getStorage('block_content')->create($values2);
+  $block_content2->save();
+}

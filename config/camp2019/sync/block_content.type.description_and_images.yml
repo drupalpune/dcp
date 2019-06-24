@@ -1,0 +1,8 @@
+uuid: 2b206afa-b8fd-46cd-b457-dbbf336ebb87
+langcode: en
+status: true
+dependencies: {  }
+id: description_and_images
+label: 'Description and Images'
+revision: 0
+description: ''

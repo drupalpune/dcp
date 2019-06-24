@@ -55,3 +55,10 @@
  * @see \Drupal\Core\DrupalKernel::getSitePath()
  * @see https://www.drupal.org/documentation/install/multi-site
  */
+$sites['camp2017-dev.drupalpune.com'] = 'camp2017';
+$sites['camp2017-stage.drupalpune.com'] = 'camp2017';
+$sites['camp2017.drupalpune.com'] = 'camp2017';
+$sites['camp2019-dev.drupalpune.com'] = 'camp2019';
+$sites['camp2019-stage.drupalpune.com'] = 'camp2019';
+$sites['camp2019.drupalpune.com'] = 'camp2019';
+$sites['camp2019.dcp'] = 'camp2019';

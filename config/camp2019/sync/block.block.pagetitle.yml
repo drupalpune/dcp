@@ -1,0 +1,25 @@
+uuid: b00e7cec-3976-4902-b9c6-82814a72d110
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - camp2019
+id: pagetitle
+theme: camp2019
+region: content
+weight: 0
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  provider: core
+  label_display: '0'
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: true
+    context_mapping: {  }

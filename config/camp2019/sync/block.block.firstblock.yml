@@ -1,0 +1,31 @@
+uuid: 10e136d7-61d3-45ac-9f4c-090bd8fdd40a
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:description_and_images:0b8712a0-2905-45c4-baa6-380232dbe071'
+  module:
+    - block_content
+    - system
+  theme:
+    - camp2019
+id: firstblock
+theme: camp2019
+region: header
+weight: 0
+provider: null
+plugin: 'block_content:0b8712a0-2905-45c4-baa6-380232dbe071'
+settings:
+  id: 'block_content:0b8712a0-2905-45c4-baa6-380232dbe071'
+  label: 'We''re excited to bring back Drupal days for you this summer.'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

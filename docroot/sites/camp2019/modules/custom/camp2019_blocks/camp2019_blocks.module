@@ -1,0 +1,16 @@
+<?php
+use Drupal\Core\Form\FormStateInterface;
+
+function camp2019_blocks_form_alter(&$form, FormStateInterface &$formState, $form_id) {
+  if ($form_id == 'user_login_form') {
+    if (!empty($_GET['destination'])) {
+      $register_link = '/user/register?destination=' . $_GET['destination'];
+    }
+    else {
+      $register_link = '/user/register';
+    }
+    $form['register_link_markup'] = [
+      '#markup' => '<div class="register-link-wrapper js-form-item form-item">Haven\'t registerd yet? <a href="' . $register_link . '">Register now</a></div>',
+    ];
+  }
+}

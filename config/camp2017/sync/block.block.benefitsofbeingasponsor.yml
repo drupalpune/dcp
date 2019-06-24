@@ -1,0 +1,31 @@
+uuid: 7127ff16-1c43-4ac6-aaba-8b71624b7450
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:sponsor_benefits:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+  module:
+    - block_content
+    - system
+  theme:
+    - bartik
+id: benefitsofbeingasponsor
+theme: bartik
+region: content
+weight: -2
+provider: null
+plugin: 'block_content:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+settings:
+  id: 'block_content:8ddebb2d-0ad4-4b76-8c71-fbe62982f866'
+  label: 'Benefits Of Being a Sponsor'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /Sponsors
+    negate: false
+    context_mapping: {  }

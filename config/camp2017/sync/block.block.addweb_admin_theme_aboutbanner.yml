@@ -1,0 +1,31 @@
+uuid: e11c13d4-6285-43a6-88c5-9053d7d8a592
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:ff4b682f-9681-4810-85c3-87280f40bfa9'
+  module:
+    - block_content
+    - system
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_aboutbanner
+theme: addweb_admin_theme
+region: header
+weight: 0
+provider: null
+plugin: 'block_content:ff4b682f-9681-4810-85c3-87280f40bfa9'
+settings:
+  id: 'block_content:ff4b682f-9681-4810-85c3-87280f40bfa9'
+  label: 'About Banner'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /about
+    negate: false
+    context_mapping: {  }

@@ -1,0 +1,25 @@
+uuid: 383ad48d-c3d5-4edd-9480-ccb3f8909c31
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:basic:1cde1e5e-86bc-4a88-b075-d83c283c4029'
+  module:
+    - block_content
+  theme:
+    - addweb_admin_theme
+id: addweb_admin_theme_madewithlovebyqed42
+theme: addweb_admin_theme
+region: header
+weight: 0
+provider: null
+plugin: 'block_content:1cde1e5e-86bc-4a88-b075-d83c283c4029'
+settings:
+  id: 'block_content:1cde1e5e-86bc-4a88-b075-d83c283c4029'
+  label: 'Made with love by QED42'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

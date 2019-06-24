@@ -1,0 +1,31 @@
+uuid: 9be00e07-2ead-4c4f-8f2e-7ba770d6ebb5
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:session_banner:56cab02e-7628-40d6-b25a-d0f9ff6b74ef'
+  module:
+    - block_content
+    - system
+  theme:
+    - internship2017
+id: internship2017_homebanner
+theme: internship2017
+region: header_bottom
+weight: -15
+provider: null
+plugin: 'block_content:56cab02e-7628-40d6-b25a-d0f9ff6b74ef'
+settings:
+  id: 'block_content:56cab02e-7628-40d6-b25a-d0f9ff6b74ef'
+  label: 'Home Banner'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

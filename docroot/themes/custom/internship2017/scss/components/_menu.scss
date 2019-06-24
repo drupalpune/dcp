@@ -1,0 +1,229 @@
+/*------------------------------------*\
+    * @file
+    * Menu Navigation.
+\*------------------------------------*/
+
+.topBar {
+  width: 100%;
+  height: 30px;
+  position: relative;
+  top: 0;
+  text-align: center;
+  border-bottom: 1px solid #fff;
+  box-shadow: 0 2px 5px #ccc;
+  padding-top: 7px;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+}
+
+.topBar .link {
+  padding: 2px 8px;
+  background-color: #831e1a;
+  color: #fff;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.topBar .link:hover {
+  background-color: #e62601;
+}
+
+.btnClose a,
+.btnOpen a {
+  width: 50px;
+  position: absolute;
+  right: 30px;
+  top: -7px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 2px $medred;
+}
+
+.topBar .btnClose a {
+  font-size: 12px;
+  line-height: 44px;
+  height: 25px;
+  padding:0px;
+  background:none;
+}
+
+.topBar .btnOpen a {
+  font-size: 0;
+  border: 1px solid #fff;
+  box-shadow: 0 2px 5px #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  padding:0px;
+  background:none;
+}
+
+.topBar a {
+  text-decoration: none;
+  padding:6px;
+  color:#fff;
+  background:rgba(25, 117, 210, 0.63);
+}
+
+.topBar:target {
+  top: -36px;
+  transition: top 0.4s ease-in;
+}
+
+.topBar:target .btnOpen a {
+  top: 30px;
+  height: 30px;
+  font-size: 11px;
+  line-height: 36px;
+  transition-property: top;
+  transition-duration: .4s;
+
+}
+
+.topBar:target .btnClose {
+  display: none;
+}
+
+.topBar:target .btnOpen a,
+.topBar {
+  background: $medred;
+}
+
+.region-header {
+  @include container($container-width, 0px);
+  @include breakpoint(phablet) {
+    width: 100%;
+  }
+}
+
+#header-bottom {
+  background: #f5f9fe;
+}
+
+.responsive-menu-toggle-icon:before,
+.responsive-menu-toggle-icon:after,
+.responsive-menu-toggle-icon span.icon {
+  background: #47444b;
+  display: block;
+  width: 20px;
+  height: 2px;
+  position: absolute;
+  left: 13px;
+  border-radius: 7px;
+}
+
+.region-header nav ul {
+  margin: 0px;
+  display: flex;
+  justify-content: center;
+  @include breakpoint(tablet) {
+    justify-content: space-around;
+  }
+  li {
+    display: inline-block;
+    margin: 0 20px 0 20px;
+    display: flex;
+    @include breakpoint (tablet) {
+      margin: 0 2px 0 2px;
+    }
+    .login-register {
+      width: 70px;
+    }
+    a {
+      display: flex;
+      align-items: center;
+      color: $blue;
+      text-decoration: none;
+      font-size: 18px;
+      text-transform: uppercase;
+      font-family: $title-font;
+      padding: 5px 10px;
+      &.is-active {
+        border-bottom: 4px solid #ff5252;
+        color: $medred;
+      }
+      &.logopath {
+        padding: 0px 0px;
+      }
+      img {
+        position: relative;
+        top: 35px;
+        z-index: 1;
+      }
+    }
+    a:hover {
+      color: #ff5252;
+    }
+  }
+}
+
+.region-header nav .sub-nav li {
+  margin: 0px;
+  text-align: center;
+  justify-content: center;
+  border-bottom: 1px solid #ececec;
+  padding: 5px 0px;
+}
+
+ul.menu.sub-nav {
+  flex-direction: column;
+  border: 1px solid #ececec;
+  border-top: 5px solid #ff5252; // box-shadow: 0px 6px 7px #121012;
+  background: #fff;
+}
+
+li#arrow_top {
+  position: absolute;
+  top: -13px;
+  left: 12px;
+  width: 13px;
+  height: 8px;
+  display: block;
+  border-bottom: none;
+  border: none;
+  background: url(../images/arrow_top.png) no-repeat left top;
+}
+
+div.responsive-menu-toggle {
+  display: none;
+}
+
+@include breakpoint(phablet) {
+  nav.responsive-menu-block-wrapper {
+    display: none;
+  }
+  div.responsive-menu-toggle {
+    display: block;
+  }
+}
+
+.mobile-menu-responsive {
+  position: relative;
+  margin: 10px;
+  height: 40px;
+  background-color: #fff;
+  display: flex; // justify-content: space-between;
+  // align-items: center;
+}
+
+@media screen and (max-width:959px) {
+  li#logopath {
+    display: none;
+  }
+}
+
+li a {
+  @include breakpoint(tablet) {
+    color: #1975d2;
+  }
+}
+
+.logopath1 {
+  z-index: 4;
+  margin: 0 auto;
+  .logo-image {
+    height: 80px;
+    margin-left: -45px;
+  }
+}

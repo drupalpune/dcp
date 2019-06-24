@@ -1,0 +1,40 @@
+uuid: 0122580e-8262-453c-b0ea-e32565630f26
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.sponsors.field_image
+    - image.style.thumbnail
+    - node.type.sponsors
+  module:
+    - image
+    - path
+id: node.sponsors.default
+targetEntityType: node
+bundle: sponsors
+mode: default
+content:
+  field_image:
+    weight: 1
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
+  path:
+    type: path
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  promote: true
+  sticky: true
+  uid: true

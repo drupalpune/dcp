@@ -1,0 +1,23 @@
+uuid: d3ac68e0-9924-42a5-8923-ccdb79c4b6fd
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.sponsors
+    - field.field.block_content.sponsors.body
+    - field.field.block_content.sponsors.field_title
+  module:
+    - text
+id: block_content.sponsors.default
+targetEntityType: block_content
+bundle: sponsors
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_title: true

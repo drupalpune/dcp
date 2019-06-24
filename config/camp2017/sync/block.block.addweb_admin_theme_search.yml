@@ -1,0 +1,28 @@
+uuid: d0719e50-c61d-4237-a0fb-ec19c125f24b
+langcode: en
+status: false
+dependencies:
+  module:
+    - search
+    - system
+  theme:
+    - addweb_admin_theme
+_core:
+  default_config_hash: za-39d5WDUg6XvbyqSnuVYEeq6QM4qKJxW8MnoAha5A
+id: addweb_admin_theme_search
+theme: addweb_admin_theme
+region: '-1'
+weight: -4
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: Search
+  provider: search
+  label_display: visible
+visibility:
+  request_path:
+    id: request_path
+    pages: /Sponsors
+    negate: true
+    context_mapping: {  }

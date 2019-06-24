@@ -1,0 +1,14 @@
+uuid: 8d506ac2-ecc6-4610-9819-8b64ba2ccb88
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.basic
+_core:
+  default_config_hash: orJpHUlAc_wiQLMUjIgEJXGeiqylGHMPcmNRjGtct-M
+id: block_content.basic.default
+targetEntityType: block_content
+bundle: basic
+mode: default
+content: {  }
+hidden: {  }

@@ -1,0 +1,10 @@
+uuid: 88c0854f-a5cf-434c-9f13-3f01bb07ff96
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: zglzjmYxi0G0ag9MZ02y0LSJOdpWRwJxyP_OvFojFyo
+id: basic
+label: 'Basic block'
+revision: 0
+description: 'This block contains a referenced paragraph.'

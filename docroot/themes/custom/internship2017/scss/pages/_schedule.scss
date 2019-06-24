@@ -1,0 +1,95 @@
+/*------------------------------------*\
+    * @file
+    * Schedule Page.
+\*------------------------------------*/
+
+
+.schedule__content {
+background-color: #f7f9fb;
+}
+
+#schedule-page {
+  width:80%;
+  margin:0px auto;
+  @include breakpoint(phablet) {
+     width:95%;
+  }
+  h1 {
+    @include heading($blue, 32px);
+    text-align: center;
+    padding: 0;
+    padding-top:80px;
+  }
+
+  .tabs {
+    width: 100%;
+    float: none;
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    margin-top: 75px;
+    padding-bottom:75px;
+  }
+  .tabs:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+  .tabs input[type=radio] {
+    display: none;
+  }
+  .tabs label {
+    display: block;
+    float: left;
+    width: 50%;
+    color: #ccc;
+    font-size: 24px;
+    font-family: $body-font;
+    background: #ebf0f5;
+    font-weight: normal;
+    text-decoration: none;
+    text-align: center;
+    line-height: 2;
+    cursor: pointer;
+    transition: all 0.5s;
+  }
+  .tab-content {
+    display: none;
+    width: 100%;
+    float: left;
+    padding-top: 40px;
+    box-sizing: border-box;
+      img {
+        width:100%;
+        height:auto;
+      }
+  }
+  .tab-content * {
+    -webkit-animation: scale 0.7s ease-in-out;
+    -moz-animation: scale 0.7s ease-in-out;
+    animation: scale 0.7s ease-in-out;
+  }
+  @keyframes scale {
+    0% {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.01);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  .tabs [id^="tab"]:checked+label {
+    background: #FFF;
+    box-shadow: inset 0px -4px 0px 0px #ffa94d;
+    color: #ffa94d;
+  }
+  #tab1:checked~#tab-content1,
+  #tab2:checked~#tab-content2 {
+    display: block;
+  }
+}
