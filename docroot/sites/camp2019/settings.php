@@ -760,8 +760,9 @@ if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
 }
 
 $settings['install_profile'] = 'standard';
-$config_directories['sync'] = '../config/camp2019/sync';
 
 if (file_exists('/var/www/site-php')) {
   require '/var/www/site-php/drupalcamppune/dcp19-settings.inc';
 }
+
+$config_directories['sync'] = '../config/camp2019/sync';
