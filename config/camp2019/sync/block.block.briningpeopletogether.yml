@@ -19,7 +19,7 @@ settings:
   id: 'block_content:989d5682-f86d-48ea-85d6-6d511aec1a93'
   label: 'Brining People Together'
   provider: block_content
-  label_display: visible
+  label_display: '0'
   status: true
   info: ''
   view_mode: full
