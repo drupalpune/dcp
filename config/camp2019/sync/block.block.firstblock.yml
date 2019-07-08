@@ -17,7 +17,7 @@ provider: null
 plugin: 'block_content:0b8712a0-2905-45c4-baa6-380232dbe071'
 settings:
   id: 'block_content:0b8712a0-2905-45c4-baa6-380232dbe071'
-  label: 'We''re excited to bring back Drupal days for you this summer.'
+  label: 'We are bringing back the most awaited DrupalCamp to Pune!'
   provider: block_content
   label_display: visible
   status: true

@@ -17,7 +17,7 @@ provider: null
 plugin: 'block_content:363f5f8c-b26e-4446-a50d-0f5ee57990bf'
 settings:
   id: 'block_content:363f5f8c-b26e-4446-a50d-0f5ee57990bf'
-  label: 'The impact we made last year'
+  label: 'The impact we made in last camp'
   provider: block_content
   label_display: visible
   status: true

@@ -72,7 +72,7 @@ settings:
       description: ''
       weight: '2'
     twitter:
-      value: drupalpune
+      value: drupalcamppune
       description: ''
       weight: '3'
     youtube:
@@ -88,7 +88,7 @@ settings:
       description: ''
       weight: '6'
     facebook:
-      value: drupalpune
+      value: punedrug
       description: ''
       weight: '7'
     googleplus:
