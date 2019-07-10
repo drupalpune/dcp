@@ -6,7 +6,7 @@ dependencies:
     - block_content.type.description_and_images
     - field.field.block_content.description_and_images.body
     - field.field.block_content.description_and_images.field_image
-    - image.style.420x420
+    - image.style.700x700
   module:
     - image
     - text
@@ -26,7 +26,7 @@ content:
     weight: 1
     label: hidden
     settings:
-      image_style: 420x420
+      image_style: 700x700
       image_link: ''
     third_party_settings: {  }
     type: image
