@@ -148,6 +148,10 @@ p:first-child{
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+#block-briningpeopletogether .field--type-image img {
+  width: 480px;
+}
 @media (min-width: 992px) {
     .image-with-text-and-link{
         display: flex;
