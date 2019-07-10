@@ -152,6 +152,15 @@ p:first-child{
 #block-briningpeopletogether .field--type-image img {
   width: 480px;
 }
+
+@media (max-width: 767px) {
+  .region.region-header .block-system-branding-block,
+  .region.region-header .diwrapper,
+  .region.region-header .block-social-media-links-block {
+    text-align: center;
+  }
+}
+
 @media (min-width: 992px) {
     .image-with-text-and-link{
         display: flex;
