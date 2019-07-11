@@ -224,6 +224,17 @@ p:first-child{
     line-height: 1.8rem;
     margin-top: 0;
 }
+.text-and-description .field--name-field-description .field--name-field-text-container .field__item .counter {
+    display: flex;
+    align-items: center;
+    font-size: 80px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.text-and-description .field--name-field-text-container > .field__item{
+    display: flex;
+    justify-content: center;
+}
 @media (min-width: 992px) {
     .text-and-description
     >h2{
