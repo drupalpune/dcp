@@ -13,6 +13,6 @@ global-styling:
 odometer:
   css:
     theme:
-      vendor/css/odometer-theme-default.css: {}
+      vendor-library/css/odometer-theme-default.css: {}
   js:
-    vendor/js/odometer.min.js: {}
+    vendor-library/js/odometer.min.js: {}
