@@ -1,0 +1,27 @@
+uuid: b8456284-960b-454f-9910-24af9ce9cef2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_attachment
+    - node.type.session
+  module:
+    - file
+id: node.session.field_attachment
+field_name: field_attachment
+entity_type: node
+bundle: session
+label: Attachment
+description: 'Please attach your proposed session also in any of the format pdf, doc, docx, ppt, pptx.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: '[date:custom:Y]-[date:custom:m]'
+  file_extensions: 'pdf doc docx ppt pptx'
+  max_filesize: ''
+  description_field: false
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: file
