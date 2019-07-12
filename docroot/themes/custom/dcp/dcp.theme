@@ -23,11 +23,6 @@ function dcp_theme_suggestions_page_alter(array &$suggestions, array $variables)
   $content_type = $node->bundle();
   $suggestions[] = 'page__'.$content_type;
   }
-
-  if (\Drupal::service('path.matcher')->isFrontPage()) {
-    $variables['#attached']['library'][] = 'camp2019/odometer';
-    $variables['#attached']['library'][] = 'camp2019/single-page-style';
-  }
 }
 
 /**
