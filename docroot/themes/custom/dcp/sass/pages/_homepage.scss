@@ -42,7 +42,7 @@
   }
 }
 
-#block-internship2017-keynotespeaker {
+#block-dcp-keynotespeaker {
   font-family: $body-font;
   background-color: #f7f9fb;
   padding: 40px 0px;
@@ -189,7 +189,7 @@
   }
 }
 
-#block-internship2017-events {
+#block-dcp-events {
   background: #ebf0f5;
   @include breakpoint(mobileonly) {
     padding: 0px;
@@ -319,7 +319,7 @@
   }
 }
 
-#block-internship2017-helpusmakethisanawesomeexperience,
+#block-dcp-helpusmakethisanawesomeexperience,
 #block-joinustomake {
   @include container($container-width, 20px);
   h2 {
@@ -360,7 +360,7 @@
   }
 }
 
-#block-internship2017-venue-2 {
+#block-dcp-venue-2 {
   background-color: $lightblue;
   padding: 30px 0px;
   h2 {
@@ -415,7 +415,7 @@
   }
 }
 
-#block-internship2017-madewithlovebyqed42 {
+#block-dcp-madewithlovebyqed42 {
   padding: 5px 20px;
   @include breakpoint(phablet) {
     padding: 5px 0px;
@@ -428,7 +428,7 @@
   }
 }
 
-#block-internship2017-followus {
+#block-dcp-followus {
   color: #fff;
   font-family: $body-font;
   background-color: $black;
