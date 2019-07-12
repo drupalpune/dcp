@@ -1,0 +1,687 @@
+/* Page title */
+.block-page-title-block {
+    text-align: center;
+}
+
+/* css for header region content: sitebranding, description and image block, social media icons */
+.region-header {
+    background: linear-gradient(162.47deg,#1049B2 ,#0acaff);
+    position: relative;
+    padding: 30px 20px;
+}
+
+.block-system-branding-block img{
+    width: 210px;
+    height: auto;
+}
+.dititle {
+    font-size: 36px;
+}
+.diimage-wrapper {
+    display: none;
+}
+.diwrapper .ditextwrap {
+    margin-top: 30px;
+}
+.diwrapper .ditextwrap .dititle {
+    font-size: 40px;
+    color: white;
+    font-weight: bold;
+}
+.diwrapper .ditextwrap .dibody {
+    font-size: 20px;
+    color: white;
+}
+.region-header .fa-2x {
+    color: white;
+    font-size: 20px;
+}
+.field--name-field-image img {
+    max-width: 100%;
+}
+@media (min-width: 768px) {
+    .region-header {
+        padding: 80px 20px 80px 20px;
+    }
+    .diwrapper {
+        display: flex;
+    }
+    .diwrapper .ditextwrap {
+        width: 50%;
+        padding-right: 30px;
+        margin-top: 50px;
+    }
+    .diimage-wrapper {
+        display: block;
+        width: 50%;
+    }
+    .field--name-field-image > .field__item {
+        width: 30%;
+        position: absolute;
+        top: 113px;
+    }
+
+    .field--name-field-image > .field__item:last-child {
+        right: 30px;
+        top: auto;
+        bottom: 75px;
+    }
+    .field--name-field-image img {
+        max-width: 250px;
+        height: auto;
+    }
+    .region-header .fa-2x {
+        font-size: 25px;
+    }
+}
+@media (min-width: 992px) {
+    .field--name-field-image > .field__item {
+        top: 0;
+    }
+    .field--name-field-image > .field__item:last-child {
+        bottom: -4px;
+    }
+    .field--name-field-image img {
+        max-width: 350px;
+    }
+    .region-header {
+        padding: 60px 40px 80px 40px;
+        position: relative;
+        margin: 0;
+        width: 100%;
+    }
+}
+
+@media (min-width: 1280px) {
+    .diwrapper .ditextwrap .dititle {
+        font-size: 66px;
+        max-width: 500px;
+    }
+    .field--name-field-image img {
+        max-width: 100%;
+    }
+}
+
+/* volunteer block */
+.image-with-text-and-link{
+    background-color:whitesmoke;
+    padding: 30px 20px;
+    text-align: center;
+}
+.image-with-text-and-link
+.field--type-text-with-summary
+>h2{
+    color: #338AFF;
+    font-size: 40px;
+    letter-spacing: 1px;
+    margin: 0px;
+    padding-bottom: 20px;
+    font-weight: bold;
+}
+
+.image-with-text-and-link
+.field--type-text-with-summary
+p >a{
+    background-color: #338AFF;
+    font-size: 20px;
+    padding: 10px;
+    text-decoration: none;
+    color: white;
+    letter-spacing: 1px;
+}
+.image-with-text-and-link
+.field--type-text-with-summary
+p > em{
+    color: grey;
+
+}
+.image-with-text-and-link
+.field--type-text-with-summary
+p{
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin-top: 0;
+}
+.field--name-field__image >img{
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+}
+.image-with-text-and-link
+.field--type-text-with-summary
+p:first-child{
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#block-briningpeopletogether .field--type-image img,
+#block-dcp-briningpeopletogether .field--type-image img {
+    width: 480px;
+}
+
+@media (max-width: 767px) {
+    .region.region-header .block-system-branding-block,
+    .region.region-header .diwrapper,
+    .region.region-header .block-social-media-links-block {
+        text-align: center;
+    }
+}
+
+@media (min-width: 992px) {
+    .image-with-text-and-link{
+        display: flex;
+    }
+    .image-with-text-and-link >div{
+        width: 50%;
+    }
+    .image-with-text-and-link
+    .field--name-body p:last-child {
+        margin: 0;
+    }
+    .image-with-text-and-link
+    .field--type-text-with-summary
+    >h2{
+        color: #338AFF;
+        font-size: 70px;
+        letter-spacing: 1px;
+        margin: 0px;
+        padding-bottom: 20px;
+        font-weight: bold;
+    }
+}
+
+/*impact block*/
+.text-and-description {
+    padding: 30px 20px;
+}
+.text-and-description > h2{
+    text-align: center;
+    font-size: 40px;
+    letter-spacing: 1px;
+    color: #338AFF;
+    font-weight: bold;
+}
+
+.text-and-description .field--name-field-description .field--name-field-text-container{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.text-and-description .field--name-field-description .field--name-field-text-container .field__item:nth-child(2){
+    position: unset;
+}
+
+.field--name-field-sub-description{
+    font-style: italic;
+    font-size: 18px;
+    font-weight: 600;
+    color: grey;
+    letter-spacing: 2px;
+    padding: 0;
+    text-align: center;
+}
+
+
+.text-and-description .field--name-field-description .field--name-field-text-container .field__item >h2{
+    font-size: 32px;
+}
+.text-and-description .field--name-field-description .field--name-field-text-container .field__item >p{
+    font-size: 20px;
+    letter-spacing: 1px;
+    line-height: 1.8rem;
+    margin-top: 0;
+}
+.text-and-description .field--name-field-description .field--name-field-text-container .field__item .counter {
+    display: flex;
+    align-items: center;
+    font-size: 80px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.text-and-description .field--name-field-text-container > .field__item{
+    display: flex;
+    justify-content: center;
+}
+@media (min-width: 992px) {
+    .text-and-description
+    >h2{
+        text-align: center;
+        font-size: 50px;
+        letter-spacing: 1px;
+        color: #338AFF;
+        margin: 0;
+    }
+
+    .text-and-description {
+        padding: 100px;
+    }
+
+    .text-and-description
+    .field--name-field-description
+    .field--name-field-text-container{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+        padding: 100px 0 0 0;
+        margin: 0;
+    }
+    .field--name-field-sub-description{
+        text-align: left;
+    }
+    .text-and-description .field--name-field-text-container > .field__item {
+        flex: 0 1 25%;
+    }
+
+    .text-and-description
+    .field--name-field-description
+    .field--name-field-text-container
+    .field__item
+    >h2{
+        font-size: 32px;
+    }
+    .text-and-description
+    .field--name-field-description
+    .field--name-field-text-container
+    .field__item
+    >p{
+        font-size: 20px;
+        letter-spacing: 1px;
+        line-height: 1.8rem;
+    }
+}
+
+
+/* Session form */
+.webform-submission-submit-session-form {
+    padding: 20px;
+    margin: 0 auto;
+}
+.webform-submission-submit-session-form .form-item .filter-wrapper {
+    display: none;
+}
+@media (min-width: 768px) {
+    .webform-submission-submit-session-form .js-form-type-textfield,
+    .webform-submission-submit-session-form .js-form-type-webform-email-multiple,
+    .webform-submission-submit-session-form .js-form-type-select,
+    .webform-submission-submit-session-form .js-form-type-textarea {
+        margin: 20px 0 0 0;
+    }
+}
+.webform-submission-submit-session-form .js-form-type-textfield.form-item--error,
+.webform-submission-submit-session-form .js-form-type-webform-email-multiple.form-item--error,
+.webform-submission-submit-session-form .js-form-type-select.form-item--error,
+.webform-submission-submit-session-form .js-form-type-textarea.form-item--error {
+    border: 1px solid #f74545;
+}
+@media (min-width: 768px) {
+    .webform-submission-submit-session-form .js-form-type-textfield.form-item--error,
+    .webform-submission-submit-session-form .js-form-type-webform-email-multiple.form-item--error,
+    .webform-submission-submit-session-form .js-form-type-select.form-item--error,
+    .webform-submission-submit-session-form .js-form-type-textarea.form-item--error {
+        margin: 50px 0 0 0;
+    }
+}
+.webform-submission-submit-session-form .js-form-type-textfield.form-item--error label,
+.webform-submission-submit-session-form .js-form-type-webform-email-multiple.form-item--error label,
+.webform-submission-submit-session-form .js-form-type-select.form-item--error label,
+.webform-submission-submit-session-form .js-form-type-textarea.form-item--error label {
+    color: #f74545;
+}
+.webform-submission-submit-session-form .js-form-type-textfield label,
+.webform-submission-submit-session-form .js-form-type-webform-email-multiple label,
+.webform-submission-submit-session-form .js-form-type-select label,
+.webform-submission-submit-session-form .js-form-type-textarea label {
+    top: -6px;
+    left: 25px;
+    font-size: 11px;
+    line-height: normal;
+    letter-spacing: 2.4px;
+    color: #000;
+    float: none;
+    width: auto;
+    background: #fff;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.webform-submission-submit-session-form .js-form-type-textfield input,
+.webform-submission-submit-session-form .js-form-type-webform-email-multiple input,
+.webform-submission-submit-session-form .js-form-type-select select,
+.webform-submission-submit-session-form .js-form-type-textarea textarea {
+    width: 100%;
+    font-size: 16px;
+    letter-spacing: .44px;
+    padding: 0;
+    background: transparent;
+    color: #444;
+    outline: none;
+    position: relative;
+    margin: 5px 0 0 0;
+    padding: 12px 0px 12px 0px;
+    line-height: normal;
+    border: 1px solid rgba(68, 68, 68, 0.4);
+}
+.webform-submission-submit-session-form .js-form-type-textarea .form-textarea-wrapper {
+    margin: 5px 0 0 0;
+}
+@media (min-width: 768px) {
+    .webform-submission-submit-session-form .js-form-type-textarea textarea {
+        letter-spacing: .5px;
+    }
+}
+.webform-submission-submit-session-form .js-form-type-select select {
+    position: relative;
+    -moz-appearance: none;
+    /* Firefox */
+    -webkit-appearance: none;
+    /* Safari and Chrome */
+    appearance: none;
+    background: url("/themes/custom/camp2019/images/arrow-down.png") no-repeat center center;
+    background-position: 98% center;
+    padding-right: 25px;
+    padding-left: 15px;
+    opacity: 1;
+    border-radius: 0;
+}
+.webform-submission-submit-session-form .js-form-type-select select::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12px 12px 0 12px;
+    border-color: #007bff transparent transparent transparent;
+}
+.webform-submission-submit-session-form .js-form-type-select select::-ms-expand {
+    display: none;
+}
+.webform-submission-submit-session-form .js-form-type-textarea textarea {
+    background: none;
+}
+.webform-submission-submit-session-form .js-form-type-textfield:not(.form-item--error) label::after,
+.webform-submission-submit-session-form .js-form-type-webform-email-multiple:not(.form-item--error) label::after,
+.webform-submission-submit-session-form .js-form-type-select:not(.form-item--error) label::after,
+.webform-submission-submit-session-form .js-form-type-textarea:not(.form-item--error) label::after,
+.webform-submission-submit-session-form .form-item-i-agree:not(.form-item--error) label::after {
+    background-image: url("/themes/custom/camp2019/images/required.png");
+}
+.webform-submission-submit-session-form .form-actions {
+    margin: 0;
+    padding: 50px 0 0 0;
+    text-align: center;
+}
+@media (min-width: 992px) {
+    .webform-submission-submit-session-form .form-actions {
+        padding-top: 30px;
+    }
+    /* Session form */
+    .webform-submission-submit-session-form {
+        max-width: 992px;
+    }
+}
+.webform-submission-submit-session-form .form-actions input {
+
+    font-size: 13px;
+    font-weight: 600;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: 1.4px;
+    text-align: center;
+    background-color: #1049B2;
+    padding: 20px 45px;
+    border-radius: 32.5px;
+    text-transform: uppercase;
+    outline: none;
+    display: inline-block;
+    color: #fff;
+    border: none;
+    text-decoration: none;
+}
+
+/* Login form */
+.user-login-form {
+    padding: 20px;
+    margin: 0 auto;
+}
+@media (min-width: 768px) {
+    .user-login-form .js-form-type-textfield,
+    .user-login-form .js-form-type-password {
+        margin: 20px 0 0 0;
+    }
+}
+.user-login-form .js-form-type-textfield.form-item--error,
+.user-login-form .js-form-type-password.form-item--error {
+    border: 1px solid #f74545;
+}
+@media (min-width: 768px) {
+    .user-login-form .js-form-type-textfield.form-item--error,
+    .user-login-form .js-form-type-password.form-item--error {
+        margin: 50px 0 0 0;
+    }
+}
+.user-login-form .js-form-type-textfield.form-item--error label,
+.user-login-form .js-form-type-password.form-item--error label {
+    color: #f74545;
+}
+.user-login-form .js-form-type-textfield label,
+.user-login-form .js-form-type-password label {
+    top: -6px;
+    left: 25px;
+    font-size: 11px;
+    line-height: normal;
+    letter-spacing: 2.4px;
+    color: #000;
+    float: none;
+    width: auto;
+    background: #fff;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.user-login-form .js-form-type-textfield input,
+.user-login-form .js-form-type-password input {
+    width: 100%;
+    font-size: 16px;
+    letter-spacing: .44px;
+    padding: 0;
+    background: transparent;
+    color: #444;
+    outline: none;
+    position: relative;
+    margin: 5px 0 0 0;
+    padding: 12px 0px 12px 0px;
+    line-height: normal;
+    border: 1px solid rgba(68, 68, 68, 0.4);
+}
+.user-login-form .js-form-type-textfield:not(.form-item--error) label::after,
+.user-login-form .js-form-type-password:not(.form-item--error) label::after {
+    background-image: url("/themes/custom/camp2019/images/required.png");
+}
+.user-login-form .form-actions {
+    margin: 0;
+    padding: 50px 0 0 0;
+    text-align: center;
+}
+@media (min-width: 992px) {
+    .user-login-form .form-actions {
+        padding-top: 30px;
+    }
+    /* Session form */
+    .user-login-form {
+        max-width: 992px;
+    }
+}
+.user-login-form .form-actions input {
+    font-size: 13px;
+    font-weight: 600;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: 1.4px;
+    text-align: center;
+    background-color: #1049B2;
+    padding: 20px 45px;
+    border-radius: 32.5px;
+    text-transform: uppercase;
+    outline: none;
+    display: inline-block;
+    color: #fff;
+    border: none;
+    text-decoration: none;
+}
+
+/* Register form */
+/* Session form */
+.user-register-form {
+    padding: 20px;
+    margin: 0 auto;
+}
+.user-register-form .form-item .filter-wrapper {
+    display: none;
+}
+@media (min-width: 768px) {
+    .user-register-form .js-form-type-textfield,
+    .user-register-form .js-form-type-email,
+    .user-register-form .js-form-type-select,
+    .user-register-form .js-form-type-textarea,
+    .user-register-form .js-form-type-password {
+        margin: 20px 0 0 0;
+    }
+}
+.user-register-form .js-form-type-textfield.form-item--error,
+.user-register-form .js-form-type-email.form-item--error,
+.user-register-form .js-form-type-select.form-item--error,
+.user-register-form .js-form-type-textarea.form-item--error,
+.user-register-form .js-form-type-password.form-item--error {
+    border: 1px solid #f74545;
+}
+@media (min-width: 768px) {
+    .user-register-form .js-form-type-textfield.form-item--error,
+    .user-register-form .js-form-type-email.form-item--error,
+    .user-register-form .js-form-type-select.form-item--error,
+    .user-register-form .js-form-type-textarea.form-item--error,
+    .user-register-form .js-form-type-password.form-item--error {
+        margin: 50px 0 0 0;
+    }
+}
+.user-register-form .js-form-type-textfield.form-item--error label,
+.user-register-form .js-form-type-email.form-item--error label,
+.user-register-form .js-form-type-select.form-item--error label,
+.user-register-form .js-form-type-textarea.form-item--error label,
+.user-register-form .js-form-type-password.form-item--error label {
+    color: #f74545;
+}
+.user-register-form .js-form-type-textfield label,
+.user-register-form .js-form-type-email label,
+.user-register-form .js-form-type-select label,
+.user-register-form .js-form-type-textarea label,
+.user-register-form .js-form-type-password label {
+    top: -6px;
+    left: 25px;
+    font-size: 11px;
+    line-height: normal;
+    letter-spacing: 2.4px;
+    color: #000;
+    float: none;
+    width: auto;
+    background: #fff;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.user-register-form .js-form-type-textfield input,
+.user-register-form .js-form-type-email input,
+.user-register-form .js-form-type-select select,
+.user-register-form .js-form-type-textarea textarea,
+.user-register-form .js-form-type-password input {
+    width: 100%;
+    font-size: 16px;
+    letter-spacing: .44px;
+    padding: 0;
+    background: transparent;
+    color: #444;
+    outline: none;
+    position: relative;
+    margin: 5px 0 0 0;
+    padding: 12px 0px 12px 0px;
+    line-height: normal;
+    border: 1px solid rgba(68, 68, 68, 0.4);
+}
+.user-register-form .js-form-type-textarea .form-textarea-wrapper {
+    margin: 5px 0 0 0;
+}
+@media (min-width: 768px) {
+    .user-register-form .js-form-type-textarea textarea {
+        letter-spacing: .5px;
+    }
+}
+.user-register-form .js-form-type-select select {
+    position: relative;
+    -moz-appearance: none;
+    /* Firefox */
+    -webkit-appearance: none;
+    /* Safari and Chrome */
+    appearance: none;
+    background: url("/themes/custom/camp2019/images/arrow-down.png") no-repeat center center;
+    background-position: 98% center;
+    padding-right: 25px;
+    padding-left: 15px;
+    opacity: 1;
+    border-radius: 0;
+}
+.user-register-form .js-form-type-select select::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12px 12px 0 12px;
+    border-color: #007bff transparent transparent transparent;
+}
+.user-register-form .js-form-type-select select::-ms-expand {
+    display: none;
+}
+.user-register-form .js-form-type-textarea textarea {
+    background: none;
+}
+.user-register-form .js-form-type-textfield:not(.form-item--error) label::after,
+.user-register-form .js-form-type-email:not(.form-item--error) label::after,
+.user-register-form .js-form-type-select:not(.form-item--error) label::after,
+.user-register-form .js-form-type-textarea:not(.form-item--error) label::after,
+.user-register-form .form-item-i-agree:not(.form-item--error) label::after,
+.user-register-form .js-form-type-password:not(.form-item--error) label::after {
+    background-image: url("/themes/custom/camp2019/images/required.png");
+}
+.user-register-form .form-actions {
+    margin: 0;
+    padding: 50px 0 0 0;
+    text-align: center;
+}
+@media (min-width: 992px) {
+    .user-register-form .form-actions {
+        padding-top: 30px;
+    }
+    /* Session form */
+    .user-register-form {
+        max-width: 992px;
+    }
+}
+.user-register-form .form-actions input {
+    font-size: 13px;
+    font-weight: 600;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: 1.4px;
+    text-align: center;
+    background-color: #1049B2;
+    padding: 20px 45px;
+    border-radius: 32.5px;
+    text-transform: uppercase;
+    outline: none;
+    display: inline-block;
+    color: #fff;
+    border: none;
+    text-decoration: none;
+}

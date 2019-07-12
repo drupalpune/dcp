@@ -1,10 +1,10 @@
-name: internship2017
+name: dcp
 type: theme
-description: 'Basic custom theme for Drupals Events'
+description: 'Basic custom theme for Drupal camp pune Events'
 base theme: classy
 package: custom
 libraries:
-  - internship2017/global-styling
+  - dcp/global-styling
 regions:
   header_top: 'Header Top'
   header: 'Header'

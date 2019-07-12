@@ -1,0 +1,88 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Template\Attribute;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+* Get the logo path and assign it to the variable 'logopath'
+*/
+function dcp_preprocess_responsive_menu_horizontal(&$variables) {
+  $variables['logopath'] = '/' . drupal_get_path('theme','dcp') . '/logo.png';
+}
+
+function dcp_preprocess_responsive_menu_block_toggle(&$variables) {
+  $variables['logopath1'] = '/' . drupal_get_path('theme','dcp') . '/logo.png';
+}
+
+/**
+* Implements hook_theme_suggestions_page_alter().
+*/
+function dcp_theme_suggestions_page_alter(array &$suggestions, array $variables) {
+  if ($node = \Drupal::routeMatch()->getParameter('node')) {
+  $content_type = $node->bundle();
+  $suggestions[] = 'page__'.$content_type;
+  }
+
+  if (\Drupal::service('path.matcher')->isFrontPage()) {
+    $variables['#attached']['library'][] = 'camp2019/odometer';
+    $variables['#attached']['library'][] = 'camp2019/single-page-style';
+  }
+}
+
+/**
+* Implements hook_theme_suggestions_block_alter().
+*/
+function dcp_theme_suggestions_block_alter(array &$suggestions, array $variables) {
+  if (isset($variables['elements']['content']['#block_content'])) {
+    array_splice($suggestions, 1, 0, 'block__' . $variables['elements']['content']['#block_content']->bundle());
+  }
+}
+
+/**
+* Implements hook_css_alter().
+*/
+function dcp_css_alter(&$css) {
+$theme_path = drupal_get_path('theme', 'dcp');
+// Add googlefonts.
+$googlefonts = '//fonts.googleapis.com/css?family=Roboto:400,500,700|Ubuntu:400,500,700';
+  $css[$googlefonts] = array(
+  'data' => $googlefonts,
+  'type' => 'external',
+  'every_page' => TRUE,
+  'media' => 'all',
+  'preprocess' => FALSE,
+  'group' => CSS_AGGREGATE_THEME,
+  'browsers' => array('IE' => TRUE, '!IE' => TRUE),
+  'weight' => -1,
+  );
+}
+
+/**
+* Implements theme_preprocess_page_title() for override the title of a block.
+*/
+
+function dcp_preprocess_page_title(&$variables) {
+  if ($node = \Drupal::routeMatch()->getParameter('node_type')) {
+if($node->id()=='session')
+$variables['title'] = $node->label();
+}
+}
+
+function dcp_theme_suggestions_alter(array &$suggestions, array $variables, $hook) {
+if ($hook == 'form') {
+$id = str_replace('-', '_', $variables['element']['#id']);
+$suggestions[] = 'form__' . $id;
+}
+}
+
+
+function dcp_form_user_register_form_alter(&$form, &$form_state, $form_id) {
+  $form['volunteer'] = array(
+    '#markup' => t("We are looking for some <a href='http://bit.ly/2vHUXZd' target='_blank'>volunteers!</a>"),
+    '#weight' => 2,
+    '#prefix' => '<p id="volunteer-field">',
+    '#suffix' => '</p>',
+  );
+
+}

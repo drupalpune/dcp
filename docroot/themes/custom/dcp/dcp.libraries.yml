@@ -1,0 +1,23 @@
+global-styling:
+  version: VERSION
+  css:
+    base:
+      css/style.css: {}
+  js:
+    js/main.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupal
+
+single-page-style:
+  css:
+    theme:
+      single-page/style.css: {}
+
+odometer:
+  css:
+    theme:
+      vendor-library/css/odometer-theme-default.css: {}
+  js:
+    vendor-library/js/odometer.min.js: {}
