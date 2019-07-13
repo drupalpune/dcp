@@ -1,0 +1,20 @@
+global-styling:
+  version: VERSION
+  css:
+    base:
+      css/style.css: {}
+      single-page/style.css: {}
+  js:
+    js/main.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupal
+    - camp2019/odometer
+
+odometer:
+  css:
+    theme:
+      vendor-library/css/odometer-theme-default.css: {}
+  js:
+    vendor-library/js/odometer.min.js: {}

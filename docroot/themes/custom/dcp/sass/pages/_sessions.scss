@@ -1,0 +1,394 @@
+/*------------------------------------*\
+    * @file
+    * Sessions Page.
+\*------------------------------------*/
+
+#block-sessionbanner-2 {
+  position: relative;
+  .session-banner {
+    position: absolute;
+    left: 150px;
+    bottom: 100px;
+    z-index: 500;
+    @include breakpoint(tablet) {
+      left: 100px;
+      bottom: 50px;
+    }
+    @include breakpoint(mobileonly) {
+      left: 50px;
+      bottom: 20px;
+    }
+    h1 {
+      color: #fff;
+      font-size: 32px;
+      word-spacing: 5px;
+      font-family: $title-font;
+      @include breakpoint(phablet) {
+        font-size: 24px;
+      }
+      @include breakpoint(mobileonly) {
+        font-size: 14px;
+      }
+    }
+    a {
+      @include abutton($medred);
+      color: #fff;
+      margin-top: 20px;
+      @include breakpoint(phablet) {
+        padding: 15px 30px;
+        margin-top: 10px;
+      }
+      @include breakpoint(mobileonly) {
+        padding: 10px 25px;
+        margin-top: 5px;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.session-main {
+  background-color: $lightblue;
+  padding: 20px;
+  margin: 0 auto;
+  font-family: $body-font;
+  h2 {
+    @include heading($blue, 32px);
+  }
+  p {
+    padding: 0 150px;
+    color: $grey;
+    text-align: center;
+    @include breakpoint(laptop) {
+      padding: 0px;
+    }
+  }
+  a {
+    display: inline-block;
+    width: 20%;
+    height: 40px;
+    background-color: $medred;
+    color: #fff;
+    text-decoration: none;
+    margin-top: 10px;
+    @include breakpoint(phablet) {
+      width: 30%;
+    }
+    @include breakpoint(mobileonly) {
+      width: 50%;
+    }
+  }
+  .session-wrapper {
+    @include container($container-width, 20px);
+    @include breakpoint(mobileonly) {
+      padding: 0px;
+    }
+    .flex-session {
+      margin-top: 50px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      a {
+        margin: 20px 20px;
+        text-align: center;
+        line-height: 40px;
+      }
+    }
+  }
+}
+
+#block-dcp-selectioncommitteeblock {
+  font-family: $body-font;
+  @include container($container-width, 20px);
+  @include breakpoint(mobileonly) {
+    padding: 0px;
+  }
+  h2 {
+    @include heading($blue, 32px);
+  }
+
+  strong {
+    font-weight: 800;
+  }
+  p {
+    color: $grey;
+    padding: 0 50px;
+    text-align: center;
+    line-height: 20px;
+    @include breakpoint(phablet) {
+      padding: 0px;
+    }
+  }
+  ul {
+    margin-top: 50px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    align-items: center;
+    @include breakpoint(phablet) {
+      flex-direction: column;
+    }
+    li {
+      width: 200px;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      margin-top: 20px;
+      @include breakpoint(phablet) {
+        width: 200px;
+      }
+      img {
+        border-top-right-radius: 5px;
+        border-top-left-radius: 5px;
+        width: 200px;
+        height: auto;
+      }
+      h3 {
+        padding: 10px 0;
+        color: $blue;
+        font-size: 18px;
+        text-transform: uppercase;
+        a {
+          text-decoration: none;
+          color: $blue;
+        }
+      }
+      p {
+        padding-left: 0px;
+        padding-right: 50px;
+        margin-top: 10px;
+        text-align: left;
+        @include breakpoint(laptop) {
+          padding: 0px;
+        }
+      }
+    }
+  }
+}
+
+#views-exposed-form-proposed-session-page-1 .form-item,
+.views-exposed-form-accepted-sessions-page-1 .form-item {
+  float: none;
+}
+
+.view-proposed-session,
+.view-accepted-sessions {
+  @include container($container-width, 20px);
+  @include breakpoint(mobileonly) {
+    padding: 0px;
+  }
+  .form-type-select {
+    display: flex;
+    align-items: center;
+    label {
+      width: 80px;
+      font-size: 18px;
+      margin-right: 10px;
+    }
+    select {
+      font-size: 18px;
+      width: 100%;
+      max-width: 300px;
+      background: #fff;
+    }
+  }
+  input#edit-submit-proposed-session {
+    margin-left: 80px;
+  }
+  .view-header {
+    margin: 20px 0px;
+    padding: 20px 0px;
+    border-bottom: 1px solid #ddd;
+    h2 {
+      font-family: $title-font;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    a {
+      text-decoration: none;
+      color: $medred;
+      outline: none;
+      font-size: 18px;
+    }
+    a:visited {
+      text-decoration: none;
+      color: $medred;
+      outline: none;
+      font-size: 18px;
+    }
+  }
+  .view-content {
+    display: flex;
+    flex-wrap: wrap;
+    @include breakpoint(phablet) {
+      flex-direction: column;
+    }
+  }
+  .views-row {
+    width: 33.33333333%;
+    border: 12px solid #fff;
+    background-color: #E34C4F;
+    margin-bottom: 20px;
+    padding: 20px 15px;
+    height: 180px;
+    position: relative;
+    @include breakpoint(tablet) {
+      width: 50%;
+    }
+    @include breakpoint(phablet) {
+      width: 100%;
+    }
+    &:hover {
+      background-color: #205081;
+      transition: color .2s ease-out, background 1s ease-in;
+    }
+    .views-field-title {
+      padding: 10px 0px;
+      a {
+        text-decoration: none;
+        color: #fff;
+        font-size: 18px;
+        line-height: 25px;
+        font-family: $title-font;
+      }
+    }
+    .views-field-field-enter-drupal-username {
+      border-top: 1px solid #fff;
+      padding-top: 10px;
+      position: absolute;
+      bottom: 0;
+      width: 90%;
+      padding-bottom: 13px;
+      .field-content {
+        display: flex;
+        justify-content: flex-end;
+        color: #fff;
+        font-family: $body-font;
+      }
+    }
+  }
+  .pager__items {
+    display: flex;
+    justify-content: center;
+    .pager__item {
+      border: 1px solid;
+      margin-right: 5px;
+      display: flex;
+      justify-content: center;
+      a {
+        text-decoration: none;
+      }
+    }
+    .is-active {
+      background: #e34c4f;
+      a {
+        color: #fff;
+        text-decoration: none;
+      }
+    }
+  }
+}
+
+
+.featured-speaker-page {
+  display: flex;
+  justify-content: space-between;
+  @include breakpoint(phablet) {
+      flex-direction: column;
+    }
+
+  .speaker-page-left {
+    width: 30%;
+    position:relative;
+    @include breakpoint(phablet) {
+      width:100%;
+    }
+    .middle {
+        transition: .5s ease;
+        opacity: 0;
+        display: flex;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        a {
+          margin: 0px 5px;
+        }
+      }
+    img {
+      width: 100%;
+      height: auto;
+      border-radius:20px;
+      transition: .5s ease;
+      backface-visibility: hidden;
+      opacity: 1;
+      @include breakpoint(phablet) {
+      display: block;
+    margin: auto;
+    width: 50%;
+    }
+    @include breakpoint(mobileonly) {
+      display: block;
+    width: 100%;
+    }
+    }
+  }
+
+  .speaker-page-right {
+    width: 60%;
+    text-align:justify;
+    @include breakpoint(phablet) {
+      width:100%;
+      margin-top:20px;
+    }
+    h1 {
+      font-size: 3rem;
+      @include breakpoint(phablet) {
+      font-size: 2rem;
+    }
+      color: #1975d2;
+      position: relative;
+      margin-bottom: 30px;
+      line-height: 1em;
+      font-family: $title-font;
+      &::after {
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 40px;
+        height: 4px;
+        background-color: #1975d2;
+        content: ' ';
+      }
+    }
+
+    p {
+        color:$grey;
+        font-family:$body-font;
+        font-size:18px;
+        a {
+            color:#e34c4f;
+            font-weight:800;
+            text-decoration: none;
+        }
+
+        &:last-child {
+            margin-top:20px;
+        }
+    }
+  }
+}
+.speaker-page-left:hover img {
+      opacity: 0.3;
+    }
+.speaker-page-left:hover .middle {
+      opacity: 1;
+    }
+    .speaker-page-left:hover .middle img {
+      opacity: 1;
+      border-radius: 50%;
+      transition: none;
+      width:45px;
+      height: 45px;
+    }

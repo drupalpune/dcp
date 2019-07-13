@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "stylelint-config-standard"
+  ],
+
+  "rules": {
+    "at-rule-empty-line-before": null,
+    "at-rule-name-space-after": "always",
+    "rule-empty-line-before": null,
+    "at-rule-no-unknown": null,
+    "value-keyword-case": "lower",
+    "number-leading-zero": "never",
+    "no-descending-specificity": null
+  }
+}

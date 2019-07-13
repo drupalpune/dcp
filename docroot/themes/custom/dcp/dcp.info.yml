@@ -1,0 +1,22 @@
+name: dcp
+type: theme
+description: 'Basic custom theme for Drupal camp pune Events'
+base theme: classy
+package: custom
+libraries:
+  - dcp/global-styling
+regions:
+  header_top: 'Header Top'
+  header: 'Header'
+  header_bottom: 'Header Bottom'
+  content: 'Content'
+  content_bottom: 'Content Bottom'
+  footer_top: 'Footer Top'
+  footer: 'Footer'
+stylesheets-remove:
+  - 'core/themes/classy/css/components/menu.css'
+  - 'core/assets/vendor/normalize-css/normalize.css'
+
+version: '8.2.7'
+core: '8.x'
+project: 'drupal'
