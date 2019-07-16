@@ -58,6 +58,7 @@
 $sites['camp2017-dev.drupalpune.org'] = 'camp2017';
 $sites['camp2017-stage.drupalpune.org'] = 'camp2017';
 $sites['camp2017.drupalpune.org'] = 'camp2017';
+$sites['camp2017.dcp'] = 'camp2017';
 $sites['camp2019-dev.drupalpune.com'] = 'camp2019';
 $sites['camp2019-stage.drupalpune.com'] = 'camp2019';
 $sites['camp2019.drupalpune.com'] = 'camp2019';
