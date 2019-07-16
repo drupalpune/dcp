@@ -53,3 +53,29 @@ function camp2019_blocks_update_8001()
   $block_content2 = \Drupal::entityTypeManager()->getStorage('block_content')->create($values2);
   $block_content2->save();
 }
+
+/**
+ * Creates custom block of type Header banner and Information banner.
+ */
+function camp2019_blocks_update_8002()
+{
+  // Header banner block.
+  $value1 = [
+    'uuid' => '73e4586c-c4d8-4d25-86b6-2e08c9918d9e',
+    'info' => 'Header Banner Block',
+    'type' => 'header_banner',
+  ];
+
+  $block_content1 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value1);
+  $block_content1->save();
+
+  // Information banner block.
+  $value2 = [
+    'uuid' => '4bc885a8-ec07-452e-a01a-55d0f2037b03',
+    'info' => 'Information Banner Block',
+    'type' => 'information_banner',
+  ];
+
+  $block_content2 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value2);
+  $block_content2->save();
+}
