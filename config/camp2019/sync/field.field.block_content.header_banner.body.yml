@@ -1,0 +1,22 @@
+uuid: cfb6c022-37a9-42bc-86e2-a93659018476
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.header_banner
+    - field.storage.block_content.body
+  module:
+    - text
+id: block_content.header_banner.body
+field_name: body
+entity_type: block_content
+bundle: header_banner
+label: Description
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: false
+field_type: text_with_summary

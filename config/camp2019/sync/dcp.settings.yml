@@ -1,0 +1,5 @@
+logo:
+  path: themes/custom/dcp/logo.png
+  use_default: false
+_core:
+  default_config_hash: DgGXg4WreL3Upz-H8j4bVbqNn75NJXO3wucF7aahSqE

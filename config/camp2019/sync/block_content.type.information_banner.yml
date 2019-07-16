@@ -1,0 +1,8 @@
+uuid: 4bc885a8-ec07-452e-a01a-55d0f2037b03
+langcode: en
+status: true
+dependencies: {  }
+id: information_banner
+label: 'Information Banner'
+revision: 0
+description: ''
