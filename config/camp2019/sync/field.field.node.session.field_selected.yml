@@ -1,0 +1,23 @@
+uuid: 5195ff3b-ee06-4be8-8a31-7026792e88dd
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_selected
+    - node.type.session
+id: node.session.field_selected
+field_name: field_selected
+entity_type: node
+bundle: session
+label: Selected
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

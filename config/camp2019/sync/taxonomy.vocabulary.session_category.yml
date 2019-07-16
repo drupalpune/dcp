@@ -1,0 +1,8 @@
+uuid: 638b6505-efbc-417c-b3db-86edb653cf9f
+langcode: en
+status: true
+dependencies: {  }
+name: 'Session Category'
+vid: session_category
+description: ''
+weight: 0
