@@ -59,23 +59,33 @@ function camp2019_blocks_update_8001()
  */
 function camp2019_blocks_update_8002()
 {
-  // Header banner block.
+  // Frontpage Header.
   $value1 = [
-    'uuid' => '73e4586c-c4d8-4d25-86b6-2e08c9918d9e',
-    'info' => 'Header Banner Block',
+    'uuid' => '917e9d07-6a71-4d9e-bf09-07ea78e1ae0a',
+    'info' => 'Frontpage Header',
     'type' => 'header_banner',
   ];
 
   $block_content1 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value1);
   $block_content1->save();
 
-  // Information banner block.
+  // Keynote speaker block.
   $value2 = [
-    'uuid' => '4bc885a8-ec07-452e-a01a-55d0f2037b03',
-    'info' => 'Information Banner Block',
+    'uuid' => '2f112f6e-4c23-4267-8a09-548533374650',
+    'info' => 'Keynote speaker block',
     'type' => 'information_banner',
   ];
 
   $block_content2 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value2);
   $block_content2->save();
+
+  // Venu information block.
+  $value3 = [
+    'uuid' => 'dd04d95a-9107-4c23-916b-78b12d0592a8',
+    'info' => 'Venu information block',
+    'type' => 'information_banner',
+  ];
+
+  $block_content3 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value3);
+  $block_content3->save();
 }
