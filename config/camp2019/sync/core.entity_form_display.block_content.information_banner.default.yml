@@ -9,6 +9,7 @@ dependencies:
     - field.field.block_content.information_banner.field_banner_link
     - field.field.block_content.information_banner.field_banner_title
     - field.field.block_content.information_banner.field_image_position
+    - field.field.block_content.information_banner.field_mobile_image
     - image.style.thumbnail
   module:
     - image
@@ -57,6 +58,14 @@ content:
     settings: {  }
     third_party_settings: {  }
     type: options_select
+    region: content
+  field_mobile_image:
+    weight: 26
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
     region: content
   info:
     type: string_textfield

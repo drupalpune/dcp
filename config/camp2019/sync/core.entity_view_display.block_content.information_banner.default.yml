@@ -9,6 +9,7 @@ dependencies:
     - field.field.block_content.information_banner.field_banner_link
     - field.field.block_content.information_banner.field_banner_title
     - field.field.block_content.information_banner.field_image_position
+    - field.field.block_content.information_banner.field_mobile_image
   module:
     - image
     - link
@@ -61,5 +62,14 @@ content:
     settings: {  }
     third_party_settings: {  }
     type: list_default
+    region: content
+  field_mobile_image:
+    weight: 5
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
     region: content
 hidden: {  }
