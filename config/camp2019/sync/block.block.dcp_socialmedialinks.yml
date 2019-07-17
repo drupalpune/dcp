@@ -9,8 +9,8 @@ dependencies:
     - dcp
 id: dcp_socialmedialinks
 theme: dcp
-region: header
-weight: -2
+region: footer
+weight: -3
 provider: null
 plugin: social_media_links_block
 settings:

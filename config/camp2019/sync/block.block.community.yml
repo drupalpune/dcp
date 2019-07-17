@@ -1,0 +1,25 @@
+uuid: 6cd3474b-e648-4f6c-ac1e-cbeee686fbc8
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.community
+  module:
+    - system
+  theme:
+    - dcp
+id: community
+theme: dcp
+region: footer
+weight: -4
+provider: null
+plugin: 'system_menu_block:community'
+settings:
+  id: 'system_menu_block:community'
+  label: Community
+  provider: system
+  label_display: visible
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }

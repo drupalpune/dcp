@@ -1,0 +1,25 @@
+uuid: 18247820-9f5e-4960-8005-8024331ad075
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.help-desk
+  module:
+    - system
+  theme:
+    - dcp
+id: helpdesk
+theme: dcp
+region: footer
+weight: -5
+provider: null
+plugin: 'system_menu_block:help-desk'
+settings:
+  id: 'system_menu_block:help-desk'
+  label: 'Help Desk'
+  provider: system
+  label_display: visible
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }
