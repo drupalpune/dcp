@@ -163,6 +163,14 @@ p:first-child{
     text-align: center;
   }
 }
+@media (max-width: 640px) {
+  .image-with-text-and-link
+  .field--type-text-with-summary
+  p >a{
+      display: block;
+      margin: 10px 0;
+  }
+}
 
 @media (min-width: 992px) {
     .image-with-text-and-link{
