@@ -7,7 +7,7 @@ dependencies:
     - field.storage.node.field_website
     - image.style.medium
     - node.type.sponsor
-    - system.menu.admin
+    - system.menu.main
   module:
     - image
     - link
@@ -348,10 +348,10 @@ display:
         title: Sponors
         description: ''
         expanded: false
-        parent: system.admin
+        parent: ''
         weight: 0
         context: '0'
-        menu_name: admin
+        menu_name: main
       path: sponsors
     cache_metadata:
       max-age: -1
