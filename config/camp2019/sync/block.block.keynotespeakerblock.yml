@@ -1,0 +1,25 @@
+uuid: 71d91dd6-3eae-4f23-afa8-630b553d1902
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:information_banner:2f112f6e-4c23-4267-8a09-548533374650'
+  module:
+    - block_content
+  theme:
+    - dcp
+id: keynotespeakerblock
+theme: dcp
+region: content
+weight: -1
+provider: null
+plugin: 'block_content:2f112f6e-4c23-4267-8a09-548533374650'
+settings:
+  id: 'block_content:2f112f6e-4c23-4267-8a09-548533374650'
+  label: 'Keynote speaker block'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

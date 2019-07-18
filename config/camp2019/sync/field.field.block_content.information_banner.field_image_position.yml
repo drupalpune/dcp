@@ -1,0 +1,21 @@
+uuid: c01f3ecd-2f71-4c0e-b622-bf8d9ad9eb7c
+langcode: en
+status: true
+dependencies:
+  config:
+    - block_content.type.information_banner
+    - field.storage.block_content.field_image_position
+  module:
+    - options
+id: block_content.information_banner.field_image_position
+field_name: field_image_position
+entity_type: block_content
+bundle: information_banner
+label: 'Image Position'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

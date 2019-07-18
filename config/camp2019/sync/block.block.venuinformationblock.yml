@@ -1,0 +1,25 @@
+uuid: 8cd37ae3-ae43-4cfb-a888-07b355f8ad40
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:information_banner:dd04d95a-9107-4c23-916b-78b12d0592a8'
+  module:
+    - block_content
+  theme:
+    - dcp
+id: venuinformationblock
+theme: dcp
+region: content
+weight: 1
+provider: null
+plugin: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
+settings:
+  id: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
+  label: 'Venu information block'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

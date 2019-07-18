@@ -1,0 +1,25 @@
+uuid: bf00707f-f102-4bfc-b3ab-b72d3a6a0c2b
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:header_banner:917e9d07-6a71-4d9e-bf09-07ea78e1ae0a'
+  module:
+    - block_content
+  theme:
+    - dcp
+id: frontpageheader
+theme: dcp
+region: content
+weight: -2
+provider: null
+plugin: 'block_content:917e9d07-6a71-4d9e-bf09-07ea78e1ae0a'
+settings:
+  id: 'block_content:917e9d07-6a71-4d9e-bf09-07ea78e1ae0a'
+  label: 'Frontpage Header'
+  provider: block_content
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }
