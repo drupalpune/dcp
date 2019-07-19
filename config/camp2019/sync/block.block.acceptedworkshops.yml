@@ -1,23 +1,23 @@
-uuid: 8cd37ae3-ae43-4cfb-a888-07b355f8ad40
+uuid: 574d724b-2d49-4b10-9b91-8c89f326c703
 langcode: en
 status: true
 dependencies:
   content:
-    - 'block_content:information_banner:dd04d95a-9107-4c23-916b-78b12d0592a8'
+    - 'block_content:header_banner:7c630c66-7c83-4488-8d98-0c2377698b50'
   module:
     - block_content
     - system
   theme:
     - dcp
-id: venuinformationblock
+id: acceptedworkshops
 theme: dcp
 region: content
-weight: 3
+weight: -5
 provider: null
-plugin: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
+plugin: 'block_content:7c630c66-7c83-4488-8d98-0c2377698b50'
 settings:
-  id: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
-  label: 'Venu information block'
+  id: 'block_content:7c630c66-7c83-4488-8d98-0c2377698b50'
+  label: 'Accepted workshops'
   provider: block_content
   label_display: '0'
   status: true
@@ -26,6 +26,6 @@ settings:
 visibility:
   request_path:
     id: request_path
-    pages: '<front>'
+    pages: /accepted-workshops
     negate: false
     context_mapping: {  }

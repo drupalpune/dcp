@@ -1,0 +1,8 @@
+uuid: f9dc96d2-47dd-4808-957c-435a370817d2
+langcode: en
+status: true
+dependencies: {  }
+id: session_date
+label: 'Session Date'
+locked: false
+pattern: 'D, j F Y \a\t  H:i'

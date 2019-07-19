@@ -1,4 +1,4 @@
-uuid: ed42bb44-4257-49f7-946f-aa23d0b8fe4f
+uuid: a6586d46-b1d3-4e00-9b5e-a09eee517bf0
 langcode: en
 status: true
 dependencies:
@@ -9,10 +9,10 @@ third_party_settings:
     available_menus:
       - main
     parent: 'main:'
-name: Session
-type: session
+name: Workshop
+type: workshop
 description: ''
 help: ''
-new_revision: false
+new_revision: true
 preview_mode: 1
 display_submitted: true

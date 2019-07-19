@@ -12,7 +12,7 @@ dependencies:
 id: keynotespeakerblock
 theme: dcp
 region: content
-weight: -1
+weight: 1
 provider: null
 plugin: 'block_content:2f112f6e-4c23-4267-8a09-548533374650'
 settings:

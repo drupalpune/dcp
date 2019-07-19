@@ -29,7 +29,7 @@ content:
     region: content
   field_attachment:
     weight: 2
-    label: above
+    label: hidden
     settings:
       use_description_as_link_text: true
     third_party_settings: {  }
@@ -37,7 +37,7 @@ content:
     region: content
   field_drupal_org_username:
     weight: 3
-    label: above
+    label: hidden
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -45,14 +45,14 @@ content:
     region: content
   field_experience_level:
     weight: 5
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
     type: list_default
     region: content
   field_session_category:
     weight: 4
-    label: above
+    label: hidden
     settings:
       link: true
     third_party_settings: {  }

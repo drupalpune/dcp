@@ -1,0 +1,23 @@
+uuid: 61e040ab-3c4b-4c91-a69b-f6d4ea577e19
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_selected
+    - node.type.workshop
+id: node.workshop.field_selected
+field_name: field_selected
+entity_type: node
+bundle: workshop
+label: 'Workshop Selected'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

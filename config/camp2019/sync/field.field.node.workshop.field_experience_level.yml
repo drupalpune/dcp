@@ -1,0 +1,21 @@
+uuid: 7a845d1b-1418-4052-8ad7-fcb596825ebb
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_experience_level
+    - node.type.workshop
+  module:
+    - options
+id: node.workshop.field_experience_level
+field_name: field_experience_level
+entity_type: node
+bundle: workshop
+label: 'Workshop Experience Level'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

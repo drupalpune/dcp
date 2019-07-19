@@ -1,0 +1,30 @@
+uuid: ff2d8a5a-94a4-42dd-9f6b-4ee142443148
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.workshop.body
+    - node.type.workshop
+  module:
+    - text
+    - user
+id: node.workshop.teaser
+targetEntityType: node
+bundle: workshop
+mode: teaser
+content:
+  body:
+    label: hidden
+    type: text_summary_or_trimmed
+    weight: 101
+    settings:
+      trim_length: 600
+    third_party_settings: {  }
+    region: content
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden: {  }

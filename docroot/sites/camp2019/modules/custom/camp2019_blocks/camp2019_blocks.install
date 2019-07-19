@@ -89,3 +89,89 @@ function camp2019_blocks_update_8002()
   $block_content3 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value3);
   $block_content3->save();
 }
+
+/**
+ * Creates custom block of type Header banner for all pages except homepage.
+ */
+function camp2019_blocks_update_8003()
+{
+  // Accepted Sessions.
+  $value1 = [
+    'uuid' => 'e8bd5849-bb44-4e33-ba2b-c441b43e9fca',
+    'info' => 'Accepted Session',
+    'type' => 'header_banner',
+  ];
+
+  $block_content1 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value1);
+  $block_content1->save();
+
+  // Accepted workshops.
+  $value2 = [
+    'uuid' => '7c630c66-7c83-4488-8d98-0c2377698b50',
+    'info' => 'Accepted Workshop',
+    'type' => 'header_banner',
+  ];
+
+  $block_content2 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value2);
+  $block_content2->save();
+
+  // Program Schedule.
+  $value3 = [
+    'uuid' => '5ea81788-fe50-43cf-a593-540273767b9b',
+    'info' => 'Program Schedule',
+    'type' => 'header_banner',
+  ];
+
+  $block_content3 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value3);
+  $block_content3->save();
+
+  // Proposed Sessions.
+  $value4 = [
+    'uuid' => '22814fda-a023-45d3-8466-e0f9ffbf870d',
+    'info' => 'Proposed Sessions',
+    'type' => 'header_banner',
+  ];
+
+  $block_content4 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value4);
+  $block_content4->save();
+
+  // Proposed Workshops.
+  $value5 = [
+    'uuid' => '0906e52a-d94f-4b7e-9f71-370165a8e7fb',
+    'info' => 'Proposed Workshops',
+    'type' => 'header_banner',
+  ];
+
+  $block_content5 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value5);
+  $block_content5->save();
+
+  // Sponsor us.
+  $value6 = [
+    'uuid' => 'b039fa9a-3808-458a-9caa-3660c6b1a53c',
+    'info' => 'Sponsor us',
+    'type' => 'header_banner',
+  ];
+
+  $block_content6 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value6);
+  $block_content6->save();
+
+  // Submit a session.
+  $value7 = [
+    'uuid' => '234dd3b1-d696-4bd4-a559-6b05b2d5e8a0',
+    'info' => 'Submit a session',
+    'type' => 'header_banner',
+  ];
+
+  $block_content7 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value7);
+  $block_content7->save();
+
+  // Submit a workshop.
+  $value8 = [
+    'uuid' => '067452fe-f171-4b8c-ba72-bdad045a4ea0',
+    'info' => 'Submit a workshop',
+    'type' => 'header_banner',
+  ];
+
+  $block_content8 = \Drupal::entityTypeManager()->getStorage('block_content')->create($value8);
+  $block_content8->save();
+}
