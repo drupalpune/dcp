@@ -1,0 +1,19 @@
+uuid: 5413e03c-341a-4bc6-a1e4-8a94fbd8ac1d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_prerequisites_for_workshop
+    - node.type.workshop
+id: node.workshop.field_prerequisites_for_workshop
+field_name: field_prerequisites_for_workshop
+entity_type: node
+bundle: workshop
+label: 'Prerequisites for Workshop'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,23 +1,23 @@
-uuid: 8cd37ae3-ae43-4cfb-a888-07b355f8ad40
+uuid: c70b9516-a066-4ac1-a95d-0359044cf060
 langcode: en
 status: true
 dependencies:
   content:
-    - 'block_content:information_banner:dd04d95a-9107-4c23-916b-78b12d0592a8'
+    - 'block_content:header_banner:067452fe-f171-4b8c-ba72-bdad045a4ea0'
   module:
     - block_content
     - system
   theme:
     - dcp
-id: venuinformationblock
+id: submitaworkshop
 theme: dcp
 region: content
-weight: 3
+weight: 0
 provider: null
-plugin: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
+plugin: 'block_content:067452fe-f171-4b8c-ba72-bdad045a4ea0'
 settings:
-  id: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
-  label: 'Venu information block'
+  id: 'block_content:067452fe-f171-4b8c-ba72-bdad045a4ea0'
+  label: 'Submit a workshop'
   provider: block_content
   label_display: '0'
   status: true
@@ -26,6 +26,6 @@ settings:
 visibility:
   request_path:
     id: request_path
-    pages: '<front>'
+    pages: /submit-workshop
     negate: false
     context_mapping: {  }

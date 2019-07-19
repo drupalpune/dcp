@@ -62,70 +62,6 @@ display:
       row:
         type: fields
       fields:
-        field_logo:
-          id: field_logo
-          table: node__field_logo
-          field: field_logo
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: ''
-          exclude: true
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: false
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          click_sort_column: target_id
-          type: image
-          settings:
-            image_style: medium
-            image_link: ''
-          group_column: ''
-          group_columns: {  }
-          group_rows: true
-          delta_limit: 0
-          delta_offset: 0
-          delta_reversed: false
-          delta_first_last: false
-          multi_type: separator
-          separator: ', '
-          field_api_classes: false
-          plugin_id: field
         field_website:
           id: field_website
           table: node__field_website
@@ -193,20 +129,20 @@ display:
           separator: ', '
           field_api_classes: false
           plugin_id: field
-        nothing:
-          id: nothing
-          table: views
-          field: nothing
+        field_logo:
+          id: field_logo
+          table: node__field_logo
+          field: field_logo
           relationship: none
           group_type: group
           admin_label: ''
           label: ''
           exclude: false
           alter:
-            alter_text: true
-            text: '<a href="{{ field_website }}" target="_blank">{{ field_logo }}</a>'
-            make_link: false
-            path: ''
+            alter_text: false
+            text: ''
+            make_link: true
+            path: '{{ field_website }}'
             absolute: false
             external: false
             replace_spaces: false
@@ -240,8 +176,23 @@ display:
           empty: ''
           hide_empty: false
           empty_zero: false
-          hide_alter_empty: false
-          plugin_id: custom
+          hide_alter_empty: true
+          click_sort_column: target_id
+          type: image
+          settings:
+            image_style: medium
+            image_link: ''
+          group_column: ''
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
       filters:
         status:
           value: '1'
@@ -319,12 +270,13 @@ display:
           empty: false
           tokenize: false
           content:
-            value: "<div class=“sponsor-title”>\r\nSponsors\r\n</div>\r\n<div class=“sponsor-description”>\r\nSponsors description\r\n</div>\r\n<a class=“btn” >\r\nSponsor Us\r\n<a/>"
+            value: "<div class=\"sponsor-wrapper\">\r\n  <div class=“sponsor-title”>\r\n     Sponsors\r\n  </div>\r\n  <div class=“sponsor-description”>\r\n    Sponsors description\r\n  </div>\r\n  <a class=“btn” href='/' >\r\n    Sponsor Us\r\n  <a/>\r\n</div>"
             format: basic_html
           plugin_id: text
       defaults:
         header: false
         title: false
+        fields: true
       title: ''
     cache_metadata:
       max-age: -1
@@ -349,7 +301,7 @@ display:
         description: ''
         expanded: false
         parent: ''
-        weight: 0
+        weight: -45
         context: '0'
         menu_name: main
       path: sponsors

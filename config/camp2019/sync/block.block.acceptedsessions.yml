@@ -1,23 +1,23 @@
-uuid: 8cd37ae3-ae43-4cfb-a888-07b355f8ad40
+uuid: 5f7acf0f-ccc0-4953-807d-874a05071aa0
 langcode: en
 status: true
 dependencies:
   content:
-    - 'block_content:information_banner:dd04d95a-9107-4c23-916b-78b12d0592a8'
+    - 'block_content:header_banner:e8bd5849-bb44-4e33-ba2b-c441b43e9fca'
   module:
     - block_content
     - system
   theme:
     - dcp
-id: venuinformationblock
+id: acceptedsessions
 theme: dcp
 region: content
-weight: 3
+weight: -6
 provider: null
-plugin: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
+plugin: 'block_content:e8bd5849-bb44-4e33-ba2b-c441b43e9fca'
 settings:
-  id: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
-  label: 'Venu information block'
+  id: 'block_content:e8bd5849-bb44-4e33-ba2b-c441b43e9fca'
+  label: 'Accepted sessions'
   provider: block_content
   label_display: '0'
   status: true
@@ -26,6 +26,6 @@ settings:
 visibility:
   request_path:
     id: request_path
-    pages: '<front>'
+    pages: /accepted-sessions
     negate: false
     context_mapping: {  }

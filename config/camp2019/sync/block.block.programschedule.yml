@@ -1,23 +1,23 @@
-uuid: 8cd37ae3-ae43-4cfb-a888-07b355f8ad40
+uuid: 1e7c9232-ed77-4c80-b6e4-9d66af0883c9
 langcode: en
 status: true
 dependencies:
   content:
-    - 'block_content:information_banner:dd04d95a-9107-4c23-916b-78b12d0592a8'
+    - 'block_content:header_banner:5ea81788-fe50-43cf-a593-540273767b9b'
   module:
     - block_content
     - system
   theme:
     - dcp
-id: venuinformationblock
+id: programschedule
 theme: dcp
 region: content
-weight: 3
+weight: -4
 provider: null
-plugin: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
+plugin: 'block_content:5ea81788-fe50-43cf-a593-540273767b9b'
 settings:
-  id: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
-  label: 'Venu information block'
+  id: 'block_content:5ea81788-fe50-43cf-a593-540273767b9b'
+  label: 'Program schedule'
   provider: block_content
   label_display: '0'
   status: true
@@ -26,6 +26,6 @@ settings:
 visibility:
   request_path:
     id: request_path
-    pages: '<front>'
+    pages: /schedule
     negate: false
     context_mapping: {  }

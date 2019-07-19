@@ -3,13 +3,14 @@ langcode: en
 status: true
 dependencies:
   module:
+    - node
     - system
   theme:
     - dcp
 id: dcp_pagetitle
 theme: dcp
 region: content
-weight: -3
+weight: -9
 provider: null
 plugin: page_title_block
 settings:
@@ -23,3 +24,13 @@ visibility:
     pages: '<front>'
     negate: true
     context_mapping: {  }
+  node_type:
+    id: node_type
+    bundles:
+      announcement: announcement
+      article: article
+      page: page
+      sponsor: sponsor
+    negate: false
+    context_mapping:
+      node: '@node.node_route_context:node'

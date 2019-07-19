@@ -1,23 +1,23 @@
-uuid: 8cd37ae3-ae43-4cfb-a888-07b355f8ad40
+uuid: 256938e6-6056-40ae-be42-2ce797ecaf63
 langcode: en
 status: true
 dependencies:
   content:
-    - 'block_content:information_banner:dd04d95a-9107-4c23-916b-78b12d0592a8'
+    - 'block_content:header_banner:22814fda-a023-45d3-8466-e0f9ffbf870d'
   module:
     - block_content
     - system
   theme:
     - dcp
-id: venuinformationblock
+id: proposedsessions
 theme: dcp
 region: content
-weight: 3
+weight: -7
 provider: null
-plugin: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
+plugin: 'block_content:22814fda-a023-45d3-8466-e0f9ffbf870d'
 settings:
-  id: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
-  label: 'Venu information block'
+  id: 'block_content:22814fda-a023-45d3-8466-e0f9ffbf870d'
+  label: ' Proposed sessions'
   provider: block_content
   label_display: '0'
   status: true
@@ -26,6 +26,6 @@ settings:
 visibility:
   request_path:
     id: request_path
-    pages: '<front>'
+    pages: /proposed-sessions
     negate: false
     context_mapping: {  }

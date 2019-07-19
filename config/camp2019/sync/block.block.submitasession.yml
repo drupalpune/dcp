@@ -1,23 +1,23 @@
-uuid: 8cd37ae3-ae43-4cfb-a888-07b355f8ad40
+uuid: 06edf03c-4d50-4136-b8c2-e1b61722802c
 langcode: en
 status: true
 dependencies:
   content:
-    - 'block_content:information_banner:dd04d95a-9107-4c23-916b-78b12d0592a8'
+    - 'block_content:header_banner:234dd3b1-d696-4bd4-a559-6b05b2d5e8a0'
   module:
     - block_content
     - system
   theme:
     - dcp
-id: venuinformationblock
+id: submitasession
 theme: dcp
 region: content
-weight: 3
+weight: -1
 provider: null
-plugin: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
+plugin: 'block_content:234dd3b1-d696-4bd4-a559-6b05b2d5e8a0'
 settings:
-  id: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
-  label: 'Venu information block'
+  id: 'block_content:234dd3b1-d696-4bd4-a559-6b05b2d5e8a0'
+  label: 'Submit a session'
   provider: block_content
   label_display: '0'
   status: true
@@ -26,6 +26,6 @@ settings:
 visibility:
   request_path:
     id: request_path
-    pages: '<front>'
+    pages: /submit-session
     negate: false
     context_mapping: {  }

@@ -6,8 +6,6 @@ dependencies:
     - field.storage.node.field_drupal_org_username
     - field.storage.node.field_session_category
     - node.type.session
-    - system.menu.admin
-    - user.role.administrator
   module:
     - node
     - user
@@ -27,10 +25,9 @@ display:
     position: 0
     display_options:
       access:
-        type: role
+        type: perm
         options:
-          role:
-            administrator: administrator
+          perm: 'administer nodes'
       cache:
         type: tag
         options: {  }
@@ -334,7 +331,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - 'user.node_grants:view'
-        - user.roles
+        - user.permissions
       tags:
         - 'config:field.storage.node.field_drupal_org_username'
         - 'config:field.storage.node.field_session_category'
@@ -345,13 +342,13 @@ display:
     position: 1
     display_options:
       display_extenders: {  }
-      path: admin/proposed-sessions
+      path: admin/content/all-sessions
       menu:
-        type: normal
-        title: 'Proposed Sessions'
+        type: tab
+        title: Sessions
         description: ''
         expanded: false
-        parent: ''
+        parent: system.admin_content
         weight: 0
         context: '0'
         menu_name: admin
@@ -361,7 +358,7 @@ display:
         - 'languages:language_content'
         - 'languages:language_interface'
         - 'user.node_grants:view'
-        - user.roles
+        - user.permissions
       tags:
         - 'config:field.storage.node.field_drupal_org_username'
         - 'config:field.storage.node.field_session_category'
