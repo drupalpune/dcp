@@ -5,6 +5,7 @@ dependencies:
   config:
     - views.view.announcements
   module:
+    - system
     - views
   theme:
     - dcp
@@ -21,4 +22,9 @@ settings:
   label_display: visible
   views_label: ''
   items_per_page: none
-visibility: {  }
+visibility:
+  request_path:
+    id: request_path
+    pages: '<front>'
+    negate: false
+    context_mapping: {  }

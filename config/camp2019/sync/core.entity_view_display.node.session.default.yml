@@ -6,11 +6,13 @@ dependencies:
     - field.field.node.session.body
     - field.field.node.session.field_attachment
     - field.field.node.session.field_drupal_org_username
+    - field.field.node.session.field_experience_level
     - field.field.node.session.field_selected
     - field.field.node.session.field_session_category
     - node.type.session
   module:
     - file
+    - options
     - text
     - user
 id: node.session.default
@@ -40,6 +42,13 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
+    region: content
+  field_experience_level:
+    weight: 5
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
     region: content
   field_session_category:
     weight: 4

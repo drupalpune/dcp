@@ -6,6 +6,7 @@ dependencies:
     - field.field.node.session.body
     - field.field.node.session.field_attachment
     - field.field.node.session.field_drupal_org_username
+    - field.field.node.session.field_experience_level
     - field.field.node.session.field_selected
     - field.field.node.session.field_session_category
     - node.type.session
@@ -47,6 +48,12 @@ content:
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
+    region: content
+  field_experience_level:
+    weight: 26
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
     region: content
   field_session_category:
     weight: 10
