@@ -1,0 +1,44 @@
+# Documentation: http://dev.docs.agile.coop/docs/dev-environment/intro/
+name: drupalcamppune # Insert the project name here in the format [client][project], i.e. ethimain.
+recipe: drupal8
+config:
+  webroot: docroot
+  php: '7.1'
+  drush: "*"
+proxy:
+  mailhog:
+    - mail.drupalcamppune.lndo.site # Change projectname to the same as the name key above.
+  adminer:
+    - adminer.drupalcamppune.lndo.site # Change projectname to the same as the name key above.
+services:
+  appserver:
+    build:
+      - |
+        if [ ! -z ${GITHUB_TOKEN} ] ; then
+          cd $LANDO_MOUNT && composer config --global --auth --unset github-oauth.github.com && composer config --global github-oauth.github.com $GITHUB_TOKEN
+        fi
+  database:
+    creds:
+      user: database
+      password: database
+      database: database
+  mailhog:
+    type: mailhog
+    hogfrom:
+      - appserver
+    portforward: true
+  adminer:
+    type: compose
+    services:
+      image: dehy/adminer
+      command: /bin/s6-svscan /etc/services.d
+    portforward: true
+tooling:
+  npm:
+    service: node
+  yarn:
+    service: node
+  node:
+    service: node
+  gulp:
+    service: node
