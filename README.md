@@ -1,6 +1,52 @@
 # My Project
 
-A brief description of My Project.
+DrupalCamp Pune Website.
+
+## Lando local Setup instructions for DCP 2019:
+
+  # Git instructions:
+   
+  1. Clone from https://github.com/drupalpune/dcp
+  2. git checkout dcp19
+
+
+  # Drupal Settings
+  1. Open drupalcamppune/docroot/sites/sites.php
+  2. Comment all $sites lines at the bottom of the file and add following line.
+    ```
+      $sites['drupalcamppune.lndo.site'] = 'camp2019';
+    ```
+  3. In docroot/sites/camp2019/settings.local.php, Copy following $databases array.
+      ```
+      $databases['default']['default'] = array (
+        'database' => 'database',
+        'username' => 'database',
+        'password' => 'database',
+        'prefix' => '',
+        'host' => 'database',
+        'port' => '3306',
+        'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+        'driver' => 'mysql',
+      );
+
+  ```
+
+  # Lando instructions:
+  1. [Download and install Lando](https://docs.devwithlando.io/installation/macos.html)
+  2. Run
+      ```
+      $ lando start
+      ```
+  3. Download and move the database gzip file to drupalcamppune directory and import database with followinng command.
+    ```
+      $ lando db-import dev-dcp19-drupalcamdb282288-2019-07-24.sql.gz
+      $ lando drush cr --uri=https://drupalcamppune.lndo.site
+    ```
+  4. Verify if the site is working on https://drupalcamppune.lndo.site/
+  5. Login using Drush uli and change the admin password.
+    ```
+      $ lando drush uli --uri=https://drupalcamppune.lndo.site
+    ```
 
 ## Using This Template
 
