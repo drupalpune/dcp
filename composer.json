@@ -26,6 +26,7 @@
         "drupal/paragraphs": "^1.8",
         "drupal/qa_accounts": "^1.0.0-alpha1",
         "drupal/r4032login": "^1.1",
+        "drupal/recaptcha": "^2.4",
         "drupal/seckit": "^1.0.0-alpha2",
         "drupal/shield": "^1.2.0",
         "drupal/social_media_links": "^2.6",
