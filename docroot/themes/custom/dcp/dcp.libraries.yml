@@ -3,7 +3,7 @@ global-styling:
   css:
     base:
       css/style.css: {}
-      single-page/style.css: {}
+#      single-page/style.css: {}
   js:
     js/main.js: {}
   dependencies:
