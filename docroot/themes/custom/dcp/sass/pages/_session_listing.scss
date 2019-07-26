@@ -1,0 +1,88 @@
+/*------------------------------------*\
+    * @file
+    * Session listing.
+\*------------------------------------*/
+
+.session-listing {
+  max-width: 72.5rem;
+  margin: auto;
+  margin-top: 5rem;
+  @include breakpoint(laptop) {
+    padding: {
+      left: 1rem;
+      right: 1rem;
+    }
+  }
+}
+.view-content__group {
+  padding-bottom: 4rem;
+  margin-bottom: 4rem;
+  border-bottom: 1px solid $color--border;
+  > .group-heading {
+    font: {
+      family: $title-font;
+      size: 1.5rem;
+      weight: 700;
+    }
+    line-height: 1;
+    margin-bottom: 2.75rem;
+  }
+  > .group-content {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-content: center;
+    .views-row {
+      @include breakpoint(phablet) {
+        flex: 0 1 auto;
+      }
+      flex: 0 0 22.5rem;
+      padding: 1.25rem;
+      border: 1px solid transparent;
+      box-shadow: 0px 0px 0.5rem rgba(0, 0, 0, 0.1);
+      transition: box-shadow $transition-time ease-in-out;
+      margin: {
+        right: 2.5rem;
+        bottom: 2.5rem;
+      }
+      @include breakpoint(phablet) {
+        margin-right: 0;
+      }
+      &:hover {
+        box-shadow: 0px 0px 3.125rem rgba(0, 0, 0, 0.1);
+      }
+      &:nth-child(3n) {
+        margin-right: 0;
+        @include breakpoint(laptop) {
+          margin-right: 2.5rem;
+        }
+        @include breakpoint(phablet) {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+  .views-field-title {
+    font: {
+      family: $title-font;
+      size: 1.125rem;
+      weight: 700;
+    }
+    line-height: 1.8rem;
+    padding-bottom: 0.875rem;
+    margin-bottom: 0.875rem;
+    border-bottom: 1px solid $color--border;
+    a {
+      color: $black;
+      text-decoration: none;
+    }
+  }
+  .views-field-field-drupal-org-username,
+  .views-field-field-organization {
+    font-family: $title-font;
+    font-weight: 300;
+  }
+  .views-field-field-drupal-org-username {
+    margin-bottom: 1rem;
+  }
+}

@@ -27,4 +27,9 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
-hidden: {  }
+hidden:
+  field_attachment: true
+  field_drupal_org_username: true
+  field_experience_level: true
+  field_selected: true
+  field_session_category: true

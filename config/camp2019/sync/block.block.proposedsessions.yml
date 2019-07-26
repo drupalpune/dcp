@@ -1,11 +1,8 @@
 uuid: 256938e6-6056-40ae-be42-2ce797ecaf63
 langcode: en
-status: true
+status: false
 dependencies:
-  content:
-    - 'block_content:header_banner:22814fda-a023-45d3-8466-e0f9ffbf870d'
   module:
-    - block_content
     - system
   theme:
     - dcp
