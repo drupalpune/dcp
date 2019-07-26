@@ -1,6 +1,6 @@
 project:
   machine_name: dcp
-  prefix: BLT
+  prefix: DCP
   human_name: 'BLTed 10'
   profile:
     name: lightning
