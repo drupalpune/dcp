@@ -66,3 +66,12 @@
         }
     }
 }
+// Button mixin
+@mixin button() {
+    padding: 12px 24px;
+    background: $btn-color;
+    border-radius: 22px;
+    color: $white;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
