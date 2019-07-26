@@ -3,7 +3,7 @@
   background: white;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   min-height: 97px;
-  padding: 18px 61px 16px 60px;
+  padding: 18px 51px 16px 60px;
   align-items: center;
   justify-content: center;
   .block-system-branding-block {
@@ -98,6 +98,7 @@
     width: 100%;
   }
   #block-logintext {
+    padding-left: 50px;
     a {
       background: #FF2370;
       border-radius: 23.5px;
