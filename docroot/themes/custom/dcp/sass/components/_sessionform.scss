@@ -2,98 +2,119 @@
     * @file
     * session content type.
 \*------------------------------------*/
+.js {
+  input {
+    &.form-autocomplete {
+      background-position: 98% center;
+    }
+  }
+}
 
 .node-session-form {
-    width: 60%;
-    margin: 0 auto;
-    padding: 20px 40px;
-    border-radius: 10px;
-    margin-top: 30px;
-    margin-bottom: 30px;
-    @include breakpoint(laptop) {
-        width: 80%;
+  width: 60%;
+  padding: 20px 40px;
+  border-radius: 10px;
+  margin: 30px auto;
+
+  @include breakpoint(laptop) {
+    width: 80%;
+  }
+
+  @include breakpoint(phablet) {
+    width: 90%;
+  }
+
+  .js-form-type-select {
+    select {
+    position: relative;
+    appearance: none;
+    background: url("/themes/custom/dcp/images/arrow.svg") no-repeat center center;
+    background-position: 98% center;
+    opacity: 1;
+    border-radius: 0;
+    font-size: 16px;
+    letter-spacing: .44px;
+    padding: 0;
+    color: $form-select;
+    margin: 5px 0 0 0;
+    padding: 12px 0px 12px 0px;
+    line-height: normal;
+    width: 100%;
+  }
+}
+
+  label {
+    color: $label;
+    display: inline-block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-family: $title-font;
+    font-weight: $light;
+
+    @include breakpoint(mobileonly) {
+      font-size: 14px;
     }
-    @include breakpoint(phablet) {
-        width: 90%;
+
+    a {
+      text-decoration: none;
+      color: $blue;
     }
-    label,
-    // .description,
-    #edit-body-0-format,
-    .link-edit-summary {
-        color: #5e6675;
-        display: inline-block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        font-family: $title-font;
-        font-weight: $light;
-        @include breakpoint(mobileonly) {
-            font-size: 14px;
-        }
-        a {
-            text-decoration: none;
-            color: $blue;
-        }
+  }
+
+  .field-edit-link {
+    display: none;
+  }
+
+  #edit-body-0-format-help {
+    margin-bottom: 10px;
+  }
+
+  .description {
+    display: none;
+  }
+
+  .text-full,
+  .form-text,
+  .form-file {
+    color: $form-text;
+    display: block;
+    width: 100%;
+    height: 40px;
+    padding: 6px 12px;
+    font-size: 16px;
+    line-height: 1.42857143;
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: 2px;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+
+    @include breakpoint(mobileonly) {
+      font-size: 14px;
     }
-    #edit-body-0-format
-    {
-        color: grey;
-        display:flex;
-        flex-direction:column;
-        padding:20px 10px;
-        line-height:20px;
+  }
+
+  #edit-body-0-value {
+    height: 160px;
+  }
+
+  #edit-submit {
+    @include button();
+    padding: 12px 40px;
+    margin: 5% 45%;
+  }
+
+  #edit-preview {
+    display: none;
+  }
+
+  img {
+    @include breakpoint(mobileonly) {
+      width: 80%;
+      height: auto;
     }
-    #edit-body-0-format-help {
-        margin-bottom: 10px;
-    }
-    .description {
-        margin-top: 5px;
-    }
-    .text-full,
-    .form-text,
-    .form-file {
-        color: #5e6675;
-        display: block;
-        width: 100%;
-        height: 40px;
-        padding: 6px 12px;
-        font-size: 16px;
-        line-height: 1.42857143;
-        background-color: #fff;
-        border: 1px solid #cecece;
-        border-radius: 2px;
-        // box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-        transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-        @include breakpoint(mobileonly) {
-            font-size: 14px;
-        }
-    }
-    #edit-body-0-value {
-        height: 160px;
-    }
-    #edit-submit,
-    #edit-preview {
-        cursor: pointer;
-        display: inline-block;
-        padding: 6px 15px;
-        margin-bottom: 0;
-        font-size: 14px;
-        font-weight: $light;
-        line-height: 1.42857143;
-        text-align: center;
-        vertical-align: middle;
-        cursor: pointer;
-        border: 1px solid transparent;
-        border-radius: 4px;
-        color: #fff;
-        background-color: #2a67a5;
-        &:hover {
-            box-shadow: 3px 3px 2px #888888;
-        }
-    }
-    img {
-        @include breakpoint(mobileonly) {
-            width: 80%;
-            height: auto;
-        }
-    }
+  }
+
+  #edit-body-0-format {
+    display: none;
+  }
 }

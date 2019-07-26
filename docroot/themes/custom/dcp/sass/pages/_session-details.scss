@@ -1,0 +1,116 @@
+.session-title {
+  font-family: Georgia;
+  font-size: 48px;
+  line-height: 68px;
+  letter-spacing: 0.315px;
+  color: $label;
+  margin: 100px 0 40px 0;
+}
+
+.session-submitted-by {
+  margin: 0 0 50px 0;
+  font-family: Circular Air;
+  font-size: 20px;
+  line-height: 29px;
+  letter-spacing: 0.315px;
+}
+
+.session-left {
+  font-family: Circular Air;
+  font-size: 16px;
+  line-height: 25px;
+  letter-spacing: 0.396667px;
+  color: $session-title;
+  font-weight: 100;
+}
+
+.session-detail-page {
+  width: 60%;
+  margin: auto;
+}
+.session-detail {
+  font-family: Circular Air;
+  font-size: 20px;
+  line-height: 29px;
+  letter-spacing: 0.315px;
+  font-weight: bold;
+  color: $session-title;
+}
+.session-right {
+  text-align: center;
+  padding: 40px 10px;
+  background: url(../images/Vector.svg) no-repeat;
+  background-size: contain;
+  padding: 60px 20px !important;
+  flex-direction: column;
+  justify-content: center;
+  display: flex;
+  width: 200px;
+  word-break: break-all;
+}
+
+.session-parent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 1rem;
+}
+
+.session-right-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.speakers {
+  font-family: Circular Air;
+  font-size: 16px;
+  line-height: 29px;
+  letter-spacing: 0.396667px;
+  color: $speaker;
+  font-weight: 100;
+  margin-bottom: 10px;
+}
+
+.title-style {
+  font-family: Circular Air;
+  font-size: 20px;
+  line-height: 29px;
+  letter-spacing: 0.315px;
+  font-weight: bold;
+  color: $session-title;
+}
+
+.track,
+.track a {
+  font-family: Circular Air;
+  font-size: 16px;
+  line-height: 29px;
+  letter-spacing: 0.396667px;
+  color: $session-title;
+  text-decoration: none;
+  font-weight: 100;
+  margin-bottom: 10px;
+}
+
+.session-detail-page {
+  span.field--name-uid {
+      color: $speaker;
+      text-decoration: none;
+  }
+}
+
+@include breakpoint(phablet) {
+  .session-title {
+    font-size: 32px;
+    line-height: 47px;
+  }
+
+  .session-parent {
+    grid-template-columns: 100%;
+    grid-column-gap: 0;
+  }
+
+  .session-detail-page {
+    width: 95%;
+    margin: auto;
+  }
+}

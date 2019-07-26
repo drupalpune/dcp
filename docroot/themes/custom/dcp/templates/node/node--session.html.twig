@@ -1,0 +1,37 @@
+<div class="session-detail-page">
+<h1 class="session-title">{{ node.label }}</h1>
+<div class="session-submitted-by">{% trans %}Submitted by {{ author_name }} on {{ date }}{% endtrans %}</div>
+<div class="session-detail">{{ 'Session Details'|t }}</div>
+<div class="session-parent title-style">
+	<div class="session-left">{{ content.body }}</div>
+	<div class="session-right-wrapper">
+	<div class="session-right session-detail">
+		<div class="speakers-wrap">
+      <div class="speaker-label">
+        {{ 'Speakers'|t }}
+      </div>
+      <div class="speakers">
+        {{ content.field_drupal_org_username }}
+      </div>
+    </div>
+		<div class="track-wrap">
+      <div class="category-label">
+        {{ 'Session Track'|t }}
+      </div>
+      <div class="category track">
+        {{ content.field_session_category }}
+      </div>
+    </div> 
+    <div class="track-wrap">
+      <div class="experience-level-label">
+        {{ 'Experience Level'|t }}
+      </div>
+      <div class="experience-level track">
+        {{ content.field_experience_level }}
+      </div>
+    </div>
+	</div>
+</div>
+</div>
+</div>
+</div>
