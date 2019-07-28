@@ -1,0 +1,93 @@
+.venue-main-wrapper {
+  @include container(1280px, 60px, 50px, 15px);
+  padding: 0 0 135px 0;
+  @include breakpoint(tablet) {
+    padding-bottom: 50px;
+  }
+  @include breakpoint(mobileonly) {
+    padding: 0;
+  }
+  .field--name-body {
+    @include breakpoint(laptop) {
+      text-align: center;
+    }
+  }
+  h2 {
+    @extend %Georgia;
+    font-size: 36px;
+    line-height: 1.8;
+    letter-spacing: 0.3px;
+    color: $label;
+    padding-bottom: 18px;
+    @include breakpoint(laptop) {
+      padding-bottom: 18px;
+      padding-top: 45px;
+    }
+  }
+
+  p {
+    margin-bottom: 40px;
+    letter-spacing: 0.4px
+  }
+
+  .venue-wrapper {
+    margin-left: 50px;
+    display: flex;
+    background-image: linear-gradient(#D8D8D8, white);
+    margin-top: 104px;
+    @include breakpoint(phablet) {
+      display: block;
+      margin: 0;
+      padding-right: 0;
+    }
+    @include breakpoint(mobileonly) {
+      padding: 15px 0 50px 15px;
+    }
+
+    .venue-image-desktop {
+      justify-self: end;
+
+      img {
+        width: 65%;
+        height: auto;
+        object-fit: contain;
+        float: right;
+        margin-top: -65px;
+        @include breakpoint(laptop) {
+          margin-right: -50px;
+        }
+      }
+      @include breakpoint(phablet) {
+        display: none;
+      }
+    }
+    .venue-image-mobile {
+      display: none;
+      text-align: center;
+      margin-top: 40px;
+      img {
+        width: 260px;
+        height: auto;
+        object-fit: contain;
+      }
+      @include breakpoint(phablet) {
+        display: block;
+      }
+    }
+
+    .venue-description {
+      padding-left: 74px;
+      padding-top: 82px;
+      @include breakpoint(laptop) {
+        padding: 0;
+      }
+    }
+  }
+  .venue-dir-link {
+    a {
+      @include block-cta();
+      letter-spacing: 0.875px;
+      display: inline-block;
+    }
+  }
+}
