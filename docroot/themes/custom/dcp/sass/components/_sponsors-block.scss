@@ -1,0 +1,100 @@
+.sponsors-content-wrapper {
+  @include container(1280px, 60px, 50px, 15px);
+  display: flex;
+  padding-bottom: 115px;
+  @include breakpoint(laptop) {
+    display: block;
+    text-align: center;
+  }
+  @include breakpoint(mobileonly) {
+    padding-bottom: 30px;
+  }
+  .view-content {
+    display: flex;
+    flex-basis: 50%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    @include breakpoint(laptop) {
+      margin-top: 70px;
+      justify-content: center;
+    }
+    @include breakpoint(mobileonly) {
+      display: block;
+    }
+    .views-row {
+      margin-bottom: 40px;
+      &:nth-child(odd) {
+        margin-right: 40px;
+        @include breakpoint(mobileonly) {
+          margin-right: 0;
+        }
+      }
+      &:nth-last-child(-n+2) {
+        margin-bottom: 0;
+        @include breakpoint(mobileonly) {
+          margin-bottom: 40px;
+        }
+      }
+      @include breakpoint(laptop) {
+        flex-basis: 40%;
+      }
+
+      @include breakpoint(phablet) {
+        margin-bottom: 40px;
+      }
+    }
+  }
+  .view-header {
+    display: flex;
+    flex-basis: 50%;
+    align-items: center;
+
+    .sponsor-wrapper {
+      max-width: 350px;
+      @include breakpoint(laptop) {
+        max-width: 750px;
+        margin: 0 auto;
+      }
+    }
+
+    .sponsor-title {
+      @include title();
+      margin-bottom: 20px;
+    }
+
+    .sponsor-description {
+      @extend %CircularAir-Book;
+      font-size: 16px;
+      letter-spacing: 0.4px;
+      color: $label;
+      margin-bottom: 40px;
+      @include breakpoint(phablet) {
+        font-size: 18px;
+        margin-bottom: 32px;
+      }
+    }
+    .btn {
+      @include button();
+    }
+
+  }
+}
+
+.view-sponsors {
+  &.view-display-id-block_1 {
+    position: relative;
+    &::before {
+      content: "";
+      position: absolute;
+      left: 60px;
+      top: -330px;
+      background: url(/../themes/custom/dcp/images/design2.svg) no-repeat;
+      background-size: 80%;
+      width: 70%;
+      height: 760px;
+      @include breakpoint(laptop) {
+        content: normal;
+      }
+    }
+  }
+}

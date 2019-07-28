@@ -270,8 +270,8 @@ display:
           empty: false
           tokenize: false
           content:
-            value: "<div class=\"sponsor-wrapper\">\r\n  <div class=“sponsor-title”>\r\n     Sponsors\r\n  </div>\r\n  <div class=“sponsor-description”>\r\n    Sponsors description\r\n  </div>\r\n  <a class=“btn” href='/' >\r\n    Sponsor Us\r\n  <a/>\r\n</div>"
-            format: basic_html
+            value: "<div class=\"sponsor-wrapper\">\r\n  <div class=\"sponsor-title\">\r\n     Sponsors\r\n  </div>\r\n  <div class=\"sponsor-description\">\r\n    Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. \r\n  </div>\r\n  <a class=\"btn\" href='/' >\r\n    Sponsor Us\r\n  <a/>\r\n</div>"
+            format: full_html
           plugin_id: text
       defaults:
         header: false
