@@ -1,0 +1,96 @@
+.keynote-speaker-wrapper {
+  @include container(1280px, 60px, 50px, 15px);
+  display: flex;
+  @include breakpoint(tablet) {
+    display: block;
+    padding-top: 80px;
+    text-align: center;
+  }
+  .speaker-description {
+    flex-basis: 50%;
+  }
+
+  h2 {
+    @extend %Georgia;
+    font-size: 36px;
+    line-height: 1.2;
+    letter-spacing: 0.35px;
+    @include breakpoint(phablet) {
+      font-size: 32px;
+    }
+  }
+
+  .speaker-name {
+    @extend %CircularAir-Bold;
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: 0.373333px;
+    color: $speaker;
+    padding-top: 10px;
+    &::before {
+      content: url(/../themes/custom/dcp/images/quote.svg);
+      display: block;
+      margin: 20px 0 5px 0;
+      @include breakpoint(phablet) {
+        margin-top: 15px;
+      }
+    }
+    @include breakpoint(phablet) {
+      font-size: 26px;
+    }
+  }
+
+  .speaker-designation {
+    @extend %CircularAir-Book;
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: 0.46px;
+    color: $form-select;
+    padding: 15px 0 18px 0;
+    @include breakpoint(phablet) {
+      font-size: 18px;
+      letter-spacing: 0.32px;
+      padding: 15px 0 20px 0;
+    }
+  }
+
+  .field.field--name-body {
+    padding-top: 305px;
+    @include breakpoint(laptop) {
+      padding-top: 50px;
+    }
+    @include breakpoint(phablet) {
+      padding-top: 25px;
+    }
+  }
+
+  .speaker-profile-desktop {
+    flex-basis: 50%;
+    img {
+      width: 90%;
+      height: auto;
+      margin-top: -102px;
+      margin-left: -60px;
+      object-fit: contain;
+      position: relative;
+      @include breakpoint(laptop) {
+        margin-left: -50px;
+      }
+    }
+    @include breakpoint(tablet) {
+      display: none;
+    }
+  }
+  .speaker-profile-mobile {
+    display: none;
+    text-align: center;
+    img {
+      width: 260px;
+      height: auto;
+      object-fit: contain;
+    }
+    @include breakpoint(tablet) {
+      display: block;
+    }
+  }
+}

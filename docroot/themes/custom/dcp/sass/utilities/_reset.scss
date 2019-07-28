@@ -36,7 +36,6 @@ s,
 samp,
 small,
 strike,
-strong,
 sub,
 sup,
 tt,
@@ -110,6 +109,7 @@ section {
 
 body {
     line-height: 1;
+    color: #2D2D2D;
 }
 
 ol,
@@ -138,3 +138,13 @@ table {
 * {
     box-sizing: border-box;
 }
+
+p {
+    margin: 0 0 1rem 0;
+    @extend %CircularAir-Book;
+    &.bold {
+        @extend %CircularAir-Bold;
+    }
+}
+
+
