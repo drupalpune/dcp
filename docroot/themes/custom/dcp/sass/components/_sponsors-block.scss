@@ -1,5 +1,4 @@
 .sponsors-content-wrapper {
-  @include container(1280px, 60px, 50px, 15px);
   display: flex;
   padding-bottom: 115px;
   @include breakpoint(laptop) {
@@ -76,18 +75,18 @@
     .btn {
       @include button();
     }
-
   }
 }
 
 .view-sponsors {
   &.view-display-id-block_1 {
     position: relative;
+    @include container(1280px, 60px, 50px, 15px);
     &::before {
       content: "";
       position: absolute;
-      left: 60px;
-      top: -330px;
+      left: 0;
+      bottom: 0;
       background: url(/../themes/custom/dcp/images/design2.svg) no-repeat;
       background-size: 80%;
       width: 70%;

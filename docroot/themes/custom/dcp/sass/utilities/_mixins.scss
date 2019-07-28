@@ -82,22 +82,14 @@
   }
 }
 
-//@mixin grid-two() {
-//  display: grid;
-//  grid-template-columns: 48% 48%;
-//  grid-column-gap: 4%;
-//  display: -ms-grid;
-//  -ms-grid-columns: 48% 48%;
-//}
-
 @mixin block-cta() {
   padding-bottom: 5px;
-  border-bottom: 2px solid #FF2370;
+  border-bottom: 2px solid $link-red;
   line-height: 18px;
   text-decoration: none;
   text-transform: uppercase;
   font-size: 14px;
-  color: #FF2370;
+  color: $link-red;
 }
 
 @mixin button() {

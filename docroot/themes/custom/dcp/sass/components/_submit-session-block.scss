@@ -53,7 +53,7 @@
       font-size: 38px;
       line-height: 1.15;
       letter-spacing: 0.44px;
-      color: #FF2370;
+      color: $link-red;
       @include breakpoint(laptop) {
         font-size: 30px;
         line-height: 1.3;
