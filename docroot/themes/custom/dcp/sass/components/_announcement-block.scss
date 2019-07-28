@@ -1,0 +1,86 @@
+.block-views-blockannouncements-block-1 {
+  @include container(1280px, 60px, 50px, 15px);
+  padding-top: 30px;
+  @include breakpoint(laptop) {
+    text-align: center;
+    padding-bottom: 72px;
+  }
+
+  h2 {
+    @extend %Georgia;
+    font-size: 36px;
+    line-height: 1.8;
+    letter-spacing: 0.3px;
+    color: $label;
+    padding-bottom: 82px;
+    @include breakpoint(laptop) {
+      padding-bottom: 18px;
+    }
+  }
+}
+
+.view-announcements {
+  .view-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-bottom: 56px;
+    @include breakpoint(phablet) {
+      display: block;
+      padding-bottom: 25px;
+    }
+
+    .views-row {
+      flex-basis: 45%;
+    }
+
+    .views-field-title {
+      a {
+        @extend %CircularAir-Bold;
+        display: inline-block;
+        text-decoration: none;
+        font-size: 24px;
+        line-height: 2.83;
+        letter-spacing: 0.21px;
+        color: $label;
+        &::after {
+          margin-left: 10px;
+          content: url(/../themes/custom/dcp/images/Arrow-black.svg);
+        }
+        &:hover {
+          color: $speaker;
+          &::after {
+            content: url(/../themes/custom/dcp/images/Arrow-blue.svg);
+          }
+        }
+        @include breakpoint(laptop) {
+          line-height: 1.5;
+        }
+      }
+    }
+
+    .views-field.views-field-body {
+      margin: 34px 0 50px 0;
+      @include breakpoint(laptop) {
+        margin: 25px 0 35px 0;
+      }
+      .field-content,
+      p {
+        @extend %CircularAir-Book;
+        font-size: 16px;
+        line-height: 1.56;
+        letter-spacing: 0.39px;
+        color: $label;
+      }
+    }
+
+  }
+
+  .more-link {
+    text-align: center;
+    a {
+      @include block-cta();
+      letter-spacing: 0.875px;
+    }
+  }
+}
