@@ -90,13 +90,6 @@
   background: $medred;
 }
 
-.region-header {
-  @include container($container-width, 0px);
-  @include breakpoint(phablet) {
-    width: 100%;
-  }
-}
-
 #header-bottom {
   background: #f5f9fe;
 }
@@ -111,59 +104,6 @@
   position: absolute;
   left: 13px;
   border-radius: 7px;
-}
-
-.region-header nav ul {
-  margin: 0px;
-  display: flex;
-  justify-content: center;
-  @include breakpoint(tablet) {
-    justify-content: space-around;
-  }
-  li {
-    display: inline-block;
-    margin: 0 20px 0 20px;
-    display: flex;
-    @include breakpoint (tablet) {
-      margin: 0 2px 0 2px;
-    }
-    .login-register {
-      width: 70px;
-    }
-    a {
-      display: flex;
-      align-items: center;
-      color: $blue;
-      text-decoration: none;
-      font-size: 18px;
-      text-transform: uppercase;
-      font-family: $title-font;
-      padding: 5px 10px;
-      &.is-active {
-        border-bottom: 4px solid #ff5252;
-        color: $medred;
-      }
-      &.logopath {
-        padding: 0px 0px;
-      }
-      img {
-        position: relative;
-        top: 35px;
-        z-index: 1;
-      }
-    }
-    a:hover {
-      color: #ff5252;
-    }
-  }
-}
-
-.region-header nav .sub-nav li {
-  margin: 0px;
-  text-align: center;
-  justify-content: center;
-  border-bottom: 1px solid #ececec;
-  padding: 5px 0px;
 }
 
 ul.menu.sub-nav {
@@ -203,8 +143,7 @@ div.responsive-menu-toggle {
   margin: 10px;
   height: 40px;
   background-color: #fff;
-  display: flex; // justify-content: space-between;
-  // align-items: center;
+  display: flex;
 }
 
 @media screen and (max-width:959px) {

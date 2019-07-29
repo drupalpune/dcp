@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * Theme override to display a region.
+ *
+ * Available variables:
+ * - content: The content for this region, typically blocks.
+ * - attributes: HTML attributes for the region <div>.
+ * - region: The name of the region variable as defined in the theme's
+ *   .info.yml file.
+ *
+ * @see template_preprocess_region()
+ */
+#}
+{%
+  set classes = [
+  'region',
+  'region-' ~ region|clean_class,
+]
+%}
+{% set mobileHeaderContent = elements|without('dcp_branding', '#children', '#sorted', '#theme_wrappers', '#region', '#render_children') %}
+{% if content %}
+  <div{{ attributes.addClass(classes) }}>
+    {{ content }}
+    <div class="mobile-menu trigger-icon"></div>
+    <div class="navigation-mobile">
+      <div class="main-menu-container">
+        <div class="mobile-header-section">
+          {{ elements['dcp_branding'] }}
+          <div class="mobile-menu cross-icon"></div>
+        </div>
+        <div class="mobile-header-content">
+          {% for singleElement in mobileHeaderContent %}
+            {{ singleElement }}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
