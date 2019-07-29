@@ -20,7 +20,7 @@
     }
     &.menu--main {
       a {
-        font-family: Circular Air;
+        @extend %CircularAir-Bold;
         font-size: 12px;
         padding-bottom: 11px;
         line-height: 15px;
@@ -51,7 +51,8 @@
       ul > li {
         width: 124px;
       }
-      a{ font-family: Circular Air;
+      a{
+        @extend %CircularAir-Bold;
         font-size: 12px;
         line-height: 15px;
         padding-bottom: 11px;
@@ -82,9 +83,9 @@
       }
       li {
         >a {
+          @extend %CircularAir-Bold;
           padding: 11px 21px 11px 12px;
           letter-spacing: 1px;
-          font-family: Circular Air;
           font-size: 12px;
           line-height: 10px;
           text-decoration: none;
@@ -106,9 +107,9 @@
   #block-logintext {
     padding-left: 50px;
     a {
+      @extend %CircularAir-Bold;
       background: #FF2370;
       border-radius: 23.5px;
-      font-family: Circular Air;
       font-size: 12px;
       line-height: 15px;
       padding:10px 30px 10px 30px;
@@ -184,7 +185,7 @@
           }
         }
         a {
-          font-family: Circular Air;
+          @extend %CircularAir-Bold;
           font-size: 18px;
           line-height: 19px;
           letter-spacing: 0.315px;
@@ -220,7 +221,8 @@
             }
           }
         }
-        a{ font-family: Circular Air;
+        a{
+          @extend %CircularAir-Bold;
           font-size: 18px;
           line-height: 19px;
           letter-spacing: 0.315px;

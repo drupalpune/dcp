@@ -9,7 +9,7 @@
     padding-right: 60px;
     flex: 1;
     h2 {
-      font-family: Circular Air;
+      @extend %CircularAir-Bold;
       font-size: 18px;
       line-height: 26px;
       letter-spacing: 0.218077px;
@@ -18,8 +18,8 @@
     li {
       padding-bottom: 20px;
       a{
+        @extend %CircularAir-Bold;
         color: white;
-        font-family: Circular Air;
         text-decoration: none;
         font-weight: 200;
       }
@@ -35,7 +35,7 @@
   .block-social-media-links-block {
     padding-right: 60px;
     h2 {
-      font-family: Circular Air;
+      @extend %CircularAir-Bold;
       font-size: 18px;
       line-height: 26px;
       letter-spacing: 0.218077px;
