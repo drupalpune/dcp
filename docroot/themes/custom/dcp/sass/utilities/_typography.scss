@@ -1,0 +1,36 @@
+@font-face {
+  font-family: 'circular-air-bold';
+  src: url('/themes/custom/dcp/fonts/Circular-Air-Bold.woff') format('woff'),
+       url('/themes/custom/dcp/fonts/Circular-Air-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'circular-air-book';
+  src: url('/themes/custom/dcp/fonts/Circular-Air-Book.woff') format('woff'),
+  url('/themes/custom/dcp/fonts/Circular-Air-Book.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'georgia';
+  src: url('/themes/custom/dcp/fonts/Georgia-Bold.woff') format('woff'),
+       url('/themes/custom/dcp/fonts/Georgia-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'eloquent-regular';
+  src: url('/themes/custom/dcp/fonts/EloquentJFRegularPro.woff') format('woff'),
+       url('/themes/custom/dcp/fonts/EloquentJFRegularPro.woff2') format('woff2')
+}
+
+%CircularAir-Bold {
+  font-family: "circular-air-bold", Helvetica, Arial;
+}
+
+%CircularAir-Book {
+  font-family: "circular-air-book", Helvetica, Arial;
+}
+
+%Georgia {
+  font-family: "georgia", Helvetica, Arial;
+}
+
+%Eloquent-Regular {
+  font-family: "eloquent-regular", Helvetica, Arial;
+}
