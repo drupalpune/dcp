@@ -19,7 +19,7 @@ settings:
   id: 'block_content:b6f1282e-77cd-45d4-9782-a8f25e81ee59'
   label: 'Proposed Session'
   provider: block_content
-  label_display: visible
+  label_display: '0'
   status: true
   info: ''
   view_mode: full

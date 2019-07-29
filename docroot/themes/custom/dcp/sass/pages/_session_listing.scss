@@ -4,14 +4,6 @@
 \*------------------------------------*/
 
 .session-listing {
-  @include breakpoint(laptop) {
-    padding: {
-      right: 1rem;
-      left: 1rem;
-    }
-  }
-  max-width: $container-width;
-  margin: auto;
   margin-top: 5rem;
 }
 .view-content__group {
@@ -19,15 +11,30 @@
   padding-bottom: 4rem;
   border-bottom: 1px solid $color--border;
   > .group-heading {
-    margin-bottom: 2.75rem;
+    @include breakpoint(laptop) {
+      padding: {
+        right: 1rem;
+        left: 1rem;
+      }
+    }
+    max-width: $container-width;
+    margin: 0 auto 2.75rem auto;
     font: {
       family: $title-font;
       size: 1.5rem;
       weight: 700;
-    };
+    }
     line-height: 1;
   }
   > .group-content {
+    @include breakpoint(laptop) {
+      padding: {
+        right: 1rem;
+        left: 1rem;
+      }
+    }
+    max-width: $container-width;
+    margin: auto;
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
@@ -39,11 +46,12 @@
       @include breakpoint(phablet) {
         margin-right: 0;
       }
+      position: relative;
       flex: 0 0 22.5rem;
       margin: {
         right: 2.5rem;
         bottom: 2.5rem;
-      };
+      }
       padding: 1.25rem;
       transition: box-shadow $transition-time ease-in-out;
       border: 1px solid transparent;
@@ -70,7 +78,7 @@
       family: $title-font;
       size: 1.125rem;
       weight: 700;
-    };
+    }
     line-height: 1.8rem;
     a {
       text-decoration: none;
@@ -84,5 +92,31 @@
   }
   .views-field-field-drupal-org-username {
     margin-bottom: 1rem;
+  }
+}
+.session-cat {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 6px;
+  height: 101%;
+  background: $black;
+  &.session-cat__backend {
+    background: $color--cat-backend;
+  }
+  &.session-cat__frontend {
+    background: $color--cat-frontend;
+  }
+  &.session-cat__qa {
+    background: $color--cat-qa;
+  }
+  &.session-cat__business {
+    background: $color--cat-business;
+  }
+  &.session-cat__community {
+    background: $color--cat-community;
+  }
+  &.session-cat__beyond {
+    background: $color--cat-beyond;
   }
 }

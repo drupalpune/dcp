@@ -5,8 +5,8 @@
 
 // Fonts
 $standard-font: sans-serif;
-$body-font: 'Ubuntu', sans-serif;
-$title-font: 'Roboto', sans-serif;
+$body-font: "Ubuntu", sans-serif;
+$title-font: "Roboto", sans-serif;
 
 // Font Weights
 $light: 400;
@@ -17,15 +17,15 @@ $bold: 700;
 $grey: #92969e;
 $blue: #1975d2;
 $black: #131313;
-$light-grey: #D8D8D8;
+$light-grey: #d8d8d8;
 $dark-grey: #0f374a;
-$form-select: #9FA0AE;
+$form-select: #9fa0ae;
 $white: #fff;
 $border: #cecece;
-$label: #2D2D2D;
+$label: #2d2d2d;
 $form-text: #5e6675;
 $session-title: #313131;
-$speaker: #316CF4;
+$speaker: #316cf4;
 
 // Background Colors
 $medblue: #f7f9fb;
@@ -33,15 +33,22 @@ $lightblue: #f5f9fe;
 
 // Button Colors
 $medred: #fd1f58;
-$btn-color: #FF0074;
-$link-red: #FF2370;
+$btn-color: #ff0074;
+$link-red: #ff2370;
 
 // Layouts width
 $container-width: 1280px;
 
 // Border colors
-$color--border: #DADBEC;
+$color--border: #dadbec;
 
 // Transition time.
 $transition-time: 0.25s;
 
+// Category colors.
+$color--cat-backend: #96cdff;
+$color--cat-frontend: #82ecac;
+$color--cat-qa: #fabd85;
+$color--cat-business: #f7a2b6;
+$color--cat-community: #b79efd;
+$color--cat-beyond: #316cf4;

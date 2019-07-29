@@ -32,24 +32,20 @@
     'block-' ~ plugin_id|clean_class,
   ]
 %}
-<div{{ attributes.addClass(classes) }}>
+<div{{attributes.addClass(classes)}}>
+  <div class="header-main-wrapper" style="background: url({{ file_url(content.field_banner_image.0['#item'].entity.uri.value) }}) no-repeat center center; background-size:cover;">
+    <div class="header-content">
+      {{ title_prefix }}
+      {% if label %}
+        <h2{{title_attributes}}>{{ label }}</h2>
+      {% endif %}
+      {{ title_suffix }}
 
-
-
-  <div class="header-main-wrapper" style = "background: url({{ file_url(content.field_banner_image.0['#item'].entity.uri.value) }}) no-repeat center center; background-size:cover;">
-  <div class="header-content">
-  {{ title_prefix }}
-  {% if label %}
-    <h2{{ title_attributes }}>{{ label }}</h2>
-  {% endif %}
-  {{ title_suffix }}
-
-  {% block content %}
-    {{ content.field_banner_title }}
-    {{ content.body }}
-    {{ content.field_banner_link }}
-  {% endblock %}
+      {% block content %}
+        <h1 class="page-title">{{ content.field_banner_title }}</h1>
+        {{ content.body }}
+        {{ content.field_banner_link }}
+      {% endblock %}
+    </div>
+    <div class="border-design"></div>
   </div>
-  <div class="border-design">
-  </div>
-</div>
