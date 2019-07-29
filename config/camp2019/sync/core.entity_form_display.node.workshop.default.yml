@@ -11,7 +11,6 @@ dependencies:
     - field.field.node.workshop.field_session_category
     - node.type.workshop
   module:
-    - path
     - text
 id: node.workshop.default
 targetEntityType: node
@@ -20,21 +19,15 @@ mode: default
 content:
   body:
     type: text_textarea_with_summary
-    weight: 121
+    weight: 3
     settings:
       rows: 9
       summary_rows: 3
       placeholder: ''
     third_party_settings: {  }
     region: content
-  created:
-    type: datetime_timestamp
-    weight: 10
-    region: content
-    settings: {  }
-    third_party_settings: {  }
   field_drupal_org_username:
-    weight: 123
+    weight: 4
     settings:
       size: 60
       placeholder: ''
@@ -42,28 +35,21 @@ content:
     type: string_textfield
     region: content
   field_experience_level:
-    weight: 125
+    weight: 5
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
   field_prerequisites_for_workshop:
-    weight: 124
+    weight: 2
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
-    region: content
-  field_selected:
-    weight: 126
-    settings:
-      display_label: true
-    third_party_settings: {  }
-    type: boolean_checkbox
     region: content
   field_session_category:
-    weight: 122
+    weight: 1
     settings:
       match_operator: CONTAINS
       size: 60
@@ -71,48 +57,19 @@ content:
     third_party_settings: {  }
     type: entity_reference_autocomplete
     region: content
-  path:
-    type: path
-    weight: 30
-    region: content
-    settings: {  }
-    third_party_settings: {  }
-  promote:
-    type: boolean_checkbox
-    settings:
-      display_label: true
-    weight: 15
-    region: content
-    third_party_settings: {  }
-  status:
-    type: boolean_checkbox
-    settings:
-      display_label: true
-    weight: 120
-    region: content
-    third_party_settings: {  }
-  sticky:
-    type: boolean_checkbox
-    settings:
-      display_label: true
-    weight: 16
-    region: content
-    third_party_settings: {  }
   title:
     type: string_textfield
-    weight: -5
+    weight: 0
     region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
-  uid:
-    type: entity_reference_autocomplete
-    weight: 5
-    settings:
-      match_operator: CONTAINS
-      size: 60
-      placeholder: ''
-    region: content
-    third_party_settings: {  }
-hidden: {  }
+hidden:
+  created: true
+  field_selected: true
+  path: true
+  promote: true
+  status: true
+  sticky: true
+  uid: true

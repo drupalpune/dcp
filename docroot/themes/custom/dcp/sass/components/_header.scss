@@ -1,0 +1,270 @@
+.region-header {
+  display: flex;
+  background: white;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  min-height: 97px;
+  padding: 18px 51px 16px 60px;
+  align-items: center;
+  justify-content: center;
+  .block-system-branding-block {
+    width: 118px;
+    height: 63px;
+    @include breakpoint(tablet) {
+      width: 88px;
+      height: 47px;
+    }
+  }
+  > nav[role="navigation"] {
+    h2 {
+      display: none;
+    }
+    &.menu--main {
+      a {
+        @extend %CircularAir-Bold;
+        font-size: 12px;
+        padding-bottom: 11px;
+        line-height: 15px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #313131;
+        text-decoration: none;
+        &.is-active {
+          color: #316CF4;
+        }
+      }
+      >.menu {
+        display: flex;
+        >.menu-item{
+          margin-right: 35px;
+          @include breakpoint(laptop) {
+            margin-right: 20px;
+          }
+        }
+      }
+      @include breakpoint(tablet) {
+        display: none;
+      }
+    }
+    &.menu--account {
+      min-width: 124px;
+      text-align: right;
+      ul > li {
+        width: 124px;
+      }
+      a{
+        @extend %CircularAir-Bold;
+        font-size: 12px;
+        line-height: 15px;
+        padding-bottom: 11px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: #313131;
+      }
+      @include breakpoint(tablet) {
+        display: none;
+      }
+    }
+    .menu-item--expanded {
+      position: relative;
+      display: inline-block;
+      .menu {
+        width: calc(100% - 10px);
+        right: 0;
+        display: none;
+        text-align: left;
+        cursor: pointer;
+        position: absolute;
+        z-index: 1;
+        background: white;
+        margin-top: 11px;
+        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
+        border-radius: 2px;
+      }
+      li {
+        >a {
+          @extend %CircularAir-Bold;
+          padding: 11px 21px 11px 12px;
+          letter-spacing: 1px;
+          font-size: 12px;
+          line-height: 10px;
+          text-decoration: none;
+          color: #313131;
+          display: block;
+        }
+      }
+    }
+    .menu-item--expanded:hover .menu {
+      display: block;
+    }
+  }
+  .block-system-branding-block {
+    margin: 0 auto 0 0;
+  }
+  img {
+    width: 100%;
+  }
+  #block-logintext {
+    padding-left: 50px;
+    a {
+      @extend %CircularAir-Bold;
+      background: #FF2370;
+      border-radius: 23.5px;
+      font-size: 12px;
+      line-height: 15px;
+      padding:10px 30px 10px 30px;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      text-decoration: none;
+    }
+    @include breakpoint(tablet) {
+      display: none;
+    }
+  }
+
+  .mobile-menu {
+    display: none;
+    &.trigger-icon {
+      background: url("../images/hamburger.png") center center no-repeat;
+      background-size: contain;
+    }
+    &.cross-icon {
+      background: url("../images/cross.png") center center no-repeat;
+      background-size: contain;
+    }
+    &[class*="-icon"] {
+      height: 18px;
+      width: 25px;
+      cursor: pointer;
+    }
+    &.header-icon {
+      background: url("../logo.png") center center no-repeat;
+      background-size: contain;
+
+    }
+    @include breakpoint(tablet) {
+      display: block;
+    }
+  }
+
+  .navigation-mobile {
+    position: fixed;
+    display: none;
+    z-index: 9999;
+    width: 100%;
+    height: 100vh;
+    background: rgba(255,255,255,.8);
+    right: 0;
+    top: 0;
+    text-align: right;
+    nav[role="navigation"] {
+      h2 {
+        display: none;
+      }
+      &.menu--main {
+        display: block;
+      }
+      &.menu--account {
+        display: block;
+      }
+      &.menu--main > .menu {
+        flex-direction: column;
+        padding-left: 80px;
+        text-align: left;
+        > .menu-item {
+          padding-bottom: 44px;
+          &.menu-item--expanded {
+            .menu{
+              padding-top: 20px;
+              padding-right: 20px;
+            }
+          }
+        }
+        a {
+          @extend %CircularAir-Bold;
+          font-size: 18px;
+          line-height: 19px;
+          letter-spacing: 0.315px;
+          color: #9FA0AE;
+          text-decoration: none;
+          &.is-active {
+            font-size: 36px;
+            color: #316CF4;
+          }
+        }
+      }
+      &.menu--account {
+        display: block;
+        .menu {
+          .menu-item {
+            padding-bottom: 10px;
+            &:last-child {
+              padding-bottom: 0;
+            }
+          }
+        }
+        > .menu {
+          flex-direction: column;
+          padding-left: 80px;
+          text-align: left;
+          > .menu-item {
+            padding-bottom: 44px;
+            &.menu-item--expanded {
+              .menu{
+                padding-top: 20px;
+                padding-right: 20px;
+              }
+            }
+          }
+        }
+        a{
+          @extend %CircularAir-Bold;
+          font-size: 18px;
+          line-height: 19px;
+          letter-spacing: 0.315px;
+          color: #9FA0AE;
+          text-decoration: none;
+        }
+
+      }
+    }
+    .main-menu-container {
+      width: 100%;
+      height: 100vh;
+      padding: 20px 17px 80px 16px;
+      float: right;
+      background: white;
+      position: relative;
+      overflow: auto;
+      box-sizing: border-box;
+    }
+    .mobile-header-content {
+      text-align: left;
+    }
+    .mobile-header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 80px;
+      .block-system-branding-block {
+        width: 88px;
+        height: 47px;
+      }
+    }
+    #block-logintext {
+      display: inline-block;
+      padding-left: 80px;
+      a{
+        font-size: 16px;
+        line-height: 20px;
+      }
+    }
+  }
+  @include breakpoint(laptop) {
+    padding: 6px 21px 16px 16px;
+  }
+}

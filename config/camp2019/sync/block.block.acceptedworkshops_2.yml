@@ -1,0 +1,31 @@
+uuid: e51046d0-3ac2-4efb-aa03-d5317f0b7a55
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:header_banner:768f5918-f756-4f74-857a-28ec7f3509aa'
+  module:
+    - block_content
+    - system
+  theme:
+    - dcp
+id: acceptedworkshops_2
+theme: dcp
+region: content
+weight: -9
+provider: null
+plugin: 'block_content:768f5918-f756-4f74-857a-28ec7f3509aa'
+settings:
+  id: 'block_content:768f5918-f756-4f74-857a-28ec7f3509aa'
+  label: 'Accepted Workshops'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /accepted-workshops
+    negate: false
+    context_mapping: {  }

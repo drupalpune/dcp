@@ -2,17 +2,14 @@ uuid: c70b9516-a066-4ac1-a95d-0359044cf060
 langcode: en
 status: true
 dependencies:
-  content:
-    - 'block_content:header_banner:067452fe-f171-4b8c-ba72-bdad045a4ea0'
   module:
-    - block_content
     - system
   theme:
     - dcp
 id: submitaworkshop
 theme: dcp
 region: content
-weight: 0
+weight: 4
 provider: null
 plugin: 'block_content:067452fe-f171-4b8c-ba72-bdad045a4ea0'
 settings:

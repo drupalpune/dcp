@@ -2,17 +2,14 @@ uuid: 5f7acf0f-ccc0-4953-807d-874a05071aa0
 langcode: en
 status: true
 dependencies:
-  content:
-    - 'block_content:header_banner:e8bd5849-bb44-4e33-ba2b-c441b43e9fca'
   module:
-    - block_content
     - system
   theme:
     - dcp
 id: acceptedsessions
 theme: dcp
 region: content
-weight: -6
+weight: -2
 provider: null
 plugin: 'block_content:e8bd5849-bb44-4e33-ba2b-c441b43e9fca'
 settings:

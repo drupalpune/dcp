@@ -1,0 +1,31 @@
+uuid: 7e06844e-eb24-49c3-b3a4-acc24874ced8
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:header_banner:47ff101f-7c21-41dc-9da6-c1dfdaedc435'
+  module:
+    - block_content
+    - system
+  theme:
+    - dcp
+id: submitasession_2
+theme: dcp
+region: content
+weight: -6
+provider: null
+plugin: 'block_content:47ff101f-7c21-41dc-9da6-c1dfdaedc435'
+settings:
+  id: 'block_content:47ff101f-7c21-41dc-9da6-c1dfdaedc435'
+  label: 'Submit a session'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /submit-session
+    negate: false
+    context_mapping: {  }

@@ -10,7 +10,8 @@
   }
 }
 
-.node-session-form {
+.node-session-form,
+.node-workshop-form {
   width: 60%;
   padding: 20px 40px;
   border-radius: 10px;
@@ -26,22 +27,22 @@
 
   .js-form-type-select {
     select {
-    position: relative;
-    appearance: none;
-    background: url("/themes/custom/dcp/images/arrow.svg") no-repeat center center;
-    background-position: 98% center;
-    opacity: 1;
-    border-radius: 0;
-    font-size: 16px;
-    letter-spacing: .44px;
-    padding: 0;
-    color: $form-select;
-    margin: 5px 0 0 0;
-    padding: 12px 0px 12px 0px;
-    line-height: normal;
-    width: 100%;
+      position: relative;
+      appearance: none;
+      background: url("/themes/custom/dcp/images/arrow.svg") no-repeat center center;
+      background-position: 98% center;
+      opacity: 1;
+      border-radius: 0;
+      font-size: 16px;
+      letter-spacing: .44px;
+      padding: 0;
+      color: $form-select;
+      margin: 5px 0 0 0;
+      padding: 12px 0px 12px 0px;
+      line-height: normal;
+      width: 100%;
+    }
   }
-}
 
   label {
     color: $label;
@@ -116,5 +117,13 @@
 
   #edit-body-0-format {
     display: none;
+  }
+
+  .js-form-item {
+    &.form-item {
+      &.js-form-type-vertical-tabs {
+        display: none;
+      }
+    }
   }
 }

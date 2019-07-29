@@ -26,4 +26,23 @@
     }
   };
 
+  Drupal.behaviors.addActiveLink = {
+    attach: function (context, settings) {
+      $( window ).resize(function() {
+        if(window.innerWidth > 992) {
+          $('body').css('overflow', 'auto');
+          $('.navigation-mobile').hide();
+        }
+      });
+      $('.region-header .mobile-menu.trigger-icon').on('click',() => {
+        $('.navigation-mobile').show();
+        $('body').css('overflow', 'hidden');
+      });
+      $('.region-header .mobile-menu.cross-icon').on('click',() => {
+        $('.navigation-mobile').hide();
+        $('body').css('overflow', 'auto');
+      });
+    }
+  };
+
 })(jQuery, Drupal);

@@ -11,7 +11,7 @@ id: user.user.field_role
 field_name: field_role
 entity_type: user
 bundle: user
-label: Role
+label: Designation
 description: ''
 required: false
 translatable: false

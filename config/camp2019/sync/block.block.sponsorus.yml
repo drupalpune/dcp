@@ -2,17 +2,14 @@ uuid: aae587f7-0ee6-4c00-b2de-98790d379e01
 langcode: en
 status: true
 dependencies:
-  content:
-    - 'block_content:header_banner:b039fa9a-3808-458a-9caa-3660c6b1a53c'
   module:
-    - block_content
     - system
   theme:
     - dcp
 id: sponsorus
 theme: dcp
 region: content
-weight: -2
+weight: 2
 provider: null
 plugin: 'block_content:b039fa9a-3808-458a-9caa-3660c6b1a53c'
 settings:

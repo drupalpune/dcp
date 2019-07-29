@@ -1,0 +1,31 @@
+uuid: ed50dfd2-4eab-4bce-a132-de6e9d203a40
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:header_banner:116ca002-5012-439e-8e3f-833e91cbbcf4'
+  module:
+    - block_content
+    - system
+  theme:
+    - dcp
+id: proposedworkshops_2
+theme: dcp
+region: content
+weight: -7
+provider: null
+plugin: 'block_content:116ca002-5012-439e-8e3f-833e91cbbcf4'
+settings:
+  id: 'block_content:116ca002-5012-439e-8e3f-833e91cbbcf4'
+  label: 'Proposed workshops'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /proposed-workshops
+    negate: false
+    context_mapping: {  }

@@ -4,67 +4,113 @@
 \*------------------------------------*/
 
 @mixin banner($banner-width, $banner-height) {
-    img {
-        width: $banner-width;
-        height: $banner-height;
-    }
+  img {
+    width: $banner-width;
+    height: $banner-height;
+  }
 }
 
-@mixin container($container-width, $container-padding) {
-    width: $container-width;
-    margin: 0 auto;
-    padding: $container-padding;
+@mixin container($container-width, $container-desktop-padding: 60px, $container-laptop-padding: 50px, $container-mobile-padding : 15px) {
+  max-width: $container-width;
+  margin: 0 auto;
+  padding-left: $container-desktop-padding;
+  padding-right: $container-desktop-padding;
+  @include breakpoint(laptop) {
+    padding-left: $container-laptop-padding;
+    padding-right: $container-laptop-padding;
+  }
+  @include breakpoint(mobileonly) {
+    padding-left: $container-mobile-padding;
+    padding-right: $container-mobile-padding;
+  }
 }
 
 @mixin heading($fontcolor, $fontsize) {
-    font: {
-        family: $title-font;
-        size: $fontsize;
-        weight: 700;
-    }
-    text: {
-        align: center;
-        transform: uppercase;
-    }
-    padding: 50px 0px;
-    color: $fontcolor;
+  font: {
+    family: $title-font;
+    size: $fontsize;
+    weight: 700;
+  }
+
+  text: {
+    align: center;
+    transform: uppercase;
+  }
+
+  padding: 50px 0px;
+  color: $fontcolor;
 }
 
 @mixin abutton($background-color) {
-    display: inline-block;
-    padding: 20px 50px;
-    text-decoration: none;
-    border-radius: 5px;
-    background-color: $background-color;
+  display: inline-block;
+  padding: 20px 50px;
+  text-decoration: none;
+  border-radius: 5px;
+  background-color: $background-color;
 }
 
 //Media Quaries Mixin
 @mixin breakpoint($point) {
-    @if $point==desktop {
-        @media screen and (max-width: 1440px) {
-            @content ;
-        }
+  @if $point==desktop {
+    @media screen and (max-width: 1440px) {
+      @content ;
     }
-    @else if $point==laptop {
-        @media screen and (max-width: 1200px) {
-            @content ;
-        }
+  }
+
+  @else if $point==laptop {
+    @media screen and (max-width: 1200px) {
+      @content ;
     }
-    @else if $point==tablet {
-        @media screen and (max-width: 992px) {
-            @content ;
-        }
+  }
+
+  @else if $point==tablet {
+    @media screen and (max-width: 992px) {
+      @content ;
     }
-    @else if $point==phablet {
-        @media screen and (max-width: 768px) {
-            @content ;
-        }
+  }
+
+  @else if $point==phablet {
+    @media screen and (max-width: 768px) {
+      @content ;
     }
-    @else if $point==mobileonly {
-        @media screen and (max-width: 480px) {
-            @content ;
-        }
+  }
+
+  @else if $point==mobileonly {
+    @media screen and (max-width: 480px) {
+      @content ;
     }
+  }
+}
+
+@mixin block-cta() {
+  padding-bottom: 5px;
+  border-bottom: 2px solid $link-red;
+  line-height: 18px;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: $link-red;
+}
+
+@mixin button() {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #FF0074;
+  border-radius: 22px;
+  color: white;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+@mixin title() {
+  font-family: Georgia;
+  font-size: 36px;
+  line-height: 68px;
+  letter-spacing: 0.315px;
+  color: #2D2D2D;
+  @include breakpoint(phablet) {
+    font-size: 32px;
+  }
 }
 // Button mixin
 @mixin button() {
