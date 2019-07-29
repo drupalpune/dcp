@@ -10,7 +10,7 @@ id: user.user.field_organization
 field_name: field_organization
 entity_type: user
 bundle: user
-label: Organization
+label: Organization/College
 description: ''
 required: false
 translatable: false

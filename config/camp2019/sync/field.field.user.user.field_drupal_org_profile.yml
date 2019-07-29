@@ -1,0 +1,20 @@
+uuid: 78f75b32-e00d-4559-8b1d-19479598863c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_drupal_org_profile
+  module:
+    - user
+id: user.user.field_drupal_org_profile
+field_name: field_drupal_org_profile
+entity_type: user
+bundle: user
+label: 'Drupal.org profile'
+description: "Example: http://www.drupal.org/u/dries\r\n<p>This must be an external URL such as http://example.com</p>"
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string
