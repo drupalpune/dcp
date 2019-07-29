@@ -3,6 +3,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.user.user.field_drupal_org_profile
     - field.field.user.user.field_full_name
     - field.field.user.user.field_organization
     - field.field.user.user.field_role
@@ -23,6 +24,14 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_drupal_org_profile:
+    weight: 5
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
   field_full_name:
     weight: 0
     settings:
