@@ -1,22 +1,25 @@
-uuid: c70b9516-a066-4ac1-a95d-0359044cf060
+uuid: f3a3d608-f837-427d-97ea-e87260e2de6e
 langcode: en
 status: true
 dependencies:
+  content:
+    - 'block_content:header_banner:3cfe5f7a-9f97-4757-8cac-46899acb02df'
   module:
+    - block_content
     - system
   theme:
     - dcp
-id: submitaworkshop
+id: submitaworkshop_2
 theme: dcp
 region: content
-weight: 4
+weight: -4
 provider: null
-plugin: 'block_content:067452fe-f171-4b8c-ba72-bdad045a4ea0'
+plugin: 'block_content:3cfe5f7a-9f97-4757-8cac-46899acb02df'
 settings:
-  id: 'block_content:067452fe-f171-4b8c-ba72-bdad045a4ea0'
+  id: 'block_content:3cfe5f7a-9f97-4757-8cac-46899acb02df'
   label: 'Submit a workshop'
   provider: block_content
-  label_display: '0'
+  label_display: visible
   status: true
   info: ''
   view_mode: full

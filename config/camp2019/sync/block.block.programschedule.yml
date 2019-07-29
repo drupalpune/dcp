@@ -2,17 +2,14 @@ uuid: 1e7c9232-ed77-4c80-b6e4-9d66af0883c9
 langcode: en
 status: true
 dependencies:
-  content:
-    - 'block_content:header_banner:5ea81788-fe50-43cf-a593-540273767b9b'
   module:
-    - block_content
     - system
   theme:
     - dcp
 id: programschedule
 theme: dcp
 region: content
-weight: -4
+weight: 0
 provider: null
 plugin: 'block_content:5ea81788-fe50-43cf-a593-540273767b9b'
 settings:

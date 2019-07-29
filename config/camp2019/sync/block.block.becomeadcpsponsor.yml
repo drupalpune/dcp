@@ -1,0 +1,31 @@
+uuid: 5863aed5-fc95-450d-b187-c722ac0af51d
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:header_banner:46bc100f-6c8a-4a4c-91a7-9cb9bf0b7d47'
+  module:
+    - block_content
+    - system
+  theme:
+    - dcp
+id: becomeadcpsponsor
+theme: dcp
+region: content
+weight: -5
+provider: null
+plugin: 'block_content:46bc100f-6c8a-4a4c-91a7-9cb9bf0b7d47'
+settings:
+  id: 'block_content:46bc100f-6c8a-4a4c-91a7-9cb9bf0b7d47'
+  label: 'Become a DCP Sponsor'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /become-a-sponsor
+    negate: false
+    context_mapping: {  }

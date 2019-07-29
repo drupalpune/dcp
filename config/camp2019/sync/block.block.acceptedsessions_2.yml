@@ -1,0 +1,31 @@
+uuid: 899acc2b-e5b1-44f2-88c0-5fa5a7940c29
+langcode: en
+status: true
+dependencies:
+  content:
+    - 'block_content:header_banner:1fd54ad1-3c9d-4a63-8cf0-4064c3b9a6b9'
+  module:
+    - block_content
+    - system
+  theme:
+    - dcp
+id: acceptedsessions_2
+theme: dcp
+region: content
+weight: -10
+provider: null
+plugin: 'block_content:1fd54ad1-3c9d-4a63-8cf0-4064c3b9a6b9'
+settings:
+  id: 'block_content:1fd54ad1-3c9d-4a63-8cf0-4064c3b9a6b9'
+  label: 'Accepted Sessions'
+  provider: block_content
+  label_display: visible
+  status: true
+  info: ''
+  view_mode: full
+visibility:
+  request_path:
+    id: request_path
+    pages: /accepted-sessions
+    negate: false
+    context_mapping: {  }

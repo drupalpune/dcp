@@ -12,7 +12,7 @@ dependencies:
 id: venuinformationblock
 theme: dcp
 region: content
-weight: 3
+weight: 7
 provider: null
 plugin: 'block_content:dd04d95a-9107-4c23-916b-78b12d0592a8'
 settings:
