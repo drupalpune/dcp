@@ -12,7 +12,7 @@ dependencies:
 id: programschedule_2
 theme: dcp
 region: content
-weight: -2
+weight: -4
 provider: null
 plugin: 'block_content:2eb40c43-8e9a-42cb-ad9b-8bb12fb94d7e'
 settings:

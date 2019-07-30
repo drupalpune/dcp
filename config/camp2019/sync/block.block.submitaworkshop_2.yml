@@ -12,7 +12,7 @@ dependencies:
 id: submitaworkshop_2
 theme: dcp
 region: content
-weight: 0
+weight: -2
 provider: null
 plugin: 'block_content:3cfe5f7a-9f97-4757-8cac-46899acb02df'
 settings:

@@ -1,23 +1,23 @@
-uuid: 71d91dd6-3eae-4f23-afa8-630b553d1902
+uuid: 7c7c4a75-62bb-4a2d-ba1f-35a8c5bbc292
 langcode: en
 status: true
 dependencies:
   content:
-    - 'block_content:information_banner:2f112f6e-4c23-4267-8a09-548533374650'
+    - 'block_content:header_banner:d3fc57ae-7484-4663-b70c-3997d6b14f64'
   module:
     - block_content
     - system
   theme:
     - dcp
-id: keynotespeakerblock
+id: submitasessionblockonhomepage
 theme: dcp
 region: content
-weight: -8
+weight: 0
 provider: null
-plugin: 'block_content:2f112f6e-4c23-4267-8a09-548533374650'
+plugin: 'block_content:d3fc57ae-7484-4663-b70c-3997d6b14f64'
 settings:
-  id: 'block_content:2f112f6e-4c23-4267-8a09-548533374650'
-  label: 'Keynote speaker block'
+  id: 'block_content:d3fc57ae-7484-4663-b70c-3997d6b14f64'
+  label: 'Submit a session block on homepage'
   provider: block_content
   label_display: '0'
   status: true
