@@ -1,0 +1,21 @@
+uuid: 338fba87-0792-4f36-ad6f-c1a6077f8d5d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_type_of_business
+  module:
+    - options
+    - user
+id: user.user.field_type_of_business
+field_name: field_type_of_business
+entity_type: user
+bundle: user
+label: 'Type of business'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string
