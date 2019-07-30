@@ -4,9 +4,9 @@ status: true
 dependencies:
   config:
     - field.field.node.workshop.body
-    - field.field.node.workshop.field_drupal_org_username
     - field.field.node.workshop.field_experience_level
     - field.field.node.workshop.field_prerequisites_for_workshop
+    - field.field.node.workshop.field_presenter
     - field.field.node.workshop.field_selected
     - field.field.node.workshop.field_session_category
     - node.type.workshop
@@ -26,14 +26,6 @@ content:
     settings: {  }
     third_party_settings: {  }
     region: content
-  field_drupal_org_username:
-    weight: 103
-    label: above
-    settings:
-      link_to_entity: false
-    third_party_settings: {  }
-    type: string
-    region: content
   field_experience_level:
     weight: 105
     label: above
@@ -48,6 +40,14 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     type: string
+    region: content
+  field_presenter:
+    weight: 107
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
     region: content
   field_selected:
     weight: 106
