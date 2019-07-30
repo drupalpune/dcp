@@ -11,6 +11,7 @@
     @include container(1280px, 60px, 50px, 15px);
     display: flex;
     position: relative;
+    overflow: visible;
 
     .border-design {
       &::after {
@@ -30,6 +31,11 @@
     padding: 120px 0 200px 0;
     flex-basis: 50%;
     z-index: 99;
+    position: relative;
+    transform: translate(0, 0);
+    left: unset;
+    top: unset;
+    text-align: left;
     @include breakpoint(laptop) {
       padding: 65px 0 75px 0;
       text-align: center;

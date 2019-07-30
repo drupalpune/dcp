@@ -1,0 +1,33 @@
+/**
+ * @file
+ * Styling Header banner block.
+*/
+.header-main-wrapper {
+  position: relative;
+  overflow: hidden;
+  min-height: 30rem;
+  .header-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: $white;
+  }
+  .page-title {
+    @include breakpoint(laptop) {
+      font-size: 2.5rem;
+      line-height: 1.5;
+    }
+    margin-bottom: 1.25rem;
+    font: {
+      family: "Georgia", serif;
+      size: 4.25rem;
+      weight: 900;
+    };
+  }
+  .field--name-body {
+    font-size: 1.5rem;
+  }
+}

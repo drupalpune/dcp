@@ -5,8 +5,8 @@ dependencies:
   content:
   - 'block_content:description_and_images:08325299-eda1-4937-888e-40c93b170718'
   module:
-  - block_content
-  - user
+    - block_content
+    - user
   theme:
   - dcp
 id: login

@@ -1,0 +1,121 @@
+/*------------------------------------*\
+    * @file
+    * Session listing.
+\*------------------------------------*/
+
+.session-listing {
+  margin-top: 5rem;
+}
+.view-content__group {
+  margin-bottom: 4rem;
+  padding-bottom: 4rem;
+  border-bottom: 1px solid $color--border;
+  > .group-heading {
+    @include breakpoint(laptop) {
+      padding: {
+        right: 1rem;
+        left: 1rem;
+      }
+    }
+    max-width: $container-width;
+    margin: 0 auto 2.75rem auto;
+    font: {
+      family: $title-font;
+      size: 1.5rem;
+      weight: 700;
+    };
+    line-height: 1;
+  }
+  > .group-content {
+    @include breakpoint(laptop) {
+      padding: {
+        right: 1rem;
+        left: 1rem;
+      }
+    }
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-content: center;
+    max-width: $container-width;
+    margin: auto;
+    .views-row {
+      @include breakpoint(phablet) {
+        flex: 0 1 auto;
+      }
+      @include breakpoint(phablet) {
+        margin-right: 0;
+      }
+      position: relative;
+      flex: 0 0 22.5rem;
+      margin: {
+        right: 2.5rem;
+        bottom: 2.5rem;
+      };
+      padding: 1.25rem;
+      transition: box-shadow $transition-time ease-in-out;
+      box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+      &:hover {
+        box-shadow: 0 0 3.125rem rgba(0, 0, 0, 0.1);
+      }
+      &:nth-child(3n) {
+        @include breakpoint(laptop) {
+          margin-right: 2.5rem;
+        }
+        @include breakpoint(phablet) {
+          margin-right: 0;
+        }
+        margin-right: 0;
+      }
+    }
+  }
+  .views-field-title {
+    margin-bottom: 0.875rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid $color--border;
+    font: {
+      family: $title-font;
+      size: 1.125rem;
+      weight: 700;
+    };
+    line-height: 1.8rem;
+    a {
+      text-decoration: none;
+      color: $black;
+    }
+  }
+  .views-field-field-drupal-org-username,
+  .views-field-field-organization {
+    font-family: $title-font;
+    font-weight: 300;
+  }
+  .views-field-field-drupal-org-username {
+    margin-bottom: 1rem;
+  }
+}
+.session-cat {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: $black;
+  &.session-cat__backend {
+    background: $color--cat-backend;
+  }
+  &.session-cat__frontend {
+    background: $color--cat-frontend;
+  }
+  &.session-cat__qa {
+    background: $color--cat-qa;
+  }
+  &.session-cat__business {
+    background: $color--cat-business;
+  }
+  &.session-cat__community {
+    background: $color--cat-community;
+  }
+  &.session-cat__beyond {
+    background: $color--cat-beyond;
+  }
+}
