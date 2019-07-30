@@ -12,14 +12,14 @@ dependencies:
 id: submitasession_2
 theme: dcp
 region: content
-weight: -3
+weight: -4
 provider: null
 plugin: 'block_content:47ff101f-7c21-41dc-9da6-c1dfdaedc435'
 settings:
   id: 'block_content:47ff101f-7c21-41dc-9da6-c1dfdaedc435'
   label: 'Submit a session'
   provider: block_content
-  label_display: visible
+  label_display: '0'
   status: true
   info: ''
   view_mode: full

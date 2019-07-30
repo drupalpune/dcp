@@ -12,14 +12,14 @@ dependencies:
 id: becomeadcpsponsor
 theme: dcp
 region: content
-weight: -1
+weight: -2
 provider: null
 plugin: 'block_content:46bc100f-6c8a-4a4c-91a7-9cb9bf0b7d47'
 settings:
   id: 'block_content:46bc100f-6c8a-4a4c-91a7-9cb9bf0b7d47'
   label: 'Become a DCP Sponsor'
   provider: block_content
-  label_display: visible
+  label_display: '0'
   status: true
   info: ''
   view_mode: full

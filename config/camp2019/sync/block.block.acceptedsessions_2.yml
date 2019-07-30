@@ -12,14 +12,14 @@ dependencies:
 id: acceptedsessions_2
 theme: dcp
 region: content
-weight: -7
+weight: -8
 provider: null
 plugin: 'block_content:1fd54ad1-3c9d-4a63-8cf0-4064c3b9a6b9'
 settings:
   id: 'block_content:1fd54ad1-3c9d-4a63-8cf0-4064c3b9a6b9'
   label: 'Accepted Sessions'
   provider: block_content
-  label_display: visible
+  label_display: '0'
   status: true
   info: ''
   view_mode: full
