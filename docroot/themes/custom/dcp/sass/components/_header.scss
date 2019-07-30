@@ -14,13 +14,24 @@
       height: 47px;
     }
   }
+  .menu--main .menu-item--expanded .menu {
+    min-width: 160px;
+    .menu-item {
+      @include breakpoint(tablet) {
+        padding-bottom: 10px;
+        &:last-child {
+          padding-bottom: 0;
+        }
+      }
+    }
+  }
   > nav[role="navigation"] {
     h2 {
       display: none;
     }
     &.menu--main {
       a {
-        @extend %CircularAir-Bold;
+        @extend %CircularAir-Book;
         font-size: 12px;
         padding-bottom: 11px;
         line-height: 15px;
@@ -52,7 +63,7 @@
         width: 124px;
       }
       a{
-        @extend %CircularAir-Bold;
+        @extend %CircularAir-Book;
         font-size: 12px;
         line-height: 15px;
         padding-bottom: 11px;
@@ -83,11 +94,11 @@
       }
       li {
         >a {
-          @extend %CircularAir-Bold;
+          @extend %CircularAir-Book;
           padding: 11px 21px 11px 12px;
           letter-spacing: 1px;
           font-size: 12px;
-          line-height: 10px;
+          line-height: 14px;
           text-decoration: none;
           color: #313131;
           display: block;
@@ -104,10 +115,10 @@
   img {
     width: 100%;
   }
-  #block-logintext {
+  .diwrapper {
     padding-left: 50px;
     a {
-      @extend %CircularAir-Bold;
+      @extend %CircularAir-Book;
       background: #FF2370;
       border-radius: 23.5px;
       font-size: 12px;
@@ -120,6 +131,10 @@
       text-transform: uppercase;
       color: #FFFFFF;
       text-decoration: none;
+    }
+    p{
+      line-height: 0;
+      margin: 0;
     }
     @include breakpoint(tablet) {
       display: none;
@@ -185,7 +200,7 @@
           }
         }
         a {
-          @extend %CircularAir-Bold;
+          @extend %CircularAir-Book;
           font-size: 18px;
           line-height: 19px;
           letter-spacing: 0.315px;
@@ -222,7 +237,7 @@
           }
         }
         a{
-          @extend %CircularAir-Bold;
+          @extend %CircularAir-Book;
           font-size: 18px;
           line-height: 19px;
           letter-spacing: 0.315px;
@@ -255,12 +270,16 @@
         height: 47px;
       }
     }
-    #block-logintext {
+    .diwrapper {
       display: inline-block;
       padding-left: 80px;
       a{
         font-size: 16px;
         line-height: 20px;
+      }
+      p{
+        line-height: 0;
+        margin: 0;
       }
     }
   }

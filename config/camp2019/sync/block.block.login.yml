@@ -1,23 +1,23 @@
-uuid: 601365de-dbcd-45af-bbb2-ce5a844cb246
+uuid: d32196b8-59d6-472b-8aca-1d25f377886f
 langcode: en
 status: true
 dependencies:
   content:
-    - 'block_content:image_with_text_and_link:55180763-010e-4910-8db7-2a1dd2f204b8'
+  - 'block_content:description_and_images:08325299-eda1-4937-888e-40c93b170718'
   module:
     - block_content
     - user
   theme:
-    - dcp
-id: logintext
+  - dcp
+id: login
 theme: dcp
 region: header
 weight: 0
 provider: null
-plugin: 'block_content:55180763-010e-4910-8db7-2a1dd2f204b8'
+plugin: 'block_content:08325299-eda1-4937-888e-40c93b170718'
 settings:
-  id: 'block_content:55180763-010e-4910-8db7-2a1dd2f204b8'
-  label: 'Login Text'
+  id: 'block_content:08325299-eda1-4937-888e-40c93b170718'
+  label: Login
   provider: block_content
   label_display: '0'
   status: true
