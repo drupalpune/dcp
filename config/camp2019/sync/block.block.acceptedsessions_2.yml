@@ -12,7 +12,7 @@ dependencies:
 id: acceptedsessions_2
 theme: dcp
 region: content
-weight: -7
+weight: -5
 provider: null
 plugin: 'block_content:1fd54ad1-3c9d-4a63-8cf0-4064c3b9a6b9'
 settings:

@@ -12,7 +12,7 @@ dependencies:
 id: proposedworkshops_2
 theme: dcp
 region: content
-weight: -5
+weight: -3
 provider: null
 plugin: 'block_content:116ca002-5012-439e-8e3f-833e91cbbcf4'
 settings:
