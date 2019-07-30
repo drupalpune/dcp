@@ -12,7 +12,7 @@ dependencies:
 id: acceptedworkshops_2
 theme: dcp
 region: content
-weight: -9
+weight: -6
 provider: null
 plugin: 'block_content:768f5918-f756-4f74-857a-28ec7f3509aa'
 settings:

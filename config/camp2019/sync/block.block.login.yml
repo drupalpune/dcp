@@ -2,13 +2,10 @@ uuid: d32196b8-59d6-472b-8aca-1d25f377886f
 langcode: en
 status: true
 dependencies:
-  content:
-  - 'block_content:description_and_images:08325299-eda1-4937-888e-40c93b170718'
   module:
-    - block_content
     - user
   theme:
-  - dcp
+    - dcp
 id: login
 theme: dcp
 region: header

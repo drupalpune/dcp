@@ -10,7 +10,7 @@ dependencies:
 id: dcp_pagetitle
 theme: dcp
 region: content
-weight: -13
+weight: -10
 provider: null
 plugin: page_title_block
 settings:
