@@ -5,8 +5,8 @@ dependencies:
   config:
     - field.field.node.session.body
     - field.field.node.session.field_attachment
-    - field.field.node.session.field_drupal_org_username
     - field.field.node.session.field_experience_level
+    - field.field.node.session.field_presenter
     - field.field.node.session.field_selected
     - field.field.node.session.field_session_category
     - node.type.session
@@ -34,19 +34,20 @@ content:
     third_party_settings: {  }
     type: file_generic
     region: content
-  field_drupal_org_username:
-    weight: 3
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
   field_experience_level:
     weight: 5
     settings: {  }
     third_party_settings: {  }
     type: options_select
+    region: content
+  field_presenter:
+    weight: 26
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
     region: content
   field_session_category:
     weight: 10
