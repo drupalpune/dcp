@@ -25,6 +25,11 @@
  * @see template_preprocess_block()
  */
 #}
+{% if content.field_banner_image.0['#item'].entity.uri.value %}
+  {% set bg_image = file_url(content.field_banner_image.0['#item'].entity.uri.value) %}
+{% else %}
+  {% set bg_image = '' %}
+{% endif %}
 {%
   set classes = [
     'block',
@@ -33,7 +38,7 @@
   ]
 %}
 <div{{attributes.addClass(classes)}}>
-  <div class="header-main-wrapper" style="background: url({{ file_url(content.field_banner_image.0['#item'].entity.uri.value) }}) no-repeat center center; background-size:cover;">
+  <div class="header-main-wrapper" style="background: url({{ bg_image }}) no-repeat center center; background-size:cover;">
     <div class="header-content">
       {{ title_prefix }}
       {% if label %}
@@ -49,3 +54,4 @@
     </div>
     <div class="border-design"></div>
   </div>
+</div>

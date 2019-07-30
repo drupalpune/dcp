@@ -1,5 +1,5 @@
 .path-frontpage {
-  .header-main-wrapper {
+  #block-frontpageheader .header-main-wrapper {
     &::before {
       content: "";
       background: linear-gradient(180deg, rgba(5, 17, 150, 0.9) 9.68%, rgba(65, 22, 158, 0.9) 67.31%, rgba(235, 13, 13, 0.9) 600%);
@@ -27,7 +27,7 @@
     }
   }
 
-  .header-content {
+  #block-frontpageheader .header-content {
     padding: 120px 0 200px 0;
     flex-basis: 50%;
     z-index: 99;
