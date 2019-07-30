@@ -6,7 +6,9 @@ dependencies:
     - field.field.user.user.field_drupal_org_profile
     - field.field.user.user.field_full_name
     - field.field.user.user.field_organization
+    - field.field.user.user.field_profile_photo
     - field.field.user.user.field_role
+    - field.field.user.user.field_type_of_business
     - field.field.user.user.user_picture
   module:
     - image
@@ -43,8 +45,24 @@ content:
     third_party_settings: {  }
     type: string
     region: content
+  field_profile_photo:
+    weight: 6
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
   field_role:
     weight: 3
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_type_of_business:
+    weight: 7
     label: above
     settings: {  }
     third_party_settings: {  }

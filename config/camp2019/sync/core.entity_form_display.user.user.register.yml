@@ -7,9 +7,13 @@ dependencies:
     - field.field.user.user.field_drupal_org_profile
     - field.field.user.user.field_full_name
     - field.field.user.user.field_organization
+    - field.field.user.user.field_profile_photo
     - field.field.user.user.field_role
+    - field.field.user.user.field_type_of_business
     - field.field.user.user.user_picture
+    - image.style.thumbnail
   module:
+    - image
     - user
 _core:
   default_config_hash: K-1rBM8mTIkFp9RqOC2tMRUukOQ1xbRCfSKK8dEddnA
@@ -19,20 +23,20 @@ bundle: user
 mode: register
 content:
   account:
-    weight: 1
+    weight: 2
     region: content
     settings: {  }
     third_party_settings: {  }
   field_drupal_org_profile:
     type: string_textfield
-    weight: 4
+    weight: 5
     region: content
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
   field_full_name:
-    weight: 0
+    weight: 1
     settings:
       size: 60
       placeholder: ''
@@ -40,19 +44,33 @@ content:
     type: string_textfield
     region: content
   field_organization:
-    weight: 2
+    weight: 3
     settings:
       size: 60
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
     region: content
+  field_profile_photo:
+    type: image_image
+    weight: 0
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
   field_role:
-    weight: 3
+    weight: 4
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
+  field_type_of_business:
+    type: options_select
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   contact: true
   language: true
