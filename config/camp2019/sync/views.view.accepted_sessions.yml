@@ -479,8 +479,8 @@ display:
         title: 'Accepted Sessions'
         description: ''
         expanded: false
-        parent: ''
-        weight: -47
+        parent: 'menu_link_content:65b3010a-a5ad-4ad5-956d-fba9e1e1ecc6'
+        weight: -50
         context: '0'
         menu_name: main
     cache_metadata:

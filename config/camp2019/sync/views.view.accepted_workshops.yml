@@ -551,8 +551,8 @@ display:
         title: 'Accepted Workshops'
         description: ''
         expanded: false
-        parent: 'menu_link_content:4d849757-7a2c-4f36-9b78-83bd6588cd7f'
-        weight: -49
+        parent: 'menu_link_content:c8ef7cb3-c9c8-4513-871c-02aa15392eb0'
+        weight: -50
         context: '0'
         menu_name: main
         enabled: true
@@ -835,8 +835,8 @@ display:
         title: 'Proposed Workshops'
         description: ''
         expanded: false
-        parent: 'menu_link_content:4d849757-7a2c-4f36-9b78-83bd6588cd7f'
-        weight: -46
+        parent: 'menu_link_content:c8ef7cb3-c9c8-4513-871c-02aa15392eb0'
+        weight: -49
         context: '0'
         menu_name: main
       header:

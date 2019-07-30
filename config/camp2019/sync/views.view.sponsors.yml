@@ -304,6 +304,7 @@ display:
         weight: -45
         context: '0'
         menu_name: main
+        enabled: false
       path: sponsors
     cache_metadata:
       max-age: -1
