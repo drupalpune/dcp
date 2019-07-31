@@ -9,6 +9,7 @@ dependencies:
     - field.field.node.workshop.field_presenter
     - field.field.node.workshop.field_selected
     - field.field.node.workshop.field_session_category
+    - field.field.node.workshop.field_speaker_consent
     - node.type.workshop
   module:
     - options
@@ -66,6 +67,16 @@ content:
       link: true
     third_party_settings: {  }
     type: entity_reference_label
+    region: content
+  field_speaker_consent:
+    weight: 108
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
     region: content
   links:
     weight: 100

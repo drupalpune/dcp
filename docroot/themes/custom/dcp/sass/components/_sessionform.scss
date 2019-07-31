@@ -126,4 +126,26 @@
       }
     }
   }
+
+  /* Consent field */
+  .form-item-field-speaker-consent-value {
+    .description {
+      display: inline-block;
+      margin-left: 0;
+      :after {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        margin: 0 0.3em;
+        content: "";
+        vertical-align: super;
+        background-image: url(/core/misc/icons/ee0000/required.svg);
+        background-repeat: no-repeat;
+        background-size: 6px 6px;
+      }
+    }
+    label {
+      display: none;
+    }
+  }
 }
