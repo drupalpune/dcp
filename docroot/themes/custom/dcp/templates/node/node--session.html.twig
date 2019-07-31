@@ -7,29 +7,50 @@
 	<div class="session-right-wrapper">
 	<div class="session-right session-detail">
 		<div class="speakers-wrap">
-      <div class="speaker-label">
-        {{ 'Speakers'|t }}
-      </div>
-      <div class="speakers">
-        {{ content.field_drupal_org_username }}
-      </div>
+    <div class="speaker-label">
+    {{ 'Speakers'|t }}
     </div>
+    <div class="speakers">
+      <ul>
+        <li>
+        {% if node.getOwner.field_drupal_org_profile.value %}
+          <a href="{{ node.getOwner.field_drupal_org_profile.value }}" target="_blank">
+          {{ node.getOwner.field_full_name.value }}
+          </a>
+        {% else %}
+          {{ node.getOwner.field_full_name.value }}
+        {% endif %}
+        </li>
+        {% if node.field_presenter %}
+          <li>
+            {% if node.field_presenter.entity.field_drupal_org_profile.value %}
+              <a href="{{ node.field_presenter.entity.field_drupal_org_profile.value }}" target="_blank">
+                {{ node.field_presenter.entity.field_full_name.value }}
+              </a>
+            {% else %}
+              {{ node.field_presenter.entity.field_full_name.value }}
+            {% endif %}
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
 		<div class="track-wrap">
-      <div class="category-label">
-        {{ 'Session Track'|t }}
-      </div>
-      <div class="category track">
-        {{ content.field_session_category }}
-      </div>
-    </div> 
-    <div class="track-wrap">
-      <div class="experience-level-label">
-        {{ 'Experience Level'|t }}
-      </div>
-      <div class="experience-level track">
-        {{ content.field_experience_level }}
-      </div>
+    <div class="category-label">
+    {{ 'Session Track'|t }}
     </div>
+    <div class="category track">
+    {{ content.field_session_category }}
+    </div>
+  </div>
+  <div class="track-wrap">
+    <div class="experience-level-label">
+    {{ 'Experience Level'|t }}
+    </div>
+    <div class="experience-level track">
+    {{ content.field_experience_level }}
+    </div>
+  </div>
 	</div>
 </div>
 </div>
