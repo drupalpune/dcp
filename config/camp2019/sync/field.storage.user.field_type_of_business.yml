@@ -26,6 +26,9 @@ settings:
     -
       value: media_parter_pr_firm
       label: 'Media Parter/PR Firm'
+    -
+      value: other
+      label: Other
   allowed_values_function: ''
 module: options
 locked: false

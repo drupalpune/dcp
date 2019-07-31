@@ -1,0 +1,26 @@
+uuid: ef690889-69a9-48a5-8b3f-6cd5dbadcd75
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+    - user
+  theme:
+    - dcp
+id: userlogin
+theme: dcp
+region: content
+weight: 5
+provider: null
+plugin: user_login_block
+settings:
+  id: user_login_block
+  label: 'User login'
+  provider: user
+  label_display: '0'
+visibility:
+  request_path:
+    id: request_path
+    pages: "/node/add/*\r\n/submit-session\r\n/submit-workshop"
+    negate: false
+    context_mapping: {  }

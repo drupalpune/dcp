@@ -30,8 +30,14 @@ settings:
       value: project_manager
       label: 'Project Manager'
     -
+      value: quality_assurance
+      label: 'Quality Assurance'
+    -
       value: c_x_o
       label: CxO
+    -
+      value: other
+      label: Other
   allowed_values_function: ''
 module: options
 locked: false
