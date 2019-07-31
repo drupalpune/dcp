@@ -1,0 +1,14 @@
+.block-page-title-block {
+  padding-top: 30px;
+}
+h1.page-title {
+  text-align: center;
+  margin-bottom: 1.25rem;
+  font-family: "Georgia",serif;
+  font-size: 3.25rem;
+  font-weight: 900;
+  @include breakpoint(laptop) {
+      font-size: 2.5rem;
+      line-height: 1.5;
+  }
+}

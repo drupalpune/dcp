@@ -5,7 +5,7 @@ dependencies:
   config:
     - field.storage.node.field_session_category
     - node.type.workshop
-    - taxonomy.vocabulary.session_category
+    - taxonomy.vocabulary.workshop_category
 id: node.workshop.field_session_category
 field_name: field_session_category
 entity_type: node
@@ -20,7 +20,7 @@ settings:
   handler: 'default:taxonomy_term'
   handler_settings:
     target_bundles:
-      session_category: session_category
+      workshop_category: workshop_category
     sort:
       field: name
       direction: asc

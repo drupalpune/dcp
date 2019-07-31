@@ -1,5 +1,11 @@
 .path-frontpage {
   #block-frontpageheader .header-main-wrapper {
+    .page-title {
+      text-align: left;
+      @include breakpoint(laptop) {
+        text-align: center;
+      }
+    }
     &::before {
       content: "";
       background: linear-gradient(180deg, rgba(5, 17, 150, 0.9) 9.68%, rgba(65, 22, 158, 0.9) 67.31%, rgba(235, 13, 13, 0.9) 600%);

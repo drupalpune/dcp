@@ -1,0 +1,8 @@
+uuid: 24a2a711-ece3-47ae-a9d7-bad7060888e0
+langcode: en
+status: true
+dependencies: {  }
+name: 'Workshop category'
+vid: workshop_category
+description: ''
+weight: 0
