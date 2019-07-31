@@ -4,7 +4,6 @@ status: true
 dependencies:
   module:
     - social_media_links
-    - system
   theme:
     - dcp
 id: dcp_socialmedialinks
@@ -110,9 +109,4 @@ settings:
     installed_iconsets:
       fontawesome:
         examples: ''
-visibility:
-  request_path:
-    id: request_path
-    pages: '<front>'
-    negate: false
-    context_mapping: {  }
+visibility: {  }
