@@ -19,7 +19,6 @@
         align-items: center;
       }
     }
-
     .user-logged-in #edit-account {
       background-color: $white;
       padding: 30px;
@@ -193,5 +192,25 @@
         background-position: 98% center;
         width: 100%;
         background-color: $medblue;
+      }
+    }
+
+    .user-logged-in {
+      .login-new-form {
+        h2 {
+          width: 200px;
+
+          @include breakpoint(phablet) {
+            margin: 0 35%;
+          }
+
+          @include breakpoint(mobileonly) {
+            margin: 0 20%;
+          }
+
+          margin: 0 40%;
+          padding: 0;
+
+        }
       }
     }
