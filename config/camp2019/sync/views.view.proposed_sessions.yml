@@ -5,6 +5,8 @@ dependencies:
   config:
     - field.storage.node.field_presenter
     - field.storage.node.field_session_category
+    - field.storage.user.field_drupal_org_profile
+    - field.storage.user.field_full_name
     - field.storage.user.field_organization
     - node.type.session
     - system.menu.main
@@ -133,6 +135,132 @@ display:
           entity_type: node
           entity_field: title
           plugin_id: field
+        field_full_name:
+          id: field_full_name
+          table: user__field_full_name
+          field: field_full_name
+          relationship: uid
+          group_type: group
+          admin_label: ''
+          label: ''
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_drupal_org_profile:
+          id: field_drupal_org_profile
+          table: user__field_drupal_org_profile
+          field: field_drupal_org_profile
+          relationship: uid
+          group_type: group
+          admin_label: ''
+          label: ''
+          exclude: false
+          alter:
+            alter_text: true
+            text: '<a href="{{ field_drupal_org_profile }}">{{ field_full_name }} </a>'
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: '{{ field_full_name }} '
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
         field_presenter:
           id: field_presenter
           table: node__field_presenter
@@ -141,7 +269,7 @@ display:
           group_type: group
           admin_label: ''
           label: ''
-          exclude: false
+          exclude: true
           alter:
             alter_text: false
             text: ''
@@ -511,6 +639,8 @@ display:
       tags:
         - 'config:field.storage.node.field_presenter'
         - 'config:field.storage.node.field_session_category'
+        - 'config:field.storage.user.field_drupal_org_profile'
+        - 'config:field.storage.user.field_full_name'
         - 'config:field.storage.user.field_organization'
   page_1:
     display_plugin: page
@@ -540,4 +670,6 @@ display:
       tags:
         - 'config:field.storage.node.field_presenter'
         - 'config:field.storage.node.field_session_category'
+        - 'config:field.storage.user.field_drupal_org_profile'
+        - 'config:field.storage.user.field_full_name'
         - 'config:field.storage.user.field_organization'

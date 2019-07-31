@@ -9,7 +9,7 @@ id: node.session.field_presenter
 field_name: field_presenter
 entity_type: node
 bundle: session
-label: Presenter
+label: Co-Presenter
 description: ''
 required: false
 translatable: false
