@@ -65,7 +65,7 @@ content:
     region: content
   field_mobile_image:
     weight: 5
-    label: above
+    label: hidden
     settings:
       image_style: ''
       image_link: ''
