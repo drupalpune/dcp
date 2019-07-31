@@ -19,7 +19,7 @@ mode: default
 content:
   body:
     type: text_textarea_with_summary
-    weight: 3
+    weight: 2
     settings:
       rows: 9
       summary_rows: 3
@@ -27,13 +27,13 @@ content:
     third_party_settings: {  }
     region: content
   field_experience_level:
-    weight: 5
+    weight: 4
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
   field_prerequisites_for_workshop:
-    weight: 2
+    weight: 1
     settings:
       size: 60
       placeholder: ''
@@ -41,7 +41,7 @@ content:
     type: string_textfield
     region: content
   field_presenter:
-    weight: 26
+    weight: 5
     settings:
       match_operator: CONTAINS
       size: 60
@@ -50,13 +50,10 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_session_category:
-    weight: 1
-    settings:
-      match_operator: CONTAINS
-      size: 60
-      placeholder: ''
+    weight: 3
+    settings: {  }
     third_party_settings: {  }
-    type: entity_reference_autocomplete
+    type: options_select
     region: content
   title:
     type: string_textfield

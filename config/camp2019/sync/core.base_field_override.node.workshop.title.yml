@@ -8,7 +8,7 @@ id: node.workshop.title
 field_name: title
 entity_type: node
 bundle: workshop
-label: Workshop
+label: 'Workshop title'
 description: ''
 required: true
 translatable: true
