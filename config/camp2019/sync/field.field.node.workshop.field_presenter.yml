@@ -9,7 +9,7 @@ id: node.workshop.field_presenter
 field_name: field_presenter
 entity_type: node
 bundle: workshop
-label: Presenter
+label: Co-Presenter
 description: ''
 required: false
 translatable: true
