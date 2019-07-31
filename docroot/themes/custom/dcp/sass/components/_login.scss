@@ -3,13 +3,15 @@
     * Login.
 \*------------------------------------*/
 
-    .path-user {
+    .path-user,
+    .path-submit-session,
+    .path-submit-workshop {
       .content {
-        background-color: #f7f9fb;
+        background-color: $medblue;
       }
 
       .main-content {
-        width: $container-width;
+        width: 95%;
         margin: 50px auto;
         padding: 50px 20px;
         display: flex;
@@ -19,27 +21,27 @@
     }
 
     .user-logged-in #edit-account {
-      background-color: #fff;
+      background-color: $white;
       padding: 30px;
-      color: #717580;
+      color: $text-color;
     }
 
     .user-logged-in .field--name-field-drupal-org-link {
-      background-color: #fff;
+      background-color: $white;
       padding: 1px 30px;
-      color: #717580;
+      color: $text-color;
     }
 
     .user-logged-in .field--name-field-curr {
-      background-color: #fff;
+      background-color: $white;
       padding: 1px 30px;
-      color: #717580;
+      color: $text-color;
     }
 
-    .path-user .login-new-form {
-      background-color: #fff;
+    .login-new-form {
+      background-color: $white;
       padding: 30px;
-      color: #717580;
+      color: $text-color;
 
       h2 {
         padding: 20px 0px;
@@ -49,16 +51,18 @@
       }
 
       a {
-        color: #717580;
+        color: $text-color;
         text-decoration: none;
         margin-top: 15px;
         display: block;
       }
     }
 
-    .path-user form {
-      border-top: 1px solid #f7f9fb;
-      border-bottom: 1px solid #f7f9fb;
+    form.user-login-form,
+    form.user-register-form,
+      {
+      border-top: 1px solid $medblue;
+      border-bottom: 1px solid $medblue;
 
       .js-form-item {
         display: flex;
@@ -79,54 +83,62 @@
       }
     }
 
-    .path-user input:focus {
+    form.user-register-form input:focus,
+    form.user-register-form input:focus {
       outline: none;
     }
 
     select#edit-field-curr {
       font-size: 1em;
-      color: #fff;
+      color: $white;
       width: 100%;
       display: block;
       border: none;
       border-radius: 2px;
       padding: 1em;
-      border-bottom: solid 1px #fff;
+      border-bottom: solid 1px $white;
       -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
       transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
-      background-color: #f7f9fb;
-      color: #717580;
+      background-color: $medblue;
+      color: $text-color;
       height: 50px;
     }
 
-    .path-user input[type="text"],
-    .path-user input[type="password"],
-    .path-user input[type="email"],
-    .path-user input[type="url"] {
+    form.user-register-form input[type="text"],
+    form.user-register-form input[type="password"],
+    form.user-register-form input[type="email"],
+    form.user-register-form input[type="file"],
+    form.user-register-form input[type="url"],
+    form.user-login-form input[type="text"],
+    form.user-login-form input[type="password"],
+    form.user-login-form input[type="email"],
+    form.user-login-form input[type="file"],
+    form.user-login-form input[type="url"] {
       font-size: 1em;
-      color: #fff;
+      color: $white;
       width: 100%;
       display: block;
       border: none;
       border-radius: 2px;
       padding: 1em;
-      border-bottom: solid 1px #fff;
+      border-bottom: solid 1px $white;
       -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
       transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
-      background-color: #f7f9fb;
-      color: #717580;
+      background-color: $medblue;
+      color: $text-color;
     }
 
     input[type=submit] {
-      background-color: #fd1f58;
-      color: #fff;
+      background-color: $btn-color;
+      color: $white;
       padding: 10px 30px;
       border: none;
       border-radius: 5px;
       font-size: 14px;
     }
 
-    .path-user .form-actions {
+    form.user-login-form .form-actions,
+    form.user-registration-form .form-actions {
       display: flex;
       justify-content: flex-end;
     }
@@ -135,17 +147,17 @@
       display: flex;
       justify-content: center;
       margin-top: 20px;
-      color: #717580;
+      color: $text-color;
 
       a {
         text-decoration: none;
-        color: #fd1f58;
+        color: $btn-color;
       }
     }
 
     #volunteer-field a {
       display: inline-block;
-      color: #fd1f58;
+      color: $btn-color;
     }
 
     #register-close {
@@ -158,5 +170,28 @@
       &.description {
         margin-top: 10px;
         display: block;
+      }
+    }
+
+    select {
+
+      &#edit-field-type-of-business.form-select,
+      &#edit-field-role.form-select {
+        font-size: 1em;
+        color: $white;
+        width: 100%;
+        display: block;
+        border: none;
+        border-radius: 2px;
+        padding: 1em;
+        border-bottom: solid 1px $white;
+        -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+        transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
+        background-color: $medblue;
+        color: $text-color;
+        background: url(../images/arrow.svg) no-repeat center center;
+        background-position: 98% center;
+        width: 100%;
+        background-color: $medblue;
       }
     }
