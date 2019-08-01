@@ -84,10 +84,11 @@
       color: $black;
     }
   }
-  .views-field-field-drupal-org-username,
+  .views-field-field-drupal-org-profile,
   .views-field-field-organization {
     font-family: $title-font;
     font-weight: 300;
+    line-height: 1.75;
   }
   .views-field-field-drupal-org-username {
     margin-bottom: 1rem;
