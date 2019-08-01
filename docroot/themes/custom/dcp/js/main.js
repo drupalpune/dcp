@@ -45,4 +45,18 @@
     }
   };
 
+  Drupal.behaviors.checkInput = {
+    attach: function (context) {
+      $('input[type="text"], input[type="email"]').each(function () {
+        if ($(this).val() != "") {
+          $(this).addClass("has-input");
+        }
+      }).on("input", function() {
+        if($(this).val() != "") {
+          $(this).addClass("has-input");
+        }
+      });
+    }
+  };
+
 })(jQuery, Drupal);
