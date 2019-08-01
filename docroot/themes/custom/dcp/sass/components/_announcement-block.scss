@@ -1,5 +1,5 @@
 .block-views-blockannouncements-block-1 {
-  @include container(1280px, 60px, 50px, 15px);
+  @include container($container-width, 60px, 50px, 15px);
   padding-top: 30px;
   @include breakpoint(laptop) {
     text-align: center;
