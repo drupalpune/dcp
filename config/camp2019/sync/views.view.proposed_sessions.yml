@@ -457,7 +457,7 @@ display:
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Session category ID'
+          label: ''
           exclude: true
           alter:
             alter_text: false
