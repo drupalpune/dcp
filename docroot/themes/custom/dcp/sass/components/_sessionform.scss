@@ -129,9 +129,13 @@
 
   /* Consent field */
   .form-item-field-speaker-consent-value {
+    display: block;
     .description {
+      position: static;
+      overflow: unset;
       display: inline-block;
       margin-left: 0;
+      width: auto;
       :after {
         display: inline-block;
         width: 6px;
