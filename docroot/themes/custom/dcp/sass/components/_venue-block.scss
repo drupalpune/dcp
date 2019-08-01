@@ -1,5 +1,5 @@
 .venue-main-wrapper {
-  @include container(1280px, 60px, 50px, 15px);
+  @include container($container-width, 60px, 50px, 15px);
   padding: 0 0 135px 0;
   @include breakpoint(tablet) {
     padding-bottom: 50px;

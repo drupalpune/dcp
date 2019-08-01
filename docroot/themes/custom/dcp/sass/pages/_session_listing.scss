@@ -17,7 +17,7 @@
         left: 1rem;
       }
     }
-    max-width: $container-width;
+    @include container($container-width, 60px, 50px, 15px);
     margin: 0 auto 2.75rem auto;
     font: {
       family: $title-font;
@@ -27,18 +27,11 @@
     line-height: 1;
   }
   > .group-content {
-    @include breakpoint(laptop) {
-      padding: {
-        right: 1rem;
-        left: 1rem;
-      }
-    }
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
     align-content: center;
-    max-width: $container-width;
-    margin: auto;
+    @include container($container-width, 60px, 50px, 15px);
     .views-row {
       @include breakpoint(phablet) {
         flex: 0 1 auto;
