@@ -6,7 +6,7 @@
 .header-main-wrapper {
   position: relative;
   overflow: hidden;
-  min-height: 30rem;
+  min-height: 25rem;
   .header-content {
     position: absolute;
     top: 50%;
@@ -47,14 +47,28 @@
   overflow: visible;
 
   .field--name-field-banner-link {
-    padding: 3rem 0 0 0;
-    a {
-      padding: 12px 24px;
-      background: #ff0074;
-      border-radius: 22px;
-      color: #fff;
-      text-decoration: none;
-      text-transform: uppercase;
+    padding: 1rem 0 0 0;
+    .field__item {
+      display: inline-block;
+      margin-right: 20px;
+      @include breakpoint(phablet) {
+        display: block;
+        margin-top: 20px;
+      }
+
+      a {
+        display: block;
+        padding: 12px 24px;
+        background: #ff0074;
+        border-radius: 22px;
+        color: #fff;
+        text-decoration: none;
+        text-transform: uppercase;
+        @include breakpoint(phablet) {
+          width: fit-content;
+          margin: 0 auto;
+        }
+      }
     }
   }
 }
