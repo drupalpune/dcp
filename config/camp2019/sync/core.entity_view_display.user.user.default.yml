@@ -9,7 +9,6 @@ dependencies:
     - field.field.user.user.field_profile_photo
     - field.field.user.user.field_role
     - field.field.user.user.field_type_of_business
-    - field.field.user.user.user_picture
   module:
     - image
     - options
@@ -72,14 +71,5 @@ content:
     weight: 0
     region: content
     settings: {  }
-    third_party_settings: {  }
-  user_picture:
-    type: image
-    weight: 4
-    region: content
-    label: above
-    settings:
-      image_style: ''
-      image_link: ''
     third_party_settings: {  }
 hidden: {  }

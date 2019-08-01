@@ -9,7 +9,6 @@ dependencies:
     - field.field.user.user.field_profile_photo
     - field.field.user.user.field_role
     - field.field.user.user.field_type_of_business
-    - field.field.user.user.user_picture
     - image.style.thumbnail
   module:
     - image
@@ -70,14 +69,6 @@ content:
     third_party_settings: {  }
     type: options_select
     region: content
-  user_picture:
-    type: image_image
-    weight: 4
-    region: content
-    settings:
-      progress_indicator: throbber
-      preview_image_style: thumbnail
-    third_party_settings: {  }
 hidden:
   contact: true
   language: true
