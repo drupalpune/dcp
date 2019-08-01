@@ -10,7 +10,6 @@ dependencies:
     - field.field.user.user.field_profile_photo
     - field.field.user.user.field_role
     - field.field.user.user.field_type_of_business
-    - field.field.user.user.user_picture
     - image.style.thumbnail
   module:
     - image
@@ -75,4 +74,3 @@ hidden:
   contact: true
   language: true
   timezone: true
-  user_picture: true
