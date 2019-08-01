@@ -25,7 +25,8 @@ form {
 input[type="text"],
 input[type="password"],
 input[type="email"],
-input[type="file"] {
+input[type="file"],
+textarea {
   width: 100%;
   padding: 0.8rem 1rem;
   border: 1px solid $color--form-border;
@@ -71,7 +72,8 @@ select {
     outline: none;
   }
 }
-#edit-field-drupal-org-profile-0-value--description {
+#edit-field-drupal-org-profile-0-value--description,
+.password-confirm {
   position: relative;
   clip: unset;
   width: 100%;
@@ -79,17 +81,18 @@ select {
   opacity: 0.75;
   font-size: 0.75rem;
 }
-.captcha {
-  margin-top: 4rem;
-  margin-bottom: 4rem;
-  border: 1px solid $color--form-border;
+.captcha,
+details {
+  margin-top: 4rem !important; // Override core styling.
+  margin-bottom: 4rem !important; // Override core styling.
+  border: 1px solid $color--form-border !important;
   summary {
-    padding: 1rem 1.8rem 1.8rem 1.8rem;
+    padding: 1rem 1.8rem;
     color: $label;
     background: $color--form-bg;
   }
   .details-wrapper {
-    padding: 1rem 1.8rem;
+    padding: 1rem 1.8rem 1.8rem 1.8rem;
     .details-description {
       max-width: 22.5rem;
       margin-bottom: 1.75rem;
@@ -110,4 +113,8 @@ select {
     font-size: 0.875rem;
     font-weight: 400;
   }
+}
+.form-actions {
+  display: flex;
+  align-items: center;
 }

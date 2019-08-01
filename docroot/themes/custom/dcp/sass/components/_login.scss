@@ -19,9 +19,13 @@
   }
 }
 .user-logged-in #edit-account {
+  margin-bottom: 2rem;
   padding: 30px;
   color: $text-color;
   background-color: $white;
+  > .form-item:last-child {
+    margin-bottom: 0;
+  }
 }
 .user-logged-in .field--name-field-drupal-org-link {
   padding: 1px 30px;
