@@ -5,18 +5,22 @@
   max-width: 72rem;
   margin: 5.25rem auto;
   padding: 1.25rem 2.5rem;
+
   .js-form-type-vertical-tabs {
     display: none;
   }
+
   /* Consent field */
   .form-item-field-speaker-consent-value {
     display: block;
+
     .description {
       position: static;
       overflow: unset;
       display: inline-block;
       margin-left: 0;
       width: auto;
+
       :after {
         display: inline-block;
         width: 6px;
@@ -29,10 +33,12 @@
         background-size: 6px 6px;
       }
     }
+
     label {
       display: none;
     }
   }
+
   .field--type-text-with-summary {
     .filter-wrapper {
       display: none;
@@ -44,6 +50,12 @@
           display: none;
         }
       }
+    }
+  }
+
+  .field--type-text-long {
+    .filter-wrapper {
+      display: none;
     }
   }
 }
