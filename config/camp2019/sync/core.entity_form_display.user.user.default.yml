@@ -63,13 +63,8 @@ content:
     third_party_settings: {  }
     type: options_select
     region: content
-  field_type_of_business:
-    weight: 7
-    settings: {  }
-    third_party_settings: {  }
-    type: options_select
-    region: content
 hidden:
   contact: true
+  field_type_of_business: true
   language: true
   timezone: true

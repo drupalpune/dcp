@@ -17,7 +17,7 @@
         left: 1rem;
       }
     }
-    max-width: $container-width;
+    @include container($container-width, 60px, 50px, 15px);
     margin: 0 auto 2.75rem auto;
     font: {
       family: $title-font;
@@ -27,18 +27,11 @@
     line-height: 1;
   }
   > .group-content {
-    @include breakpoint(laptop) {
-      padding: {
-        right: 1rem;
-        left: 1rem;
-      }
-    }
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
     align-content: center;
-    max-width: $container-width;
-    margin: auto;
+    @include container($container-width, 60px, 50px, 15px);
     .views-row {
       @include breakpoint(phablet) {
         flex: 0 1 auto;
@@ -84,10 +77,11 @@
       color: $black;
     }
   }
-  .views-field-field-drupal-org-username,
+  .views-field-field-drupal-org-profile,
   .views-field-field-organization {
     font-family: $title-font;
     font-weight: 300;
+    line-height: 1.75;
   }
   .views-field-field-drupal-org-username {
     margin-bottom: 1rem;

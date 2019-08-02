@@ -81,7 +81,7 @@
 .view-sponsors {
   &.view-display-id-block_1 {
     position: relative;
-    @include container(1280px, 60px, 50px, 15px);
+    @include container($container-width, 60px, 50px, 15px);
     &::before {
       content: "";
       position: absolute;

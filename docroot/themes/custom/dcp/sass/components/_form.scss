@@ -1,0 +1,120 @@
+form {
+  .form-item {
+    display: flex;
+    flex-flow: column nowrap;
+    margin-top: 0;
+    margin-bottom: 2rem;
+  }
+  label {
+    color: $label;
+    font: {
+      family: $title-font;
+      weight: bold;
+    };
+    line-height: 40px;
+  }
+  .description {
+    position: absolute;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    width: 1px;
+    height: 1px;
+    word-wrap: normal;
+  }
+}
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="file"],
+textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid $color--form-border;
+  background: $white;
+  font-size: 1rem;
+  line-height: 1;
+  &:focus,
+  &.has-input {
+    outline: none;
+    background: $color--form-bg;
+  }
+}
+input[type="submit"],
+.form-submit {
+  display: flex;
+  align-items: center;
+  padding: 10px 30px 10px 30px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: $white;
+  border-radius: 23.5px;
+  background: $btn-color;
+  font-size: 12px;
+  line-height: 15px;
+}
+input[type="file"]:placeholder {
+  font-size: 0.875rem;
+  line-height: 2;
+}
+select {
+  padding: 0.8rem 1rem;
+  border: 1px solid $color--form-border;
+  border-radius: 0;
+  background: $white url("../images/expand.svg") no-repeat 95% center;
+  background-size: 0.75rem;
+  font-size: 1rem;
+
+  -webkit-appearance: none;
+  &:focus {
+    outline: none;
+  }
+}
+#edit-field-drupal-org-profile-0-value--description,
+.password-confirm {
+  position: relative;
+  clip: unset;
+  width: 100%;
+  height: auto;
+  opacity: 0.75;
+  font-size: 0.75rem;
+}
+.captcha,
+details {
+  margin-top: 4rem !important; // Override core styling.
+  margin-bottom: 4rem !important; // Override core styling.
+  border: 1px solid $color--form-border !important;
+  summary {
+    padding: 1rem 1.8rem;
+    color: $label;
+    background: $color--form-bg;
+  }
+  .details-wrapper {
+    padding: 1rem 1.8rem 1.8rem 1.8rem;
+    .details-description {
+      max-width: 22.5rem;
+      margin-bottom: 1.75rem;
+      color: $form-select;
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+  }
+}
+.form-item--error-message {
+  line-height: 2;
+  &:before {
+    display: none !important; // Override core styling.
+  }
+  strong,
+  em {
+    color: $link-red;
+    font-size: 0.875rem;
+    font-weight: 400;
+  }
+}
+.form-actions {
+  display: flex;
+  align-items: center;
+}

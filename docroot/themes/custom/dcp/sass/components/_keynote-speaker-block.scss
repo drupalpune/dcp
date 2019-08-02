@@ -1,5 +1,5 @@
 .keynote-speaker-wrapper {
-  @include container(1280px, 60px, 50px, 15px);
+  @include container($container-width, 60px, 50px, 15px);
   display: flex;
   @include breakpoint(tablet) {
     display: block;

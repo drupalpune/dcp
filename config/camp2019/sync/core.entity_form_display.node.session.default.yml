@@ -9,6 +9,7 @@ dependencies:
     - field.field.node.session.field_presenter
     - field.field.node.session.field_selected
     - field.field.node.session.field_session_category
+    - field.field.node.session.field_speaker_consent
     - node.type.session
   module:
     - file
@@ -28,20 +29,20 @@ content:
     third_party_settings: {  }
     region: content
   field_attachment:
-    weight: 2
+    weight: 5
     settings:
       progress_indicator: throbber
     third_party_settings: {  }
     type: file_generic
     region: content
   field_experience_level:
-    weight: 5
+    weight: 3
     settings: {  }
     third_party_settings: {  }
     type: options_select
     region: content
   field_presenter:
-    weight: 26
+    weight: 4
     settings:
       match_operator: CONTAINS
       size: 60
@@ -50,10 +51,17 @@ content:
     type: entity_reference_autocomplete
     region: content
   field_session_category:
-    weight: 10
+    weight: 2
     settings: {  }
     third_party_settings: {  }
     type: options_select
+    region: content
+  field_speaker_consent:
+    weight: 26
+    settings:
+      display_label: false
+    third_party_settings: {  }
+    type: boolean_checkbox
     region: content
   title:
     type: string_textfield

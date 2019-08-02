@@ -1,0 +1,23 @@
+uuid: 0585cba4-7fc3-47fc-96e8-23ce1aa28aaf
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_speaker_consent
+    - node.type.session
+id: node.session.field_speaker_consent
+field_name: field_speaker_consent
+entity_type: node
+bundle: session
+label: 'Speaker consent'
+description: 'I agree to the <a href="/speaker-agreement>speaker agreement</a>'
+required: true
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'Yes'
+  off_label: 'No'
+field_type: boolean
