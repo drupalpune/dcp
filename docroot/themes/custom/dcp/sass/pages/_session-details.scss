@@ -18,6 +18,7 @@
 .session-left {
   font-family: Circular Air;
   font-size: 16px;
+  word-break: break-all;
   line-height: 25px;
   letter-spacing: 0.396667px;
   color: $session-title;
@@ -25,8 +26,9 @@
 }
 
 .session-detail-page {
-  width: 60%;
+  width: 80%;
   margin: auto;
+  padding: 10px 0;
 }
 .session-detail {
   font-family: Circular Air;
@@ -38,20 +40,22 @@
 }
 .session-right {
   text-align: center;
-  padding: 40px 10px;
   background: url(../images/Vector.svg) no-repeat;
   background-size: 150%;
-  padding: 60px 20px !important;
+  padding: 45px 20px;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   display: flex;
   width: 210px;
   word-break: break-all;
+  @include breakpoint(phablet) {
+    padding: 60px 20px;
+  }
 }
 
 .session-parent {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr;
   grid-column-gap: 1rem;
 }
 
