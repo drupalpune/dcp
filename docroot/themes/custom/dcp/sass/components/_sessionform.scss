@@ -1,177 +1,13 @@
-// /*------------------------------------*\
-//     * @file
-//     * session content type.
-// \*------------------------------------*/
-// .js {
-//   input {
-//     &.form-autocomplete {
-//       background-position: 98% center;
-//     }
-//   }
-// }
-
-// .node-session-form,
-// .node-workshop-form {
-//   width: 60%;
-//   padding: 20px 40px;
-//   border-radius: 10px;
-//   margin: 30px auto;
-
-//   @include breakpoint(laptop) {
-//     width: 80%;
-//   }
-
-//   @include breakpoint(phablet) {
-//     width: 90%;
-//   }
-
-//   .js-form-type-select {
-//     select {
-//       position: relative;
-//       appearance: none;
-//       background: url("/themes/custom/dcp/images/arrow.svg") no-repeat center center;
-//       background-position: 98% center;
-//       opacity: 1;
-//       border-radius: 0;
-//       font-size: 16px;
-//       letter-spacing: .44px;
-//       padding: 0;
-//       color: $form-select;
-//       margin: 5px 0 0 0;
-//       padding: 12px 0px 12px 10px;
-//       line-height: normal;
-//       width: 100%;
-//     }
-//   }
-
-//   label {
-//     color: $label;
-//     display: inline-block;
-//     margin-bottom: 5px;
-//     font-weight: bold;
-//     font-family: $title-font;
-//     font-weight: $light;
-
-//     @include breakpoint(mobileonly) {
-//       font-size: 14px;
-//     }
-
-//     a {
-//       text-decoration: none;
-//       color: $blue;
-//     }
-//   }
-
-//   .field-edit-link {
-//     display: none;
-//   }
-
-//   #edit-body-0-format-help {
-//     margin-bottom: 10px;
-//   }
-
-//   .description {
-//     display: none;
-//   }
-
-//   .text-full,
-//   .form-text,
-//   .form-file {
-//     color: $form-text;
-//     display: block;
-//     width: 100%;
-//     height: 40px;
-//     padding: 6px 12px;
-//     font-size: 16px;
-//     line-height: 1.42857143;
-//     background-color: $white;
-//     border: 1px solid $border;
-//     border-radius: 2px;
-//     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-
-//     @include breakpoint(mobileonly) {
-//       font-size: 14px;
-//     }
-//   }
-
-//   #edit-body-0-value {
-//     height: 160px;
-//   }
-
-//   #edit-submit {
-//     @include button();
-//     padding: 12px 40px;
-//     margin: 5% 45%;
-//   }
-
-//   #edit-preview {
-//     display: none;
-//   }
-
-//   img {
-//     @include breakpoint(mobileonly) {
-//       width: 80%;
-//       height: auto;
-//     }
-//   }
-
-//   #edit-body-0-format {
-//     display: none;
-//   }
-
-//   .js-form-item {
-//     &.form-item {
-//       &.js-form-type-vertical-tabs {
-//         display: none;
-//       }
-//     }
-//   }
-
-//   /* Consent field */
-//   .form-item-field-speaker-consent-value {
-//     .description {
-//       display: inline-block;
-//       margin-left: 0;
-//       :after {
-//         display: inline-block;
-//         width: 6px;
-//         height: 6px;
-//         margin: 0 0.3em;
-//         content: "";
-//         vertical-align: super;
-//         background-image: url(/core/misc/icons/ee0000/required.svg);
-//         background-repeat: no-repeat;
-//         background-size: 6px 6px;
-//       }
-//     }
-//     label {
-//       display: none;
-//     }
-//   }
-// }
-
 .node-session-form,
-.node-session-edit-form {
-  max-width: 48rem;
+.node-session-edit-form,
+.node-workshop-form,
+.node-workshop-edit-form {
+  max-width: 72rem;
   margin: 5.25rem auto;
   padding: 1.25rem 2.5rem;
   .js-form-type-vertical-tabs {
     display: none;
   }
-}
-.field--type-text-with-summary {
-  .filter-wrapper {
-    display: none;
-  }
-
-  .js-form-item {
-    &.form-item {
-      &.js-form-type-vertical-tabs {
-        display: none;
-      }
-    }
-  }
-
   /* Consent field */
   .form-item-field-speaker-consent-value {
     display: block;
@@ -195,6 +31,19 @@
     }
     label {
       display: none;
+    }
+  }
+  .field--type-text-with-summary {
+    .filter-wrapper {
+      display: none;
+    }
+
+    .js-form-item {
+      &.form-item {
+        &.js-form-type-vertical-tabs {
+          display: none;
+        }
+      }
     }
   }
 }
