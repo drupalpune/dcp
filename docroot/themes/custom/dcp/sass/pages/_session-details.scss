@@ -18,6 +18,7 @@
 .session-left {
   font-family: Circular Air;
   font-size: 16px;
+  word-break: break-all;
   line-height: 25px;
   letter-spacing: 0.396667px;
   color: $session-title;
@@ -27,6 +28,7 @@
 .session-detail-page {
   width: 80%;
   margin: auto;
+  padding: 10px 0;
 }
 .session-detail {
   font-family: Circular Air;
