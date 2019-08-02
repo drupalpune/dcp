@@ -11,7 +11,7 @@ id: node.workshop.body
 field_name: body
 entity_type: node
 bundle: workshop
-label: 'Workshop Synopsis'
+label: 'Workshop Details'
 description: ''
 required: true
 translatable: true

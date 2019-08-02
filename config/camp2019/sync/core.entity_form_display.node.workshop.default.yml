@@ -5,7 +5,7 @@ dependencies:
   config:
     - field.field.node.workshop.body
     - field.field.node.workshop.field_experience_level
-    - field.field.node.workshop.field_prerequisites_for_workshop
+    - field.field.node.workshop.field_prerequisites
     - field.field.node.workshop.field_presenter
     - field.field.node.workshop.field_selected
     - field.field.node.workshop.field_session_category
@@ -33,13 +33,13 @@ content:
     third_party_settings: {  }
     type: options_select
     region: content
-  field_prerequisites_for_workshop:
+  field_prerequisites:
     weight: 1
     settings:
-      size: 60
+      rows: 5
       placeholder: ''
     third_party_settings: {  }
-    type: string_textfield
+    type: text_textarea
     region: content
   field_presenter:
     weight: 5
@@ -57,7 +57,7 @@ content:
     type: options_select
     region: content
   field_speaker_consent:
-    weight: 26
+    weight: 6
     settings:
       display_label: false
     third_party_settings: {  }

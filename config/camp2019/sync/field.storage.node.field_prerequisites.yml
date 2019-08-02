@@ -1,0 +1,19 @@
+uuid: 24a05d20-5925-4e80-af7e-30247f757c0c
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - text
+id: node.field_prerequisites
+field_name: field_prerequisites
+entity_type: node
+type: text_long
+settings: {  }
+module: text
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

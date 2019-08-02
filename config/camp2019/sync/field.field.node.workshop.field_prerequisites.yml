@@ -1,0 +1,21 @@
+uuid: b636b98d-c737-4a87-80f9-e9f7cf6d26ff
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_prerequisites
+    - node.type.workshop
+  module:
+    - text
+id: node.workshop.field_prerequisites
+field_name: field_prerequisites
+entity_type: node
+bundle: workshop
+label: Prerequisites
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long
