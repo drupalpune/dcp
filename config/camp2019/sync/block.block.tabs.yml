@@ -1,0 +1,30 @@
+uuid: 3d806f7e-93ce-4c23-8f37-b22c47f94169
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+  theme:
+    - dcp
+id: tabs
+theme: dcp
+region: content
+weight: -12
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  provider: core
+  label_display: '0'
+  primary: true
+  secondary: true
+visibility:
+  user_role:
+    id: user_role
+    roles:
+      authenticated: authenticated
+      administrator: administrator
+    negate: false
+    context_mapping:
+      user: '@user.current_user_context:current_user'
