@@ -158,20 +158,6 @@
   .js-form-type-vertical-tabs {
     display: none;
   }
-}
-.field--type-text-with-summary {
-  .filter-wrapper {
-    display: none;
-  }
-
-  .js-form-item {
-    &.form-item {
-      &.js-form-type-vertical-tabs {
-        display: none;
-      }
-    }
-  }
-
   /* Consent field */
   .form-item-field-speaker-consent-value {
     display: block;
@@ -195,6 +181,19 @@
     }
     label {
       display: none;
+    }
+  }
+  .field--type-text-with-summary {
+    .filter-wrapper {
+      display: none;
+    }
+
+    .js-form-item {
+      &.form-item {
+        &.js-form-type-vertical-tabs {
+          display: none;
+        }
+      }
     }
   }
 }
