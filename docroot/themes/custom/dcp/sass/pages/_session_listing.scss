@@ -27,11 +27,11 @@
     line-height: 1;
   }
   > .group-content {
+    @include container($container-width, 60px, 50px, 15px);
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
     align-content: center;
-    @include container($container-width, 60px, 50px, 15px);
     .views-row {
       @include breakpoint(phablet) {
         flex: 0 1 auto;
@@ -112,4 +112,9 @@
   &.session-cat__beyond {
     background: $color--cat-beyond;
   }
+}
+.session-listing--my .views-field-edit-node {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 2.5rem;
 }
