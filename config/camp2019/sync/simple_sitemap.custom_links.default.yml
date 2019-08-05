@@ -1,0 +1,25 @@
+links:
+  -
+    path: /
+    priority: '1.0'
+    changefreq: daily
+  -
+    path: /submit-session
+  -
+    path: /submit-workshop
+  -
+    path: /faq
+  -
+    path: /session-tracks
+  -
+    path: /code-of-conduct
+  -
+    path: /speaker-agreement
+  -
+    path: /proposed-workshops
+  -
+    path: /proposed-sessions
+  -
+    path: /accepted-workshops
+  -
+    path: /accepted-sessions
