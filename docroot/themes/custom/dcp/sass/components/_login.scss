@@ -65,25 +65,7 @@
   .form-submit {
     margin: auto !important; // Force overwrite Classy styling.
   }
-  // .js-form-item {
-  //   display: flex;
-  //   flex-direction: column;
-  // }
-  // .description {
-  //   display: none;
-  // }
-  // label {
-  //   margin: 5px 0;
-  //   font-family: $title-font;
-  // }
-  // label::after {
-  //   content: unset;
-  // }
 }
-// .user-register-form input:focus,
-// .user-register-form input:focus {
-//   outline: none;
-// }
 select#edit-field-curr {
   display: block;
   width: 100%;
@@ -98,42 +80,6 @@ select#edit-field-curr {
   border-radius: 2px;
   background-color: $medblue;
   font-size: 1em;
-}
-form.user-register-form input[type="text"],
-form.user-register-form input[type="password"],
-form.user-register-form input[type="email"],
-form.user-register-form input[type="file"],
-form.user-register-form input[type="url"],
-form.user-login-form input[type="text"],
-form.user-login-form input[type="password"],
-form.user-login-form input[type="email"],
-form.user-login-form input[type="file"],
-form.user-login-form input[type="url"] {
-  // display: block;
-  // width: 100%;
-  // padding: 1em;
-  // -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
-  // transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
-  // color: $white;
-  // color: $text-color;
-  // border: none;
-  // border-bottom: solid 1px $white;
-  // border-radius: 2px;
-  // background-color: $medblue;
-  // font-size: 1em;
-}
-input[type="submit"] {
-  // padding: 10px 30px;
-  // color: $white;
-  // border: none;
-  // border-radius: 5px;
-  // background-color: $btn-color;
-  // font-size: 14px;
-}
-form.user-login-form .form-actions,
-form.user-registration-form .form-actions {
-  // display: flex;
-  // justify-content: flex-end;
 }
 .new-account {
   display: flex;
@@ -160,27 +106,6 @@ form.user-registration-form .form-actions {
     margin-top: 10px;
   }
 }
-// select {
-//   &#edit-field-type-of-business.form-select,
-//   &#edit-field-role.form-select {
-//     display: block;
-//     width: 100%;
-//     width: 100%;
-//     padding: 1em;
-//     -webkit-transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
-//     transition: all 0.3s cubic-bezier(0.64, 0.09, 0.08, 1);
-//     color: $white;
-//     color: $text-color;
-//     border: none;
-//     border-bottom: solid 1px $white;
-//     border-radius: 2px;
-//     background: url(../images/arrow.svg) no-repeat center center;
-//     background-color: $medblue;
-//     background-color: $medblue;
-//     background-position: 98% center;
-//     font-size: 1em;
-//   }
-// }
 .user-logged-in {
   .login-new-form {
     h2 {
@@ -194,5 +119,15 @@ form.user-registration-form .form-actions {
       margin: 0 40%;
       padding: 0;
     }
+  }
+}
+.block-user-login-block {
+  .login-new-form {
+    @include breakpoint(mobileonly) {
+      min-width: 0;
+      margin-right: -30px;
+      margin-left: -30px;
+    }
+    min-width: 35rem;
   }
 }
