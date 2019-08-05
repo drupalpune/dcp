@@ -1,0 +1,23 @@
+{#
+/**
+ * @file
+ * Theme override to display a unformatted rows of Proposed session view.
+ */
+#}
+<div class="view-content__group">
+  {% if title %}
+    <h3 class="group-heading">{{ title }}</h3>
+  {% endif %}
+  <div class="group-content">
+    {% for row in rows %}
+      {%
+    set row_classes = [
+      default_row_class ? 'views-row',
+    ]
+  %}
+      <div{{row.attributes.addClass(row_classes)}}>
+        {{- row.content -}}
+      </div>
+    {% endfor %}
+  </div>
+</div>
