@@ -12,7 +12,7 @@ dependencies:
 id: volunteerwithusblockonhomepage
 theme: dcp
 region: content
-weight: 1
+weight: 3
 provider: null
 plugin: 'block_content:380095ac-142c-415e-add5-05c852b3a835'
 settings:
