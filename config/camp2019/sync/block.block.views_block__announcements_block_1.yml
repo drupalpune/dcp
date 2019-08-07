@@ -1,6 +1,6 @@
 uuid: a0c3d9fa-af21-43ab-b96a-a7e29d3be232
 langcode: en
-status: false
+status: true
 dependencies:
   config:
     - views.view.announcements
@@ -12,7 +12,7 @@ dependencies:
 id: views_block__announcements_block_1
 theme: dcp
 region: content
-weight: 2
+weight: 0
 provider: null
 plugin: 'views_block:announcements-block_1'
 settings:
