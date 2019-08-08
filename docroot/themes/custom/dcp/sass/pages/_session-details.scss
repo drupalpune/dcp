@@ -29,6 +29,14 @@
   width: 80%;
   margin: auto;
   padding: 10px 0;
+  ol, ul, li {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+  }
 }
 .session-detail {
   font-family: Circular Air;
