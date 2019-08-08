@@ -48,6 +48,14 @@
   display: flex;
   width: 210px;
   word-break: break-all;
+  ul,ol {
+    list-style-type: none;
+  }
+  &-wrapper {
+    display: flex;
+    justify-content: center;
+    min-height: 400px;
+  }
   @include breakpoint(phablet) {
     padding: 60px 20px;
   }
@@ -57,11 +65,6 @@
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   grid-column-gap: 1rem;
-}
-
-.session-right-wrapper {
-  display: flex;
-  justify-content: center;
 }
 
 .speakers {
