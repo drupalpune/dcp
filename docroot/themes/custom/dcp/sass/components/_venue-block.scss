@@ -35,6 +35,8 @@
     display: flex;
     background-image: linear-gradient($light-grey, white);
     margin-top: 104px;
+    justify-content: space-between;
+
     @include breakpoint(phablet) {
       display: block;
       margin: 0;
@@ -47,6 +49,7 @@
 
     .venue-image-desktop {
       justify-self: end;
+      max-width: 50%;
 
       img {
         width: 65%;
