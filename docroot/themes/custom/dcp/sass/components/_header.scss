@@ -1,11 +1,12 @@
 .region-header {
   display: flex;
   background: white;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   min-height: 97px;
   padding: 18px 51px 16px 60px;
   align-items: center;
   justify-content: center;
+
   .block-system-branding-block {
     width: 118px;
     height: 63px;
@@ -14,8 +15,10 @@
       height: 47px;
     }
   }
+
   .menu--main .menu-item--expanded .menu {
     min-width: 160px;
+
     .menu-item {
       @include breakpoint(tablet) {
         padding-bottom: 10px;
@@ -25,10 +28,12 @@
       }
     }
   }
+
   > nav[role="navigation"] {
     h2 {
       display: none;
     }
+
     &.menu--main {
       a {
         @extend %CircularAir-Book;
@@ -39,30 +44,37 @@
         text-transform: uppercase;
         color: #313131;
         text-decoration: none;
+
         &.is-active {
           color: #316CF4;
         }
       }
-      >.menu {
+
+      > .menu {
         display: flex;
-        >.menu-item{
+
+        > .menu-item {
           margin-right: 35px;
           @include breakpoint(laptop) {
             margin-right: 20px;
           }
         }
       }
+
       @include breakpoint(tablet) {
         display: none;
       }
     }
+
     &.menu--account {
       min-width: 124px;
       text-align: right;
+
       ul > li {
         width: 124px;
       }
-      a{
+
+      a {
         @extend %CircularAir-Book;
         font-size: 12px;
         line-height: 15px;
@@ -72,13 +84,16 @@
         text-decoration: none;
         color: #313131;
       }
+
       @include breakpoint(tablet) {
         display: none;
       }
     }
+
     .menu-item--expanded {
       position: relative;
       display: inline-block;
+
       .menu {
         width: calc(100% - 10px);
         right: 0;
@@ -92,8 +107,9 @@
         box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
         border-radius: 2px;
       }
+
       li {
-        >a {
+        > a {
           @extend %CircularAir-Book;
           padding: 11px 21px 11px 12px;
           letter-spacing: 1px;
@@ -105,25 +121,30 @@
         }
       }
     }
+
     .menu-item--expanded:hover .menu {
       display: block;
     }
   }
+
   .block-system-branding-block {
     margin: 0 auto 0 0;
   }
+
   img {
     width: 100%;
   }
+
   .diwrapper {
     padding-left: 50px;
+
     a {
       @extend %CircularAir-Book;
       background: #FF2370;
       border-radius: 23.5px;
       font-size: 12px;
       line-height: 15px;
-      padding:10px 30px 10px 30px;
+      padding: 10px 30px 10px 30px;
       display: flex;
       align-items: center;
       text-align: center;
@@ -132,10 +153,12 @@
       color: #FFFFFF;
       text-decoration: none;
     }
-    p{
+
+    p {
       line-height: 0;
       margin: 0;
     }
+
     @include breakpoint(tablet) {
       display: none;
     }
@@ -143,24 +166,29 @@
 
   .mobile-menu {
     display: none;
+
     &.trigger-icon {
       background: url("../images/hamburger.png") center center no-repeat;
       background-size: contain;
     }
+
     &.cross-icon {
       background: url("../images/cross.png") center center no-repeat;
       background-size: contain;
     }
+
     &[class*="-icon"] {
       height: 18px;
       width: 25px;
       cursor: pointer;
     }
+
     &.header-icon {
       background: url("../logo.png") center center no-repeat;
       background-size: contain;
 
     }
+
     @include breakpoint(tablet) {
       display: block;
     }
@@ -172,33 +200,40 @@
     z-index: 9999;
     width: 100%;
     height: 100vh;
-    background: rgba(255,255,255,.8);
+    background: rgba(255, 255, 255, .8);
     right: 0;
     top: 0;
     text-align: right;
+
     nav[role="navigation"] {
       h2 {
         display: none;
       }
+
       &.menu--main {
         display: block;
       }
+
       &.menu--account {
         display: block;
       }
+
       &.menu--main > .menu {
         flex-direction: column;
         padding-left: 80px;
         text-align: left;
+
         > .menu-item {
           padding-bottom: 44px;
+
           &.menu-item--expanded {
-            .menu{
+            .menu {
               padding-top: 20px;
               padding-right: 20px;
             }
           }
         }
+
         a {
           @extend %CircularAir-Book;
           font-size: 18px;
@@ -206,37 +241,45 @@
           letter-spacing: 0.315px;
           color: #9FA0AE;
           text-decoration: none;
+
           &.is-active {
             font-size: 36px;
             color: #316CF4;
           }
         }
       }
+
       &.menu--account {
         display: block;
+
         .menu {
           .menu-item {
             padding-bottom: 10px;
+
             &:last-child {
               padding-bottom: 0;
             }
           }
         }
+
         > .menu {
           flex-direction: column;
           padding-left: 80px;
           text-align: left;
+
           > .menu-item {
             padding-bottom: 44px;
+
             &.menu-item--expanded {
-              .menu{
+              .menu {
                 padding-top: 20px;
                 padding-right: 20px;
               }
             }
           }
         }
-        a{
+
+        a {
           @extend %CircularAir-Book;
           font-size: 18px;
           line-height: 19px;
@@ -247,6 +290,7 @@
 
       }
     }
+
     .main-menu-container {
       width: 100%;
       height: 100vh;
@@ -257,32 +301,52 @@
       overflow: auto;
       box-sizing: border-box;
     }
+
     .mobile-header-content {
       text-align: left;
     }
+
     .mobile-header-section {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding-bottom: 80px;
+
       .block-system-branding-block {
         width: 88px;
         height: 47px;
       }
     }
+
     .diwrapper {
       display: inline-block;
       padding-left: 80px;
-      a{
+
+      a {
         font-size: 16px;
         line-height: 20px;
       }
-      p{
+
+      p {
         line-height: 0;
         margin: 0;
       }
     }
   }
+
+  ol, ul, li {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+  }
+
+  ol, ul {
+    list-style-type: none;
+  }
+
   @include breakpoint(laptop) {
     padding: 6px 21px 16px 16px;
   }

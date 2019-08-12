@@ -10,7 +10,7 @@ field_name: field_speaker_consent
 entity_type: node
 bundle: workshop
 label: 'Speaker consent'
-description: 'I agree to the <a href="/speaker-agreement>speaker agreement</a>'
+description: 'I agree to the <a href="/speaker-agreement">speaker agreement</a>'
 required: true
 translatable: true
 default_value:
