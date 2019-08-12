@@ -1,0 +1,10 @@
+uuid: 2fd7a366-87c2-4960-8bad-ac28fc556b77
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.schedule_view_mode
+label: 'Schedule view mode'
+targetEntityType: node
+cache: true

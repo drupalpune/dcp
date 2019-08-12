@@ -1,0 +1,26 @@
+uuid: af3b29c7-0329-4302-b15b-5a18ad1682dd
+langcode: en
+status: true
+dependencies:
+  module:
+    - quicktabs
+    - system
+  theme:
+    - dcp
+id: quicktabsschedule
+theme: dcp
+region: content
+weight: 0
+provider: null
+plugin: 'quicktabs_block:schedule'
+settings:
+  id: 'quicktabs_block:schedule'
+  label: 'QuickTabs - Schedule'
+  provider: quicktabs
+  label_display: visible
+visibility:
+  request_path:
+    id: request_path
+    pages: /schedule-test
+    negate: false
+    context_mapping: {  }

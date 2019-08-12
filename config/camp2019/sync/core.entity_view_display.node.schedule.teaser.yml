@@ -1,0 +1,22 @@
+uuid: 4fd7b4b1-6d15-4700-8736-f64c2e734628
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.schedule.field_slot
+    - node.type.schedule
+  module:
+    - user
+id: node.schedule.teaser
+targetEntityType: node
+bundle: schedule
+mode: teaser
+content:
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden:
+  field_slot: true

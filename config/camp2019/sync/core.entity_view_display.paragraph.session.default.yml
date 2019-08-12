@@ -1,0 +1,51 @@
+uuid: 28d86bbb-e794-4f09-867d-8eb9df86b80d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.session.field_rooms
+    - field.field.paragraph.session.field_schedule_highlighted
+    - field.field.paragraph.session.field_session_title
+    - field.field.paragraph.session.field_time_slots
+    - field.field.paragraph.session.field_title
+    - paragraphs.paragraphs_type.session
+  module:
+    - options
+id: paragraph.session.default
+targetEntityType: paragraph
+bundle: session
+mode: default
+content:
+  field_rooms:
+    weight: 3
+    label: visually_hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_session_title:
+    weight: 2
+    label: visually_hidden
+    settings:
+      view_mode: schedule_view_mode
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_time_slots:
+    weight: 0
+    label: visually_hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_title:
+    weight: 1
+    label: visually_hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden:
+  field_schedule_highlighted: true

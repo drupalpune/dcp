@@ -1,0 +1,48 @@
+uuid: 95078a74-664e-43e1-a254-3b7649fdf8d7
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.schedule_view_mode
+    - field.field.node.session.body
+    - field.field.node.session.field_attachment
+    - field.field.node.session.field_experience_level
+    - field.field.node.session.field_presenter
+    - field.field.node.session.field_selected
+    - field.field.node.session.field_session_category
+    - field.field.node.session.field_speaker_consent
+    - node.type.session
+  module:
+    - options
+    - user
+id: node.session.schedule_view_mode
+targetEntityType: node
+bundle: session
+mode: schedule_view_mode
+content:
+  field_experience_level:
+    weight: 2
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_session_category:
+    weight: 0
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  links:
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  body: true
+  field_attachment: true
+  field_presenter: true
+  field_selected: true
+  field_speaker_consent: true

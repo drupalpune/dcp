@@ -1,0 +1,55 @@
+uuid: 2acb574e-3ead-4493-b06b-42e17d876296
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.session.field_rooms
+    - field.field.paragraph.session.field_schedule_highlighted
+    - field.field.paragraph.session.field_session_title
+    - field.field.paragraph.session.field_time_slots
+    - field.field.paragraph.session.field_title
+    - paragraphs.paragraphs_type.session
+id: paragraph.session.default
+targetEntityType: paragraph
+bundle: session
+mode: default
+content:
+  field_rooms:
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_schedule_highlighted:
+    weight: 3
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
+    region: content
+  field_session_title:
+    weight: 1
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_time_slots:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_title:
+    weight: 4
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  created: true
+  status: true

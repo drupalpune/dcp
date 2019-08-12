@@ -1,0 +1,36 @@
+uuid: d0c330ae-1186-43fd-ab58-3b9c5548549a
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - paragraphs
+id: paragraph.field_rooms
+field_name: field_rooms
+entity_type: paragraph
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: '1'
+      label: Auditorium
+    -
+      value: '2'
+      label: 'Classroom 1'
+    -
+      value: '3'
+      label: 'Classroom 2'
+    -
+      value: '4'
+      label: 'Classroom 3'
+    -
+      value: '5'
+      label: 'Classroom 4'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
