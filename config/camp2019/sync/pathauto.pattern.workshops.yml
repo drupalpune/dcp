@@ -1,0 +1,22 @@
+uuid: da5887ad-cbe9-4430-bae5-b5cfcd716856
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: workshops
+label: workshops
+type: 'canonical_entities:node'
+pattern: 'workshop/[node:title]'
+selection_criteria:
+  4001cab8-911f-43dc-8e15-c784497fb0ed:
+    id: node_type
+    bundles:
+      workshop: workshop
+    negate: false
+    context_mapping:
+      node: node
+    uuid: 4001cab8-911f-43dc-8e15-c784497fb0ed
+selection_logic: and
+weight: 0
+relationships: {  }
