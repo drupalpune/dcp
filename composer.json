@@ -23,6 +23,7 @@
         "drupal/features": "^3.8.0",
         "drupal/flag": "^4.0@alpha",
         "drupal/google_analytics": "^3.0",
+        "drupal/google_tag": "^1.1",
         "drupal/memcache": "2.0-alpha7",
         "drupal/paragraphs": "^1.8",
         "drupal/qa_accounts": "^1.0.0-alpha1",
