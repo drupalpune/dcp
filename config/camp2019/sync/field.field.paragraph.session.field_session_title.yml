@@ -1,0 +1,30 @@
+uuid: 2f79bbcf-fe70-47e0-9c44-02d8ef30a7ca
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_session_title
+    - node.type.session
+    - node.type.workshop
+    - paragraphs.paragraphs_type.session
+id: paragraph.session.field_session_title
+field_name: field_session_title
+entity_type: paragraph
+bundle: session
+label: 'Session Title'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:node'
+  handler_settings:
+    target_bundles:
+      session: session
+      workshop: workshop
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: session
+field_type: entity_reference

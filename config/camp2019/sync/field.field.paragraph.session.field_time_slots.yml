@@ -1,0 +1,21 @@
+uuid: 7aaeff0d-d4d6-4454-a754-d025b7b4bee7
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_time_slots
+    - paragraphs.paragraphs_type.session
+  module:
+    - options
+id: paragraph.session.field_time_slots
+field_name: field_time_slots
+entity_type: paragraph
+bundle: session
+label: 'Time Slots'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -1,0 +1,21 @@
+uuid: f9ee41f5-43d6-4af7-8b3e-ea4d43107d2c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_rooms
+    - paragraphs.paragraphs_type.session
+  module:
+    - options
+id: paragraph.session.field_rooms
+field_name: field_rooms
+entity_type: paragraph
+bundle: session
+label: Rooms
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string
