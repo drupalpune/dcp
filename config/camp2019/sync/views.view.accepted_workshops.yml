@@ -555,7 +555,7 @@ display:
         weight: -50
         context: '0'
         menu_name: main
-        enabled: true
+        enabled: false
       defaults:
         fields: true
     cache_metadata:
@@ -666,6 +666,7 @@ display:
         weight: -49
         context: '0'
         menu_name: main
+        enabled: false
       header:
         area:
           id: area
