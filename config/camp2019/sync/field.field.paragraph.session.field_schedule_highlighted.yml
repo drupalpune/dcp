@@ -1,0 +1,23 @@
+uuid: 086d0ef5-9506-490c-b6b3-18c6c5913a45
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_schedule_highlighted
+    - paragraphs.paragraphs_type.session
+id: paragraph.session.field_schedule_highlighted
+field_name: field_schedule_highlighted
+entity_type: paragraph
+bundle: session
+label: 'Schedule Highlighted'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

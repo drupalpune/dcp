@@ -3,22 +3,23 @@
     * Schedule Page.
 \*------------------------------------*/
 
-
 .schedule__content {
-background-color: #f7f9fb;
+  background-color: #f7f9fb;
 }
 
 #schedule-page {
-  width:80%;
-  margin:0px auto;
+  width: 80%;
+  margin: 0px auto;
+
   @include breakpoint(phablet) {
-     width:95%;
+    width: 95%;
   }
+
   h1 {
     @include heading($blue, 32px);
     text-align: center;
     padding: 0;
-    padding-top:80px;
+    padding-top: 80px;
   }
 
   .tabs {
@@ -28,16 +29,19 @@ background-color: #f7f9fb;
     padding: 0;
     margin: 0 auto;
     margin-top: 75px;
-    padding-bottom:75px;
+    padding-bottom: 75px;
   }
+
   .tabs:after {
-    content: '';
+    content: "";
     display: table;
     clear: both;
   }
-  .tabs input[type=radio] {
+
+  .tabs input[type="radio"] {
     display: none;
   }
+
   .tabs label {
     display: block;
     float: left;
@@ -53,43 +57,313 @@ background-color: #f7f9fb;
     cursor: pointer;
     transition: all 0.5s;
   }
+
   .tab-content {
     display: none;
     width: 100%;
     float: left;
     padding-top: 40px;
     box-sizing: border-box;
-      img {
-        width:100%;
-        height:auto;
-      }
+
+    img {
+      width: 100%;
+      height: auto;
+    }
   }
+
   .tab-content * {
     -webkit-animation: scale 0.7s ease-in-out;
     -moz-animation: scale 0.7s ease-in-out;
     animation: scale 0.7s ease-in-out;
   }
+
   @keyframes scale {
     0% {
       transform: scale(0.9);
       opacity: 0;
     }
+
     50% {
       transform: scale(1.01);
       opacity: 0.5;
     }
+
     100% {
       transform: scale(1);
       opacity: 1;
     }
   }
+
   .tabs [id^="tab"]:checked+label {
-    background: #FFF;
+    background: #fff;
     box-shadow: inset 0px -4px 0px 0px #ffa94d;
     color: #ffa94d;
   }
+
   #tab1:checked~#tab-content1,
   #tab2:checked~#tab-content2 {
     display: block;
+  }
+}
+
+.schedule-view-mode-wrap {
+  .field {
+
+    &.field--name-field-experience-level.field__item,
+    &.field--name-uid,
+    &.field--name-field-session-category.field__item {
+      padding: 0;
+      margin: 0;
+    }
+
+    &.field--name-uid {
+      @extend %CircularAir-Book;
+
+      font-size: 16px;
+
+      @include breakpoint(tablet) {
+        font-size: 12px;
+      }
+
+      line-height: 1.2;
+      letter-spacing: 0.396667px;
+      color: $black;
+    }
+
+    &.field--name-field-experience-level.field__item {
+      @extend %CircularAir-Book;
+      font-size: 18px;
+
+      @include breakpoint(tablet) {
+        font-size: 12px;
+      }
+
+      line-height: 1.2;
+      letter-spacing: 0.315px;
+      color: $form-select;
+      text-transform: uppercase;
+    }
+
+    &.field--name-field-session-category.field__item {
+      a {
+        @include button();
+        @extend %CircularAir-Bold;
+        font-size: 16px;
+
+        @include breakpoint(tablet) {
+          font-size: 10px;
+          padding: 8px 4px;
+        }
+
+        line-height: 1.2;
+        letter-spacing: 0.315px;
+        color: $white;
+      }
+    }
+  }
+}
+
+.schedule-session-title,
+.schedule-session-experience,
+.schedule-session-category,
+.schedule-session-speaker {
+  margin: 0 0 30px 0;
+}
+
+.schedule-session-title {
+  @extend %CircularAir-Bold;
+  font-size: 18px;
+
+  @include breakpoint(tablet) {
+    font-size: 14px;
+  }
+
+  line-height: 1.2;
+  letter-spacing: 0.315px;
+  color: $label;
+}
+
+.node--type-schedule {
+  .node__content {
+    .field {
+      .field__item {
+        margin: 0;
+        padding: 0;
+      }
+    }
+
+    .field--name-field-schedule-date {
+      text-align: center;
+
+      .field__item {
+        @extend %CircularAir-Bold;
+        font-size: 24px;
+        line-height: 55px;
+        text-align: center;
+        letter-spacing: 0.315px;
+        color: $session-title;
+      }
+    }
+
+    padding: 0;
+
+    .paragraph--type--session {
+      display: flex;
+      justify-content: space-between;
+      padding-right: 30px;
+      margin-bottom: 40px;
+
+      @include breakpoint(tablet) {
+        padding-right: 0;
+      }
+
+      border: 1.5px solid $light-grey;
+      box-sizing: border-box;
+      border-radius: 10px;
+
+      .field--name-field-rooms {
+        flex-basis: 20%;
+
+        .field__item {
+          @extend %CircularAir-Bold;
+          font-size: 18px;
+
+          @include breakpoint(tablet) {
+            font-size: 12px;
+          }
+
+          line-height: 1.2;
+          letter-spacing: 0.315px;
+          color: $speaker;
+        }
+      }
+
+      .field--name-field-time-slots {
+        flex-basis: 20%;
+
+        @include breakpoint(tablet) {
+          flex-basis: 15%;
+        }
+
+        .field__item {
+          @extend %CircularAir-Bold;
+          font-size: 18px;
+
+          @include breakpoint(tablet) {
+            font-size: 12px;
+          }
+
+          line-height: 1.2;
+          letter-spacing: 0.315px;
+          color: $session-title;
+        }
+      }
+
+      .field--name-field-title {
+        .field__item {
+          @extend %CircularAir-Bold;
+          font-size: 18px;
+
+          @include breakpoint(tablet) {
+            font-size: 14px;
+          }
+
+          text-transform: uppercase;
+          line-height: 1.2;
+          letter-spacing: 0.315px;
+          color: $label;
+        }
+      }
+
+      .field--name-field-session-title,
+      .field--name-field-title {
+        flex-basis: 60%;
+
+        @include breakpoint(tablet) {
+          flex-basis: 70%;
+        }
+      }
+    }
+  }
+}
+
+.paragraph--type--session.highlighted {
+  background: $highlighted;
+}
+
+.quicktabs-wrapper {
+  .item-list {
+    width: 40%;
+    margin: 80px auto 60px auto;
+
+    ul {
+      padding: 20px;
+
+      &.quicktabs-tabs li {
+        padding: 20px 20% 20px 20%;
+        border: 1.5px solid $light-grey;
+        box-sizing: border-box;
+        margin: 0;
+
+        &:nth-child(1) {
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+          border-right: none;
+        }
+
+        &:nth-child(2) {
+          border-top-right-radius: 10px;
+          border-bottom-right-radius: 10px;
+        }
+
+        &.active {
+          background: $highlighted;
+
+          a {
+            color: $black;
+          }
+        }
+
+        a {
+          text-decoration: none;
+          text-transform: uppercase;
+          color: $form-select;
+
+          &:hover {
+            color: $black;
+          }
+        }
+      }
+    }
+  }
+}
+
+footer.node__meta {
+  display: none;
+}
+
+.block-quicktabs-blockschedule {
+  >h2 {
+    display: none;
+  }
+}
+
+.node--type-schedule {
+  >h2 {
+    text-align: center;
+    background: url(../images/schedule.svg) no-repeat;
+    background-position: center;
+    background-size: contain;
+    padding: 30px;
+
+    a {
+      text-decoration: none;
+      @extend %Georgia;
+      font-size: 36px;
+      line-height: 55px;
+      text-align: center;
+      letter-spacing: 0.315px;
+      color: $label;
+    }
   }
 }

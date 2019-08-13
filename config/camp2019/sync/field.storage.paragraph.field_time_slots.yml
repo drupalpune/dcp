@@ -1,0 +1,39 @@
+uuid: d3cc8c38-58ac-4345-ae3c-552cc46e4f6f
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - paragraphs
+id: paragraph.field_time_slots
+field_name: field_time_slots
+entity_type: paragraph
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: '1'
+      label: '09:30 - 10:00'
+    -
+      value: '2'
+      label: '10:00 - 10:00'
+    -
+      value: '3'
+      label: '11:00 - 11:30'
+    -
+      value: '4'
+      label: '11:30 - 12:15'
+    -
+      value: '5'
+      label: '12:30 - 01:15'
+    -
+      value: '6'
+      label: '01:15 - 02:00'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

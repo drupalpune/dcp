@@ -1,0 +1,9 @@
+uuid: 9f55d8b1-4a75-456c-bb4b-d06be2828ac7
+langcode: en
+status: true
+dependencies: {  }
+id: session
+label: Session
+icon_uuid: null
+description: 'This will enable the session list'
+behavior_plugins: {  }

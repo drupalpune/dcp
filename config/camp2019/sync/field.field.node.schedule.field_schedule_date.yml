@@ -1,0 +1,19 @@
+uuid: 612eb02b-203f-4f90-a4f0-102bedd393ec
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_schedule_date
+    - node.type.schedule
+id: node.schedule.field_schedule_date
+field_name: field_schedule_date
+entity_type: node
+bundle: schedule
+label: 'Schedule Date'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -7,6 +7,10 @@
   position: relative;
   overflow: hidden;
   min-height: 25rem;
+
+  @include breakpoint(phablet) {
+    min-height: 40rem;
+  }
   .header-content {
     position: absolute;
     top: 50%;

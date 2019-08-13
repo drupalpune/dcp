@@ -1,0 +1,31 @@
+uuid: 8d390a08-3f97-4f7a-a4e9-227e8feba4dd
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_slot
+    - node.type.schedule
+    - paragraphs.paragraphs_type.session
+  module:
+    - entity_reference_revisions
+id: node.schedule.field_slot
+field_name: field_slot
+entity_type: node
+bundle: schedule
+label: Slot
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      session: session
+    target_bundles_drag_drop:
+      session:
+        enabled: true
+        weight: 2
+field_type: entity_reference_revisions

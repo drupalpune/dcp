@@ -1,0 +1,39 @@
+uuid: 298361b4-b3f6-4ba2-ab68-75435b8e2d1d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.schedule.field_schedule_date
+    - field.field.node.schedule.field_slot
+    - node.type.schedule
+  module:
+    - entity_reference_revisions
+    - user
+id: node.schedule.default
+targetEntityType: node
+bundle: schedule
+mode: default
+content:
+  field_schedule_date:
+    weight: 1
+    label: visually_hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_slot:
+    type: entity_reference_revisions_entity_view
+    weight: 2
+    label: visually_hidden
+    settings:
+      view_mode: default
+      link: ''
+    third_party_settings: {  }
+    region: content
+  links:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

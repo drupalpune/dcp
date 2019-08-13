@@ -63,3 +63,17 @@ function dcp_form_user_register_form_alter(&$form, &$form_state, $form_id) {
   );
 
 }
+/**
+* Implements theme_preprocess_paragraph_title() to add highlight wrapper.
+*/
+
+function dcp_preprocess_paragraph__session(&$variables) {
+  $paragraph = $variables['paragraph'];
+
+  $parafield = $paragraph->get('field_schedule_highlighted')->value;
+  if ($parafield == "1") {
+    $variables['classArray'] = 'highlighted ';
+  } else {
+      $variables['classArray'] = 'unhighlighted ';
+  }
+}
