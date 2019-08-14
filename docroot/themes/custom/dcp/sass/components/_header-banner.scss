@@ -6,19 +6,15 @@
 .header-main-wrapper {
   position: relative;
   overflow: hidden;
-  min-height: 25rem;
-
-  @include breakpoint(phablet) {
-    min-height: 40rem;
-  }
   .header-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 80%;
-    transform: translate(-50%, -50%);
     text-align: center;
     color: $white;
+    z-index: 9;
+    margin: 0 auto;
+    padding: 100px 0;
+    @include breakpoint(phablet) {
+      padding: 50px 0;
+    }
   }
   .page-title {
     @include breakpoint(laptop) {

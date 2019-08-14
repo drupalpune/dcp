@@ -29,7 +29,7 @@ content:
     region: content
   field_experience_level:
     weight: 4
-    label: above
+    label: hidden
     settings: {  }
     third_party_settings: {  }
     type: list_default
@@ -61,7 +61,7 @@ content:
     region: content
   field_session_category:
     weight: 3
-    label: above
+    label: hidden
     settings:
       link: true
     third_party_settings: {  }

@@ -24,15 +24,17 @@
         {% endif %}
         </li>
         {% if node.field_presenter %}
-          <li>
-            {% if node.field_presenter.entity.field_drupal_org_profile.value %}
-              <a href="{{ node.field_presenter.entity.field_drupal_org_profile.value }}" target="_blank">
-                {{ node.field_presenter.entity.field_full_name.value }}
-              </a>
-            {% else %}
-              {{ node.field_presenter.entity.field_full_name.value }}
-            {% endif %}
-          </li>
+          {% for presenter in node.field_presenter %}
+              <li>
+                {% if presenter.entity.field_drupal_org_profile.value %}
+                  <a href="{{ presenter.entity.field_drupal_org_profile.value }}" target="_blank">
+                    {{ presenter.entity.field_full_name.value }}
+                  </a>
+                {% else %}
+                  {{ presenter.entity.field_full_name.value }}
+                {% endif %}
+              </li>
+          {% endfor %}
         {% endif %}
       </ul>
     </div>
