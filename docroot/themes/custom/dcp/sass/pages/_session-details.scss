@@ -29,14 +29,6 @@
   width: 80%;
   margin: auto;
   padding: 10px 0;
-  ol, ul, li {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
-    font: inherit;
-    vertical-align: baseline;
-  }
 }
 .session-detail {
   font-family: Circular Air;
@@ -56,13 +48,21 @@
   display: flex;
   width: 210px;
   word-break: break-all;
-  ul,ol {
-    list-style-type: none;
-  }
   &-wrapper {
     display: flex;
     justify-content: center;
     min-height: 400px;
+    ul,ol {
+      list-style-type: none;
+    }
+    ol, ul, li {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      font-size: 100%;
+      font: inherit;
+      vertical-align: baseline;
+    }
   }
   @include breakpoint(phablet) {
     padding: 60px 20px;

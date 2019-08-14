@@ -17,7 +17,7 @@
   }
 
   .menu--main .menu-item--expanded .menu {
-    min-width: 160px;
+    min-width: 260px;
 
     .menu-item {
       @include breakpoint(tablet) {
@@ -95,13 +95,15 @@
       display: inline-block;
 
       .menu {
-        width: calc(100% - 10px);
-        right: 0;
+        width: 100%;
+        right: auto;
+        left: 50%;
+        transform: translate(-50%);
         display: none;
         text-align: left;
         cursor: pointer;
         position: absolute;
-        z-index: 1;
+        z-index: 999;
         background: white;
         margin-top: 11px;
         box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.3);
