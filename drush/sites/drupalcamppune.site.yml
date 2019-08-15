@@ -1,0 +1,48 @@
+# Application 'drupalcamppune', environment 'dev'.
+dev:
+  root: /var/www/html/drupalcamppune.dev/docroot
+  ac-site: drupalcamppune
+  ac-env: dev
+  ac-realm: prod
+  uri: drupalcamppunedev.prod.acquia-sites.com
+  dev.livedev:
+    parent: '@drupalcamppune.dev'
+    root: /mnt/gfs/drupalcamppune.dev/livedev/docroot
+  host: drupalcamppunedev.ssh.prod.acquia-sites.com
+  user: drupalcamppune.dev
+  paths:
+    drush-script: drush9
+
+
+# Application 'drupalcamppune', environment 'prod'.
+prod:
+  root: /var/www/html/drupalcamppune.prod/docroot
+  ac-site: drupalcamppune
+  ac-env: prod
+  ac-realm: prod
+  uri: camp2019.drupalpune.com
+  prod.livedev:
+    parent: '@drupalcamppune.prod'
+    root: /mnt/gfs/drupalcamppune.prod/livedev/docroot
+  host: drupalcamppune.ssh.prod.acquia-sites.com
+  user: drupalcamppune.prod
+  paths:
+    drush-script: drush9
+
+
+# Application 'drupalcamppune', environment 'test'.
+test:
+  root: /var/www/html/drupalcamppune.test/docroot
+  ac-site: drupalcamppune
+  ac-env: test
+  ac-realm: prod
+  uri: camp2019-stage.drupalpune.com
+  test.livedev:
+    parent: '@drupalcamppune.test'
+    root: /mnt/gfs/drupalcamppune.test/livedev/docroot
+  host: drupalcamppunetest.ssh.prod.acquia-sites.com
+  user: drupalcamppune.test
+  paths:
+    drush-script: drush9
+
+
