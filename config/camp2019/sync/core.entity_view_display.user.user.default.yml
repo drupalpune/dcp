@@ -9,6 +9,7 @@ dependencies:
     - field.field.user.user.field_profile_photo
     - field.field.user.user.field_role
     - field.field.user.user.field_type_of_business
+    - image.style.medium
   module:
     - image
     - options
@@ -22,7 +23,7 @@ mode: default
 content:
   field_drupal_org_profile:
     weight: 5
-    label: above
+    label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -30,7 +31,7 @@ content:
     region: content
   field_full_name:
     weight: 2
-    label: above
+    label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -38,7 +39,7 @@ content:
     region: content
   field_organization:
     weight: 3
-    label: above
+    label: inline
     settings:
       link_to_entity: false
     third_party_settings: {  }
@@ -48,14 +49,14 @@ content:
     type: image
     weight: 1
     region: content
-    label: above
+    label: hidden
     settings:
-      image_style: ''
+      image_style: medium
       image_link: ''
     third_party_settings: {  }
   field_role:
     weight: 4
-    label: above
+    label: inline
     settings: {  }
     third_party_settings: {  }
     type: list_default
