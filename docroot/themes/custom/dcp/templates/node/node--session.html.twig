@@ -3,7 +3,10 @@
 <div class="session-submitted-by">{% trans %}Submitted by {{ author_name }} on {{ date }}{% endtrans %}</div>
 <div class="session-detail">{{ 'Session Details'|t }}</div>
 <div class="session-parent title-style">
-	<div class="session-left">{{ content.body }}</div>
+	<div class="session-left">
+    <div class="session-body">{{ content.body }}</div>
+    <div class="session-attachment">{{ content.field_attachment }}</div>
+  </div>
 	<div class="session-right-wrapper">
 	<div class="session-right session-detail">
 		<div class="speakers-wrap">
