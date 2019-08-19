@@ -57,6 +57,31 @@
   width: 80%;
   margin: auto;
   padding: 10px 0;
+  .session-attachment-label {
+    font-size: 22px;
+    line-height: 29px;
+    letter-spacing: 0.315px;
+    font-weight: bold;
+    color: #313131;
+    padding-bottom: 20px;
+  }
+  .field--name-field-attachment {
+    background-color: #fff;
+    border-radius: 2px;
+    transition: box-shadow 83ms;
+    width: 232px;
+    padding: 12px 24px 12px 52px;
+    position: relative;
+    margin: 0 16px 16px 0;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.15);
+    background-clip: padding-box;
+    box-sizing: border-box;
+    cursor: pointer;
+    a{
+      color: $session-title;
+      text-decoration: none;
+    }
+  }
 }
 
 .session-detail {

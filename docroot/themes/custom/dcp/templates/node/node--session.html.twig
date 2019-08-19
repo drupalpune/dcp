@@ -5,7 +5,6 @@
 <div class="session-parent title-style">
 	<div class="session-left">
     <div class="session-body">{{ content.body }}</div>
-    <div class="session-attachment">{{ content.field_attachment }}</div>
   </div>
 	<div class="session-right-wrapper">
 	<div class="session-right session-detail">
@@ -20,12 +19,12 @@
           <a href="{{ node.getOwner.field_drupal_org_profile.value }}" target="_blank">
           {{ node.getOwner.field_full_name.value }}
           </a>
-        {% else %}
-          {{ node.getOwner.field_full_name.value }}
-        {% endif %}
-        </li>
-        {% if node.field_presenter %}
-          {% for presenter in node.field_presenter %}
+          {% else %}
+            {{ node.getOwner.field_full_name.value }}
+          {% endif %}
+          </li>
+          {% if node.field_presenter %}
+            {% for presenter in node.field_presenter %}
               <li>
                 {% if presenter.entity.field_drupal_org_profile.value %}
                   <a href="{{ presenter.entity.field_drupal_org_profile.value }}" target="_blank">
@@ -35,28 +34,36 @@
                   {{ presenter.entity.field_full_name.value }}
                 {% endif %}
               </li>
-          {% endfor %}
-        {% endif %}
-      </ul>
+            {% endfor %}
+          {% endif %}
+          </ul>
+        </div>
+      </div>
+      <div class="track-wrap">
+        <div class="category-label">
+          {{ 'Session Track'|t }}
+        </div>
+        <div class="category track">
+          {{ content.field_session_category }}
+        </div>
+      </div>
+      <div class="track-wrap">
+        <div class="experience-level-label">
+          {{ 'Experience Level'|t }}
+        </div>
+        <div class="experience-level track">
+          {{ content.field_experience_level }}
+        </div>
+      </div>
     </div>
   </div>
-		<div class="track-wrap">
-    <div class="category-label">
-    {{ 'Session Track'|t }}
-    </div>
-    <div class="category track">
-    {{ content.field_session_category }}
-    </div>
-  </div>
-  <div class="track-wrap">
-    <div class="experience-level-label">
-    {{ 'Experience Level'|t }}
-    </div>
-    <div class="experience-level track">
-    {{ content.field_experience_level }}
-    </div>
-  </div>
-	</div>
 </div>
-</div>
+  {% if content.field_attachment %}
+    <div class="session-attachment">
+      <div class="session-attachment-label">
+        {{ 'Attachments'|t }}
+      </div>
+      {{ content.field_attachment }}
+    </div>
+  {% endif %}
 </div>
