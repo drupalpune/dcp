@@ -58,14 +58,13 @@
 	</div>
 </div>
 </div>
-</div>
-{% if content.field_attachment %}
-  <div class="session-attachment">
-    <div class="session-attachment-label">
-      {{ 'Attachments'|t }}
+  {% if content.field_attachment %}
+    <div class="session-attachment">
+      <div class="session-attachment-label">
+        {{ 'Attachments'|t }}
+      </div>
+      {{ content.field_attachment }}
     </div>
-    {{ content.field_attachment }}
-  </div>
-{% endif %}
+  {% endif %}
 </div>
 
