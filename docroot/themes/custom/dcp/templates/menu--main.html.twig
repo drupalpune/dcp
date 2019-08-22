@@ -53,11 +53,6 @@
           {{ menus.menu_links(front,logopath,item.below, attributes, menu_level + 1) }}
         {% endif %}
       </li>
-        {% if loop.index == 3 %}
-         <li{{ item.attributes.addClass(classes) }} id='logopath'>
-          <a class="logopath" href="/"><img class='logo-image' src='{{ logopath }}' />
-          </a></li>
-        {% endif %}
     {% endfor %}
     </ul>
   {% endif %}
