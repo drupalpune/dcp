@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.field.node.sponsor.body
     - field.field.node.sponsor.field_logo
+    - field.field.node.sponsor.field_sponsorship_level
     - field.field.node.sponsor.field_website
     - image.style.thumbnail
     - node.type.sponsor
@@ -40,6 +41,12 @@ content:
       preview_image_style: thumbnail
     third_party_settings: {  }
     type: image_image
+    region: content
+  field_sponsorship_level:
+    weight: 124
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
     region: content
   field_website:
     weight: 123
