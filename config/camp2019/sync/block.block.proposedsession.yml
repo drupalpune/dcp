@@ -12,7 +12,7 @@ dependencies:
 id: proposedsession
 theme: dcp
 region: content
-weight: -9
+weight: -10
 provider: null
 plugin: 'block_content:b6f1282e-77cd-45d4-9782-a8f25e81ee59'
 settings:

@@ -10,7 +10,7 @@ dependencies:
 id: quicktabsschedule
 theme: dcp
 region: content
-weight: 0
+weight: -1
 provider: null
 plugin: 'quicktabs_block:schedule'
 settings:

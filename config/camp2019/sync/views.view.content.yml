@@ -2,8 +2,13 @@ uuid: 98e9c164-006d-472c-be1e-62bbadd2d08b
 langcode: en
 status: true
 dependencies:
+  config:
+    - field.storage.node.field_experience_level
+    - taxonomy.vocabulary.session_category
   module:
     - node
+    - options
+    - taxonomy
     - user
 _core:
   default_config_hash: tS8PbpJX90aRFC3-UTgXzdqkq7_2frk2pz4TMijEebM
@@ -355,6 +360,68 @@ display:
           hide_alter_empty: true
           destination: true
           plugin_id: entity_operations
+        field_experience_level:
+          id: field_experience_level
+          table: node__field_experience_level
+          field: field_experience_level
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Experience Level'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: list_default
+          settings: {  }
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
       filters:
         title:
           id: title
@@ -533,6 +600,51 @@ display:
           plugin_id: node_status
           group: 1
           entity_type: node
+        field_session_category_target_id:
+          id: field_session_category_target_id
+          table: node__field_session_category
+          field: field_session_category_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_session_category_target_id_op
+            label: 'Session Category'
+            description: ''
+            use_operator: false
+            operator: field_session_category_target_id_op
+            identifier: field_session_category_target_id
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          type: select
+          limit: true
+          vid: session_category
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
       sorts: {  }
       title: Content
       empty:
@@ -572,7 +684,8 @@ display:
         - 'user.node_grants:view'
         - user.permissions
       max-age: 0
-      tags: {  }
+      tags:
+        - 'config:field.storage.node.field_experience_level'
   page_1:
     display_options:
       path: admin/content/node
@@ -604,4 +717,5 @@ display:
         - 'user.node_grants:view'
         - user.permissions
       max-age: 0
-      tags: {  }
+      tags:
+        - 'config:field.storage.node.field_experience_level'

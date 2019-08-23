@@ -12,7 +12,7 @@ dependencies:
 id: submitasessionblockonhomepage
 theme: dcp
 region: content
-weight: 1
+weight: 5
 provider: null
 plugin: 'block_content:d3fc57ae-7484-4663-b70c-3997d6b14f64'
 settings:
