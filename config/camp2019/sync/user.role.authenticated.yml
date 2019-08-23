@@ -13,7 +13,6 @@ permissions:
   - 'access content'
   - 'access shortcuts'
   - 'access site-wide contact form'
-  - 'create workshop content'
   - 'edit own workshop content'
   - 'opt-in or out of google analytics tracking'
   - 'post comments'

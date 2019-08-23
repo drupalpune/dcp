@@ -12,13 +12,13 @@ type: list_string
 settings:
   allowed_values:
     -
-      value: platinum
+      value: '1'
       label: Platinum
     -
-      value: gold
+      value: '2'
       label: Gold
     -
-      value: silver
+      value: '3'
       label: Silver
   allowed_values_function: ''
 module: options
