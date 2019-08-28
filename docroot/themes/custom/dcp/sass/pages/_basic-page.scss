@@ -1,0 +1,41 @@
+.node--type-page {
+  .field--name-body {
+    margin-bottom: 8rem;
+    @include breakpoint(phablet) {
+      margin-bottom: 4rem;
+    }
+    p {
+      color: $session-title;
+      font-size: 16px;
+      line-height: 1.56;
+      margin: 0 0 1rem 0;
+    }
+
+    h3 {
+      @extend %CircularAir-Bold;
+      font-size: 24px;
+      line-height: 2.83;
+      letter-spacing: 0.21px;
+      color: $label;
+      @include breakpoint(laptop) {
+        line-height: 1.5;
+        margin-bottom: 35px;
+      }
+    }
+
+    h2 {
+      @extend %Georgia;
+      font-size: 36px;
+      line-height: 1.8;
+      letter-spacing: 0.3px;
+      color: #2d2d2d;
+      padding: 30px 0 20px 0;
+    }
+  }
+}
+
+.page-node-type-page {
+  .page-title {
+    margin-top: 1.25rem;
+  }
+}
