@@ -1,6 +1,7 @@
 .sponsors-content-wrapper {
   display: flex;
   padding-bottom: 115px;
+  padding-top: 150px;
   @include breakpoint(laptop) {
     display: block;
     text-align: center;
@@ -80,6 +81,7 @@
       letter-spacing: 0.4px;
       color: $label;
       margin-bottom: 40px;
+      line-height: 1.3;
       @include breakpoint(phablet) {
         font-size: 18px;
         margin-bottom: 32px;
@@ -99,7 +101,7 @@
       content: "";
       position: absolute;
       left: 0;
-      background: url(/../themes/custom/dcp/images/design2.svg) no-repeat;
+      background: url(/../themes/custom/dcp/images/design2.svg) left -150px no-repeat;
       background-size: 80%;
       width: 70%;
       height: 100%;
@@ -107,6 +109,9 @@
       @include breakpoint(laptop) {
         content: normal;
       }
+    }
+    .sponsor-us-link {
+      text-align: center;
     }
   }
 }
