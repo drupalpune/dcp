@@ -33,7 +33,11 @@ body p {
         }
     }
 }
-
+.page-node-type-page {
+    article {
+        padding-bottom: 60px;
+    }
+}
 .node__content {
     font-size: 18px;
     font-family: $body-font;
