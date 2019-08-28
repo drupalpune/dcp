@@ -8,8 +8,11 @@
 }
 .view-content__group {
   margin-bottom: 4rem;
-  padding-bottom: 4rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid $color--border;
+  &:last-child {
+    border-bottom: none;
+  }
   > .group-heading {
     @include breakpoint(laptop) {
       padding: {
@@ -33,12 +36,6 @@
     justify-content: flex-start;
     align-content: center;
     .views-row {
-      @include breakpoint(phablet) {
-        flex: 0 1 auto;
-      }
-      @include breakpoint(phablet) {
-        margin-right: 0;
-      }
       position: relative;
       flex: 0 0 22.5rem;
       margin: {
@@ -58,6 +55,10 @@
         @include breakpoint(phablet) {
           margin-right: 0;
         }
+        margin-right: 0;
+      }
+      @include breakpoint(phablet) {
+        flex: auto;
         margin-right: 0;
       }
     }
