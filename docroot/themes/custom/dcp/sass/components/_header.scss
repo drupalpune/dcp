@@ -30,10 +30,6 @@
   }
 
   > nav[role="navigation"] {
-    h2 {
-      display: none;
-    }
-
     &.menu--main {
       a {
         @extend %CircularAir-Book;
@@ -222,12 +218,9 @@
 
       &.menu--main > .menu {
         flex-direction: column;
-        padding-left: 80px;
         text-align: left;
 
         > .menu-item {
-          padding-bottom: 44px;
-
           &.menu-item--expanded {
             .menu {
               padding-top: 20px;
@@ -245,7 +238,7 @@
           text-decoration: none;
 
           &.is-active {
-            font-size: 36px;
+            font-size: 18px;
             color: #316CF4;
           }
         }
@@ -266,12 +259,9 @@
 
         > .menu {
           flex-direction: column;
-          padding-left: 80px;
           text-align: left;
 
           > .menu-item {
-            padding-bottom: 44px;
-
             &.menu-item--expanded {
               .menu {
                 padding-top: 20px;
