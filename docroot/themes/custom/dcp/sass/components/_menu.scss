@@ -167,63 +167,57 @@ li a {
   }
 }
 
-@media screen and (max-width: 768px) {
-  .region-header {
-    .navigation-mobile {
-      .menu-item {
-        margin: 0 0 30px 0;
+.region-header {
+  .navigation-mobile {
+    .menu-item {
+      margin: 0 0 30px 0;
+      text-transform: uppercase;
+    }
+    .diwrapper {
+      display: block;
+      padding-left: 0;
+      .ditextwrap {
+        width: 300px;
+        margin: 0 auto;
       }
-      .diwrapper {
-        display: block;
-        padding-left: 0;
-        .ditextwrap {
-          width: 300px;
-          margin: 0 auto;
-          padding-left: 25px;
-        }
-        .field--name-body {
-          width: 130px;
-        }
+      .field--name-body {
+        width: 130px;
       }
-      .menu-item--expanded {
+    }
+    .menu-item--expanded {
+      a {
+        padding-right: 30px;
+      }
+      .menu {
+        display: none;
+        margin-left: 25px;
+        .menu-item {
+          margin-bottom: 15px;
+        }
         a {
-          padding-right: 30px;
-        }
-        .menu {
-          display: none;
-          margin-left: 25px;
-          .menu-item {
-            margin-bottom: 15px;
-          }
-          a {
-            &.is-active {
-              font-size: 18px;
-            }
-          }
-        }
-        &.open {
-          .navigation-arrow {
-            transform: rotate(0);
-            -webkit-transform: rotate(0);
-          }
-          display: block;
-          .menu {
-            margin-left: 25px;
+          &.is-active {
+            font-size: 18px;
           }
         }
       }
-      .menu--account {
-        .menu-item--expanded {
-          .menu {
-            display: block;
-            margin-left: 0;
-            margin-top: 10px;
-          }
+      &.open {
+        display: block;
+        .menu {
+          margin-left: 25px;
+        }
+      }
+    }
+    .menu--account {
+      .menu-item--expanded {
+        .menu {
+          display: block;
+          margin-left: 0;
+          margin-top: 10px;
         }
       }
     }
     #block-mainnavigation > .menu, #block-useraccountmenu > .menu {
-      width: 230px;
+      width: 300px;
       margin: 0 auto;
     }
     #block-mainnavigation {
@@ -239,6 +233,11 @@ li a {
         transform: rotate(180deg);
         -webkit-transform: rotate(180deg);
       }
+      .menu-item--expanded.open > a:after{
+        transform: rotate(0);
+        -webkit-transform: rotate(0);
+      }
     }
   }
 }
+
