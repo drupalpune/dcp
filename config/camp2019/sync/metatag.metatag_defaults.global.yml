@@ -7,6 +7,13 @@ _core:
 id: global
 label: Global
 tags:
+  keywords: 'DCP, DCP 2019, Drupal Camp Pune, Drupal Camp 2019, Drupal camp pune 2019, Drupal Pune, Drupal Event, Drupal Event Pune, Drupal VIT, Drupal VIT Pune, Drupalcamp Pune 2019, Drupalcamp Pune, Drupalcamp'
+  geo_position: '8.516726, 73.856255'
   title: '[current-page:title] | [site:name]'
+  icbm: '8.516726, 73.856255'
+  content_language: en-IN
+  robots: 'index, follow'
   canonical_url: '[current-page:url]'
+  geo_placename: Pune
+  geo_region: IN-MH
   google: ELOxWXF36Fei3Rn3GXUQB_oa3AhheVb9Ub73P5ZzEPA
