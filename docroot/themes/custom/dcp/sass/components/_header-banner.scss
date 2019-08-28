@@ -11,7 +11,7 @@
     color: $white;
     z-index: 9;
     margin: 0 auto;
-    padding: 100px 0;
+    padding: 60px 0;
     @include breakpoint(phablet) {
       padding: 50px 0;
     }

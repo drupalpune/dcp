@@ -113,3 +113,13 @@
     }
   }
 }
+.user-logged-in {
+  #block-frontpageheader {
+    .header-main-wrapper {
+      .field--name-field-banner-link {
+        display: none;
+      }
+    }
+  }
+}
+
