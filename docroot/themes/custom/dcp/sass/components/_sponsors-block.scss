@@ -114,3 +114,30 @@
     }
   }
 }
+.page-node-type-page {
+  .node__content {
+    @include breakpoint(mobilelandscape){
+    padding-left: 0;
+    padding-right: 0;
+    }
+  }
+  .sponsors-content-wrapper {
+    .view-header {
+      flex-basis: unset;
+      .field__item {
+        margin: 0 auto;
+        a{
+          @include breakpoint(laptop) {
+            font-size: 15px;
+          }
+          @include breakpoint(phablet) {
+             font-size: 12px;
+          }
+          @include breakpoint(mobileonly) {
+            font-size: 8px;
+          }
+        }
+      }
+    }
+  }
+}
