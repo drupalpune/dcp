@@ -622,20 +622,7 @@ display:
             label: ''
           granularity: second
       title: 'Accepted Workshops'
-      header:
-        area:
-          id: area
-          table: views
-          field: area
-          relationship: none
-          group_type: group
-          admin_label: ''
-          empty: false
-          tokenize: false
-          content:
-            value: "<h2>Accepted Workshops</h2>\r\n<br>\r\n<a href=\"/proposed-workshops\">Click here to see a list of all proposed workshops</a>"
-            format: basic_html
-          plugin_id: text
+      header: {  }
       footer: {  }
       empty: {  }
       relationships:
