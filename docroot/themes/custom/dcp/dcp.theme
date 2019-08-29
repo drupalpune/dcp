@@ -53,16 +53,6 @@ $suggestions[] = 'form__' . $id;
 }
 }
 
-
-function dcp_form_user_register_form_alter(&$form, &$form_state, $form_id) {
-  $form['volunteer'] = array(
-    '#markup' => t("We are looking for some <a href='http://bit.ly/2vHUXZd' target='_blank'>volunteers!</a>"),
-    '#weight' => 2,
-    '#prefix' => '<p id="volunteer-field">',
-    '#suffix' => '</p>',
-  );
-
-}
 /**
 * Implements theme_preprocess_paragraph_title() to add highlight wrapper.
 */

@@ -64,6 +64,7 @@
   border-bottom: 1px solid $medblue;
   .form-submit {
     margin: auto !important; // Force overwrite Classy styling.
+    padding: 15px 30px 15px 30px;
   }
 }
 select#edit-field-curr {
@@ -129,5 +130,40 @@ select#edit-field-curr {
       margin-left: -30px;
     }
     min-width: 35rem;
+  }
+}
+
+
+.user-register-form, .user-pass {
+  .captcha.js-form-wrapper {
+    // Important is needed to override earlier important.
+    border: 0 !important;
+    margin: 30px auto 10px !important;
+    summary {
+      display: none;
+    }
+    .details-wrapper {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .details-description {
+      display: none;
+    }
+    .g-recaptcha {
+      width: 300px;
+      margin: 0 auto;
+    }
+  }
+}
+
+.user-pass {
+  .captcha.js-form-wrapper {
+    .details-wrapper {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .g-recaptcha {
+      margin-left: 0;
+    }
   }
 }
