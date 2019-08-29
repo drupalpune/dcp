@@ -1,15 +1,18 @@
 .sponsors-content-wrapper {
   display: flex;
   padding-bottom: 50px;
+  min-height: 790px;
   @include breakpoint(laptop) {
     display: block;
     text-align: center;
+    min-height: auto;
   }
   @include breakpoint(mobileonly) {
     padding-bottom: 30px;
   }
   .view-content {
     flex-basis: 50%;
+    align-self: center;
     @include breakpoint(laptop) {
       margin-top: 70px;
       justify-content: center;
@@ -19,7 +22,7 @@
     }
     .views-row {
       margin-bottom: 40px;
-      
+
       @include breakpoint(laptop) {
         flex-basis: 40%;
       }
@@ -34,13 +37,14 @@
         width: 100%
       }
       h3 {
-        @extend %CircularAir-Book;
+        @extend %CircularAir-Bold;
         text-align: center;
         margin: 30px 0;
-        font-size: 24px;
+        font-size: 26px;
         line-height: 1.5;
         letter-spacing: 0.21px;
-        color: $label;
+        color: $speaker;
+        text-transform: uppercase;
       }
     }
     .view-row-wrapper-inner {
@@ -108,9 +112,6 @@
       @include breakpoint(laptop) {
         content: normal;
       }
-    }
-    .sponsor-us-link {
-      text-align: center;
     }
   }
 }
