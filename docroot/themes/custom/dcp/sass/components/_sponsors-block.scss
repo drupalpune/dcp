@@ -1,7 +1,6 @@
 .sponsors-content-wrapper {
   display: flex;
-  padding-bottom: 115px;
-  padding-top: 150px;
+  padding-bottom: 50px;
   @include breakpoint(laptop) {
     display: block;
     text-align: center;
@@ -112,6 +111,33 @@
     }
     .sponsor-us-link {
       text-align: center;
+    }
+  }
+}
+.page-node-type-page {
+  .node__content {
+    @include breakpoint(mobilelandscape){
+    padding-left: 0;
+    padding-right: 0;
+    }
+  }
+  .sponsors-content-wrapper {
+    .view-header {
+      flex-basis: unset;
+      .field__item {
+        margin: 0 auto;
+        a{
+          @include breakpoint(laptop) {
+            font-size: 15px;
+          }
+          @include breakpoint(phablet) {
+             font-size: 12px;
+          }
+          @include breakpoint(mobileonly) {
+            font-size: 8px;
+          }
+        }
+      }
     }
   }
 }
