@@ -4,7 +4,6 @@
     "description": "Project template for Drupal 8 sites built with BLT.",
     "license": "GPL-2.0-only",
     "require": {
-        "php": ">=7.1",
         "acquia/blt": "^10.1.0",
         "acquia/drupal-spec-tool": ">=2.0.0",
         "acquia/lightning": "^3.1.0",
@@ -35,7 +34,8 @@
         "drupal/simple_sitemap": "^3.3",
         "drupal/social_media_links": "^2.6",
         "drupal/stage_file_proxy": "^1.0@beta",
-        "drupal/webform": "^5.2"
+        "drupal/webform": "^5.2",
+        "php": ">=7.1"
     },
     "require-dev": {
         "acquia/blt-require-dev": "^10.0.0-alpha1"
