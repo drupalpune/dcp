@@ -58,7 +58,7 @@
         margin-right: 0;
       }
       @include breakpoint(phablet) {
-        flex: auto;
+        flex: 100%;
         margin-right: 0;
       }
     }
