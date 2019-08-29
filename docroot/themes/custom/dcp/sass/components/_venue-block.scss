@@ -7,11 +7,11 @@
   @include breakpoint(laptop) {
     padding-left: 0;
   }
-  @include breakpoint(phablet) {
+  @include breakpoint(tablet) {
     padding: 0;
   }
   .field--name-body {
-    @include breakpoint(phablet) {
+    @include breakpoint(tablet) {
       text-align: center;
     }
   }
@@ -22,14 +22,14 @@
     letter-spacing: 0.3px;
     color: $label;
     padding-bottom: 18px;
-    @include breakpoint(phablet) {
+    @include breakpoint(tablet) {
       padding-bottom: 18px;
       padding-top: 45px;
     }
   }
 
   p {
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     letter-spacing: 0.4px
   }
 
@@ -38,14 +38,14 @@
     background-image: linear-gradient($light-grey, white);
     justify-content: space-between;
 
-    @include breakpoint(phablet) {
+    @include breakpoint(tablet) {
       display: block;
       margin: 0;
       padding-right: 0;
       padding-bottom: 50px;
     }
     @include breakpoint(mobileonly) {
-      padding: 15px 0 50px 15px;
+      padding: 15px 0 50px 0;
     }
 
     .venue-image-desktop {
@@ -63,7 +63,7 @@
           margin-right: -50px;
         }
       }
-      @include breakpoint(phablet) {
+      @include breakpoint(tablet) {
         display: none;
       }
     }
@@ -76,7 +76,7 @@
         height: auto;
         object-fit: contain;
       }
-      @include breakpoint(phablet) {
+      @include breakpoint(tablet) {
         display: block;
       }
     }
@@ -84,7 +84,7 @@
     .venue-description {
       padding-left: 74px;
       padding-top: 82px;
-      @include breakpoint(phablet) {
+      @include breakpoint(tablet) {
         padding: 0;
       }
     }

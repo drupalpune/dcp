@@ -45,12 +45,6 @@
           margin-left: 10px;
           content: url(/../themes/custom/dcp/images/Arrow-black.svg);
         }
-        &:hover {
-          color: $speaker;
-          &::after {
-            content: url(/../themes/custom/dcp/images/Arrow-blue.svg);
-          }
-        }
         @include breakpoint(laptop) {
           line-height: 1.5;
         }
