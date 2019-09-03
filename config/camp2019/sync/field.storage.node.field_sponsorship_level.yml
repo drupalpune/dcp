@@ -19,6 +19,9 @@ settings:
       label: Gold
     -
       value: '3'
+      label: Lanyard
+    -
+      value: '4'
       label: Silver
   allowed_values_function: ''
 module: options
