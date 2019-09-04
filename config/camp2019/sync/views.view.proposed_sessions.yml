@@ -656,7 +656,7 @@ display:
         description: ''
         expanded: true
         parent: 'menu_link_content:65b3010a-a5ad-4ad5-956d-fba9e1e1ecc6'
-        weight: -50
+        weight: -49
         context: '0'
         menu_name: main
         enabled: true

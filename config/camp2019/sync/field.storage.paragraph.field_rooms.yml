@@ -16,16 +16,16 @@ settings:
       label: Auditorium
     -
       value: '2'
-      label: 'Classroom 1'
+      label: 'Lecture hall 1'
     -
       value: '3'
-      label: 'Classroom 2'
+      label: 'Lecture hall 2'
     -
       value: '4'
-      label: 'Classroom 3'
+      label: 'Lecture hall 3'
     -
       value: '5'
-      label: 'Classroom 4'
+      label: 'Lecture hall 4'
   allowed_values_function: ''
 module: options
 locked: false
