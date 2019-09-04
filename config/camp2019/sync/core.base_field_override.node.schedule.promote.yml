@@ -1,0 +1,22 @@
+uuid: ff11f9e0-f61d-4c50-a2d4-ee21890b19c4
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.schedule
+id: node.schedule.promote
+field_name: promote
+entity_type: node
+bundle: schedule
+label: 'Promoted to front page'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean
