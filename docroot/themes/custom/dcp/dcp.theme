@@ -67,3 +67,36 @@ function dcp_preprocess_paragraph__session(&$variables) {
       $variables['classArray'] = 'unhighlighted ';
   }
 }
+
+/**
+ * Implements theme_preprocess_node_view_mode() calls to the function which add different color classes to session category on schedule page.
+ */
+
+function dcp_preprocess_node__session__schedule_view_mode(&$variables) {
+  add_schedule_category_class($variables);
+}
+
+/**
+ * Implements theme_preprocess_node_view_mode() calls to the function which add different color classes to workshop category on schedule page.
+ */
+
+function dcp_preprocess_node__workshop__schedule_view_mode(&$variables) {
+  add_schedule_category_class($variables);
+}
+
+/**
+ * Implements add_schedule_category_class() to add different color classes to category on schedule page.
+ */
+
+function add_schedule_category_class(&$variables) {
+  if (!empty($variables['node'])) {
+    $node = $variables['node'];
+    $category_id = $node->get('field_session_category')->getValue();
+    $category_id = $category_id[0]['target_id'];
+    if (!empty($category_id)) {
+      $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($category_id);
+      $variables['category_class'] = $term->name->value;
+    }
+  }
+}
+
