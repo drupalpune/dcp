@@ -13,52 +13,52 @@ settings:
   allowed_values:
     -
       value: '1'
-      label: '08:30 - 09:30am'
+      label: '08:30am - 09:30am'
     -
       value: '2'
-      label: '09:00 - 09:30am'
+      label: '09:00am - 09:30am'
     -
       value: '3'
-      label: '09:30 - 10:30am'
+      label: '09:30am - 10:30am'
     -
       value: '4'
-      label: '10:30 - 10:45am'
+      label: '10:30am - 10:45am'
     -
       value: '5'
-      label: '10:45 - 11:15am'
+      label: '10:45am - 11:15am'
     -
       value: '6'
-      label: '11:15 - 12:10pm'
+      label: '11:15am - 12:10pm'
     -
       value: '7'
-      label: '11:15 - 03:00pm'
+      label: '11:15am - 03:00pm'
     -
       value: '8'
-      label: '11:15 - 05:50pm'
+      label: '11:15am - 05:50pm'
     -
       value: '9'
-      label: '12:10 - 01:05pm'
+      label: '12:10pm - 01:05pm'
     -
       value: '10'
-      label: '01:05 - 02:05pm'
+      label: '01:05pm - 02:05pm'
     -
       value: '11'
-      label: '02:05 - 03:00pm'
+      label: '02:05pm - 03:00pm'
     -
       value: '12'
-      label: '03:00 - 03:55pm'
+      label: '03:00pm - 03:55pm'
     -
       value: '13'
-      label: '03:00 – 05:50pm'
+      label: '03:00pm – 05:50pm'
     -
       value: '14'
-      label: '03:55 – 04:10pm'
+      label: '03:55pm – 04:10pm'
     -
       value: '15'
-      label: '04:10 – 05:05pm'
+      label: '04:10pm – 05:05pm'
     -
       value: '16'
-      label: '05:05 – 05:50pm'
+      label: '05:05pm – 05:50pm'
   allowed_values_function: ''
 module: options
 locked: false
