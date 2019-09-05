@@ -16,7 +16,7 @@ hide_empty_tabs: 0
 default_tab: '0'
 configuration_data:
   -
-    title: Day1
+    title: Day 1
     weight: '0'
     type: node_content
     content:
@@ -27,7 +27,7 @@ configuration_data:
           args: ''
       node_content:
         options:
-          nid: '64'
+          nid: '531'
           view_mode: full
           hide_title: 0
       block_content:
@@ -39,7 +39,7 @@ configuration_data:
         options:
           machine_name: ''
   -
-    title: Day2
+    title: Day 2
     weight: '0'
     type: node_content
     content:
@@ -50,7 +50,7 @@ configuration_data:
           args: ''
       node_content:
         options:
-          nid: '67'
+          nid: '536'
           view_mode: full
           hide_title: 0
       block_content:

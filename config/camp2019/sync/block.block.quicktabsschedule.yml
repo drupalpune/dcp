@@ -21,6 +21,6 @@ settings:
 visibility:
   request_path:
     id: request_path
-    pages: /schedule-test
+    pages: /schedule
     negate: false
     context_mapping: {  }
