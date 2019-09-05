@@ -1,7 +1,12 @@
+.path-frontpage {
+  .sponsors-content-wrapper{
+    min-height: 790px;
+  }
+}
+
 .sponsors-content-wrapper {
   display: flex;
   padding-bottom: 50px;
-  min-height: 790px;
   @include breakpoint(laptop) {
     display: block;
     text-align: center;

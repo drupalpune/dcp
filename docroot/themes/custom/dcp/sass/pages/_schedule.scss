@@ -109,10 +109,12 @@
 .schedule-view-mode-wrap {
   .field {
 
-    &.field--name-field-experience-level.field__item,
+    &.field--name-field-experience-level.field__item {
+      padding: 0;
+      margin: 0;
+    }
     &.field--name-uid,
     &.field--name-field-session-category.field__item {
-      padding: 0;
       margin: 0;
     }
 
@@ -145,9 +147,9 @@
     }
 
     &.field--name-field-session-category.field__item {
-      a {
         @include button();
         @extend %CircularAir-Bold;
+        display: inline-block;
         font-size: 16px;
 
         @include breakpoint(tablet) {
@@ -158,7 +160,6 @@
         line-height: 1.2;
         letter-spacing: 0.315px;
         color: $schedule-btn-text;
-      }
     }
   }
 }
@@ -175,17 +176,21 @@
 }
 
 .schedule-session-title {
-  @extend %CircularAir-Bold;
-  font-size: 18px;
   margin: 0 0 20px 0;
 
-  @include breakpoint(tablet) {
-    font-size: 14px;
-  }
+  a {
+    @extend %CircularAir-Bold;
+    font-size: 18px;
 
-  line-height: 1.2;
-  letter-spacing: 0.315px;
-  color: $label;
+    @include breakpoint(tablet) {
+      font-size: 14px;
+    }
+
+    line-height: 1.2;
+    letter-spacing: 0.315px;
+    color: $label;
+    text-decoration: none;
+  }
 }
 
 .node--type-schedule {
@@ -193,7 +198,6 @@
     .field {
       .field__item {
         margin: 0;
-        padding: 0;
       }
     }
 
@@ -376,9 +380,7 @@ footer.node__meta {
   .field {
     &.field--name-field-session-category {
       &.field__item {
-        a {
           background: $color--cat-community;
-        }
       }
     }
   }
@@ -387,9 +389,7 @@ footer.node__meta {
   .field {
     &.field--name-field-session-category {
       &.field__item {
-        a {
           background: $color--cat-beyond;
-        }
       }
     }
   }
@@ -398,9 +398,7 @@ footer.node__meta {
   .field {
     &.field--name-field-session-category {
       &.field__item {
-        a {
           background: $color--cat-frontend;
-        }
       }
     }
   }
@@ -409,9 +407,7 @@ footer.node__meta {
   .field {
     &.field--name-field-session-category {
       &.field__item {
-        a {
           background: $color--cat-qa;
-        }
       }
     }
   }
@@ -420,9 +416,7 @@ footer.node__meta {
   .field {
     &.field--name-field-session-category {
       &.field__item {
-        a {
           background: $color--cat-business;
-        }
       }
     }
   }
@@ -431,9 +425,7 @@ footer.node__meta {
   .field {
     &.field--name-field-session-category {
       &.field__item {
-        a {
           background: $color--cat-beyond;
-        }
       }
     }
   }

@@ -9,7 +9,7 @@
     {{ content.field_experience_level }}
   </div>
   <div class="schedule-session-title">
-    {% trans %} Workshop: {{ node.label }} {% endtrans %}
+    {% trans %} <a href= "{{ url }}"><strong>Workshop:</strong> {{ node.label }} </a>{% endtrans %}
   </div>
   <div class="schedule-session-speaker">
     {{ author_name }}
