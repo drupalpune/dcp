@@ -108,7 +108,11 @@
 
 .schedule-view-mode-wrap {
   .field {
-
+    .field__item {
+      .schedule-session-category {
+        margin: 0;
+      }
+    }
     &.field--name-field-experience-level.field__item {
       padding: 0;
       margin: 0;
@@ -396,7 +400,7 @@ footer.node__meta {
   .field {
     &.field--name-field-session-category {
       &.field__item {
-          background: $color--cat-beyond;
+          background: $color--cat-backend;
       }
     }
   }
@@ -433,6 +437,7 @@ footer.node__meta {
     &.field--name-field-session-category {
       &.field__item {
           background: $color--cat-beyond;
+          color: #ffffff;
       }
     }
   }
