@@ -396,7 +396,7 @@ footer.node__meta {
   .field {
     &.field--name-field-session-category {
       &.field__item {
-          background: $color--cat-beyond;
+          background: $color--cat-backend;
       }
     }
   }
@@ -433,6 +433,7 @@ footer.node__meta {
     &.field--name-field-session-category {
       &.field__item {
           background: $color--cat-beyond;
+          color: #ffffff;
       }
     }
   }
