@@ -167,9 +167,10 @@
 .schedule-session-experience,
 .schedule-session-category,
 .schedule-session-speaker {
-  margin: 0 0 30px 0;
+  margin: 0 0 20px 0;
 }
 .schedule-session-speaker {
+  font-size: 16px;
   a {
     font-size: 16px;
   }
@@ -179,6 +180,9 @@
   margin: 0 0 20px 0;
 
   a {
+    &:hover {
+      text-decoration: underline;
+    }
     @extend %CircularAir-Bold;
     font-size: 18px;
 
@@ -220,7 +224,7 @@
       display: flex;
       justify-content: space-between;
       padding-right: 30px;
-      margin-bottom: 15px;
+      margin-bottom: 0px;
 
       @include breakpoint(tablet) {
         padding-right: 0;
