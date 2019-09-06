@@ -108,7 +108,11 @@
 
 .schedule-view-mode-wrap {
   .field {
-
+    .field__item {
+      .schedule-session-category {
+        margin: 0;
+      }
+    }
     &.field--name-field-experience-level.field__item {
       padding: 0;
       margin: 0;
